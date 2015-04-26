@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{ _("Captive Portal for unauthenticated and unauthorized users") }}">
+    <meta name="author" content="Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN)">
+    <link rel="icon" href="../static/favicon.ico">
+    <title>{{ _("AG DSN Captive Portal") }}</title>
+
+    <link href="../static/dependencies/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/css/cover.css" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="static/dependencies/html5shiv/dist/html5shiv.min.js"></script>
+      <script src="static/dependencies/respond/dest/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="site-wrapper">
+
+      <div class="site-wrapper-inner">
+
+        <div class="cover-container">
+
+          <div class="masthead clearfix">
+            <div class="inner">
+              <h3 class="masthead-brand"><img style="height: 8ex" src="static/img/agdsn_logo_weiß.png"/></h3>
+            </div>
+          </div>
+
+          <div class="inner cover">
+            <h1 class="cover-heading">{{ _("We are very sorry :-(") }}</h1>
+            <p class="lead">{{ _("We have to deny you from accessing the network, because:") }}</p>
+            {% if traffic %}<p class="lead">{{ _("You've exceeded your traffic limit.") }}</p>{% endif %}
+            {% if default_in_payment %}<p class="lead">{{ _("You are late with paying your fees.") }}</p>{% endif %}
+            {% if security %}<p class="lead">{{ _("We had to block you due to security problems.") }}</p>{% endif %}
+            {% if violation %}<p class="lead">{{ _("You violated our Terms of Services.") }}</p>{% endif %}
+            {% if wrong_port %}<p class="lead">{{ _("According to our records you live in a different room.") }}</p>{% endif %}
+            {% if membership_ended %}<p class="lead">{{ _("According to our records you live in a different room.") }}</p>{% endif %}
+            {% if unknown %}
+              <p class="lead">{{ _("We don't know your MAC address.") }}</p>
+              <p class="lead">{{ _("We detected the MAC address {}").format(mac) }}</p>
+            {% endif %}
+            {% if error %}<p class="lead">{{ _("There was an error on our side. You shouldn't be here.") }}</p>{% endif %}
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <td>Accepted</td>
+                <td>Groups</td>
+                <td>When</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                  <td>{{ last_auth_groups }}</td>
+                  <td>{{ last_auth_date|datetimeformat }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="mastfoot">
+            <div class="inner">
+              <p>Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN) .</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <script src="../static/dependencies/jquery/dist/jquery.min.js"></script>
+    <script src="../static/dependencies/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug. See http://getbootstrap.com/getting-started/#support-ie10-width -->
+    <script src="../static/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>
+
+  <body>
+
+  </body>
+</html>
+

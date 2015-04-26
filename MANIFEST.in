@@ -1,0 +1,2 @@
+recursive-include hades_portal/templates *
+recursive-include hades_portal/static *
