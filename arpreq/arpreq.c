@@ -14,7 +14,16 @@
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 
-static PyObject *Error = NULL;
+struct arpreq_state {
+    PyObject *error;
+};
+
+#if PY_MAJOR_VERSION >= 3
+#define GETSTATE(m) ((struct arpreq_state*)PyModule_GetState(m))
+#else
+#define GETSTATE(m) (&_state)
+static struct arpreq_state _state;
+#endif
 
 void set_verror(PyObject * exc, const char *format, va_list args) {
     char * msg;
@@ -53,7 +62,8 @@ arpreq(PyObject * self, PyObject * args) {
 
     struct ifaddrs * head_ifa;
     if (getifaddrs(&head_ifa) != 0) {
-        set_error(Error, "getifaddrs: %s\n", strerror(errno));
+        struct arpreq_state *st = GETSTATE(self);
+        set_error(st->error, "getifaddrs: %s\n", strerror(errno));
         return NULL;
     }
 
@@ -73,19 +83,23 @@ arpreq(PyObject * self, PyObject * args) {
     }
     freeifaddrs(head_ifa);
     if (arpreq.arp_dev[0] == 0) {
-        set_error(Error, "Requested address is not available on any local subnet.\n");
+        struct arpreq_state *st = GETSTATE(self);
+        set_error(st->error, "Requested address is not available on any local subnet.\n");
         return NULL;
     }
 
     int s = socket(AF_INET, SOCK_DGRAM, 0);
     if (s == -1) {
-        set_error(Error, "socket failed: %s (%d)\n: %s\n", strerror(errno), errno);
+        struct arpreq_state *st = GETSTATE(self);
+        set_error(st->error, "socket failed: %s (%d)\n: %s\n", strerror(errno), errno);
         return NULL;
     }
 
     PyObject * rv;
     if (ioctl(s, SIOCGARP, &arpreq) < 0) {
-        rv = Py_None;
+        struct arpreq_state *st = GETSTATE(self);
+        set_error(st->error, "ioctl failed: %s (%d)\n: %s\n", strerror(errno), errno);
+        rv = NULL;
         goto cleanup;
     }
 
@@ -97,32 +111,79 @@ arpreq(PyObject * self, PyObject * args) {
         rv = Py_BuildValue("s", mac);
     } else {
         rv = Py_None;
+        Py_INCREF(rv);
     }
 
 cleanup:
     if (close(s) == -1) {
-        set_error(PyExc_Exception, "close: %s (%d)\n", strerror(errno), errno);
+        Py_XDECREF(rv);
+        struct arpreq_state *st = GETSTATE(self);
+        set_error(st->error, "close: %s (%d)\n", strerror(errno), errno);
         return NULL;
     }
-    Py_INCREF(rv);
     return rv;
 }
 
-static PyMethodDef methods[] = {
+static PyMethodDef arpreq_methods[] = {
     {"arpreq", arpreq, METH_VARARGS, "Probe the kernel ARP cache for the MAC address of an IPv4 address."},
     {NULL, NULL, 0, NULL}
 };
 
-PyMODINIT_FUNC
-initarpreq(void) {
-    PyObject * m;
-    m = Py_InitModule("arpreq", methods);
-    if (m == NULL)
-        return;
+#if PY_MAJOR_VERSION >= 3
 
-    Error = PyErr_NewException("arpreq.Error", NULL, NULL);
-    Py_INCREF(Error);
-    PyModule_AddObject(m, "Error", Error);
+static int arpreq_traverse(PyObject *m, visitproc visit, void *arg) {
+    Py_VISIT(GETSTATE(m)->error);
+    return 0;
+}
+
+static int arpreq_clear(PyObject *m) {
+    Py_CLEAR(GETSTATE(m)->error);
+    return 0;
+}
+
+static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "arpreq",
+        NULL,
+        sizeof(struct arpreq_state),
+        arpreq_methods,
+        NULL,
+        arpreq_traverse,
+        arpreq_clear,
+        NULL
+};
+
+#define INITERROR return NULL
+
+PyMODINIT_FUNC
+PyInit_arpreq(void)
+#else
+#define INITERROR return
+
+PyMODINIT_FUNC
+initarpreq(void)
+#endif
+{
+    PyObject * module;
+#if PY_MAJOR_VERSION >= 3
+    module = PyModule_Create(&moduledef);
+#else
+    module = Py_InitModule("arpreq", arpreq_methods);
+#endif
+    if (module == NULL)
+        INITERROR;
+
+    struct arpreq_state *st = GETSTATE(module);
+    st->error = PyErr_NewException("arpreq.ARPError", NULL, NULL);
+    if (st->error == NULL) {
+        Py_DECREF(module);
+        INITERROR;
+    }
+    Py_INCREF(st->error);
+    PyModule_AddObject(module, "ARPError", st->error);
+#if PY_MAJOR_VERSION >= 3
+    return module;
+#endif
 }
 
 
