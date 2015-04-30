@@ -67,7 +67,7 @@ arpreq(PyObject * self, PyObject * args) {
         return NULL;
     }
 
-    for (struct ifaddrs * ifa = head_ifa; ifa; ifa = ifa->ifa_next) {
+    for (struct ifaddrs * ifa = head_ifa; ifa != NULL; ifa = ifa->ifa_next) {
         if (ifa->ifa_addr == NULL)
             continue;
         if (ifa->ifa_addr->sa_family != AF_INET)
@@ -170,9 +170,9 @@ initarpreq(void)
 #else
     module = Py_InitModule("arpreq", arpreq_methods);
 #endif
-    if (module == NULL)
+    if (module == NULL) {
         INITERROR;
-
+    }
     struct arpreq_state *st = GETSTATE(module);
     st->error = PyErr_NewException("arpreq.ARPError", PyExc_IOError, NULL);
     if (st->error == NULL) {
