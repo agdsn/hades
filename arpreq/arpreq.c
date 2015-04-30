@@ -170,7 +170,6 @@ initarpreq(void)
         Py_DECREF(module);
         INITERROR;
     }
-    Py_INCREF(st->error);
     PyModule_AddObject(module, "ARPError", st->error);
 #if PY_MAJOR_VERSION >= 3
     return module;
