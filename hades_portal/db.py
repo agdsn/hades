@@ -57,8 +57,6 @@ radpostauth = Table(
     Column('authdate', String(64), nullable=False),
 )
 
-GROUP_SEPARATOR = ":"
-
 
 class utcnow(expression.FunctionElement):
     type = DateTime()
@@ -93,8 +91,8 @@ def get_latest_auth_attempt(mac):
     Get all authentication attempts of a MAC address in the last 24 hours.
 
     :param str mac: MAC address
-    :return: A list of (accepted, [groups], when) tuples.
-    :rtype: [(bool, [str], datetime)]
+    :return: A list of ([groups], when) tuples.
+    :rtype: [([str], datetime)]
     """
     connection = get_connection()
     interval = timedelta(
@@ -110,5 +108,5 @@ def get_latest_auth_attempt(mac):
     ).first()
     if result:
         m, d = result
-        return m.strip(GROUP_SEPARATOR).split(GROUP_SEPARATOR), d
+        return m.strip().split(), d
     return None
