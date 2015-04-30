@@ -35,8 +35,3 @@ def index():
         membership_ended='membership_ended' in mac_groups,
         mac=mac,
     )
-
-
-@app.route("/status")
-def status():
-    pass
