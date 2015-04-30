@@ -144,7 +144,7 @@ static int arpreq_clear(PyObject *m) {
 static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
         "arpreq",
-        NULL,
+        "Translate IP addresses to MAC addresses using the kernel's arp(7) interface.",
         sizeof(struct arpreq_state),
         arpreq_methods,
         NULL,
