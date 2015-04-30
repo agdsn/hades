@@ -1,10 +1,41 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 import operator
-from sqlalchemy import Column, Integer, String, Table, select, and_, DateTime
+from sqlalchemy import (
+    BigInteger, Column, DateTime, Integer, String, Table, select, and_)
 from sqlalchemy.dialects.postgresql import INET
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
 from hades_portal import sqlalchemy, app
+
+radacct = Table(
+    'radacct', sqlalchemy.metadata,
+    Column('radacctid', Integer, nullable=False),
+    Column('acctsessionid', String(64), nullable=False),
+    Column('acctuniqueid', String(32), nullable=False),
+    Column('username', String(253)),
+    Column('groupname', String(253)),
+    Column('realm', String(64)),
+    Column('nasipaddres', INET, nullable=False),
+    Column('nasportid', String(15)),
+    Column('nasporttype', String(32)),
+    Column('acctstarttime', DateTime),
+    Column('acctstoptime', DateTime),
+    Column('acctsessiontime', BigInteger),
+    Column('acctauthentic', String(32)),
+    Column('connectinfo_start', String(50)),
+    Column('connectinfo_stop', String(50)),
+    Column('acctinputoctets', BigInteger),
+    Column('acctoutputoctets', BigInteger),
+    Column('calledstationid', String(50)),
+    Column('callingstationid', String(50)),
+    Column('acctterminatecause', String(32)),
+    Column('servicetype', String(32)),
+    Column('xascendsessionsvrkey', String(10)),
+    Column('framedprotocol', String(32)),
+    Column('framedipaddress', INET),
+    Column('acctstartdelay', Integer),
+    Column('acctstopdelay', Integer),
+)
 
 radusergroup = Table(
     'radusergroup', sqlalchemy.metadata,
