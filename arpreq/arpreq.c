@@ -16,6 +16,7 @@
 
 struct arpreq_state {
     PyObject *error;
+    int socket;
 };
 
 #if PY_MAJOR_VERSION >= 3
@@ -48,6 +49,7 @@ arpreq(PyObject * self, PyObject * args) {
     if (!PyArg_ParseTuple(args, "s", &addr_str)) {
         return NULL;
     }
+    struct arpreq_state *st = GETSTATE(self);
 
     struct arpreq arpreq;
     memset(&arpreq, 0, sizeof(arpreq));
@@ -62,7 +64,6 @@ arpreq(PyObject * self, PyObject * args) {
 
     struct ifaddrs * head_ifa;
     if (getifaddrs(&head_ifa) != 0) {
-        struct arpreq_state *st = GETSTATE(self);
         set_error(st->error, "getifaddrs: %s\n", strerror(errno));
         return NULL;
     }
@@ -83,24 +84,13 @@ arpreq(PyObject * self, PyObject * args) {
     }
     freeifaddrs(head_ifa);
     if (arpreq.arp_dev[0] == 0) {
-        struct arpreq_state *st = GETSTATE(self);
         set_error(st->error, "Requested address is not available on any local subnet.\n");
         return NULL;
     }
 
-    int s = socket(AF_INET, SOCK_DGRAM, 0);
-    if (s == -1) {
-        struct arpreq_state *st = GETSTATE(self);
-        set_error(st->error, "socket failed: %s (%d)\n: %s\n", strerror(errno), errno);
-        return NULL;
-    }
-
-    PyObject * rv;
-    if (ioctl(s, SIOCGARP, &arpreq) < 0) {
-        struct arpreq_state *st = GETSTATE(self);
+    if (ioctl(st->socket, SIOCGARP, &arpreq) < 0) {
         set_error(st->error, "ioctl failed: %s (%d)\n: %s\n", strerror(errno), errno);
-        rv = NULL;
-        goto cleanup;
+        return NULL;
     }
 
     if (arpreq.arp_flags & ATF_COM) {
@@ -108,20 +98,12 @@ arpreq(PyObject * self, PyObject * args) {
         char mac[18];
         snprintf(mac, sizeof(mac), "%02x:%02x:%02x:%02x:%02x:%02x\n",
                  eap[0], eap[1], eap[2], eap[3], eap[4], eap[5]);
-        rv = Py_BuildValue("s", mac);
+        return Py_BuildValue("s", mac);
     } else {
-        rv = Py_None;
+        PyObject * rv = Py_None;
         Py_INCREF(rv);
+        return rv;
     }
-
-cleanup:
-    if (close(s) == -1) {
-        Py_XDECREF(rv);
-        struct arpreq_state *st = GETSTATE(self);
-        set_error(st->error, "close: %s (%d)\n", strerror(errno), errno);
-        return NULL;
-    }
-    return rv;
 }
 
 static PyMethodDef arpreq_methods[] = {
@@ -137,7 +119,9 @@ static int arpreq_traverse(PyObject *m, visitproc visit, void *arg) {
 }
 
 static int arpreq_clear(PyObject *m) {
-    Py_CLEAR(GETSTATE(m)->error);
+    struct arpreq_state *st = GETSTATE(m);
+    Py_CLEAR(st->error);
+    close(st->socket);
     return 0;
 }
 
@@ -174,6 +158,13 @@ initarpreq(void)
         INITERROR;
     }
     struct arpreq_state *st = GETSTATE(module);
+
+    st->socket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (st->socket == -1) {
+        PyErr_SetFromErrno(PyExc_IOError);
+        Py_DECREF(module);
+        INITERROR;
+    }
     st->error = PyErr_NewException("arpreq.ARPError", PyExc_IOError, NULL);
     if (st->error == NULL) {
         Py_DECREF(module);
