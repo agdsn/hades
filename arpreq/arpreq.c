@@ -55,7 +55,7 @@ arpreq(PyObject * self, PyObject * args) {
     struct sockaddr_in *sin = (struct sockaddr_in *) &arpreq.arp_pa;
     sin->sin_family = AF_INET;
     if (inet_pton(AF_INET, addr_str, &(sin->sin_addr)) != 1) {
-        set_error(PyExc_ValueError, "Invalid address %s\n", addr_str);
+        set_error(PyExc_ValueError, "Invalid IP address %s\n", addr_str);
         return NULL;
     }
     int addr = sin->sin_addr.s_addr;
