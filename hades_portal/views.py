@@ -31,7 +31,7 @@ def index():
         default_in_payment='default_in_payment' in mac_groups,
         traffic='traffic' in mac_groups,
         unknown=not mac_groups,
-        wrong_port='unknown' in last_auth_groups,
+        wrong_port='unknown' in last_auth_groups and mac_groups,
         membership_ended='membership_ended' in mac_groups,
         mac=mac,
     )
