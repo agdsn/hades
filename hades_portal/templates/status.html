@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="inner cover">
+    <h1 class="cover-heading">{{ _("We are very sorry :-(") }}</h1>
+    <p class="lead">{{ _("We have to deny you from accessing the network for the following reasons:") }}</p>
+    <ul>
+    {% if traffic %}<li>{{ _("You've exceeded your traffic limit.") }}</li>{% endif %}
+    {% if default_in_payment %}<li>{{ _("You are late with paying your fees.") }}</li>{% endif %}
+    {% if security %}<li>{{ _("We had to block you due to security problems with your devices.") }}</li>{% endif %}
+    {% if violation %}<li>{{ _("You violated our Terms of Services.") }}</li>{% endif %}
+    {% if wrong_port %}<li>{{ _("According to our records you live in a different room.") }}</li>{% endif %}
+    {% if membership_ended %}<li>{{ _("Your current membership status does not allow network access.") }}</li>{% endif %}
+    {% if unknown %}
+      <li>
+        {{ _("We don't know you, because we don't know your MAC address.") }}<br>
+        {{ _("We detected the MAC address {}").format(mac) }}
+      </li>
+    {% endif %}
+    {% if error %}<li>{{ _("There was an error on our side. You shouldn't be here.") }}</li>{% endif %}
+    </ul>
+  </div>
+{% endblock %}

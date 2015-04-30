@@ -30,41 +30,12 @@
             </div>
           </div>
 
-          <div class="inner cover">
-            <h1 class="cover-heading">{{ _("We are very sorry :-(") }}</h1>
-            <p class="lead">{{ _("We have to deny you from accessing the network, because:") }}</p>
-            {% if traffic %}<p class="lead">{{ _("You've exceeded your traffic limit.") }}</p>{% endif %}
-            {% if default_in_payment %}<p class="lead">{{ _("You are late with paying your fees.") }}</p>{% endif %}
-            {% if security %}<p class="lead">{{ _("We had to block you due to security problems.") }}</p>{% endif %}
-            {% if violation %}<p class="lead">{{ _("You violated our Terms of Services.") }}</p>{% endif %}
-            {% if wrong_port %}<p class="lead">{{ _("According to our records you live in a different room.") }}</p>{% endif %}
-            {% if membership_ended %}<p class="lead">{{ _("According to our records you live in a different room.") }}</p>{% endif %}
-            {% if unknown %}
-              <p class="lead">{{ _("We don't know your MAC address.") }}</p>
-              <p class="lead">{{ _("We detected the MAC address {}").format(mac) }}</p>
-            {% endif %}
-            {% if error %}<p class="lead">{{ _("There was an error on our side. You shouldn't be here.") }}</p>{% endif %}
-          </div>
-
-          <table class="table">
-            <thead>
-              <tr>
-                <td>Accepted</td>
-                <td>Groups</td>
-                <td>When</td>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                  <td>{{ last_auth_groups }}</td>
-                  <td>{{ last_auth_date|datetimeformat }}</td>
-              </tr>
-            </tbody>
-          </table>
+        {% block content %}
+        {% endblock %}
 
           <div class="mastfoot">
             <div class="inner">
-              <p>Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN) .</p>
+              <p>Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN).</p>
             </div>
           </div>
 
