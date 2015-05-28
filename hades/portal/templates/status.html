@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="inner cover">
+    <h1 class="cover-heading">{{ _("We are very sorry ☹") }}</h1>
+    {% if reasons %}
+      <p class="lead">{{ _("We have to deny you from accessing the network for the following reasons:") }}</p>
+      <ul class="text-left">
+        {% for reason in reasons %}
+          <li class="lead">{{ reason }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="lead">{{
+          _("Your account status is good. Your network connectivity "
+            "If your network connectivity does not resume within a few minutes, "
+            "try restarting your devices (Router, Laptop). "
+            "If you are still receving this message, contact our support.") }}</p>
+    {% endif %}
+    {% if show_mac %}
+      <p class="lead">{{ _("Your MAC address is {}").format(mac) }}</p>
+    {% endif %}
+  </div>
+{% endblock %}

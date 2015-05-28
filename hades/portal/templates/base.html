@@ -35,7 +35,12 @@
 
           <div class="mastfoot">
             <div class="inner">
-              <p>Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN).</p>
+              <p>Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN)</p>
+              <ul class="list-unstyled">
+                {% for name, address in config["HADES_CONTACT_ADDRESSES"].items() %}
+                  <li>{{ name }}: <a href="mailto:{{ address }}">{{ address }}</a></li>
+                {% endfor %}
+              </ul>
             </div>
           </div>
 

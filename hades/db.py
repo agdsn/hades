@@ -5,7 +5,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import INET
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
-from hades_portal import sqlalchemy, app
+from hades import sqlalchemy, app
 
 radacct = Table(
     'radacct', sqlalchemy.metadata,
@@ -76,10 +76,9 @@ def get_groups(mac):
     Get the groups of a user.
 
     :param mac: MAC address
-    :return:
+    :return: A list of group names
     :rtype: [str]
     """
-
     connection = get_connection()
     results = connection.execute(select([radusergroup.c.groupname])
                                  .where(radusergroup.c.username == mac))
@@ -88,11 +87,13 @@ def get_groups(mac):
 
 def get_latest_auth_attempt(mac):
     """
-    Get all authentication attempts of a MAC address in the last 24 hours.
+    Get the latest auth attempt of a MAC address that occurred within twice the
+    reauthentication interval.
 
     :param str mac: MAC address
-    :return: A list of ([groups], when) tuples.
-    :rtype: [([str], datetime)]
+    :return: A pair of list of group names and when or None if no attempt was
+    found..
+    :rtype: [([str], datetime)]|None
     """
     connection = get_connection()
     interval = timedelta(

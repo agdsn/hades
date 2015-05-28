@@ -1,9 +1,15 @@
-from flask import request
+import os
 import random
 import string
-from hades_portal import app, babel, sqlalchemy
 
-app.config.from_pyfile("config.py")
+from flask import request
+
+import hades
+from hades.portal import app, babel
+
+config_path = os.path.join(os.path.dirname(hades.__file__), "config.py")
+app.config.from_pyfile(config_path)
+# Generate a secret key
 app.config['SECRET_KEY'] = ''.join(random.choice(string.printable)
                                    for i in range(64))
 babel.init_app(app)
@@ -14,8 +20,7 @@ def get_locale():
     return request.accept_languages.best_match(['de', 'en'])
 
 
-import hades_portal.views
-
+from hades.portal import views
 
 application = app
 
