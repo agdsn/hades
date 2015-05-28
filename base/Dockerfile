@@ -1,5 +1,5 @@
 FROM debian:jessie
-MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
+MAINTAINER Sebastian Schrader <schrader@agdsn.de>
 
 # Setup package installation
 COPY sources.list /etc/apt/sources.list
