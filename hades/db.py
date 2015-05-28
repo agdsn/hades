@@ -1,14 +1,21 @@
 from datetime import timedelta
 import operator
+
 from sqlalchemy import (
-    BigInteger, Column, DateTime, Integer, String, Table, select, and_)
+    BigInteger, Column, DateTime, Integer, MetaData, String, Table, select,
+    and_, create_engine)
 from sqlalchemy.dialects.postgresql import INET
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
-from hades import sqlalchemy, app
+
+from . import config
+
+
+engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
+metadata = MetaData(bind=engine)
 
 radacct = Table(
-    'radacct', sqlalchemy.metadata,
+    'radacct', metadata,
     Column('radacctid', Integer, nullable=False),
     Column('acctsessionid', String(64), nullable=False),
     Column('acctuniqueid', String(32), nullable=False),
@@ -38,7 +45,7 @@ radacct = Table(
 )
 
 radusergroup = Table(
-    'radusergroup', sqlalchemy.metadata,
+    'radusergroup', metadata,
     Column('id', Integer, primary_key=True, nullable=False),
     Column('username', String(64), nullable=False),
     Column('nasipaddres', INET, nullable=False),
@@ -47,7 +54,7 @@ radusergroup = Table(
 )
 
 radpostauth = Table(
-    'radpostauth', sqlalchemy.metadata,
+    'radpostauth', metadata,
     Column('id', Integer, primary_key=True, nullable=False),
     Column('username', String(64), nullable=False),
     Column('nasipaddres', INET, nullable=False),
@@ -68,7 +75,7 @@ def pg_utcnow(element, compiler, **kw):
 
 
 def get_connection():
-    return sqlalchemy.engine.connect()
+    return engine.connect()
 
 
 def get_groups(mac):
@@ -96,8 +103,7 @@ def get_latest_auth_attempt(mac):
     :rtype: [([str], datetime)]|None
     """
     connection = get_connection()
-    interval = timedelta(
-        seconds=2 * app.config['HADES_REAUTHENTICATION_INTERVAL'])
+    interval = config.HADES_REAUTHENTICATION_INTERVAL
     result = connection.execute(
         select([radpostauth.c.replymessage, radpostauth.c.authdate])
         .where(and_(

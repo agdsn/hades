@@ -13,7 +13,6 @@ app.config.from_pyfile(config_path)
 app.config['SECRET_KEY'] = ''.join(random.choice(string.printable)
                                    for i in range(64))
 babel.init_app(app)
-sqlalchemy.init_app(app)
 
 @babel.localeselector
 def get_locale():

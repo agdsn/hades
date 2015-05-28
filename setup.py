@@ -13,7 +13,6 @@ setup(name='hades',
       install_requires=[
           "Flask",
           "Flask-Babel",
-          "Flask-SQLAlchemy",
           "SQLAlchemy",
           "psycopg2",
           "celery"
