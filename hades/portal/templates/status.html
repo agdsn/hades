@@ -12,10 +12,11 @@
       </ul>
     {% else %}
       <p class="lead">{{
-          _("Your account status is good. Your network connectivity "
-            "If your network connectivity does not resume within a few minutes, "
-            "try restarting your devices (Router, Laptop). "
-            "If you are still receving this message, contact our support.") }}</p>
+          _("Your account status is good. Your network connectivity should "
+            "work in a few minutes. "
+            "If does not work in a few minutes, try restarting your devices "
+            "(Router, Laptop). "
+            "If you are still receiving this message, contact our support.") }}</p>
     {% endif %}
     {% if show_mac %}
       <p class="lead">{{ _("Your MAC address is {}").format(mac) }}</p>
