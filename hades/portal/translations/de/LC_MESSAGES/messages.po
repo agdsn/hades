@@ -46,7 +46,7 @@ msgstr ""
 "ausstehenden Beträge (inklusive Versäumnisgebühr). Um deine "
 "Netzwerkverbindung sofort wieder zu erhalten, melde dich bei unserem "
 "Support. Anderenfalls wird dein Benutzerkonto erst wieder aktiviert "
-"sobald das Geld auf unseren Bankkonto eingegangen ist."
+"sobald das Geld auf unserem Bankkonto eingegangen ist."
 
 #: views.py:22
 msgid ""
