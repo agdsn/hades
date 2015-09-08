@@ -64,7 +64,7 @@ arpreq(PyObject * self, PyObject * args) {
 
     struct ifaddrs * head_ifa;
     if (getifaddrs(&head_ifa) != 0) {
-        set_error(st->error, "getifaddrs: %s\n", strerror(errno));
+        set_error(st->error, "getifaddrs: %s (%d)\n", strerror(errno), errno);
         return NULL;
     }
 
@@ -89,7 +89,7 @@ arpreq(PyObject * self, PyObject * args) {
     }
 
     if (ioctl(st->socket, SIOCGARP, &arpreq) < 0) {
-        set_error(st->error, "ioctl failed: %s (%d)\n: %s\n", strerror(errno), errno);
+        set_error(st->error, "ioctl failed: %s (%d)\n", strerror(errno), errno);
         return NULL;
     }
 
