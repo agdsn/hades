@@ -1,28 +1,33 @@
-interface=eth1
-interface=eth2
+interface={{ HADES_UNAUTH_INTERFACE }}
 # Do not listen on the loopback interface
 # dnsmasq always adds the loopback interface if not told otherwise
 except-interface=lo
-listen-address=10.66.0.1
+listen-address={{ HADES_UNAUTH_LISTEN.ip }}
 # Explicitly bind to the interfaces specified above, otherwise any other DNS
 # server running on the same machine won't be able to listen on DNS port
 bind-interfaces
+
+# Don't read /etc/hosts /etc/resolv.conf or poll these files for changes
 no-hosts
 no-resolv
 no-poll
 
 # DNS-Record for the Captive Portal
-host-record=captive-portal.agdsn.de,10.66.0.1
+host-record={{ HADES_PORTAL_DOMAIN }},{{ HADES_UNAUTH_LISTEN.ip }}
 
-# Return the expected DNS address for Windows NCSI to work
+# Return the expected Windows NCSI DNS address
 # See https://technet.microsoft.com/en-us/library/cc766017%28v=ws.10%29.aspx
 address=/dns.msftncsi.com/131.107.255.255
+
 # Wildcard A-Record to redirect all domains to the captive portal
-address=/#/10.66.0.1
+address=/#/{{ HADES_UNAUTH_LISTEN.ip }}
+
 # Domain of DHCP hosts
-domain=hades.agdsn.de,10.66.0.0,local
-dhcp-range=10.66.1.0,10.66.65.255,300
-#
+domain={{ HADES_PORTAL_DOMAIN }},{{ HADES_UNAUTH_LISTEN.network }},local
+dhcp-range={{ HADES_UNAUTH_DHCP_RANGE.first|IPAddress }},{{ HADES_UNAUTH_DHCP_RANGE.last|IPAddress }},{{ HADES_UNAUTH_DHCP_LEASE_TIME.seconds }}s
+
+# Enable authoritative DHCP mode to NAK any unknown DHCP requests
 dhcp-authoritative
+
 # ignore the host names send in the DHCP request message
 dhcp-ignore-names
