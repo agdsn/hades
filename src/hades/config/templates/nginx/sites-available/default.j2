@@ -1,0 +1,41 @@
+server {
+	listen 80 default_server;
+	listen [::]:80 default_server;
+	listen 443 ssl default_server;
+	listen [::]:443 ssl default_server;
+
+	ssl_certificate {{ HADES_PORTAL_SSL_CERTIFICATE }};
+	ssl_certificate_key {{ HADES_PORTAL_SSL_CERTIFICATE_KEY }};
+
+	# Return 302 for clients using HTTP/1.0
+	if ($server_protocol = 'HTTP/1.0') {	
+		return 302 http://{{ HADES_PORTAL_DOMAIN }}/;
+	}
+	# Return the more appropriate 303 status code for HTTP/1.1 and others
+	if ($server_protocol != 'HTTP/1.0') {
+		return 303 http://{{ HADES_PORTAL_DOMAIN }}/;
+	}
+}
+
+server {
+	listen 80;
+	listen [::]:80;
+
+	# SSL configuration
+	listen 443 ssl;
+	listen [::]:443 ssl;
+
+	ssl_certificate {{ HADES_PORTAL_SSL_CERTIFICATE }};
+	ssl_certificate_key {{ HADES_PORTAL_SSL_CERTIFICATE_KEY }};
+
+	root {{ HADES_PORTAL_HOME }};
+
+	index index.html index.htm;
+
+	server_name {{ HADES_PORTAL_DOMAIN }};
+
+	location / {
+		include uwsgi_params;
+		uwsgi_pass unix:{{ HADES_PORTAL_UWSGI_SOCKET }};
+	}
+}
