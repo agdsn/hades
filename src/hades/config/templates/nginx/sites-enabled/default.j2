@@ -8,7 +8,7 @@ server {
 	ssl_certificate_key {{ HADES_PORTAL_SSL_CERTIFICATE_KEY }};
 
 	# Return 302 for clients using HTTP/1.0
-	if ($server_protocol = 'HTTP/1.0') {	
+	if ($server_protocol = 'HTTP/1.0') {
 		return 302 http://{{ HADES_PORTAL_DOMAIN }}/;
 	}
 	# Return the more appropriate 303 status code for HTTP/1.1 and others
