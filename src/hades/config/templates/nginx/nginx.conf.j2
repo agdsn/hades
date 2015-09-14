@@ -1,6 +1,8 @@
-user www-data;
+user {{ HADES_PORTAL_USER }} {{ HADES_PORTAL_GROUP }};
+working_directory {{ HADES_PORTAL_HOME }};
 worker_processes {{ HADES_PORTAL_NGINX_WORKERS }};
 pid /run/nginx.pid;
+daemon off;
 
 events {
 	worker_connections 768;
@@ -23,7 +25,7 @@ http {
 	# server_names_hash_bucket_size 64;
 	# server_name_in_redirect off;
 
-	include /etc/nginx/mime.types;
+	include {{ BASE_DIRECTORY }}/mime.types;
 	default_type application/octet-stream;
 
 	##
@@ -32,6 +34,8 @@ http {
 
 	ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE
 	ssl_prefer_server_ciphers on;
+	ssl_ciphers 'EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH:+CAMELLIA256:+AES256:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!ECDSA:CAMELLIA256-SHA:AES256-SHA:CAMELLIA128-SHA:AES128-SHA';
+	ssl_session_tickets off;
 
 	##
 	# Logging Settings
@@ -44,8 +48,8 @@ http {
 	# Gzip Settings
 	##
 
-	gzip on;
-	gzip_disable "msie6";
+	gzip off;
+	#gzip_disable "msie6";
 
 	# gzip_vary on;
 	# gzip_proxied any;
@@ -58,6 +62,6 @@ http {
 	# Virtual Host Configs
 	##
 
-	include /etc/nginx/conf.d/*.conf;
-	include /etc/nginx/sites-enabled/*;
+	include {{ BASE_DIRECTORY }}/conf.d/*.conf;
+	include {{ BASE_DIRECTORY }}/sites-enabled/*;
 }
