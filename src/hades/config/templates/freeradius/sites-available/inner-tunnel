@@ -57,7 +57,7 @@ authorize {
 	#  the MS-CHAP-Challenge attribute, and add 'Auth-Type := MS-CHAP'
 	#  to the request, which will cause the server to then use
 	#  the mschap module for authentication.
-	mschap
+#	mschap
 
 	#
 	#  Pull crypt'd passwords from /etc/passwd or /etc/shadow,
@@ -150,8 +150,8 @@ authorize {
 	# Use the checkval module
 #	checkval
 
-	expiration
-	logintime
+#	expiration
+#	logintime
 
 	#
 	#  If no other module has claimed responsibility for
@@ -201,15 +201,15 @@ authenticate {
 	#  A back-end database listed in the 'authorize' section
 	#  MUST supply a CLEAR TEXT password.  Encrypted passwords
 	#  won't work.
-	Auth-Type CHAP {
-		chap
-	}
+#	Auth-Type CHAP {
+#		chap
+#	}
 
 	#
 	#  MSCHAP authentication.
-	Auth-Type MS-CHAP {
-		mschap
-	}
+#	Auth-Type MS-CHAP {
+#		mschap
+#	}
 
 	#
 	#  Pluggable Authentication Modules.
@@ -221,7 +221,7 @@ authenticate {
 	#  containing CHAP-Password attributes CANNOT be authenticated
 	#  against /etc/passwd!  See the FAQ for details.
 	#  
-	unix
+#	unix
 
 	# Uncomment it if you want to use ldap for authentication
 	#
@@ -234,7 +234,7 @@ authenticate {
 
 	#
 	#  Allow EAP authentication.
-	eap
+#	eap
 }
 
 ######################################################################
@@ -249,11 +249,11 @@ authenticate {
 #  or rlm_sql module can handle this.
 #  The rlm_sql module is *much* faster
 session {
-	radutmp
+#	radutmp
 
 	#
 	#  See "Simultaneous Use Checking Queries" in sql.conf
-#	sql
+	sql
 }
 
 
@@ -299,7 +299,7 @@ post-auth {
 	#
 	Post-Auth-Type REJECT {
 		# log failed authentications in SQL, too.
-#		sql
+		sql
 		attr_filter.access_reject
 	}
 
@@ -393,7 +393,7 @@ post-proxy {
 	#  hidden inside of the EAP packet, and the end server will
 	#  reject the EAP request.
 	#
-	eap
+#	eap
 
 	#
 	#  If the server tries to proxy a request and fails, then the

@@ -195,8 +195,8 @@ authorize {
 	# Use the checkval module
 #	checkval
 
-	expiration
-	logintime
+#	expiration
+#	logintime
 
 	#
 	#  If no other module has claimed responsibility for
@@ -269,9 +269,9 @@ authenticate {
 
 	#
 	#  MSCHAP authentication.
-	Auth-Type MS-CHAP {
-		mschap
-	}
+#	Auth-Type MS-CHAP {
+#		mschap
+#	}
 
 	#
 	#  If you have a Cisco SIP server authenticating against
@@ -317,7 +317,7 @@ authenticate {
 	#
 #	Auth-Type eap {
 #		eap {
-#			handled = 1  
+#			handled = 1
 #		}
 #		if (handled && (Response-Packet-Type == Access-Challenge)) {
 #			attr_filter.access_challenge.post-auth
