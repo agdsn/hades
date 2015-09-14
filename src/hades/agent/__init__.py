@@ -1,26 +1,18 @@
 from celery import Celery
-from celery.datastructures import DictAttribute
-from celery.loaders.base import BaseLoader
 from datetime import timedelta
+import logging
 from sqlalchemy import select, and_
 from ..db import get_connection, radacct, radpostauth, utcnow
+from hades.config.loader import get_config
 
-
-class Loader(BaseLoader):
-    def read_configuration(self, fail_silently=False):
-        try:
-            config = self._import_config_module('hades.config')
-        except ImportError:
-            raise
-        self.configured = True
-        return DictAttribute(config)
-
-
-app = Celery('agent', loader=Loader)
+logger = logging.getLogger(__name__)
+app = Celery(__name__)
+app.config_from_object(get_config())
 
 
 @app.task(rate_limit='1/m')
 def refresh():
+    logger.info("Refreshing materialized views")
     connection = get_connection()
     connection.execute("REFRESH MATERIALIZED VIEW radcheck")
     connection.execute("REFRESH MATERIALIZED VIEW radgroupcheck")
@@ -30,6 +22,7 @@ def refresh():
 
 @app.task(rate_limit='1/m')
 def delete_old():
+    logger.info("Deleting old records")
     connection = get_connection()
     result = connection.execute(radacct.delete().where(and_(
         radacct.c.acctstoptime < utcnow() - app.conf["HADES_RETENTION_INTERVAL"]
@@ -37,7 +30,6 @@ def delete_old():
     result = connection.execute(radpostauth.delete().where(and_(
         radpostauth.c.authdate < utcnow() - timedelta(days=1)
     )))
-
 
 
 @app.task(bind=True)

@@ -14,8 +14,10 @@ setup(name='hades',
           "Flask",
           "Flask-Babel",
           "SQLAlchemy",
+          "celery",
+          "netaddr",
           "psycopg2",
-          "celery"
+          "pyroute2",
       ],
       ext_modules=[arpreq],
       classifiers=[

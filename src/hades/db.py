@@ -1,4 +1,3 @@
-from datetime import timedelta
 import operator
 
 from sqlalchemy import (
@@ -7,10 +6,10 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import INET
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
+from hades.config.loader import CheckWrapper, get_config
 
-from . import config
 
-
+config = CheckWrapper(get_config())
 engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
 metadata = MetaData(bind=engine)
 
