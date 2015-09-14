@@ -5,8 +5,8 @@ arpreq = Extension('arpreq', sources=['arpreq/arpreq.c'],
 
 setup(name='hades',
       version='0.1',
-      description="Resolve an IP address to a MAC address by probing the "
-                  "Kernel's arp cache.",
+      description="Distributed AG DSN RADIUS MAC authentication. "
+                  "Site node agent and captive portal",
       packages=find_packages(exclude=["*.tests"]),
       include_package_data=True,
       zip_safe=False,
@@ -17,5 +17,20 @@ setup(name='hades',
           "psycopg2",
           "celery"
       ],
-      ext_modules=[arpreq])
+      ext_modules=[arpreq],
+      classifiers=[
+          'Development Status :: 5 - Production/Stable',
+          'License :: OSI Approved :: MIT License',
+          'Environment :: No Input/Output (Daemon)',
+          'Environment :: Web Environment',
+          'Intended Audience :: System Administrators',
+          'Operating System :: POSIX :: Linux',
+          'Programming Language :: Python :: 3 :: Only',
+          'Programming Language :: Python :: 3.4',
+          'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: Implementation :: CPython',
+          'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
+          'Topic :: System :: Networking',
+      ],
+      )
 
