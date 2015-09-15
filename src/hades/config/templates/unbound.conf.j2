@@ -1,0 +1,13 @@
+server:
+    directory: "/etc/unbound"
+    username: unbound
+    do-daemonize: no
+    pidfile: "/run/unbound.pid"
+    interface: {{ HADES_REGULAR_LISTEN.ip }}
+    {%- for name, network in HADES_REGULAR_NETWORKS.items() %}
+    access-control: {{ network }} allow
+    {%- endfor %}
+    auto-trust-anchor-file: "/var/lib/unbound/root.key"
+    outgoing-num-tcp: 100
+    incoming-num-tcp: 100
+
