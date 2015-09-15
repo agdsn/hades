@@ -1,0 +1,28 @@
+# Disable DNS
+port=0
+
+interface={{ HADES_REGULAR_INTERFACE }}
+except-interface=lo
+
+listen-address={{ HADES_REGULAR_LISTEN.ip }}
+
+# Bind to listed interfaces only
+bind-interfaces
+
+# Enable authoritative DHCP
+dhcp-authoritative
+
+# Define DHCP ranges
+{% for name, network in HADES_REGULAR_NETWORKS.items() %}
+dhcp-range=set:{{ name }},{{ network.network }},static,{{ network.netmask }},{{ network.broadcast }},{{ HADES_REGULAR_DHCP_LEASE_TIME.seconds }}s
+dhcp-option=tag:{{ name }},option:router,{{ network.ip }}
+{% endfor %}
+dhcp-option=option:dns-server,{{ HADES_REGULAR_LISTEN_ADDRESS }}
+dhcp-option=option:domain-name,{{ HADES_REGULAR_DHCP_DOMAIN }}
+
+# Ensure lease max is high enough (default is 1000)
+dhcp-lease-max={{ HADES_REGULAR_NETWORKS|map('length')|sum }}
+
+# Set DHCP lease and hosts file
+dhcp-leasefile={{ HADES_REGULAR_DNSMASQ_LEASE_FILE }}
+dhcp-hostsfile={{ HADES_REGULAR_DNSMASQ_HOSTS_FILE }}
