@@ -1,0 +1,12 @@
+[uwsgi]
+immediate-gid = {{ HADES_PORTAL_GROUP }}
+immediate-uid = {{ HADES_PORTAL_USER }}
+need-plugin = python3
+uwsgi-socket = {{ HADES_PORTAL_UWSGI_SOCKET }}
+need-app = true
+reaper = true
+chdir = {{ HADES_PORTAL_HOME }}
+die-on-term = false
+module = hades.portal.app
+master = true
+workers = {{ HADES_PORTAL_UWSGI_WORKERS }}
