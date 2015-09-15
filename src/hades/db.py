@@ -3,7 +3,7 @@ import operator
 from sqlalchemy import (
     BigInteger, Column, DateTime, Integer, MetaData, String, Table, select,
     and_, create_engine)
-from sqlalchemy.dialects.postgresql import INET
+from sqlalchemy.dialects.postgresql import INET, MACADDR
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
 from hades.config.loader import CheckWrapper, get_config
@@ -12,6 +12,13 @@ from hades.config.loader import CheckWrapper, get_config
 config = CheckWrapper(get_config())
 engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
 metadata = MetaData(bind=engine)
+
+dhcphost = Table(
+    'dhcphost', metadata,
+    Column('id', Integer, primary_key=True, nullable=False),
+    Column('mac', MACADDR, nullable=False),
+    Column('ipaddress', INET, nullable=False),
+)
 
 radacct = Table(
     'radacct', metadata,
@@ -43,15 +50,6 @@ radacct = Table(
     Column('acctstopdelay', Integer),
 )
 
-radusergroup = Table(
-    'radusergroup', metadata,
-    Column('id', Integer, primary_key=True, nullable=False),
-    Column('username', String(64), nullable=False),
-    Column('nasipaddres', INET, nullable=False),
-    Column('nasportid', String(15), nullable=False),
-    Column('groupname', String(64), nullable=False),
-)
-
 radpostauth = Table(
     'radpostauth', metadata,
     Column('id', Integer, primary_key=True, nullable=False),
@@ -61,6 +59,15 @@ radpostauth = Table(
     Column('packettype', String(64), nullable=False),
     Column('replymessage', String(253), nullable=False),
     Column('authdate', String(64), nullable=False),
+)
+
+radusergroup = Table(
+    'radusergroup', metadata,
+    Column('id', Integer, primary_key=True, nullable=False),
+    Column('username', String(64), nullable=False),
+    Column('nasipaddres', INET, nullable=False),
+    Column('nasportid', String(15), nullable=False),
+    Column('groupname', String(64), nullable=False),
 )
 
 
@@ -116,3 +123,9 @@ def get_latest_auth_attempt(mac):
         m, d = result
         return m.strip().split(), d
     return None
+
+
+def get_all_dhcp_hosts():
+    connection = get_connection()
+    result = connection.execute(select([dhcphost.c.mac, dhcphost.c.ipaddress]))
+    return iter(result)
