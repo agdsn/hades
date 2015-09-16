@@ -79,6 +79,37 @@ SET search_path = public, pg_catalog;
 SET default_tablespace = '';
 
 --
+-- Name: dhcphost; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE FOREIGN TABLE foreign_dhcphost (
+    id integer NOT NULL,
+    mac macaddr NOT NULL,
+    ipaddress inet NOT NULL
+)
+SERVER {{ server_name }}
+OPTIONS (
+    {{ table_options(HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS) }}
+);
+
+
+ALTER FOREIGN TABLE foreign_dhcphost OWNER TO postgres;
+
+--
+-- Name: dhcphost; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ HADES_AGENT_USER }}; Tablespace:
+--
+
+CREATE MATERIALIZED VIEW dhcphost AS
+ SELECT foreign_dhcphost.id,
+    foreign_dhcphost.mac,
+    foreign_dhcphost.ipaddress
+   FROM foreign_dhcphost
+  WITH NO DATA;
+
+
+ALTER TABLE dhcphost OWNER TO "{{ HADES_AGENT_USER }}";
+
+--
 -- Name: foreign_nas; Type: FOREIGN TABLE; Schema: public; Owner: postgres; Tablespace:
 --
 
@@ -468,6 +499,26 @@ REVOKE ALL ON SCHEMA public FROM PUBLIC;
 REVOKE ALL ON SCHEMA public FROM postgres;
 GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- Name: foreign_dhcphost; Type: ACL; Schema: public; Owner: postgres
+--
+
+REVOKE ALL ON TABLE foreign_dhcphost FROM PUBLIC;
+REVOKE ALL ON TABLE foreign_dhcphost FROM postgres;
+GRANT ALL ON TABLE foreign_dhcphost TO postgres;
+GRANT SELECT ON TABLE foreign_dhcphost TO "{{ HADES_AGENT_USER }}";
+
+
+--
+-- Name: dhcphost; Type: ACL; Schema: public; Owner: {{ HADES_AGENT_USER }}
+--
+
+REVOKE ALL ON TABLE dhcphost FROM PUBLIC;
+REVOKE ALL ON TABLE dhcphost FROM "{{ HADES_AGENT_USER }}";
+GRANT ALL ON TABLE dhcphost TO "{{ HADES_AGENT_USER }}";
+GRANT ALL ON TABLE dhcphost TO postgres;
 
 
 --
