@@ -11,9 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def from_object(obj):
-    return {name: getattr(obj, name)
-            for name in dir(obj)
-            if not name.startswith('_')}
+    return {name: getattr(obj, name) for name in dir(obj) if name.isupper()}
 
 
 class ConfigObject(collections.Mapping):
