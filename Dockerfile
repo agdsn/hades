@@ -34,7 +34,10 @@ RUN apt-get update && apt-get install \
     apt-get clean && \
     pip3 install \
     Flask-Babel \
-    pyroute2
+    pyroute2 \
+    && \
+    pg_dropcluster 9.4 main && \
+    pg_createcluster --locale C -e UTF-8 9.4 main
 
 COPY docker/ /build/
 RUN cd /build && \
