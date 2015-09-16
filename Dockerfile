@@ -1,9 +1,9 @@
 FROM debian:jessie
 MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
 ENV LANG=C.UTF-8
-COPY sources.list /etc/apt/sources.list
+COPY docker/etc/apt/ /etc/apt/
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install \
     arping \
     dnsmasq \
     freeradius \
