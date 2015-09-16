@@ -108,14 +108,14 @@ def ip_range_in_network(network_config):
     return checker
 
 
-def user_exists(name, value):
+def user_exists(config, name, value):
     try:
         return pwd.getpwnam(value)
     except KeyError:
         raise ConfigError(name, "User {} does not exists".format(value))
 
 
-def group_exists(name, value):
+def group_exists(config, name, value):
     try:
         return grp.getgrnam(value)
     except KeyError:
