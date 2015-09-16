@@ -164,8 +164,8 @@ pidfile = ${run_dir}/${name}.pid
 #  It will join all groups where "user" is a member.  This can allow
 #  for some finer-grained access controls.
 #
-user = freerad
-group = freerad
+user = {{ HADES_FREERADIUS_USER }}
+group = {{ HADES_FREERADIUS_GROUP }}
 
 #  panic_action: Command to execute if the server dies unexpectedly.
 #

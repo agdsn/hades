@@ -229,6 +229,18 @@ class HADES_UNAUTH_DHCP_RANGE(Option):
     static_check = check.ip_range_in_network('HADES_UNAUTH_LISTEN')
 
 
+class HADES_RADIUS_LISTEN(Option):
+    """IP and network RADIUS to listen on for RADIUS requests"""
+    type = str
+    runtime_check = check.address_exists
+
+
+class HADES_RADIUS_INTERFACE(Option):
+    """Interface RADIUS requests arrive on"""
+    type = str
+    runtime_check = check.interface_exists
+
+
 # Flask options
 class SECRET_KEY(Option):
     default = ''.join(random.choice(string.printable) for i in range(64))
