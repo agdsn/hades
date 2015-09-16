@@ -20,11 +20,13 @@ class ConfigError(Exception):
 def check_option(config, option, value, runtime_checks=False):
     name = option.__name__
     if option.type is not None and not isinstance(value, option.type):
+        got = type(value).__name__
         if option.type.__module__ == 'builtins':
-            type_name = option.type.__name__
+            expected = option.type.__name__
         else:
-            type_name = option.type.__module__ + '.' + option.type
-        raise ConfigError(name, "Must be of type {}".format(type_name))
+            expected = option.type.__module__ + '.' + option.type.__name__
+        raise ConfigError(name, "Must be a subtype of {}, was {}"
+                          .format(expected, got))
     if option.static_check:
         option.static_check(config, name, value)
     if runtime_checks and option.runtime_check:
@@ -136,12 +138,15 @@ def has_key(name, value, *keys):
             raise ConfigError(name, "Missing key {}".format('->'.join(path)))
 
 
-def postgresql_foreign_server(config, name, value):
-    has_key(name, value, 'name')
-    has_key(name, value, 'type')
-    has_key(name, value, 'version')
-    has_key(name, value, 'fdw')
-    has_key(name, value, 'options')
-    has_key(name, value, 'user-mappings')
-    for user_name, mapping in value['user-mappings'].items():
-        has_key(name, value, 'user-mappings', user_name)
+def user_mapping_for_user_exists(user_option_name):
+    def checker(config, name, value):
+        user_name = config[user_option_name]
+        if 'PUBLIC' in config[user_option_name]:
+            return
+        if 'postgres' not in value:
+            raise ConfigError(name, "No mapping for user postgres")
+        if user_name not in value:
+            raise ConfigError(name, "No mapping for user {} defined in "
+                                    "option {}"
+                              .format(user_name, user_option_name))
+    return checker

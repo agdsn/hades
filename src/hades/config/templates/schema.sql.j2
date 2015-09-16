@@ -3,8 +3,8 @@
 --
 
 {%- macro join_options(options) %}
-    {%- set items = options.items()|list %}
     {%- if options %}
+    {%- set items = options.items()|list %}
     {%- for name, value in items[:-1] %}
     {{ name }} '{{ value }}',
     {%- endfor %}
@@ -13,11 +13,8 @@
 {%- endmacro %}
 
 
-{%- macro table_options(table) %}
-    {%- set options = HADES_POSTGRESQL_FOREIGN_SERVER['global-table-options'] %}
-    {%- if table in HADES_POSTGRESQL_FOREIGN_SERVER['per-table-options'] %}
-    {%- do options.update(HADES_POSTGRESQL_FOREIGN_SERVER['per-table-options'][table]) %}
-    {%- endif %}
+{%- macro table_options(options) %}
+    {%- do options.update(HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS) %}
     {{ join_options(options) }}
 {%- endmacro %}
 
@@ -43,28 +40,35 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
 --
--- Name: {{ HADES_POSTGRESQL_FOREIGN_SERVER.fdw }}; Type: EXTENSION; Schema: -; Owner:
+-- Name: {{ HADES_POSTGRESQL_FOREIGN_SERVER_FDW}}; Type: EXTENSION; Schema: -; Owner:
 --
 
-CREATE EXTENSION IF NOT EXISTS {{ HADES_POSTGRESQL_FOREIGN_SERVER.fdw }} WITH SCHEMA public;
+CREATE EXTENSION IF NOT EXISTS {{ HADES_POSTGRESQL_FOREIGN_SERVER_FDW }} WITH SCHEMA public;
 
 
-CREATE SERVER {{ HADES_POSTGRESQL_FOREIGN_SERVER.name }}
-    {%- if  HADES_POSTGRESQL_FOREIGN_SERVER.type is defined    %} TYPE    '{{ HADES_POSTGRESQL_FOREIGN_SERVER.type }}'{% endif %}
-    {%- if  HADES_POSTGRESQL_FOREIGN_SERVER.version is defined %} VERSION '{{ HADES_POSTGRESQL_FOREIGN_SERVER.version }}'{% endif %}
-    FOREIGN DATA WRAPPER {{ HADES_POSTGRESQL_FOREIGN_SERVER.fdw }} OPTIONS (
-    {{ join_options(HADES_POSTGRESQL_FOREIGN_SERVER['server-options']) }}
+{%- set server_name = 'master' %}
+CREATE SERVER {{ server_name }}
+    {%- if  HADES_POSTGRESQL_FOREIGN_SERVER_TYPE is defined    %} TYPE    '{{ HADES_POSTGRESQL_FOREIGN_SERVER_TYPE }}'{% endif %}
+    {%- if  HADES_POSTGRESQL_FOREIGN_SERVER_VERSION is defined %} VERSION '{{ HADES_POSTGRESQL_FOREIGN_SERVER_VERSION }}'{% endif %}
+    FOREIGN DATA WRAPPER {{ HADES_POSTGRESQL_FOREIGN_SERVER_FDW }} OPTIONS (
+    {{ join_options(HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS) }}
 );
 
 
-ALTER SERVER {{ HADES_POSTGRESQL_FOREIGN_SERVER.name }} OWNER TO postgres;
+ALTER SERVER master OWNER TO postgres;
 
 --
 -- Name: USER MAPPING public SERVER atlantis_mysql; Type: USER MAPPING; Schema: -; Owner: postgres
 --
 
-{%- for user_name, options in HADES_POSTGRESQL_FOREIGN_SERVER['user-mappings'].items() %}
-CREATE USER MAPPING FOR {{ user_name }} SERVER {{ HADES_POSTGRESQL_FOREIGN_SERVER.name }} OPTIONS (
+{%- for user_name, options in HADES_POSTGRESQL_USER_MAPPINGS.items() %}
+CREATE USER MAPPING FOR
+{%- if user_name == 'PUBLIC' -%}
+PUBLIC
+{%- else -%}
+"{{ user_name }}"
+{%- endif -%}
+SERVER {{ server_name }} OPTIONS (
     {{ join_options(options) }}
 );
 {%- endfor %}
@@ -89,9 +93,9 @@ CREATE FOREIGN TABLE foreign_nas (
     community character varying(50),
     description character varying(200)
 )
-SERVER {{ HADES_POSTGRESQL_FOREIGN_SERVER.name }}
+SERVER {{ server_name }}
 OPTIONS (
-    {{ table_options('nas') }}
+    {{ table_options(HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS) }}
 );
 
 
@@ -110,9 +114,9 @@ CREATE FOREIGN TABLE foreign_radcheck (
     op character(2) NOT NULL,
     value character varying(253) NOT NULL
 )
-SERVER {{ HADES_POSTGRESQL_FOREIGN_SERVER.name }}
+SERVER {{ server_name }}
 OPTIONS (
-    {{ table_options('radcheck') }}
+    {{ table_options(HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS) }}
 );
 
 
@@ -129,9 +133,9 @@ CREATE FOREIGN TABLE foreign_radgroupcheck (
     op character(2) NOT NULL,
     value character varying(253) NOT NULL
 )
-SERVER {{ HADES_POSTGRESQL_FOREIGN_SERVER.name }}
+SERVER {{ server_name }}
 OPTIONS (
-    {{ table_options('radgroupcheck') }}
+    {{ table_options(HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS) }}
 );
 
 
@@ -148,9 +152,9 @@ CREATE FOREIGN TABLE foreign_radgroupreply (
     op character(2) NOT NULL,
     value character varying(253) NOT NULL
 )
-SERVER {{ HADES_POSTGRESQL_FOREIGN_SERVER.name }}
+SERVER {{ server_name }}
 OPTIONS (
-    {{ table_options('radgroupreply') }}
+    {{ table_options(HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS) }}
 );
 
 
@@ -169,9 +173,9 @@ CREATE FOREIGN TABLE foreign_radreply (
     op character(2) DEFAULT '='::bpchar NOT NULL,
     value character varying(253) NOT NULL
 )
-SERVER {{ HADES_POSTGRESQL_FOREIGN_SERVER.name }}
+SERVER {{ server_name }}
 OPTIONS (
-    {{ table_options('radreply') }}
+    {{ table_options(HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS) }}
 );
 
 
@@ -188,9 +192,9 @@ CREATE FOREIGN TABLE foreign_radusergroup (
     groupname character varying(64) NOT NULL,
     priority integer NOT NULL
 )
-SERVER {{ HADES_POSTGRESQL_FOREIGN_SERVER.name }}
+SERVER {{ server_name }}
 OPTIONS (
-    {{ table_options('radusergroup') }}
+    {{ table_options(HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS) }}
 );
 
 

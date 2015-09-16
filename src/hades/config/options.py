@@ -73,10 +73,74 @@ class HADES_POSTGRESQL_SOCKET(Option):
     runtime_check = check.directory_exists
 
 
-class HADES_POSTGRESQL_FOREIGN_SERVER(Option):
-    type = collections.Mapping
-    static_check = check.postgresql_foreign_server
+class HADES_POSTGRESQL_FOREIGN_SERVER_FDW(Option):
+    default = 'mysql_fdw'
+    type = str
 
+
+class HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS(Option):
+    type = collections.Mapping
+
+
+class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
+    default = {
+        'dbname': 'hades',
+    }
+    type = collections.Mapping
+
+
+class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS(Option):
+    default = {
+        'table_name': 'dhcphost',
+    }
+    type = collections.Mapping
+
+
+class HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS(Option):
+    default = {
+        'table_name': 'nas',
+    }
+    type = collections.Mapping
+
+
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS(Option):
+    default = {
+        'table_name': 'radcheck',
+    }
+    type = collections.Mapping
+
+
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS(Option):
+    default = {
+        'table_name': 'radgroupcheck',
+    }
+    type = collections.Mapping
+
+
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS(Option):
+    default = {
+        'table_name': 'radgroupreply',
+    }
+    type = collections.Mapping
+
+
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS(Option):
+    default = {
+        'table_name': 'radreply',
+    }
+    type = collections.Mapping
+
+
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS(Option):
+    default = {
+        'table_name': 'radusergroup',
+    }
+    type = collections.Mapping
+
+
+class HADES_POSTGRESQL_USER_MAPPINGS(Option):
+    type = collections.Mapping
+    static_check = check.user_mapping_for_user_exists('HADES_AGENT_USER')
 
 
 class HADES_PORTAL_DOMAIN(Option):
