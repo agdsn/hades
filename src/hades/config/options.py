@@ -48,10 +48,35 @@ class HADES_AGENT_HOME(Option):
     runtime_check = check.directory_exists
 
 
+class HADES_FREERADIUS_USER(Option):
+    """User of the freeRADIUS server"""
+    default = 'freerad'
+    type = str
+    runtime_check = check.user_exists
+
+
+class HADES_FREERADIUS_GROUP(Option):
+    """User of the freeRADIUS server"""
+    default = 'freerad'
+    type = str
+    runtime_check = check.group_exists
+
+
+class HADES_POSTGRESQL_DATABASE(Option):
+    default = 'hades'
+    type = str
+
+
 class HADES_POSTGRESQL_SOCKET(Option):
     default = '/var/run/postgresql'
     type = str
     runtime_check = check.directory_exists
+
+
+class HADES_POSTGRESQL_FOREIGN_SERVER(Option):
+    type = collections.Mapping
+    static_check = check.postgresql_foreign_server
+
 
 
 class HADES_PORTAL_DOMAIN(Option):

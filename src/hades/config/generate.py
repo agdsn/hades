@@ -21,6 +21,8 @@ class ConfigGenerator(object):
             loader=jinja2.FileSystemLoader(self.template_dir),
             auto_reload=False, autoescape=False, keep_trailing_newline=True,
             undefined=jinja2.StrictUndefined,
+            extensions=['jinja2.ext.do', 'jinja2.ext.loopcontrols',
+                        'jinja2.ext.with_'],
         )
         self.env.globals.update({
             'netaddr': netaddr,
@@ -89,6 +91,10 @@ def write_nginx_config(generator, args):
     return write_directory_config(generator, "nginx", args)
 
 
+def write_postgresql_schema(generator, args):
+    return write_single_file_config(generator, "schema.sql.j2", args)
+
+
 def write_unauth_dnsmasq_config(generator, args):
     return write_single_file_config(generator, "unauth-dnsmasq.conf.j2", args)
 
@@ -105,6 +111,7 @@ commands = {
     "freeradius": write_freeradius_config,
     "iptables": write_iptables_config,
     "nginx": write_nginx_config,
+    "postgresql-schema": write_postgresql_schema,
     "unauth-dnsmasq": write_unauth_dnsmasq_config,
     "unbound": write_unbound_config,
     "uwsgi": write_uwsgi_config,

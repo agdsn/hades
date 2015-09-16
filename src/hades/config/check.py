@@ -2,6 +2,7 @@ import os
 import socket
 import grp
 import pwd
+import collections
 
 import netaddr
 from pyroute2.iproute import IPRoute
@@ -121,3 +122,26 @@ def group_exists(name, value):
         raise ConfigError(name, "Group {} does not exists".format(value))
 
 
+def has_key(name, value, *keys):
+    obj = value
+    path = []
+    for key in keys:
+        if not isinstance(obj, collections.Mapping):
+            raise ConfigError(name, "{} is not a Mapping type"
+                              .format('->'.join(path)))
+        path.append(key)
+        try:
+            obj = obj.get(key)
+        except KeyError:
+            raise ConfigError(name, "Missing key {}".format('->'.join(path)))
+
+
+def postgresql_foreign_server(config, name, value):
+    has_key(name, value, 'name')
+    has_key(name, value, 'type')
+    has_key(name, value, 'version')
+    has_key(name, value, 'fdw')
+    has_key(name, value, 'options')
+    has_key(name, value, 'user-mappings')
+    for user_name, mapping in value['user-mappings'].items():
+        has_key(name, value, 'user-mappings', user_name)
