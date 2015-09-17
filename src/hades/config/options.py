@@ -233,6 +233,11 @@ class HADES_CONTACT_ADDRESSES(Option):
     type = collections.Mapping
 
 
+class HADES_DEFAULT_GATEWAY(Option):
+    """Default gateway"""
+    type = netaddr.IPAddress
+
+
 class HADES_REGULAR_DHCP_DOMAIN(Option):
     """DNS domain returned in the DHCP replies to users in the regular VLANs"""
     default = 'users.agdsn.de'
