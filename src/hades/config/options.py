@@ -293,14 +293,17 @@ class HADES_UNAUTH_DHCP_RANGE(Option):
     static_check = check.ip_range_in_network('HADES_UNAUTH_LISTEN')
 
 
-class HADES_RADIUS_LISTEN(Option):
-    """IP and network RADIUS to listen on for RADIUS requests"""
+class HADES_MANAGEMENT_LISTEN(Option):
+    """
+    IP and network for services with restricted access.
+    The RADIUS server listens on this IP.
+    """
     type = str
     runtime_check = check.address_exists
 
 
-class HADES_RADIUS_INTERFACE(Option):
-    """Interface RADIUS requests arrive on"""
+class HADES_MANAGEMENT_INTERFACE(Option):
+    """Interface for services with restricted access."""
     type = str
     runtime_check = check.interface_exists
 

@@ -303,7 +303,7 @@ listen {
 	#	dotted quad (1.2.3.4)
 	#       hostname    (radius.example.com)
 	#       wildcard    (*)
-	ipaddr = *
+	ipaddr = {{ HADES_MANAGEMENT_LISTEN.ip }}
 
 	#  OR, you can use an IPv6 address, but not both
 	#  at the same time.
@@ -323,7 +323,7 @@ listen {
 	#  If your system does not support this feature, you will
 	#  get an error if you try to use it.
 	#
-#	interface = eth0
+	interface = {{ HADES_MANAGEMENT_INTERFACE }}
 
 	#  Per-socket lists of clients.  This is a very useful feature.
 	#
@@ -346,11 +346,11 @@ listen {
 #  port, too.
 #
 listen {
-	ipaddr = *
+	ipaddr = {{ HADES_MANAGEMENT_LISTEN.ip }}
 #	ipv6addr = ::
 	port = 0
 	type = acct
-#	interface = eth0
+	interface = {{ HADES_MANAGEMENT_INTERFACE }}
 #	clients = per_socket_clients
 }
 
