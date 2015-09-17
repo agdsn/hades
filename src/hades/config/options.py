@@ -310,7 +310,8 @@ class HADES_MANAGEMENT_INTERFACE(Option):
 
 # Flask options
 class SECRET_KEY(Option):
-    default = ''.join(random.choice(string.printable) for i in range(64))
+    default = ''.join(random.choice(string.ascii_letters + string.digits)
+                      for i in range(64))
     type = str
 
 
