@@ -1,6 +1,6 @@
 FROM debian:jessie
 MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
-ENV LANG=C.UTF-8
+ENV LANG=C.UTF-8 PGVERSION=9.4 PGCLUSTER=main
 COPY docker/etc/apt/ /etc/apt/
 
 RUN apt-get update && apt-get install \
@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install \
     nginx \
     python3-pip \
     postgresql \
-    postgresql-server-dev-9.4 \
+    postgresql-server-dev-${PGVERSION} \
     python3-babel \
     python3-celery \
     python3-dev \
@@ -36,8 +36,8 @@ RUN apt-get update && apt-get install \
     Flask-Babel \
     pyroute2 \
     && \
-    pg_dropcluster 9.4 main && \
-    pg_createcluster --locale C -e UTF-8 9.4 main
+    pg_dropcluster ${PGVERSION} ${PGCLUSTER} && \
+    pg_createcluster --locale C -e UTF-8 ${PGVERSION} ${PGCLUSTER}
 
 COPY docker/ /build/
 RUN cd /build && \

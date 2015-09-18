@@ -37,14 +37,30 @@ run_agent() {
 }
 
 run_database() {
-    PATH="/usr/lib/postgresql/9.4/bin:$PATH"
-    pg_ctl start -w -s
-    createuser freerad
-    createuser hades-agent
-    createuser hades-portal
-    createdb --owner=hades-agent hades
-    psql
-    exec postgres
+    # PostgreSQL offers no UID/GID configuration option that allows dropping
+    # root privileges after the start of PostgreSQL, one must start PostgreSQL
+    # as the postgres user.
+    # We cannot use su, because su does fork a child keeps running in the
+    # background instead of simply execing and becoming the target program,
+    # which caused very behavior with pg_ctl stop.
+    # Furthermore su would be PID 1 instead of the postgresql master process,
+    # which could potentially break some docker functionality
+    if [[ $(whoami) != postgres ]]; then
+        msg "This command must be run with the -u postgres option of docker run"
+        exit ${EX_USAGE}
+    fi
+    export PATH="/usr/lib/postgresql/${PGVERSION}/bin:${PATH}"
+    export PGDATA="/var/lib/postgresql/${PGVERSION}/${PGCLUSTER}"
+    local PGCONFIG="/etc/postgresql/${PGVERSION}/${PGCLUSTER}/postgresql.conf"
+    mkdir "/var/run/postgresql/${PGVERSION}-${PGCLUSTER}.pg_stat_tmp"
+    pg_ctl start -w -s -o "-c config_file=${PGCONFIG}"
+    createuser ${HADES_FREERADIUS_USER}
+    createuser ${HADES_AGENT_USER}
+    createuser ${HADES_PORTAL_USER}
+    createdb ${HADES_POSTGRESQL_DATABASE}
+    python3 -m hades.config.generate postgresql-schema | psql --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- ${HADES_POSTGRESQL_DATABASE}
+    pg_ctl stop -w -s -o "-c config_file=${PGCONFIG}"
+    exec postgres -c config_file=${PGCONFIG}
 }
 
 run_http() {
