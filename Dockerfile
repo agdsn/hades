@@ -40,12 +40,13 @@ RUN apt-get update && apt-get install \
     pg_dropcluster ${PGVERSION} ${PGCLUSTER} && \
     pg_createcluster --locale C -e UTF-8 ${PGVERSION} ${PGCLUSTER}
 
-COPY docker/ /build/
+COPY docker/rights.sh docker/mysql_fdw.sh /build/
 RUN cd /build && \
     /build/rights.sh && \
     /build/mysql_fdw.sh
 
-COPY src docker/* /build/
+COPY src /build/
 RUN cd /build && python3 setup.py install
 
-ENTRYPOINT ["/build/entrypoint.sh"]
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
