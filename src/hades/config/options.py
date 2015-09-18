@@ -163,7 +163,7 @@ class HADES_PORTAL_GROUP(Option):
 
 class HADES_PORTAL_HOME(Option):
     """Working directory of the captive portal application"""
-    default = '/var/lib/hades-portal'
+    default = '/var/lib/hades/portal'
     runtime_check = check.directory_exists
 
 
@@ -279,7 +279,7 @@ class HADES_UNAUTH_DHCP_LEASE_TIME(Option):
 
 
 class HADES_UNAUTH_INTERFACE(Option):
-    """Interface of attached to the unauth VLAN"""
+    """Interface attached to the unauth VLAN"""
     type = str
     runtime_check = check.interface_exists
 
@@ -303,7 +303,7 @@ class HADES_MANAGEMENT_LISTEN(Option):
     IP and network for services with restricted access.
     The RADIUS server listens on this IP.
     """
-    type = str
+    type = netaddr.IPNetwork
     runtime_check = check.address_exists
 
 
