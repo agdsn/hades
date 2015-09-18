@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install \
     python3-setuptools \
     python3-sqlalchemy \
     python3-sqlalchemy-ext \
+    supervisor \
     unbound \
     uwsgi \
     uwsgi-plugin-python3 \

@@ -12,24 +12,22 @@ print_usage() {
     msg "Usage: COMMAND"
     msg ""
     msg "Available commands"
-    msg "  agent         Execute the site node agent (Celery worker)"
-    msg "  database      Execute the database (currently PostgreSQL)"
-    msg "  help          Print this help message"
-    msg "  http          Execute the captive portal web server (currently nginx)"
-    msg "  firewall      Load the iptables rules"
-    msg "  portal        Run the captive portal WSGI application (currently"
-    msg "                using uWSGI)"
-    msg "  radius        Run the RADIUS server (currently freeRADIUS)"
-    msg "  regular-dhcp  Execute the DHCP resolver for the regular VLANs"
-    msg "                (currently dnsmasq monitored by a"
-    msg "                hades.dnsmasq.monitor.SignalProxyDaemon)"
-    msg "  regular-dns   Execute the DNS resolver for the regular VLANs"
-    msg "                (currently unbound)"
-    msg "  shell         Start a shell (bash) to debug the container"
-    msg "  unauth-dhcp   Run the DHCP server for the unauth VLAN (currently a"
-    msg "                noop and handled by dnsmasq of unauth-dns)"
-    msg "  unauth-dns    Run the DNS resolver for the unauth VLAN (currently"
-    msg "                dnsmasq)"
+    msg "  agent           Execute the site node agent (Celery worker)"
+    msg "  database        Execute the database (currently PostgreSQL)"
+    msg "  help            Print this help message"
+    msg "  http            Execute the captive portal web server (nginx)"
+    msg "  firewall        Load the iptables rules"
+    msg "  gratuitous-arp  Continously broadcast gratuitous ARP (using arping)"
+    msg "  portal          Run the captive portal WSGI application (using uWSGI)"
+    msg "  radius          Run the RADIUS server (freeRADIUS)"
+    msg "  regular-dhcp    Execute the DHCP resolver for the regular VLANs"
+    msg "                  (dnsmasq monitored by a"
+    msg "                  hades.dnsmasq.monitor.SignalProxyDaemon)"
+    msg "  regular-dns     Execute the DNS resolver for the regular VLANs (unbound)"
+    msg "  shell           Start a bash shell to debug the container"
+    msg "  unauth-dhcp     Run the DHCP server for the unauth VLAN (currently a"
+    msg "                  noop and handled by dnsmasq of unauth-dns)"
+    msg "  unauth-dns      Run the DNS resolver (dnsmasq) for the unauth VLAN"
 }
 
 run_agent() {
@@ -70,6 +68,11 @@ run_http() {
 
 run_firewall() {
     python3 -m hades.config.generate iptables | iptables-restore
+}
+
+run_gratuitous_arp() {
+    python3 -m hades.config.generate arping /etc/hades/arping.ini
+    exec supervisord -n -c /etc/hades/arping.ini
 }
 
 run_portal() {
@@ -117,7 +120,7 @@ main() {
     fi
     shift
     case "$command" in
-        agent|database|http|firewall|portal|radius|regular-dhcp|regular-dns|shell|unauth-dhcp|unauth-dns)
+        agent|database|http|firewall|gratuitous-arp|portal|radius|regular-dhcp|regular-dns|shell|unauth-dhcp|unauth-dns)
             run_${command//-/_} $@
             ;;
         help|-h|--help)

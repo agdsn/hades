@@ -79,6 +79,10 @@ def write_directory_config(generator, name, args):
     return 0
 
 
+def write_arping_config(generator, args):
+    return write_single_file_config(generator, 'arping.ini.j2', args)
+
+
 def write_freeradius_config(generator, args):
     return write_directory_config(generator, 'freeradius', args)
 
@@ -108,6 +112,7 @@ def write_uwsgi_config(generator, args):
 
 
 commands = {
+    "arping": write_arping_config,
     "freeradius": write_freeradius_config,
     "iptables": write_iptables_config,
     "nginx": write_nginx_config,
