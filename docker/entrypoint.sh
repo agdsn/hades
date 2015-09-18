@@ -63,6 +63,8 @@ run_database() {
 
 run_http() {
     python3 -m hades.config.generate nginx /etc/hades/nginx
+    ln -sf /dev/stdout /var/log/nginx/access.log
+    ln -sf /dev/stderr /var/log/nginx/error.log
     exec nginx -c /etc/hades/nginx/nginx.conf
 }
 
