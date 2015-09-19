@@ -37,22 +37,49 @@ def send_reload(config):
     return result == b'\x00'
 
 
+class SignalingError(Exception):
+    pass
+
+
 class SignalProxyClient(object):
+    """
+    Connects to SignalProxyDaemon to send signals over a Unix socket
+    """
     def __init__(self, sockfile):
+        """
+        Establishes the connection
+        :raises OSError:
+        """
         self.sockfile = sockfile
         self.conn = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.conn.connect(self.sockfile)
 
     def send_signal(self, signo, timeout=None):
+        """
+        Send a signal over the socket
+        :raises socket.timeout: if timeout is reached
+        :raises ValueError: if the server returned an invalid response
+        """
         prev_timeout = self.conn.gettimeout()
         self.conn.settimeout(timeout)
-        sent = self.conn.send(signo.to_bytes(1, sys.byteorder))
+        try:
+            sent = self.conn.send(encode(signo))
+            data = self.conn.recv(1)
+        except BrokenPipeError as e:
+            self.close()
+            raise SignalingError("Remote side closed connection") from e
+        if len(data) == 0:
+            raise SignalingError("Remote side shut down connection")
+        else:
+            try:
+                response = Response(decode(data[0]))
+            except ValueError as e:
+                raise SignalingError("Server sent invalid response") from e
         self.conn.settimeout(prev_timeout)
-        data = self.conn.recv(1)
-        return data == b'0'
+        return response
 
     def close(self):
-        self.conn.close()
+        try_close(self.conn)
 
 
 def generate_dhcp_host_reservations(hosts):
