@@ -430,6 +430,18 @@ class BROKER_URL(Option):
     type = str
 
 
+class BROKER_CONNECTION_MAX_RETRIES(Option):
+    """
+    Maximum number of retries before giving up re-establishing the
+    connection to the broker.
+
+    Set to zero to retry forever in case of longer partitions between sites
+    and the main database.
+    """
+    default = 0
+    type = int
+
+
 class CELERY_ENABLE_UTC(Option):
     default = True
     type = bool
