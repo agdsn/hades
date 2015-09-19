@@ -119,8 +119,8 @@ main() {
         command=help
     else
         command=$1
+        shift
     fi
-    shift
     case "$command" in
         agent|database|http|firewall|gratuitous-arp|portal|radius|regular-dhcp|regular-dns|shell|unauth-dhcp|unauth-dns)
             run_${command//-/_} $@
