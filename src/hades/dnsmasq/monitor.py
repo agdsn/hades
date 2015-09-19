@@ -209,11 +209,12 @@ class SignalProxyDaemon(object):
 
     def _noop_handler(self, signo, frame):
         logger.debug("Received signal %s with signal handler",
-                     signame_map.get(signo, str(signo)))
+                     signame_map.get(signo, signo))
 
     def _forkexec(self):
         if time.monotonic() - self.last_forkexec < 1:
-            logger.error("Tried to execute a child less than a second ago")
+            logger.error("Tried to execute a child less than a second ago."
+                         "Won't attempt restart.")
             raise RuntimeError("Less than a second between last fork/exec")
         self.last_forkexec = time.monotonic()
         try:
@@ -298,8 +299,8 @@ class SignalProxyDaemon(object):
         try:
             conn, addr = self.server.accept()
         except BlockingIOError:
-            logger.exception("poll() reported POLLIN on server socket,"
-                             " accept should not have blocked")
+            logger.exception("poll() reported POLLIN on server socket, accept "
+                             "should not have blocked")
             return
         conn_fd = conn.fileno()
         logger.debug("New connection on fd %d", conn_fd)
@@ -307,11 +308,13 @@ class SignalProxyDaemon(object):
         self.connections[conn_fd] = connection
         logger.info("New connection with id %d", connection.id)
         if len(self.connections) >= self.MAX_CONNECTIONS:
+            logger.info("Maximum number of parallel connections reached")
             self.poll.unregister(self.server)
 
     def handle_connection(self, fd, eventmask):
         connection = self.connections[fd]
-        logger.debug("Handling poll event from connection %d", connection.id)
+        logger.debug("Handling poll event %d from connection %d on fd %d",
+                     eventmask, connection.id, fd)
         try:
             connection.handle_poll(eventmask)
         except CloseConnection:
@@ -325,13 +328,15 @@ class SignalProxyDaemon(object):
         raw = os.read(self.sig_read_fd, 1)
         signo = int.from_bytes(raw, sys.byteorder, signed=False)
         signame = signame_map.get(signo, signo)
-        logger.info("Received signal %s with wakeup fd", signame)
+        logger.debug("Read signal %s from wakeup fd", signame)
         if signo == signal.SIGCHLD:
+            logger.critical("Received SIGCHLD signal")
             self.handle_sigchld()
         elif signo in self.SHUTDOWN_SIGNALS:
+            logger.critical("Received shutdown signal %s", signame)
             raise ShutdownDaemon(code=0)
         else:
-            logger.error("Received unknown signal %s", signame)
+            logger.error("Received unexpected signal %s", signame)
 
     def handle_sigchld(self):
         while True:
@@ -360,6 +365,7 @@ class SignalProxyDaemon(object):
     def handle_child_death(self):
         self.pid = None
         if self.restart:
+            logger.critical("Trying to restart monitored process.")
             try:
                 self._forkexec()
             except (RuntimeError, OSError):
@@ -383,6 +389,7 @@ class SignalProxyDaemon(object):
         try:
             os.kill(self.pid, signal.SIGTERM)
         except ProcessLookupError:
+            logger.error("Monitored process already cleaned up")
             return
         except PermissionError:
             logger.error("Can't stop monitored process %d (Permission denied)",
@@ -395,10 +402,13 @@ class SignalProxyDaemon(object):
                 logger.warning()
             try:
                 pid, status = os.waitpid(self.pid, os.WNOHANG)
+            except InterruptedError:
+                logger.debug("waitpid was interrupted")
             except ChildProcessError:
                 logger.warning("Someone else cleaned up %d", self.pid)
                 return
             if pid == self.pid:
+                logger.info("Monitored process terminated")
                 return
             remaining = max(time.monotonic() - endtime, 0)
             delay = min(delay * 2, remaining, .05)
@@ -407,16 +417,21 @@ class SignalProxyDaemon(object):
         try:
             os.kill(self.pid, signal.SIGKILL)
         except ProcessLookupError:
-            pass
+            logger.error("Monitored process already cleaned up")
         except PermissionError:
             logger.error("Can't stop monitored process %d (Permission denied)",
                          self.pid)
         else:
             try:
-                os.waitpid(self.pid, 0)
+                while True:
+                    try:
+                        os.waitpid(self.pid, 0)
+                    except InterruptedError:
+                        continue
+                    else:
+                        break
             except ChildProcessError:
                 pass
-        return
 
 
 class ConnectionState(enum.Enum):
@@ -491,15 +506,20 @@ class ClientConnection(object):
                 continue
             try:
                 os.kill(self.proxy.pid, signo)
-            except OSError:
+            except ProcessLookupError:
                 logger.exception("Tried sending %s", signame_map[signo])
                 self.pending_responses.append(self.RETURN_CHILD_ERROR)
-                # Try to send the responses
+            except PermissionError:
+                logger.exception("Tried sending %s", signame_map[signo])
+                self.pending_responses.append(self.RETURN_CHILD_ERROR)
+                # Try to send the responses before shutdown
                 try:
                     self.send_responses()
                 except (CloseConnection, OSError):
                     pass
                 raise ShutdownDaemon()
+            except OSError:
+                logger.exception("Unknown OSError")
             else:
                 self.pending_responses.append(self.RETURN_OK)
 
