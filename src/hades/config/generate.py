@@ -134,7 +134,12 @@ def main(args):
     config = get_config()
     template_dir = pkg_resources.resource_filename('hades.config', 'templates')
     generator = ConfigGenerator(template_dir, config)
-    return commands.get(args[1], lambda g, a: os.EX_USAGE)(generator, args)
+    command = commands.get(args[1])
+    if command is None:
+        print("Unknown config generation command {}".format(args[1]),
+              file=sys.stderr)
+        return os.EX_USAGE
+    return command(generator, args)
 
 
 if __name__ == '__main__':
