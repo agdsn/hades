@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eo pipefail
+set -euo pipefail
 mkdir -p /etc/hades /var/lib/hades /run/hades
 
 for SERVICE in agent portal; do

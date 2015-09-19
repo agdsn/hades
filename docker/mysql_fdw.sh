@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eo pipefail
+set -euo pipefail
 VERSION=2.0.1
 SHA512=4201bb82357cea6b4f8415d4f2095652c2015d3bc436978cdb8b46fdb6d2288e7fbb9e28d4bd09a8b9c48bbce396e4655454d085cb3049ad42a1889353a05238
 
