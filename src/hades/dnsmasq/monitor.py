@@ -175,6 +175,7 @@ class SignalProxyDaemon(object):
         self.executable = executable
         self.use_path = use_path
         self.env = env
+        self.pid = None
         self.last_forkexec = -1
 
         try:
@@ -192,7 +193,7 @@ class SignalProxyDaemon(object):
             self.server.listen(0)
             self.poll = select.poll()
             self.connections = {}
-            self.pid = self._forkexec()
+            self._forkexec()
             self.state = DaemonState.started
         except:
             self._restore_signals()
@@ -215,7 +216,11 @@ class SignalProxyDaemon(object):
             logger.error("Tried to execute a child less than a second ago")
             raise RuntimeError("Less than a second between last fork/exec")
         self.last_forkexec = time.monotonic()
-        pid = os.fork()
+        try:
+            pid = os.fork()
+        except OSError:
+            logger.exception("fork failed")
+            raise
         if pid == 0:
             os.chdir('/')
             devnull = os.open(os.devnull, os.O_RDONLY)
@@ -230,18 +235,22 @@ class SignalProxyDaemon(object):
                 logger.info("Executing %s as %s",
                             self.executable,
                             ' '.join(self.args))
-            if self.use_path:
-                if self.env is not None:
-                    os.execvpe(self.executable, self.args, self.env)
+            try:
+                if self.use_path:
+                    if self.env is not None:
+                        os.execvpe(self.executable, self.args, self.env)
+                    else:
+                        os.execvp(self.executable, self.args)
                 else:
-                    os.execvp(self.executable, self.args)
-            else:
-                if self.env is not None:
-                    os.execve(self.executable, self.args, self.env)
-                else:
-                    os.execv(self.executable, self.args)
+                    if self.env is not None:
+                        os.execve(self.executable, self.args, self.env)
+                    else:
+                        os.execv(self.executable, self.args)
+            except OSError:
+                logger.exception("exec failed")
+                raise
         else:
-            return pid
+            self.pid = pid
 
     def _restore_signals(self):
         for signo in self.sigset:
@@ -352,7 +361,7 @@ class SignalProxyDaemon(object):
         self.pid = None
         if self.restart:
             try:
-                self.pid = self._forkexec()
+                self._forkexec()
             except (RuntimeError, OSError):
                 raise ShutdownDaemon(code=os.EX_SOFTWARE)
         else:
