@@ -26,7 +26,7 @@ address=/dns.msftncsi.com/131.107.255.255
 address=/#/{{ HADES_UNAUTH_LISTEN.ip }}
 
 # Domain of DHCP hosts
-dhcp-range={{ netaddr.IPAddress(HADES_UNAUTH_DHCP_RANGE.first) }},{{ netaddr.IPAddress(HADES_UNAUTH_DHCP_RANGE.last) }},{{ HADES_UNAUTH_DHCP_LEASE_TIME.seconds }}
+dhcp-range={{ netaddr.IPAddress(HADES_UNAUTH_DHCP_RANGE.first) }},{{ netaddr.IPAddress(HADES_UNAUTH_DHCP_RANGE.last) }},{{ HADES_UNAUTH_DHCP_LEASE_TIME.total_seconds()|int }}
 
 # Enable authoritative DHCP mode to NAK any unknown DHCP requests
 dhcp-authoritative
