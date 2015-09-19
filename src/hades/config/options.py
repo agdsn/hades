@@ -224,7 +224,7 @@ class HADES_PORTAL_SSL_CERTIFICATE_KEY(Option):
 
 class HADES_PORTAL_UWSGI_SOCKET(Option):
     """Path to uWSGI socket of the captive portal"""
-    default = '/run/hades/portal.sock'
+    default = '/run/hades/portal/uwsgi.sock'
     type = str
     runtime_check = check.file_creatable
 
