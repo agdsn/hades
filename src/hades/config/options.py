@@ -6,6 +6,7 @@ import collections
 import netaddr
 
 from hades.config import check
+from hades.config.check import ConfigError
 
 
 class OptionMeta(type):
@@ -29,6 +30,30 @@ class Option(object, metaclass=OptionMeta):
 def equal_to(other_name):
     def f(config, name):
         return config[other_name]
+    return f
+
+
+def deferred_format(fmt_string, *args, **kwargs):
+    """
+    Evaluate a format string using values from others config options.
+
+    Names of options are given as positional arguments and the corresponding
+    values can be referred to using numbers in the format string.
+    Keywords arguments can be used as well to bind other option values to
+    specific names that are available in the format string.
+    :param fmt_string:
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    def f(config, name):
+        try:
+            fmt_args = tuple(config[a] for a in args)
+            fmt_kwargs = {k: config[v] for k, v in kwargs}
+        except KeyError as e:
+            raise ConfigError(e.args[0], "Option is missing (required by {})"
+                              .format(name)) from e
+        return fmt_string.format(*fmt_args, **fmt_kwargs)
     return f
 
 
