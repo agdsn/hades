@@ -104,7 +104,7 @@ CREATE MATERIALIZED VIEW dhcphost AS
     foreign_dhcphost.mac,
     foreign_dhcphost.ipaddress
    FROM foreign_dhcphost
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE dhcphost OWNER TO "{{ HADES_AGENT_USER }}";
@@ -246,7 +246,7 @@ CREATE MATERIALIZED VIEW nas AS
     foreign_nas.community,
     foreign_nas.description
    FROM foreign_nas
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE nas OWNER TO "{{ HADES_AGENT_USER }}";
@@ -323,7 +323,7 @@ CREATE MATERIALIZED VIEW radcheck AS
     foreign_radcheck.op,
     foreign_radcheck.value
    FROM foreign_radcheck
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE radcheck OWNER TO "{{ HADES_AGENT_USER }}";
@@ -339,7 +339,7 @@ CREATE MATERIALIZED VIEW radgroupcheck AS
     foreign_radgroupcheck.op,
     foreign_radgroupcheck.value
    FROM foreign_radgroupcheck
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE radgroupcheck OWNER TO "{{ HADES_AGENT_USER }}";
@@ -355,7 +355,7 @@ CREATE MATERIALIZED VIEW radgroupreply AS
     foreign_radgroupreply.op,
     foreign_radgroupreply.value
    FROM foreign_radgroupreply
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE radgroupreply OWNER TO "{{ HADES_AGENT_USER }}";
@@ -411,7 +411,7 @@ CREATE MATERIALIZED VIEW radreply AS
     foreign_radreply.op,
     foreign_radreply.value
    FROM foreign_radreply
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE radreply OWNER TO "{{ HADES_AGENT_USER }}";
@@ -427,7 +427,7 @@ CREATE MATERIALIZED VIEW radusergroup AS
     foreign_radusergroup.groupname,
     foreign_radusergroup.priority
    FROM foreign_radusergroup
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE radusergroup OWNER TO "{{ HADES_AGENT_USER }}";
