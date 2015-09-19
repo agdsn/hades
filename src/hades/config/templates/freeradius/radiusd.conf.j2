@@ -453,7 +453,9 @@ log {
 	#  The attribute that the value is assigned to is unimportant,
 	#  and should be a "throw-away" attribute with no side effects.
 	#
+	{%- raw %}
 	#requests = ${logdir}/radiusd-%{%{Virtual-Server}:-DEFAULT}-%Y%m%d.log
+	{%- endraw %}
 
 	#
 	#  Which syslog facility to use, if ${destination} == "syslog"
