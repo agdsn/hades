@@ -112,6 +112,15 @@ def check_config(config, runtime_checks=False):
             check_option(config, option, value, runtime_checks=runtime_checks)
 
 
+def evaluate_callables(config):
+    """Option values may be callables that are evaluated after the full config
+    has been loaded. They receive the config and the name of the option as
+    arguments"""
+    for name, value in config.items():
+        if callable(value):
+            config[name] = value(config, name)
+
+
 @memoize
 def get_config():
     config = get_defaults()
@@ -141,5 +150,6 @@ def get_config():
         logger.exception("Config file %s has errors: %s", filename, str(e))
         raise
     config.update(from_object(d))
+    evaluate_callables(config)
     check_config(config)
     return ConfigObject(config)
