@@ -447,6 +447,11 @@ class CELERY_ENABLE_UTC(Option):
     type = bool
 
 
+class CELERY_TIMEZONE(Option):
+    default = 'UTC'
+    type = str
+
+
 class CELERY_DEFAULT_QUEUE(Option):
     default = deferred_format("hades-site-{}", 'HADES_SITE_NAME')
     type = str
