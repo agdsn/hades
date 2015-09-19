@@ -395,7 +395,7 @@ class BABEL_DEFAULT_TIMEZONE(Option):
 
 # Flask-SQLAlchemy options
 class SQLALCHEMY_DATABASE_URI(Option):
-    default = 'postgresql:///hades'
+    default = deferred_format('postgresql:///{}', 'HADES_POSTGRESQL_DATABASE')
     type = str
 
 
