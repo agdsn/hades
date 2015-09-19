@@ -402,7 +402,7 @@ class SECRET_KEY(Option):
 
 class DEBUG(Option):
     """Flask debug mode flag"""
-    defaults = True
+    defaults = False
     type = bool
 
 
