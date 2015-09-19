@@ -439,16 +439,19 @@ class ConnectionState(enum.Enum):
     closed = 1
 
 
+class Response(enum.IntEnum):
+    OK = 0
+    INVALID_SIGNAL = 1
+    CHILD_ERROR = 2
+
+encode = partial(int.to_bytes, length=1, byteorder=sys.byteorder)
+decode = partial(int.from_bytes, byteorder=sys.byteorder)
+
+
 class ClientConnection(object):
-    RETURN_OK = 0
-    RETURN_INVALID = 1
-    RETURN_CHILD_ERROR = 2
     MAX_PENDING_REQUESTS = 1024
     MAX_PENDING_RESPONSES = 1024
     id = 0
-
-    encode = partial(int.to_bytes, length=1, byteorder=sys.byteorder)
-    decode = partial(int.from_bytes, byteorder=sys.byteorder)
 
     def __init__(self, proxy, conn):
         self.id = ClientConnection.id
@@ -478,7 +481,7 @@ class ClientConnection(object):
 
     def send_responses(self):
         while self.pending_responses:
-            response = self.encode(self.pending_responses.popleft())
+            response = encode(self.pending_responses.popleft())
             try:
                 sent = self.conn.send(response)
             except InterruptedError:
@@ -502,16 +505,16 @@ class ClientConnection(object):
             signo = self.pending_requests.popleft()
             if signo not in signame_map:
                 logger.warning("Client requested invalid signal %d", signo)
-                self.pending_responses.append(self.RETURN_INVALID)
+                self.pending_responses.append(Response.INVALID_SIGNAL)
                 continue
             try:
                 os.kill(self.proxy.pid, signo)
             except ProcessLookupError:
                 logger.exception("Tried sending %s", signame_map[signo])
-                self.pending_responses.append(self.RETURN_CHILD_ERROR)
+                self.pending_responses.append(Response.CHILD_ERROR)
             except PermissionError:
                 logger.exception("Tried sending %s", signame_map[signo])
-                self.pending_responses.append(self.RETURN_CHILD_ERROR)
+                self.pending_responses.append(Response.CHILD_ERROR)
                 # Try to send the responses before shutdown
                 try:
                     self.send_responses()
@@ -521,7 +524,7 @@ class ClientConnection(object):
             except OSError:
                 logger.exception("Unknown OSError")
             else:
-                self.pending_responses.append(self.RETURN_OK)
+                self.pending_responses.append(Response.OK)
 
     def receive_requests(self):
         """Read all available data from the client socket"""
