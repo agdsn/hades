@@ -384,6 +384,16 @@ class CELERY_DEFAULT_QUEUE(Option):
     type = str
 
 
+class CELERY_ACCEPT_CONTENT(Option):
+    default = ['json', 'msgpack', 'pickle', 'yaml']
+    type = collections.Sequence
+
+
+class CELERY_TASK_SERIALIZER(Option):
+    default = 'pickle'
+    type = str
+
+
 class CELERYBEAT_SCHEDULE(Option):
     default = {
         'refresh': {
