@@ -258,8 +258,8 @@ class SignalProxyDaemon(object):
             signal.signal(signo, signal.SIG_DFL)
 
     def run(self):
-        if self.state != DaemonState.started:
-            raise RuntimeError("")
+        if self.state is not DaemonState.started:
+            raise RuntimeError("Daemon must be in started state")
         logger.info("Running main event loop")
         self.poll.register(self.server, select.POLLIN)
         self.poll.register(self.sig_read_fd, select.POLLIN)
@@ -368,7 +368,7 @@ class SignalProxyDaemon(object):
             raise ShutdownDaemon(code=os.EX_SOFTWARE)
 
     def shutdown(self, timeout=5, in_finalizer=False):
-        if self.state == DaemonState.stopped:
+        if self.state is DaemonState.stopped:
             return
         logger.info("Shutting down")
         if not in_finalizer:
@@ -446,7 +446,7 @@ class ClientConnection(object):
         self.state = ConnectionState.open
 
     def handle_poll(self, eventmask):
-        if self.state != ConnectionState.open:
+        if self.state is not ConnectionState.open:
             raise RuntimeError("Connection is not open")
         if select.POLLHUP & eventmask:
             raise CloseConnection()
@@ -518,7 +518,7 @@ class ClientConnection(object):
             self.pending_requests.extend(data)
 
     def close(self):
-        if self.state == ConnectionState.closed:
+        if self.state is ConnectionState.closed:
             logger.warning("Connection already closed")
             return
         self.poll.unregister(self.conn)
