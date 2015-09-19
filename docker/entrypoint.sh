@@ -31,7 +31,7 @@ print_usage() {
 }
 
 run_agent() {
-    exec python3 -m celery.bin.worker --app=hades.agent
+    exec python3 -m celery.bin.worker --app=hades.agent --uid="${HADES_AGENT_USER}" --gid="${HADES_AGENT_GROUP}" --workdir="${HADES_AGENT_HOME}"
 }
 
 run_database() {
