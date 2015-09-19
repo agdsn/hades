@@ -63,17 +63,17 @@ def gateway_network_dict(config, name, value):
 
 
 def directory_exists(config, name, value):
-    if os.path.exists(value):
-        raise ConfigError(name, "Directory %s does not exists".format(value))
-    if os.path.isdir(value):
-        raise ConfigError(name, "%s is not a directory".format(value))
+    if not os.path.exists(value):
+        raise ConfigError(name, "Directory {} does not exists".format(value))
+    if not os.path.isdir(value):
+        raise ConfigError(name, "{} is not a directory".format(value))
 
 
 def file_exists(config, name, value):
-    if os.path.exists(value):
-        raise ConfigError(name, "File %s does not exists".format(value))
-    if os.path.isfile(value):
-        raise ConfigError(name, "%s is not a file".format(value))
+    if not os.path.exists(value):
+        raise ConfigError(name, "File {} does not exists".format(value))
+    if not os.path.isfile(value):
+        raise ConfigError(name, "{} is not a file".format(value))
 
 
 def file_creatable(config, name, value):
