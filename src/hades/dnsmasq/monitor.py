@@ -112,7 +112,7 @@ def try_close_fd(fd):
 class DaemonState(enum.Enum):
     started = 0
     running = 1
-    stopped = 2
+    shut_down = 2
 
 
 class ShutdownDaemon(Exception):
@@ -368,8 +368,12 @@ class SignalProxyDaemon(object):
             raise ShutdownDaemon(code=os.EX_SOFTWARE)
 
     def shutdown(self, timeout=5, in_finalizer=False):
-        if self.state is DaemonState.stopped:
+        if self.state is DaemonState.shut_down:
             return
+        self._do_shutdown(timeout, in_finalizer)
+        self.state = DaemonState.shut_down
+
+    def _do_shutdown(self, timeout, in_finalizer):
         logger.info("Shutting down")
         if not in_finalizer:
             self._restore_signals()
