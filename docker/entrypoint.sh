@@ -94,7 +94,7 @@ run_regular_dns() {
 
 run_regular_dhcp() {
     python3 -m hades.config.generate regular-dnsmasq /etc/hades/regular-dnsmasq.conf
-    exec python3 -m hades.dnsmasq.monitor
+    exec python3 -m hades.dnsmasq.monitor /etc/hades/regular-dnsmasq.conf
 }
 
 run_shell() {

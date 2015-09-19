@@ -99,6 +99,10 @@ def write_postgresql_schema(generator, args):
     return write_single_file_config(generator, "schema.sql.j2", args)
 
 
+def write_regular_dnsmasq_config(generator, args):
+    return write_single_file_config(generator, "regular-dnsmasq.conf.j2", args)
+
+
 def write_unauth_dnsmasq_config(generator, args):
     return write_single_file_config(generator, "unauth-dnsmasq.conf.j2", args)
 
@@ -117,6 +121,7 @@ commands = {
     "iptables": write_iptables_config,
     "nginx": write_nginx_config,
     "postgresql-schema": write_postgresql_schema,
+    "regular-dnsmasq": write_regular_dnsmasq_config,
     "unauth-dnsmasq": write_unauth_dnsmasq_config,
     "unbound": write_unbound_config,
     "uwsgi": write_uwsgi_config,

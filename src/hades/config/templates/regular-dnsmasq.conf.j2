@@ -4,6 +4,10 @@ log-facility=-
 # Disable DNS
 port=0
 
+keep-in-foreground
+user={{ HADES_REGULAR_DNSMASQ_USER }}
+group={{ HADES_REGULAR_DNSMASQ_GROUP }}
+
 interface={{ HADES_REGULAR_INTERFACE }}
 except-interface=lo
 

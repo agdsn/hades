@@ -26,6 +26,12 @@ class Option(object, metaclass=OptionMeta):
     static_check = None
 
 
+def equal_to(other_name):
+    def f(config, name):
+        return config[other_name]
+    return f
+
+
 # Hades options
 class HADES_AGENT_USER(Option):
     """User of the site node agent"""
@@ -200,16 +206,37 @@ class HADES_PORTAL_UWSGI_WORKERS(Option):
     static_check = check.greater_than(0)
 
 
-class HADES_REGULAR_DNSMASQ_DHCP_HOSTS_FILE(Option):
+class HADES_REGULAR_DNSMASQ_USER(Option):
+    """User of the regular dnsmasq instance and the SignalProxyDaemon"""
+    default = equal_to('HADES_AGENT_USER')
+    type = str
+    runtime_check = check.user_exists
+
+
+class HADES_REGULAR_DNSMASQ_GROUP(Option):
+    """Group of the regular dnsmasq instance and the SignalProxyDaemon"""
+    default = equal_to('HADES_AGENT_GROUP')
+    type = str
+    runtime_check = check.group_exists
+
+
+class HADES_REGULAR_DNSMASQ_HOSTS_FILE(Option):
     """Path to the DHCP hosts file of the regular dnsmasq instance."""
-    default = "/var/lib/hades/agent/dnsmasq-regular.hosts"
+    default = "/var/lib/hades/agent/regular-dnsmasq.hosts"
     type = str
     runtime_check = check.file_creatable
 
 
-class HADES_REGULAR_DNSMASQ_DHCP_LEASE_FILE(Option):
+class HADES_REGULAR_DNSMASQ_LEASE_FILE(Option):
     """Path to the DHCP lease file of the regular dnsmasq instance."""
-    default = "/var/lib/hades/agent/dnsmasq-regular.leases"
+    default = "/var/lib/hades/agent/regular-dnsmasq.leases"
+    type = str
+    runtime_check = check.file_creatable
+
+
+class HADES_REGULAR_DNSMASQ_SIGNAL_SOCKET(Option):
+    """Path to the Unix socket of the SignalProxyDaemon"""
+    default = '/run/hades/agent/regular-dnsmasq.sock'
     type = str
     runtime_check = check.file_creatable
 

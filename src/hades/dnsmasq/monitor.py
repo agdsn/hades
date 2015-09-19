@@ -13,26 +13,9 @@ import time
 
 import netaddr
 
-from hades.config.loader import get_config
-
+from hades.config.loader import get_config, CheckWrapper
 
 logger = logging.getLogger(__name__)
-
-
-def get_passwd_entry(user):
-    try:
-        return pwd.getpwnam(user)
-    except KeyError:
-        logger.fatal("No such user: %s", user)
-        sys.exit(os.EX_NOUSER)
-
-
-def get_group_entry(group):
-    try:
-        return grp.getgrnam(group)
-    except KeyError:
-        logger.fatal("No such group: %s", group)
-        sys.exit(os.EX_NOUSER)
 
 
 def drop_privileges(passwd, group):
@@ -88,20 +71,21 @@ def generate_dhcp_host_reservations(hosts):
 
 
 def main():
-    config = get_config()
-    passwd = get_passwd_entry(config['HADES_REGULAR_DNSMASQ_USER'])
-    group = get_group_entry(config['HADES_REGULAR_DNSMASQ_GROUP'])
-    sockfile = config['HADES_REGULAR_DNSMASQ_MONITOR_SOCKET']
-    args = (
-        'dnsmasq',
-        '--keep-in-foreground',
-        '--user=' + config['HADES_REGULAR_DNSMASQ_USER'],
-        '--group=' + config['HADES_REGULAR_DNSMASQ_GROUP'],
-        '--conf-file=' + config['HADES_REGULAR_DNSMASQ_CONFIG_FILE'],
-        '--dhcp-leasefile=' + config['HADES_REGULAR_DNSMASQ_DHCP_LEASE_FILE'],
-        '--dhcp-hostsfile=' + config['HADES_REGULAR_DNSMASQ_DHCP_HOSTS_FILE'],
-    )
-    monitor = SignalProxyDaemon(sockfile, args)
+    if len(sys.argv) < 2:
+        print("No config file specified")
+        sys.exit(os.EX_USAGE)
+    logger.info("dnsmasq monitor")
+    conf_file = sys.argv[1]
+    config = CheckWrapper(get_config())
+    passwd = pwd.getpwnam(config['HADES_REGULAR_DNSMASQ_USER'])
+    group = grp.getgrnam(config['HADES_REGULAR_DNSMASQ_GROUP'])
+    sockfile = config['HADES_REGULAR_DNSMASQ_SIGNAL_SOCKET']
+    hosts_file = config['HADES_REGULAR_DNSMASQ_HOSTS_FILE']
+    if not os.path.exists(hosts_file):
+        with open(hosts_file, mode='w'):
+            pass
+    args = ('dnsmasq', '--conf-file=' + conf_file)
+    monitor = SignalProxyDaemon(sockfile, args, restart=True)
     os.chown(sockfile, passwd.pw_uid, group.gr_gid)
     drop_privileges(passwd, group)
     sys.exit(monitor.run())
