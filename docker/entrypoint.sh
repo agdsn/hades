@@ -70,6 +70,7 @@ run_http() {
 
 run_firewall() {
     python3 -m hades.config.generate iptables | iptables-restore
+    exit ${EX_OK}
 }
 
 run_gratuitous_arp() {
