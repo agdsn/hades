@@ -57,6 +57,11 @@ def deferred_format(fmt_string, *args, **kwargs):
     return f
 
 
+class HADES_SITE_NAME(Option):
+    """Name of the site"""
+    type = str
+
+
 # Hades options
 class HADES_AGENT_USER(Option):
     """User of the site node agent"""
@@ -405,7 +410,7 @@ class CELERY_ENABLE_UTC(Option):
 
 
 class CELERY_DEFAULT_QUEUE(Option):
-    default = "hades-agent-test"
+    default = deferred_format("hades-site-{}", 'HADES_SITE_NAME')
     type = str
 
 
