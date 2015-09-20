@@ -47,10 +47,10 @@ run_database() {
         msg "This command must be run with the -u postgres option of docker run"
         exit ${EX_USAGE}
     fi
-    export PATH="/usr/lib/postgresql/${PGVERSION}/bin:${PATH}"
-    export PGDATA="/var/lib/postgresql/${PGVERSION}/${PGCLUSTER}"
-    local PGCONFIG="/etc/postgresql/${PGVERSION}/${PGCLUSTER}/postgresql.conf"
-    mkdir "/var/run/postgresql/${PGVERSION}-${PGCLUSTER}.pg_stat_tmp"
+    export PATH="/usr/lib/postgresql/${PG_VERSION}/bin:${PATH}"
+    export PGDATA="/var/lib/postgresql/${PG_VERSION}/${PG_CLUSTER}"
+    local PGCONFIG="/etc/postgresql/${PG_VERSION}/${PG_CLUSTER}/postgresql.conf"
+    mkdir "/var/run/postgresql/${PG_VERSION}-${PG_CLUSTER}.pg_stat_tmp"
     pg_ctl start -w -s -o "-c config_file=${PGCONFIG}"
     createuser ${HADES_FREERADIUS_USER}
     createuser ${HADES_AGENT_USER}
