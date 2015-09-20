@@ -32,8 +32,7 @@ RUN apt-get update && apt-get install \
     uwsgi \
     uwsgi-plugin-python3 \
     curl \
-    gcc \
-    make \
+    build-essential \
     unzip \
     && \
     apt-get clean && \
