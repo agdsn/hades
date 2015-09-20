@@ -325,22 +325,26 @@ class HADES_REGULAR_DHCP_LEASE_TIME(Option):
     static_check = check.greater_than(timedelta(0))
 
 
-class HADES_REGULAR_LISTEN(Option):
-    """IP and network to listen on for requests from the regular VLANs"""
+class HADES_AUTH_LISTEN(Option):
+    """IP and network to listen on for requests from authenticated users"""
     default = netaddr.IPNetwork('10.66.67.1/24')
     static_check = check.address_exists
 
 
-class HADES_REGULAR_INTERFACE(Option):
-    """Interface where requests from the regular VLANs arrive. Interface must
-    not be attached directly to an regular VLAN."""
+class HADES_AUTH_INTERFACE(Option):
+    """Interface where requests from the authenticated users arrive. Interface
+    must not be attached directly to the users networks."""
     type = str
     runtime_check = check.interface_exists
 
 
-class HADES_REGULAR_NETWORKS(Option):
-    """Dictionary of networks. Keys are unique identifiers of the network,
-    values are netaddr.IPNetworks objects"""
+class HADES_USER_NETWORKS(Option):
+    """
+    Public networks of authenticated users.
+
+    Dictionary of networks. Keys are unique identifiers of the network,
+    values are netaddr.IPNetworks objects
+    """
     type = collections.Mapping
     static_check = check.gateway_network_dict
 
