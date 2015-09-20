@@ -9,6 +9,8 @@ server:
     {%- endfor %}
     auto-trust-anchor-file: "/var/lib/unbound/root.key"
     root-hints: /usr/share/dns/root.hints
+    # Log to stderr
+    logfile: ""
     outgoing-num-tcp: 100
     incoming-num-tcp: 100
 
