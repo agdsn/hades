@@ -478,3 +478,7 @@ class CELERYBEAT_SCHEDULE(Option):
             'schedule': timedelta(hours=1),
         },
     }
+
+
+class CELERYBEAT_SCHEDULE_FILENAME(Option):
+    default = '/var/lib/hades/agent/celerybeat-schedule'
