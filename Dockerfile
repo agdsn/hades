@@ -8,6 +8,7 @@ COPY docker/etc/apt/ /etc/apt/
 
 RUN apt-get update && apt-get install \
     arping \
+    dns-root-data \
     dnsmasq \
     freeradius \
     freeradius-postgresql \
