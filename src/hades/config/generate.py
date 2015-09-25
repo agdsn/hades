@@ -61,7 +61,7 @@ class ConfigGenerator(object):
         output.writelines(stream)
 
 
-def write_single_file_config(generator, name, args):
+def write_single_file_config(name, generator, args):
     if len(args) < 3:
         generator.from_file(name, sys.stdout)
     else:
@@ -71,7 +71,7 @@ def write_single_file_config(generator, name, args):
     return 0
 
 
-def write_directory_config(generator, name, args):
+def write_directory_config(name, generator, args):
     if len(args) < 3:
         return os.EX_USAGE
     target_dir = args[2]
@@ -79,52 +79,18 @@ def write_directory_config(generator, name, args):
     return 0
 
 
-def write_arping_config(generator, args):
-    return write_single_file_config(generator, 'arping.ini.j2', args)
-
-
-def write_freeradius_config(generator, args):
-    return write_directory_config(generator, 'freeradius', args)
-
-
-def write_iptables_config(generator, args):
-    return write_single_file_config(generator, "iptables.j2", args)
-
-
-def write_nginx_config(generator, args):
-    return write_directory_config(generator, "nginx", args)
-
-
-def write_postgresql_schema(generator, args):
-    return write_single_file_config(generator, "schema.sql.j2", args)
-
-
-def write_regular_dnsmasq_config(generator, args):
-    return write_single_file_config(generator, "regular-dnsmasq.conf.j2", args)
-
-
-def write_unauth_dnsmasq_config(generator, args):
-    return write_single_file_config(generator, "unauth-dnsmasq.conf.j2", args)
-
-
-def write_unbound_config(generator, args):
-    return write_single_file_config(generator, "unbound.conf.j2", args)
-
-
-def write_uwsgi_config(generator, args):
-    return write_single_file_config(generator, "uwsgi.ini.j2", args)
-
-
 commands = {
-    "arping": write_arping_config,
-    "freeradius": write_freeradius_config,
-    "iptables": write_iptables_config,
-    "nginx": write_nginx_config,
-    "postgresql-schema": write_postgresql_schema,
-    "regular-dnsmasq": write_regular_dnsmasq_config,
-    "unauth-dnsmasq": write_unauth_dnsmasq_config,
-    "unbound": write_unbound_config,
-    "uwsgi": write_uwsgi_config,
+    'arping': partial(write_single_file_config, 'arping.ini.j2'),
+    'freeradius': partial(write_directory_config,'freeradius'),
+    'iptables': partial(write_single_file_config, "iptables.j2"),
+    'nginx': partial(write_directory_config, 'nginx'),
+    'postgresql-schema': partial(write_single_file_config, 'schema.sql.j2'),
+    'regular-dnsmasq': partial(write_single_file_config,
+                               'regular-dnsmasq.conf.j2'),
+    'unauth-dnsmasq': partial(write_single_file_config,
+                              'unauth-dnsmasq.conf.j2'),
+    'unbound': partial(write_single_file_config, 'unbound.conf.j2'),
+    'uwsgi': partial(write_single_file_config, 'uwsgi.ini.j2'),
 }
 
 
