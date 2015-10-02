@@ -68,6 +68,7 @@ class ConfigGenerator(object):
                         'jinja2.ext.with_'],
         )
         self.env.globals.update({
+            'collections': collections,
             'netaddr': netaddr,
         })
         self.env.filters.update(template_filter.registered)
