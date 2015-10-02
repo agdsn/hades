@@ -114,8 +114,7 @@ run_unauth_dns() {
 }
 
 main() {
-    python3 -m hades.config.export > ~/env.sh
-    source ~/env.sh
+    source <(python3 -m hades.config.export)
     if [[ $# -lt 1 ]]; then
         command=help
     else
