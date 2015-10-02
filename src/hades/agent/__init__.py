@@ -2,7 +2,8 @@ from celery import Celery
 from datetime import timedelta
 import logging
 from sqlalchemy import select, and_
-from ..db import get_connection, radacct, radpostauth, utcnow
+
+from hades.common.db import (get_connection, radacct, radpostauth, utcnow)
 from hades.config.loader import get_config
 
 logger = logging.getLogger(__name__)
