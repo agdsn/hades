@@ -27,9 +27,21 @@ class Option(object, metaclass=OptionMeta):
     static_check = None
 
 
-def equal_to(other_name):
+def equal_to(other):
+    if isinstance(other, type) and issubclass(other, Option):
+        other_name = other.__name__
+    elif isinstance(other, str):
+        other_name = other
+    else:
+        raise TypeError("Expected Option subclass or str")
+
     def f(config, name):
-        return config[other_name]
+        try:
+            return config[other_name]
+        except KeyError:
+            raise ConfigError(name, "Can not set equal to option {}, option is"
+                                    " not defined"
+                              .format(other_name))
     return f
 
 
@@ -255,14 +267,14 @@ class HADES_PORTAL_UWSGI_WORKERS(Option):
 
 class HADES_REGULAR_DNSMASQ_USER(Option):
     """User of the regular dnsmasq instance and the SignalProxyDaemon"""
-    default = equal_to('HADES_AGENT_USER')
+    default = equal_to(HADES_AGENT_USER)
     type = str
     runtime_check = check.user_exists
 
 
 class HADES_REGULAR_DNSMASQ_GROUP(Option):
     """Group of the regular dnsmasq instance and the SignalProxyDaemon"""
-    default = equal_to('HADES_AGENT_GROUP')
+    default = equal_to(HADES_AGENT_GROUP)
     type = str
     runtime_check = check.group_exists
 
