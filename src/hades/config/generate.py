@@ -11,6 +11,49 @@ import pkg_resources
 from hades.config.loader import get_config
 
 
+def template_filter(name):
+    def decorator(f):
+        template_filter.registered[name] = f
+        return f
+    return decorator
+template_filter.registered = dict()
+
+
+@template_filter('unique')
+def do_unique(a):
+    return set(a)
+
+
+@template_filter('intersection')
+def do_intersection(a, b):
+    return set(a).intersection(set(b))
+
+
+@template_filter('difference')
+def do_difference(a, b):
+    return set(a).difference(set(b))
+
+
+@template_filter('symmetric_difference')
+def do_symmetric_difference(a, b):
+    return set(a).symmetric_difference(set(b))
+
+
+@template_filter('union')
+def do_union(a, b):
+    return set(a).union(set(b))
+
+
+@template_filter('min')
+def do_min(a):
+    return min(a)
+
+
+@template_filter('max')
+def do_max(a):
+    return max(a)
+
+
 class ConfigGenerator(object):
     TEMPLATE_SUFFIX = ".j2"
 
@@ -27,6 +70,7 @@ class ConfigGenerator(object):
         self.env.globals.update({
             'netaddr': netaddr,
         })
+        self.env.filters.update(template_filter.registered)
 
     def from_directory(self, name, target_dir):
         source_base = os.path.join(self.template_dir, name)
