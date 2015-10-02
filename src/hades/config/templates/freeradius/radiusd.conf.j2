@@ -313,7 +313,7 @@ listen {
 	#  Allowed values are:
 	#	integer port number (1812)
 	#	0 means "use /etc/services for the proper port"
-	port = 0
+	port = {{ HADES_RADIUS_AUTHENTICATION_PORT }}
 
 	#  Some systems support binding to an interface, in addition
 	#  to the IP address.  This feature isn't strictly necessary,
@@ -348,7 +348,7 @@ listen {
 listen {
 	ipaddr = {{ HADES_RADIUS_LISTEN.ip }}
 #	ipv6addr = ::
-	port = 0
+	port = {{ HADES_RADIUS_ACCOUNTING_PORT }}
 	type = acct
 	interface = {{ HADES_RADIUS_INTERFACE }}
 #	clients = per_socket_clients

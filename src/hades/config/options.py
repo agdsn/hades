@@ -388,6 +388,18 @@ class HADES_RADIUS_INTERFACE(Option):
     runtime_check = check.interface_exists
 
 
+class HADES_RADIUS_AUTHENTICATION_PORT(Option):
+    """RADIUS authentication port"""
+    type = int
+    default = 1812
+
+
+class HADES_RADIUS_ACCOUNTING_PORT(Option):
+    """RADIUS accounting port"""
+    type = int
+    default = 1813
+
+
 # Flask options
 class SECRET_KEY(Option):
     """
