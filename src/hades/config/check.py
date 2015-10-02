@@ -40,6 +40,14 @@ def greater_than(threshold):
     return checker
 
 
+def between(low, high):
+    def checker(config, name, value):
+        if not (low <= value <= high):
+            raise ConfigError(name, "Must be between {} and {} inclusively"
+                              .format(low, high))
+    return checker
+
+
 def gateway_network_dict(config, name, value):
     if not value:
         raise ConfigError(name, "No networks specified")
