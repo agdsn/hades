@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install \
     dnsmasq \
     freeradius \
     freeradius-postgresql \
+    iptables \
     libmysqlclient-dev \
     nginx \
     python3-pip \
