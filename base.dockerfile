@@ -49,8 +49,5 @@ RUN cd /build && \
     /build/rights.sh && \
     /build/mysql_fdw.sh
 
-COPY src /build/
-RUN cd /build && python3 setup.py install && python3 setup.py clean
-
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
