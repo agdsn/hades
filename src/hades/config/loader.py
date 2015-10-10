@@ -1,9 +1,9 @@
+import collections
 import logging
 import os
 import types
 
-import collections
-import functools
+from hades.common.util import memoize
 from hades.config.check import check_option
 from hades.config.options import OptionMeta
 
@@ -86,18 +86,6 @@ class CheckWrapper(collections.Mapping):
 
     def items(self):
         return self._config.items()
-
-
-def memoize(f):
-    f._cache = None
-
-    @functools.wraps(f)
-    def wrapper():
-        if f._cache is None:
-            f._cache = f()
-        return f._cache
-
-    return wrapper
 
 
 def get_defaults():
