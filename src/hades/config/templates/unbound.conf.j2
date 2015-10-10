@@ -3,6 +3,7 @@ server:
     username: unbound
     do-daemonize: no
     pidfile: "/run/unbound.pid"
+    interface: 127.0.0.1
     interface: {{ HADES_AUTH_LISTEN.ip }}
     {%- for name, network in HADES_USER_NETWORKS.items() %}
     access-control: {{ network }} allow
