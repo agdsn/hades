@@ -123,7 +123,7 @@ main() {
     fi
     case "$command" in
         agent|database|http|firewall|gratuitous-arp|portal|radius|regular-dhcp|regular-dns|shell|unauth-dhcp|unauth-dns)
-            run_${command//-/_} $@
+            run_${command//-/_} "$@"
             ;;
         help|-h|--help)
             print_usage
@@ -137,4 +137,4 @@ main() {
     esac
 }
 
-main $@
+main "$@"
