@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install \
     freeradius \
     freeradius-postgresql \
     iptables \
+    keepalived \
     libmysqlclient-dev \
     nginx \
     python3-pip \

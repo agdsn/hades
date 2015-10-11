@@ -1,0 +1,73 @@
+global_defs {
+    notification_email {
+        root@agdsn
+    }
+    notification_email_from {{ HADES_SITE_NODE_ID }}@agdsn
+    router_id {{ HADES_SITE_NAME }}
+}
+
+static_ipaddress {
+    {{ HADES_VRRP_LISTEN }} dev {{ HADES_VRRP_INTERFACE }}
+}
+
+vrrp_script db_ready {
+    script "true"
+    interval 5
+}
+
+vrrp_instance unauth {
+    {%- if HADES_MASTER %}
+    state MASTER
+    {%- else %}
+    state BACKUP
+    {%- endif %}
+    preempt_delay {{ HADES_VRRP_PREEMPTION_DELAY.total_seconds()|int }}
+
+    interface {{ HADES_VRRP_INTERFACE }}
+    track_interface {
+        {%- for interface in [HADES_UNAUTH_INTERFACE, HADES_AUTH_INTERFACE, HADES_RADIUS_INTERFACE]|difference([HADES_VRRP_INTERFACE]) %}
+        {{ interface }}
+        {%- endfor %}
+    }
+    track_script {
+        db_ready
+    }
+
+    mcast_src_ip {{ HADES_VRRP_LISTEN.ip }}
+
+    garp_master_refresh {{ HADES_GRATUITOUS_ARP_INTERVAL.total_seconds()|int }}
+    garp_master_refresh_repeat 1
+
+    virtual_router_id {{ HADES_VRRP_VIRTUAL_ROUTER_ID }}
+    advert_int {{ HADES_VRRP_ADVERTISEMENT_INTERVAL.total_seconds()|int }}
+
+    notify_master "/usr/bin/env python3 -m hades.vrrp.notify"
+
+    {%- if HADES_MASTER %}
+    priority 150
+    {%- else %}
+    priority 100
+    {%- endif %}
+
+    authentication {
+        auth_type PASS
+        auth_pass {{ HADES_VRRP_PASSWORD }}
+    }
+
+    virtual_ipaddress {
+        {{ HADES_AUTH_LISTEN   }} dev {{ HADES_AUTH_INTERFACE   }}
+        {{ HADES_UNAUTH_LISTEN }} dev {{ HADES_UNAUTH_INTERFACE }}
+        {{ HADES_RADIUS_LISTEN }} dev {{ HADES_RADIUS_INTERFACE }}
+        {%- for network in HADES_USER_NETWORKS.values() %}
+        {{ network }} dev {{ HADES_UNAUTH_INTERFACE }}
+        {%- endfor %}
+    }
+
+    virtual_routes {
+        # Unauth interface routes
+        src {{ HADES_UNAUTH_LISTEN.ip }} to {{ HADES_UNAUTH_LISTEN.cidr }} dev {{ HADES_UNAUTH_INTERFACE }} scope link table {{ HADES_UNAUTH_ROUTING_TABLE }}
+        {%- for network in HADES_USER_NETWORKS.values() %}
+        src {{ network.ip }} to {{ network.cidr }} dev {{ HADES_UNAUTH_INTERFACE }} scope link table {{ HADES_UNAUTH_ROUTING_TABLE }}
+        {%- endfor %}
+    }
+}

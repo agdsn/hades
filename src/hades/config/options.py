@@ -496,6 +496,71 @@ class HADES_RADIUS_ACCOUNTING_PORT(Option):
     default = 1813
 
 
+class HADES_GRATUITOUS_ARP_INTERVAL(Option):
+    """
+    Period in which gratuitous ARP requests are broadcasted to notify
+    a) clients of the MAC address of current master site node instance
+    b) clients switching from the auth to the unauth VLAN of the new gateway MAC
+    """
+    type = timedelta
+    default = timedelta(seconds=1)
+
+
+################
+# VRRP options #
+################
+
+
+class HADES_MASTER(Option):
+    """Flag that indicates if a site node instance is the default master"""
+    type = bool
+    default = False
+
+
+class HADES_VRRP_INTERFACE(Option):
+    """Interface for VRRP communication"""
+    type = str
+    runtime_check = check.interface_exists
+
+
+class HADES_VRRP_LISTEN(Option):
+    """IP and network for VRRP communication"""
+    type = netaddr.IPNetwork
+    static_check = check.network_ip
+    runtime_check = check.address_exists
+
+
+class HADES_VRRP_PASSWORD(Option):
+    """
+    Shared secret to authenticate VRRP messages between site node instances.
+    """
+    type = str
+
+
+class HADES_VRRP_VIRTUAL_ROUTER_ID(Option):
+    """Virtual router ID used by Hades"""
+    type = int
+    default = 66
+    static_check = check.between(0, 255)
+
+
+class HADES_VRRP_ADVERTISEMENT_INTERVAL(Option):
+    """Interval between VRRP advertisements"""
+    type = timedelta
+    default = timedelta(seconds=5)
+    static_check = check.greater_than(timedelta(0))
+
+
+class HADES_VRRP_PREEMPTION_DELAY(Option):
+    """
+    Delay before a MASTER transitions to BACKUP when a node with a higher
+    priority comes online
+    """
+    type = timedelta
+    default = timedelta(seconds=30)
+    static_check = check.between(timedelta(seconds=0), timedelta(seconds=1000))
+
+
 ################
 # Test options #
 ################

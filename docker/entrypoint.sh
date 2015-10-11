@@ -26,6 +26,7 @@ print_usage() {
     msg "  unauth-dhcp  Run the DHCP server for the unauthenticated users"
     msg "               (no-op and handled by the unauth-dns dnsmasq)"
     msg "  unauth-dns   Run the DNS resolver (dnsmasq) for the unauth VLAN"
+    msg "  vrrp         Run the VRRP daemon (keepalived)"
 }
 
 run_agent() {
@@ -118,6 +119,11 @@ run_unauth_dns() {
     exec dnsmasq -k -C /etc/hades/unauth-dnsmasq.conf
 }
 
+run_vrrp() {
+    python3 -m hades.config.generate keepalived /etc/hades/keepalived.conf
+    exec keepalived --log-console --dont-fork --vrrp --use-file=/etc/hades/keepalived.conf
+}
+
 main() {
     source <(python3 -m hades.config.export)
     if [[ $# -lt 1 ]]; then
@@ -127,7 +133,7 @@ main() {
         shift
     fi
     case "$command" in
-        agent|auth-dhcp|auth-dns|database|http|networking|portal|radius|shell|unauth-dhcp|unauth-dns)
+        agent|auth-dhcp|auth-dns|database|http|networking|portal|radius|shell|unauth-dhcp|unauth-dns|vrrp)
             run_${command//-/_} "$@"
             ;;
         help|-h|--help)

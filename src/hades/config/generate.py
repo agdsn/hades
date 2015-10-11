@@ -128,6 +128,7 @@ commands = {
     'auth-dnsmasq': partial(write_single_file_config, 'auth-dnsmasq.conf.j2'),
     'freeradius': partial(write_directory_config,'freeradius'),
     'iptables': partial(write_single_file_config, "iptables.j2"),
+    'keepalived': partial(write_single_file_config, 'keepalived.conf.j2'),
     'nginx': partial(write_directory_config, 'nginx'),
     'postgresql-schema': partial(write_single_file_config, 'schema.sql.j2'),
     'unauth-dnsmasq': partial(write_single_file_config,
