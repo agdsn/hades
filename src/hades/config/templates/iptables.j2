@@ -3,22 +3,45 @@
 :INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
--A PREROUTING -i {{ HADES_UNAUTH_INTERFACE }} -p udp -m udp --dport 53 -j DNAT --to-destination {{ HADES_UNAUTH_LISTEN.ip }}
--A PREROUTING -i {{ HADES_UNAUTH_INTERFACE }} -p tcp -m tcp --dport 80 -j DNAT --to-destination {{ HADES_UNAUTH_LISTEN.ip }}
--A PREROUTING -i {{ HADES_UNAUTH_INTERFACE }} -p tcp -m tcp --dport 443 -j DNAT --to-destination {{ HADES_UNAUTH_LISTEN.ip }}
+{%- for port in HADES_UNAUTH_CAPTURED_TCP_PORTS %}
+-A PREROUTING -i {{ HADES_UNAUTH_INTERFACE }} -p tcp -m tcp --dport {{ port }} -j DNAT --to-destination {{ HADES_UNAUTH_LISTEN.ip }}
+{%- endfor %}
+{%- for port in HADES_UNAUTH_CAPTURED_UDP_PORTS %}
+-A PREROUTING -i {{ HADES_UNAUTH_INTERFACE }} -p udp -m udp --dport {{ port }} -j DNAT --to-destination {{ HADES_UNAUTH_LISTEN.ip }}
+{%- endfor %}
 COMMIT
 *filter
 :INPUT ACCEPT [0:0]
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
-:unauth - [0:0]
 -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED,SNAT,DNAT -j ACCEPT
--A INPUT -i {{ HADES_UNAUTH_INTERFACE }} -p icmp -j ACCEPT
--A INPUT -i {{ HADES_UNAUTH_INTERFACE }} -p udp -m udp --dport 53 -j ACCEPT
--A INPUT -i {{ HADES_UNAUTH_INTERFACE }} -p udp -m udp --dport 67 -j ACCEPT
--A INPUT -i {{ HADES_UNAUTH_INTERFACE }} -p tcp -m tcp --dport 80 -j ACCEPT
--A INPUT -i {{ HADES_UNAUTH_INTERFACE }} -p tcp -m tcp --dport 443 -j ACCEPT
--A INPUT -i {{ HADES_UNAUTH_INTERFACE }} -p tcp -m tcp -j REJECT --reject-with tcp-reset
--A INPUT -i {{ HADES_UNAUTH_INTERFACE }} -j REJECT --reject-with icmp-admin-prohibited
+-A INPUT -i lo -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i {{ HADES_RADIUS_INTERFACE }} -p udp -m udp --dport {{ HADES_RADIUS_AUTHENTICATION_PORT }}
+-A INPUT -i {{ HADES_RADIUS_INTERFACE }} -p udp -m udp --dport {{ HADES_RADIUS_ACCOUNTING_PORT     }}
+{%- for port in HADES_AUTH_ALLOWED_TCP_PORTS %}
+-A INPUT -i {{ HADES_AUTH_INTERFACE }} -p tcp -m tcp --dport {{ port }} -j ACCEPT
+{%- endfor %}
+{%- for port in HADES_AUTH_ALLOWED_UDP_PORTS %}
+-A INPUT -i {{ HADES_AUTH_INTERFACE }} -p udp -m udp --dport {{ port }} -j ACCEPT
+{%- endfor %}
+{%- for port in HADES_UNAUTH_ALLOWED_TCP_PORTS %}
+-A INPUT -i {{ HADES_UNAUTH_INTERFACE }} -p tcp -m tcp --dport {{ port }} -j ACCEPT
+{%- endfor %}
+{%- for port in HADES_UNAUTH_ALLOWED_UDP_PORTS %}
+-A INPUT -i {{ HADES_UNAUTH_INTERFACE }} -p udp -m udp --dport {{ port }} -j ACCEPT
+{%- endfor %}
+-A INPUT -p tcp -m tcp -j REJECT --reject-with tcp-reset
+-A INPUT -j REJECT --reject-with icmp-admin-prohibited
 -A FORWARD -j REJECT --reject-with icmp-admin-prohibited
+COMMIT
+*mangle
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+-A PREROUTING -i !{{ HADES_UNAUTH_INTERFACE }} -m conntrack --ctstate NEW,RELATED -j CONNMARK --set-mark {{ HADES_AUTH_FWMARK   }}
+-A PREROUTING -i  {{ HADES_UNAUTH_INTERFACE }} -m conntrack --ctstate NEW,RELATED -j CONNMARK --set-mark {{ HADES_UNAUTH_FWMARK }}
+-A PREROUTING -j CONNMARK --restore-mark
 COMMIT
