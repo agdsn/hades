@@ -50,7 +50,7 @@ run_database() {
     export PATH="/usr/lib/postgresql/${PG_VERSION}/bin:${PATH}"
     export PGDATA="/var/lib/postgresql/${PG_VERSION}/${PG_CLUSTER}"
     local PGCONFIG="/etc/postgresql/${PG_VERSION}/${PG_CLUSTER}/postgresql.conf"
-    mkdir "/var/run/postgresql/${PG_VERSION}-${PG_CLUSTER}.pg_stat_tmp"
+    mkdir -p "/var/run/postgresql/${PG_VERSION}-${PG_CLUSTER}.pg_stat_tmp"
     pg_ctl start -w -s -o "-c config_file=${PGCONFIG}"
     createuser ${HADES_FREERADIUS_USER}
     createuser ${HADES_AGENT_USER}
