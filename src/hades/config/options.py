@@ -101,15 +101,15 @@ class HADES_AGENT_HOME(Option):
     runtime_check = check.directory_exists
 
 
-class HADES_FREERADIUS_USER(Option):
+class HADES_RADIUS_USER(Option):
     """User of the freeRADIUS server"""
     default = 'freerad'
     type = str
     runtime_check = check.user_exists
 
 
-class HADES_FREERADIUS_GROUP(Option):
-    """User of the freeRADIUS server"""
+class HADES_RADIUS_GROUP(Option):
+    """Group of the freeRADIUS server"""
     default = 'freerad'
     type = str
     runtime_check = check.group_exists

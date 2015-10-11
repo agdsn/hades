@@ -52,7 +52,7 @@ run_database() {
     local PGCONFIG="/etc/postgresql/${PG_VERSION}/${PG_CLUSTER}/postgresql.conf"
     mkdir -p "/var/run/postgresql/${PG_VERSION}-${PG_CLUSTER}.pg_stat_tmp"
     pg_ctl start -w -s -o "-c config_file=${PGCONFIG}"
-    createuser ${HADES_FREERADIUS_USER}
+    createuser ${HADES_RADIUS_USER}
     createuser ${HADES_AGENT_USER}
     createuser ${HADES_PORTAL_USER}
     createdb ${HADES_POSTGRESQL_DATABASE}
