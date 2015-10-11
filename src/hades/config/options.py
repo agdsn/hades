@@ -335,6 +335,7 @@ class HADES_REGULAR_DHCP_LEASE_TIME(Option):
 class HADES_AUTH_LISTEN(Option):
     """IP and network to listen on for requests from authenticated users"""
     default = netaddr.IPNetwork('10.66.67.1/24')
+    static_check = check.network_ip
     runtime_check = check.address_exists
 
 
@@ -353,7 +354,8 @@ class HADES_USER_NETWORKS(Option):
     values are netaddr.IPNetworks objects
     """
     type = collections.Mapping
-    static_check = check.gateway_network_dict
+    static_check = check.all(check.not_empty,
+                             check.mapping(value_check=check.network_ip))
 
 
 class HADES_UNAUTH_DHCP_LEASE_TIME(Option):
@@ -373,6 +375,7 @@ class HADES_UNAUTH_LISTEN(Option):
     """IP and network to listen for unauthenticated users"""
     default = netaddr.IPNetwork('10.66.0.1/19')
     type = netaddr.IPNetwork
+    static_check = check.network_ip
     runtime_check = check.address_exists
 
 
@@ -387,6 +390,7 @@ class HADES_UNAUTH_DHCP_RANGE(Option):
 class HADES_RADIUS_LISTEN(Option):
     """IP and network the RADIUS server is listening on"""
     type = netaddr.IPNetwork
+    static_check = check.network_ip
     runtime_check = check.address_exists
 
 

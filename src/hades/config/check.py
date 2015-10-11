@@ -48,26 +48,51 @@ def between(low, high):
     return checker
 
 
-def gateway_network_dict(config, name, value):
-    if not value:
-        raise ConfigError(name, "No networks specified")
+def mapping(key_check=None, value_check=None):
+    def f(config, name, value):
+        for k, v in value.items():
+            try:
+                if key_check is not None:
+                    key_check(config, name, k)
+                if value_check is not None:
+                    value_check(config, name, v)
+            except ConfigError as e:
+                raise ConfigError(name, "Error in key {}: {}"
+                                  .format(k, e.args[0]))
+    return f
 
-    for key, network in value.items():
-        if not isinstance(key, str):
-            raise ConfigError(name, "Keys must be strings")
-        if not isinstance(network, netaddr.IPNetwork):
-            raise ConfigError(name, "Values must be of type {}"
-                              .format(netaddr.IPNetwork))
-        if network.ip == network.network:
-            raise ConfigError(name, "The host part of {} is the network "
-                                    "address of the subnet. Must be the IP "
-                                    "address of the default gateway"
-                              .format(network))
-        if network.ip == network.broadcast:
-            raise ConfigError(name, "The host part of {} is the broadcast "
-                                    "address of the subnet. Must be the IP "
-                                    "address of the default gateway."
-                              .format(network))
+
+def type_is(types):
+    def f(config, name, value):
+        if not isinstance(value, types):
+            raise ConfigError(name, "Must be an instance of {}"
+                              .format(', '.join(types)))
+    return f
+
+
+def not_empty(config, name, value):
+    if len(value) <= 0:
+        raise ConfigError(name, "Must not be empty")
+
+
+def all(*checks):
+    def f(config, name, value):
+        for check in checks:
+            check(config, name, value)
+    return f
+
+
+def network_ip(config, name, value):
+    if value.ip == value.value:
+        raise ConfigError(name, "The host part of {} is the network "
+                                "address of the subnet. Must be an IP of the "
+                                "subnet."
+                          .format(value))
+    if value.ip == value.broadcast:
+        raise ConfigError(name, "The host part of {} is the broadcast "
+                                "address of the subnet. Must be an IP of the "
+                                "subnet."
+                          .format(value))
 
 
 def directory_exists(config, name, value):
