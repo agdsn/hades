@@ -69,6 +69,11 @@ def deferred_format(fmt_string, *args, **kwargs):
     return f
 
 
+###################
+# General options #
+###################
+
+
 class HADES_SITE_NAME(Option):
     """Name of the site"""
     type = str
@@ -79,7 +84,6 @@ class HADES_SITE_NODE_ID(Option):
     type = str
 
 
-# Hades options
 class HADES_REAUTHENTICATION_INTERVAL(Option):
     """RADIUS periodic reauthentication interval"""
     default = timedelta(seconds=300)
@@ -97,6 +101,23 @@ class HADES_RETENTION_INTERVAL(Option):
 class HADES_CONTACT_ADDRESSES(Option):
     """Contact addresses displayed on the captive portal page"""
     type = collections.Mapping
+
+
+class HADES_USER_NETWORKS(Option):
+    """
+    Public networks of authenticated users.
+
+    Dictionary of networks. Keys are unique identifiers of the network,
+    values are netaddr.IPNetworks objects
+    """
+    type = collections.Mapping
+    static_check = check.all(check.not_empty,
+                             check.mapping(value_check=check.network_ip))
+
+
+#######################
+# Hades Agent options #
+#######################
 
 
 class HADES_AGENT_USER(Option):
@@ -120,18 +141,9 @@ class HADES_AGENT_HOME(Option):
     runtime_check = check.directory_exists
 
 
-class HADES_RADIUS_USER(Option):
-    """User of the freeRADIUS server"""
-    default = 'freerad'
-    type = str
-    runtime_check = check.user_exists
-
-
-class HADES_RADIUS_GROUP(Option):
-    """Group of the freeRADIUS server"""
-    default = 'freerad'
-    type = str
-    runtime_check = check.group_exists
+######################
+# PostgreSQL options #
+######################
 
 
 class HADES_POSTGRESQL_DATABASE(Option):
@@ -232,6 +244,11 @@ class HADES_POSTGRESQL_USER_MAPPINGS(Option):
     static_check = check.user_mapping_for_user_exists('HADES_AGENT_USER')
 
 
+########################
+# Hades Portal options #
+########################
+
+
 class HADES_PORTAL_DOMAIN(Option):
     """Fully qualified domain name of the captive portal"""
     default = 'captive-portal.agdsn.de'
@@ -287,6 +304,11 @@ class HADES_PORTAL_UWSGI_WORKERS(Option):
     default = 4
     type = int
     static_check = check.greater_than(0)
+
+
+###############################
+# Authenticated users options #
+###############################
 
 
 class HADES_AUTH_DNSMASQ_USER(Option):
@@ -386,16 +408,9 @@ class HADES_AUTH_ROUTING_TABLE(Option):
     static_check = check.between(0, 255)
 
 
-class HADES_USER_NETWORKS(Option):
-    """
-    Public networks of authenticated users.
-
-    Dictionary of networks. Keys are unique identifiers of the network,
-    values are netaddr.IPNetworks objects
-    """
-    type = collections.Mapping
-    static_check = check.all(check.not_empty,
-                             check.mapping(value_check=check.network_ip))
+#################################
+# Unauthenticated users options #
+#################################
 
 
 class HADES_UNAUTH_DHCP_LEASE_TIME(Option):
@@ -471,6 +486,25 @@ class HADES_UNAUTH_DHCP_RANGE(Option):
     static_check = check.ip_range_in_network(HADES_UNAUTH_LISTEN.__name__)
 
 
+##################
+# RADIUS options #
+##################
+
+
+class HADES_RADIUS_USER(Option):
+    """User of the freeRADIUS server"""
+    default = 'freerad'
+    type = str
+    runtime_check = check.user_exists
+
+
+class HADES_RADIUS_GROUP(Option):
+    """Group of the freeRADIUS server"""
+    default = 'freerad'
+    type = str
+    runtime_check = check.group_exists
+
+
 class HADES_RADIUS_LISTEN(Option):
     """IP and network the RADIUS server is listening on"""
     type = netaddr.IPNetwork
@@ -494,6 +528,11 @@ class HADES_RADIUS_ACCOUNTING_PORT(Option):
     """RADIUS accounting port"""
     type = int
     default = 1813
+
+
+##########################
+# Gratuitous ARP options #
+##########################
 
 
 class HADES_GRATUITOUS_ARP_INTERVAL(Option):
@@ -572,7 +611,11 @@ class HADES_CREATE_DUMMY_INTERFACES(Option):
     default = False
 
 
-# Flask options
+#################
+# Flask options #
+#################
+
+
 class SECRET_KEY(Option):
     """
     Flask secret key
@@ -591,7 +634,11 @@ class DEBUG(Option):
     type = bool
 
 
-# Flask-Babel options
+#######################
+# Flask-Babel options #
+#######################
+
+
 class BABEL_DEFAULT_LOCALE(Option):
     """Default locale of the portal application"""
     default = 'de_DE'
@@ -604,13 +651,21 @@ class BABEL_DEFAULT_TIMEZONE(Option):
     type = str
 
 
-# Flask-SQLAlchemy options
+############################
+# Flask-SQLAlchemy options #
+############################
+
+
 class SQLALCHEMY_DATABASE_URI(Option):
     default = deferred_format('postgresql:///{}', 'HADES_POSTGRESQL_DATABASE')
     type = str
 
 
-# Celery options
+##################
+# Celery options #
+##################
+
+
 class BROKER_URL(Option):
     type = str
 
