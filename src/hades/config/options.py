@@ -384,7 +384,7 @@ class HADES_UNAUTH_DHCP_RANGE(Option):
     HADES_UNAUTH_LISTEN network."""
     default = netaddr.IPRange('10.66.0.10', '10.66.31.254')
     type = netaddr.IPRange
-    static_check = check.ip_range_in_network('HADES_UNAUTH_LISTEN')
+    static_check = check.ip_range_in_network(HADES_UNAUTH_LISTEN.__name__)
 
 
 class HADES_RADIUS_LISTEN(Option):
