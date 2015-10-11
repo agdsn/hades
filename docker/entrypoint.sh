@@ -61,13 +61,13 @@ run_database() {
     local -r PGCONFIG="/etc/postgresql/${PG_VERSION}/${PG_CLUSTER}/postgresql.conf"
     mkdir -p "/var/run/postgresql/${PG_VERSION}-${PG_CLUSTER}.pg_stat_tmp"
     pg_ctl start -w -s -o "-c config_file=${PGCONFIG}"
-    createuser ${HADES_RADIUS_USER}
-    createuser ${HADES_AGENT_USER}
-    createuser ${HADES_PORTAL_USER}
-    createdb ${HADES_POSTGRESQL_DATABASE}
-    python3 -m hades.config.generate postgresql-schema | psql --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- ${HADES_POSTGRESQL_DATABASE}
+    createuser "${HADES_RADIUS_USER}"
+    createuser "${HADES_AGENT_USER}"
+    createuser "${HADES_PORTAL_USER}"
+    createdb "${HADES_POSTGRESQL_DATABASE}"
+    python3 -m hades.config.generate postgresql-schema | psql --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "${HADES_POSTGRESQL_DATABASE}"
     pg_ctl stop -w -s -o "-c config_file=${PGCONFIG}"
-    exec postgres -c config_file=${PGCONFIG}
+    exec postgres -c config_file="${PGCONFIG}"
 }
 
 run_http() {
@@ -136,7 +136,7 @@ main() {
     fi
     case "$command" in
         agent|auth-dhcp|auth-dns|database|http|networking|portal|radius|shell|unauth-dhcp|unauth-dns|vrrp)
-            run_${command//-/_} "$@"
+            "run_${command//-/_}" "$@"
             ;;
         help|-h|--help)
             print_usage
