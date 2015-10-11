@@ -74,6 +74,11 @@ class HADES_SITE_NAME(Option):
     type = str
 
 
+class HADES_SITE_NODE_ID(Option):
+    """Unique name of the site node instance"""
+    type = str
+
+
 # Hades options
 class HADES_AGENT_USER(Option):
     """User of the site node agent"""
