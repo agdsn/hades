@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-EX_OK=0
-EX_USAGE=64
+readonly EX_OK=0
+readonly EX_USAGE=64
 
 msg() {
     echo "$@"
@@ -58,7 +58,7 @@ run_database() {
     fi
     export PATH="/usr/lib/postgresql/${PG_VERSION}/bin:${PATH}"
     export PGDATA="/var/lib/postgresql/${PG_VERSION}/${PG_CLUSTER}"
-    local PGCONFIG="/etc/postgresql/${PG_VERSION}/${PG_CLUSTER}/postgresql.conf"
+    local -r PGCONFIG="/etc/postgresql/${PG_VERSION}/${PG_CLUSTER}/postgresql.conf"
     mkdir -p "/var/run/postgresql/${PG_VERSION}-${PG_CLUSTER}.pg_stat_tmp"
     pg_ctl start -w -s -o "-c config_file=${PGCONFIG}"
     createuser ${HADES_RADIUS_USER}
@@ -79,6 +79,7 @@ run_http() {
 
 run_networking() {
     if [[ "${HADES_CREATE_DUMMY_INTERFACES-False}" = True ]]; then
+        local interface
         for interface in "${HADES_RADIUS_INTERFACE}" "${HADES_VRRP_INTERFACE}" "${HADES_AUTH_INTERFACE}" "${HADES_UNAUTH_INTERFACE}"; do
             if [[ -d "/sys/class/net/${interface}" ]]; then
                 continue
@@ -126,6 +127,7 @@ run_vrrp() {
 
 main() {
     source <(python3 -m hades.config.export)
+    local command
     if [[ $# -lt 1 ]]; then
         command=help
     else

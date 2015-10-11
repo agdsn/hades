@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-VERSION=2.0.1
-SHA512=4201bb82357cea6b4f8415d4f2095652c2015d3bc436978cdb8b46fdb6d2288e7fbb9e28d4bd09a8b9c48bbce396e4655454d085cb3049ad42a1889353a05238
+readonly VERSION=2.0.1
+readonly SHA512=4201bb82357cea6b4f8415d4f2095652c2015d3bc436978cdb8b46fdb6d2288e7fbb9e28d4bd09a8b9c48bbce396e4655454d085cb3049ad42a1889353a05238
 
 curl -O -L http://api.pgxn.org/dist/mysql_fdw/${VERSION}/mysql_fdw-${VERSION}.zip
 sha512sum --status --strict --check <<HASH
