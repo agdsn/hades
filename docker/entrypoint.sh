@@ -12,25 +12,34 @@ print_usage() {
     msg "Usage: COMMAND"
     msg ""
     msg "Available commands"
-    msg "  agent           Execute the site node agent (Celery worker)"
-    msg "  database        Execute the database (currently PostgreSQL)"
-    msg "  help            Print this help message"
-    msg "  http            Execute the captive portal web server (nginx)"
-    msg "  networking      Setup networking (iptables, routing)"
-    msg "  portal          Run the captive portal WSGI application (using uWSGI)"
-    msg "  radius          Run the RADIUS server (freeRADIUS)"
-    msg "  regular-dhcp    Execute the DHCP resolver for the regular VLANs"
-    msg "                  (dnsmasq monitored by a"
-    msg "                  hades.dnsmasq.monitor.SignalProxyDaemon)"
-    msg "  regular-dns     Execute the DNS resolver for the regular VLANs (unbound)"
-    msg "  shell           Start a bash shell to debug the container"
-    msg "  unauth-dhcp     Run the DHCP server for the unauth VLAN (currently a"
-    msg "                  noop and handled by dnsmasq of unauth-dns)"
-    msg "  unauth-dns      Run the DNS resolver (dnsmasq) for the unauth VLAN"
+    msg "  agent        Execute the site node agent (Celery worker)"
+    msg "  auth-dhcp    Execute the DHCP server for authenticated users"
+    msg "               (dnsmasq monitored by a SignalProxyDaemon)"
+    msg "  auth-dns     Execute the DNS resolver for the authenticated users (unbound)"
+    msg "  database     Execute the database (PostgreSQL)"
+    msg "  help         Print this help message"
+    msg "  http         Execute the captive portal web server (nginx)"
+    msg "  networking   Setup networking (iptables, routing)"
+    msg "  portal       Run the captive portal WSGI application (using uWSGI)"
+    msg "  radius       Run the RADIUS server (freeRADIUS)"
+    msg "  shell        Start a bash shell for debugging"
+    msg "  unauth-dhcp  Run the DHCP server for the unauthenticated users"
+    msg "               (no-op and handled by the unauth-dns dnsmasq)"
+    msg "  unauth-dns   Run the DNS resolver (dnsmasq) for the unauth VLAN"
 }
 
 run_agent() {
     exec python3 -m celery.bin.worker --beat --app=hades.agent --uid="${HADES_AGENT_USER}" --gid="${HADES_AGENT_GROUP}" --workdir="${HADES_AGENT_HOME}"
+}
+
+run_auth_dns() {
+    python3 -m hades.config.generate unbound /etc/hades/unbound.conf
+    exec unbound -c /etc/hades/unbound.conf
+}
+
+run_auth_dhcp() {
+    python3 -m hades.config.generate auth-dnsmasq /etc/hades/auth-dnsmasq.conf
+    exec python3 -m hades.dnsmasq.monitor /etc/hades/auth-dnsmasq.conf
 }
 
 run_database() {
@@ -94,16 +103,6 @@ run_radius() {
     exec freeradius -f -m -d /etc/hades/freeradius
 }
 
-run_regular_dns() {
-    python3 -m hades.config.generate unbound /etc/hades/unbound.conf
-    exec unbound -c /etc/hades/unbound.conf
-}
-
-run_regular_dhcp() {
-    python3 -m hades.config.generate regular-dnsmasq /etc/hades/regular-dnsmasq.conf
-    exec python3 -m hades.dnsmasq.monitor /etc/hades/regular-dnsmasq.conf
-}
-
 run_shell() {
     exec bash
 }
@@ -128,7 +127,7 @@ main() {
         shift
     fi
     case "$command" in
-        agent|database|http|networking|portal|radius|regular-dhcp|regular-dns|shell|unauth-dhcp|unauth-dns)
+        agent|auth-dhcp|auth-dns|database|http|networking|portal|radius|shell|unauth-dhcp|unauth-dns)
             run_${command//-/_} "$@"
             ;;
         help|-h|--help)

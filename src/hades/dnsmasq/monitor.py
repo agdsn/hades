@@ -104,10 +104,10 @@ def main():
     logger.info("dnsmasq monitor")
     conf_file = sys.argv[1]
     config = CheckWrapper(get_config())
-    passwd = pwd.getpwnam(config['HADES_REGULAR_DNSMASQ_USER'])
-    group = grp.getgrnam(config['HADES_REGULAR_DNSMASQ_GROUP'])
-    sockfile = config['HADES_REGULAR_DNSMASQ_SIGNAL_SOCKET']
-    hosts_file = config['HADES_REGULAR_DNSMASQ_HOSTS_FILE']
+    passwd = pwd.getpwnam(config['HADES_AUTH_DNSMASQ_USER'])
+    group = grp.getgrnam(config['HADES_AUTH_DNSMASQ_GROUP'])
+    sockfile = config['HADES_AUTH_DNSMASQ_SIGNAL_SOCKET']
+    hosts_file = config['HADES_AUTH_DNSMASQ_HOSTS_FILE']
     if not os.path.exists(hosts_file):
         with open(hosts_file, mode='w'):
             pass

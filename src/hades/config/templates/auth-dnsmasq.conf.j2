@@ -5,8 +5,8 @@ log-facility=-
 port=0
 
 keep-in-foreground
-user={{ HADES_REGULAR_DNSMASQ_USER }}
-group={{ HADES_REGULAR_DNSMASQ_GROUP }}
+user={{ HADES_AUTH_DNSMASQ_USER }}
+group={{ HADES_AUTH_DNSMASQ_GROUP }}
 
 interface={{ HADES_AUTH_INTERFACE }}
 except-interface=lo
@@ -21,15 +21,15 @@ dhcp-authoritative
 
 # Define DHCP ranges
 {% for name, network in HADES_USER_NETWORKS.items() %}
-dhcp-range=set:{{ name }},{{ network.network }},static,{{ network.netmask }},{{ network.broadcast }},{{ HADES_REGULAR_DHCP_LEASE_TIME.total_seconds()|int }}s
+dhcp-range=set:{{ name }},{{ network.network }},static,{{ network.netmask }},{{ network.broadcast }},{{ HADES_AUTH_DHCP_LEASE_TIME.total_seconds()|int }}s
 dhcp-option=tag:{{ name }},option:router,{{ network.ip }}
 {% endfor %}
 dhcp-option=option:dns-server,{{ HADES_AUTH_LISTEN.ip }}
-dhcp-option=option:domain-name,{{ HADES_REGULAR_DHCP_DOMAIN }}
+dhcp-option=option:domain-name,{{ HADES_AUTH_DHCP_DOMAIN }}
 
 # Ensure lease max is high enough (default is 1000)
 dhcp-lease-max={{ HADES_USER_NETWORKS|map('length')|sum }}
 
 # Set DHCP lease and hosts file
-dhcp-leasefile={{ HADES_REGULAR_DNSMASQ_LEASE_FILE }}
-dhcp-hostsfile={{ HADES_REGULAR_DNSMASQ_HOSTS_FILE }}
+dhcp-leasefile={{ HADES_AUTH_DNSMASQ_LEASE_FILE }}
+dhcp-hostsfile={{ HADES_AUTH_DNSMASQ_HOSTS_FILE }}

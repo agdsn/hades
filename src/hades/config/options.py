@@ -80,6 +80,25 @@ class HADES_SITE_NODE_ID(Option):
 
 
 # Hades options
+class HADES_REAUTHENTICATION_INTERVAL(Option):
+    """RADIUS periodic reauthentication interval"""
+    default = timedelta(seconds=300)
+    type = timedelta
+    static_check = check.greater_than(timedelta(0))
+
+
+class HADES_RETENTION_INTERVAL(Option):
+    """RADIUS postauth and accounting data retention interval"""
+    default = timedelta(days=1)
+    type = timedelta
+    static_check = check.greater_than(timedelta(0))
+
+
+class HADES_CONTACT_ADDRESSES(Option):
+    """Contact addresses displayed on the captive portal page"""
+    type = collections.Mapping
+
+
 class HADES_AGENT_USER(Option):
     """User of the site node agent"""
     default = 'hades-agent'
@@ -270,68 +289,58 @@ class HADES_PORTAL_UWSGI_WORKERS(Option):
     static_check = check.greater_than(0)
 
 
-class HADES_REGULAR_DNSMASQ_USER(Option):
-    """User of the regular dnsmasq instance and the SignalProxyDaemon"""
+class HADES_AUTH_DNSMASQ_USER(Option):
+    """
+    User of the dnsmasq instance for authenticated users and the
+    SignalProxyDaemon
+    """
     default = equal_to(HADES_AGENT_USER)
     type = str
     runtime_check = check.user_exists
 
 
-class HADES_REGULAR_DNSMASQ_GROUP(Option):
-    """Group of the regular dnsmasq instance and the SignalProxyDaemon"""
+class HADES_AUTH_DNSMASQ_GROUP(Option):
+    """
+    Group of the dnsmasq instance for authenticated users and the SignalProxyDaemon
+    """
     default = equal_to(HADES_AGENT_GROUP)
     type = str
     runtime_check = check.group_exists
 
 
-class HADES_REGULAR_DNSMASQ_HOSTS_FILE(Option):
-    """Path to the DHCP hosts file of the regular dnsmasq instance."""
-    default = "/var/lib/hades/agent/regular-dnsmasq.hosts"
+class HADES_AUTH_DNSMASQ_HOSTS_FILE(Option):
+    """
+    Path to the DHCP hosts file of the dnsmasq instance for authenticated users.
+    """
+    default = "/var/lib/hades/agent/auth-dnsmasq.hosts"
     type = str
     runtime_check = check.file_creatable
 
 
-class HADES_REGULAR_DNSMASQ_LEASE_FILE(Option):
-    """Path to the DHCP lease file of the regular dnsmasq instance."""
-    default = "/var/lib/hades/agent/regular-dnsmasq.leases"
+class HADES_AUTH_DNSMASQ_LEASE_FILE(Option):
+    """
+    Path to the DHCP lease file of the dnsmasq instance for authenticated users.
+    """
+    default = "/var/lib/hades/agent/auth-dnsmasq.leases"
     type = str
     runtime_check = check.file_creatable
 
 
-class HADES_REGULAR_DNSMASQ_SIGNAL_SOCKET(Option):
+class HADES_AUTH_DNSMASQ_SIGNAL_SOCKET(Option):
     """Path to the Unix socket of the SignalProxyDaemon"""
-    default = '/run/hades/agent/regular-dnsmasq.sock'
+    default = '/run/hades/agent/auth-dnsmasq.sock'
     type = str
     runtime_check = check.file_creatable
 
 
-class HADES_REAUTHENTICATION_INTERVAL(Option):
-    """RADIUS periodic reauthentication interval"""
-    default = timedelta(seconds=300)
-    type = timedelta
-    static_check = check.greater_than(timedelta(0))
-
-
-class HADES_RETENTION_INTERVAL(Option):
-    """RADIUS postauth and accounting data retention interval"""
-    default = timedelta(days=1)
-    type = timedelta
-    static_check = check.greater_than(timedelta(0))
-
-
-class HADES_CONTACT_ADDRESSES(Option):
-    """Contact addresses displayed on the captive portal page"""
-    type = collections.Mapping
-
-
-class HADES_REGULAR_DHCP_DOMAIN(Option):
-    """DNS domain returned in the DHCP replies to users in the regular VLANs"""
+class HADES_AUTH_DHCP_DOMAIN(Option):
+    """DNS domain of authenticated users"""
     default = 'users.agdsn.de'
     type = str
 
 
-class HADES_REGULAR_DHCP_LEASE_TIME(Option):
-    """DHCP Lease time in the the regular VLANs"""
+class HADES_AUTH_DHCP_LEASE_TIME(Option):
+    """DHCP Lease time for authenticated users"""
     default = timedelta(hours=24)
     type = timedelta
     static_check = check.greater_than(timedelta(0))
