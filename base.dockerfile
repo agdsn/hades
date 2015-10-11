@@ -7,7 +7,6 @@ ENV LANG=C.UTF-8 PG_VERSION=9.4 PG_CLUSTER=main
 COPY docker/etc/apt/ /etc/apt/
 
 RUN apt-get update && apt-get install \
-    arping \
     dns-root-data \
     dnsmasq \
     freeradius \
@@ -28,7 +27,6 @@ RUN apt-get update && apt-get install \
     python3-setuptools \
     python3-sqlalchemy \
     python3-sqlalchemy-ext \
-    supervisor \
     unbound \
     uwsgi \
     uwsgi-plugin-python3 \

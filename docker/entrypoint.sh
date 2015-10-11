@@ -16,7 +16,6 @@ print_usage() {
     msg "  database        Execute the database (currently PostgreSQL)"
     msg "  help            Print this help message"
     msg "  http            Execute the captive portal web server (nginx)"
-    msg "  gratuitous-arp  Continously broadcast gratuitous ARP (using arping)"
     msg "  networking      Setup networking (iptables, routing)"
     msg "  portal          Run the captive portal WSGI application (using uWSGI)"
     msg "  radius          Run the RADIUS server (freeRADIUS)"
@@ -85,11 +84,6 @@ run_networking() {
     exit ${EX_OK}
 }
 
-run_gratuitous_arp() {
-    python3 -m hades.config.generate arping /etc/hades/arping.ini
-    exec supervisord -n -c /etc/hades/arping.ini
-}
-
 run_portal() {
     python3 -m hades.config.generate uwsgi /etc/hades/uwsgi.ini
     exec uwsgi --ini=/etc/hades/uwsgi.ini
@@ -134,7 +128,7 @@ main() {
         shift
     fi
     case "$command" in
-        agent|database|http|gratuitous-arp|networking|portal|radius|regular-dhcp|regular-dns|shell|unauth-dhcp|unauth-dns)
+        agent|database|http|networking|portal|radius|regular-dhcp|regular-dns|shell|unauth-dhcp|unauth-dns)
             run_${command//-/_} "$@"
             ;;
         help|-h|--help)

@@ -125,7 +125,6 @@ def write_directory_config(name, generator, args):
 
 
 commands = {
-    'arping': partial(write_single_file_config, 'arping.ini.j2'),
     'freeradius': partial(write_directory_config,'freeradius'),
     'iptables': partial(write_single_file_config, "iptables.j2"),
     'nginx': partial(write_directory_config, 'nginx'),
