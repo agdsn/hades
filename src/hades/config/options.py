@@ -84,6 +84,13 @@ class HADES_SITE_NODE_ID(Option):
     type = str
 
 
+class HADES_CONFIG_DIR(Option):
+    """Directory where generated config files will be saved"""
+    type = str
+    default = '/etc/hades'
+    runtime_check = check.directory_exists
+
+
 class HADES_REAUTHENTICATION_INTERVAL(Option):
     """RADIUS periodic reauthentication interval"""
     default = timedelta(seconds=300)
