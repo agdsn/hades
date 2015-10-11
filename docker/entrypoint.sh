@@ -16,8 +16,8 @@ print_usage() {
     msg "  database        Execute the database (currently PostgreSQL)"
     msg "  help            Print this help message"
     msg "  http            Execute the captive portal web server (nginx)"
-    msg "  firewall        Load the iptables rules"
     msg "  gratuitous-arp  Continously broadcast gratuitous ARP (using arping)"
+    msg "  networking      Setup networking (iptables, routing)"
     msg "  portal          Run the captive portal WSGI application (using uWSGI)"
     msg "  radius          Run the RADIUS server (freeRADIUS)"
     msg "  regular-dhcp    Execute the DHCP resolver for the regular VLANs"
@@ -68,8 +68,20 @@ run_http() {
     exec nginx -c /etc/hades/nginx/nginx.conf
 }
 
-run_firewall() {
+run_networking() {
+    if [[ "${HADES_CREATE_DUMMY_INTERFACES-False}" = True ]]; then
+        for interface in "${HADES_RADIUS_INTERFACE}" "${HADES_VRRP_INTERFACE}" "${HADES_AUTH_INTERFACE}" "${HADES_UNAUTH_INTERFACE}"; do
+            if [[ -d "/sys/class/net/${interface}" ]]; then
+                continue
+            fi
+            ip link add name "${interface}" type dummy
+            ip link set up dev "${interface}"
+        done
+    fi
     python3 -m hades.config.generate iptables | iptables-restore
+    sysctl net.ipv4.ip_nonlocal_bind=1
+    ip rule add fwmark "${HADES_AUTH_FWMARK}"   table "${HADES_AUTH_ROUTING_TABLE}"
+    ip rule add fwmark "${HADES_UNAUTH_FWMARK}" table "${HADES_UNAUTH_ROUTING_TABLE}"
     exit ${EX_OK}
 }
 
@@ -122,7 +134,7 @@ main() {
         shift
     fi
     case "$command" in
-        agent|database|http|firewall|gratuitous-arp|portal|radius|regular-dhcp|regular-dns|shell|unauth-dhcp|unauth-dns)
+        agent|database|http|gratuitous-arp|networking|portal|radius|regular-dhcp|regular-dns|shell|unauth-dhcp|unauth-dns)
             run_${command//-/_} "$@"
             ;;
         help|-h|--help)

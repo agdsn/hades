@@ -487,6 +487,17 @@ class HADES_RADIUS_ACCOUNTING_PORT(Option):
     default = 1813
 
 
+################
+# Test options #
+################
+
+
+class HADES_CREATE_DUMMY_INTERFACES(Option):
+    """Create dummy interfaces if interfaces do not exist"""
+    type = bool
+    default = False
+
+
 # Flask options
 class SECRET_KEY(Option):
     """
