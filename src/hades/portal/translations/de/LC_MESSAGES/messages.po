@@ -53,7 +53,7 @@ msgid ""
 "According to our records you live in a different room. Please inform us "
 "of your relocation."
 msgstr ""
-"Laut unseren Datenbank wohnst du in einem anderem Zimmer. Bitte teile "
+"Laut unserer Datenbank wohnst du in einem anderem Zimmer. Bitte teile "
 "unserem Support deinen Umzug mit."
 
 #: views.py:25
