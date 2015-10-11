@@ -11,7 +11,7 @@
 {%- endfor %}
 COMMIT
 *filter
-:INPUT ACCEPT [0:0]
+:INPUT DROP [0:0]
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
 -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED,SNAT,DNAT -j ACCEPT
