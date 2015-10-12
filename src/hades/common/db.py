@@ -20,6 +20,19 @@ dhcphost = Table(
     Column('ipaddress', INET, nullable=False),
 )
 
+nas = Table(
+    'nas', metadata,
+    Column('id', Integer, primary_key=True, nullable=False),
+    Column('nasname', String(128), nullable=False),
+    Column('shortname', String(32), nullable=False),
+    Column('type', String(30), default='other', nullable=False),
+    Column('ports', Integer),
+    Column('secret', String(60), nullable=False),
+    Column('server', String(64)),
+    Column('community', String(50)),
+    Column('description', String(200)),
+)
+
 radacct = Table(
     'radacct', metadata,
     Column('radacctid', Integer, nullable=False),
@@ -50,6 +63,35 @@ radacct = Table(
     Column('acctstopdelay', Integer),
 )
 
+radcheck = Table(
+    'radcheck', metadata,
+    Column('id', Integer, primary_key=True, nullable=False),
+    Column('username', String(64), nullable=False),
+    Column('nasipaddress', INET, nullable=False),
+    Column('nasportid', String(15), nullable=False),
+    Column('attribute', String(64), nullable=False),
+    Column('op', String(2), nullable=False),
+    Column('value', String(253), nullable=False),
+)
+
+radgroupcheck = Table(
+    'radgroupcheck', metadata,
+    Column('id', Integer, primary_key=True, nullable=False),
+    Column('groupname', String(64), nullable=False),
+    Column('attribute', String(64), nullable=False),
+    Column('op', String(2), nullable=False),
+    Column('value', String(253), nullable=False),
+)
+
+radgroupreply = Table(
+    'radgroupreply', metadata,
+    Column('id', Integer, primary_key=True, nullable=False),
+    Column('groupname', String(64), nullable=False),
+    Column('attribute', String(64), nullable=False),
+    Column('op', String(2), nullable=False),
+    Column('value', String(253), nullable=False),
+)
+
 radpostauth = Table(
     'radpostauth', metadata,
     Column('id', Integer, primary_key=True, nullable=False),
@@ -59,6 +101,17 @@ radpostauth = Table(
     Column('packettype', String(64), nullable=False),
     Column('replymessage', String(253), nullable=False),
     Column('authdate', String(64), nullable=False),
+)
+
+radreply = Table(
+    'radreply', metadata,
+    Column('id', Integer, primary_key=True, nullable=False),
+    Column('username', String(64), nullable=False),
+    Column('nasipaddress', INET, nullable=False),
+    Column('nasportid', String(15), nullable=False),
+    Column('attribute', String(64), nullable=False),
+    Column('op', String(2), default='=', nullable=False),
+    Column('value', String(253), nullable=False),
 )
 
 radusergroup = Table(
