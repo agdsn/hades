@@ -47,6 +47,3 @@ COPY docker/rights.sh docker/mysql_fdw.sh /build/
 RUN cd /build && \
     /build/rights.sh && \
     /build/mysql_fdw.sh
-
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

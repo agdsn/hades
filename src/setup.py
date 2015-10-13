@@ -20,6 +20,7 @@ setup(name='hades',
           "pyroute2",
       ],
       ext_modules=[arpreq],
+      scripts=['scripts/hades'],
       classifiers=[
           'Development Status :: 5 - Production/Stable',
           'License :: OSI Approved :: MIT License',
