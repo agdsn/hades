@@ -41,7 +41,7 @@ radacct = Table(
     Column('username', String(253)),
     Column('groupname', String(253)),
     Column('realm', String(64)),
-    Column('nasipaddres', INET, nullable=False),
+    Column('nasipaddress', INET, nullable=False),
     Column('nasportid', String(15)),
     Column('nasporttype', String(32)),
     Column('acctstarttime', DateTime),
