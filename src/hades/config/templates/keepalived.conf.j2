@@ -25,7 +25,7 @@ vrrp_instance unauth {
 
     interface {{ HADES_VRRP_INTERFACE }}
     track_interface {
-        {%- for interface in [HADES_UNAUTH_INTERFACE, HADES_AUTH_INTERFACE, HADES_RADIUS_INTERFACE]|difference([HADES_VRRP_INTERFACE]) %}
+        {%- for interface in [HADES_UNAUTH_INTERFACE, HADES_AUTH_INTERFACE, HADES_RADIUS_INTERFACE]|difference([HADES_VRRP_INTERFACE])|unique %}
         {{ interface }}
         {%- endfor %}
     }
@@ -55,11 +55,10 @@ vrrp_instance unauth {
     }
 
     virtual_ipaddress {
-        {{ HADES_AUTH_LISTEN   }} dev {{ HADES_AUTH_INTERFACE   }}
-        {{ HADES_UNAUTH_LISTEN }} dev {{ HADES_UNAUTH_INTERFACE }}
-        {{ HADES_RADIUS_LISTEN }} dev {{ HADES_RADIUS_INTERFACE }}
-        {%- for network in HADES_USER_NETWORKS.values() %}
-        {{ network }} dev {{ HADES_UNAUTH_INTERFACE }}
+        {%- set vip_networks = itertools.chain((HADES_AUTH_LISTEN, HADES_UNAUTH_LISTEN, HADES_RADIUS_LISTEN), HADES_USER_NETWORKS.values()) %}
+        {%- set vip_interfaces = itertools.chain((HADES_AUTH_INTERFACE, HADES_UNAUTH_INTERFACE, HADES_RADIUS_INTERFACE), itertools.cycle((HADES_UNAUTH_INTERFACE, ))) %}
+        {%- for network, interface in vip_networks|zip(vip_interfaces)|unique|sorted(item=0) %}
+        {{ network }} dev {{ interface }}
         {%- endfor %}
     }
 
