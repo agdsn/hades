@@ -43,11 +43,8 @@ RUN apt-get update && apt-get install \
     Flask-Babel \
     pyroute2 \
     && npm install -g bower \
-    && \
-    pg_dropcluster ${PG_VERSION} ${PG_CLUSTER} && \
-    pg_createcluster --locale C -e UTF-8 ${PG_VERSION} ${PG_CLUSTER}
+    && pg_dropcluster ${PG_VERSION} ${PG_CLUSTER} \
+    && pg_createcluster --locale C -e UTF-8 ${PG_VERSION} ${PG_CLUSTER}
 
 COPY docker/rights.sh docker/mysql_fdw.sh /build/
-RUN cd /build && \
-    /build/rights.sh && \
-    /build/mysql_fdw.sh
+RUN /build/rights.sh && /build/mysql_fdw.sh
