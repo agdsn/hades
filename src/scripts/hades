@@ -34,12 +34,12 @@ run_agent() {
 }
 
 run_auth_dns() {
-    python3 -m hades.config.generate unbound "${HADES_CONFIG_DIR}/unbound.conf"
+    python3 -m hades.config.generate unbound.conf.j2 "${HADES_CONFIG_DIR}/unbound.conf"
     exec unbound -c "${HADES_CONFIG_DIR}/unbound.conf"
 }
 
 run_auth_dhcp() {
-    python3 -m hades.config.generate auth-dnsmasq "${HADES_CONFIG_DIR}/auth-dnsmasq.conf"
+    python3 -m hades.config.generate auth-dnsmasq.conf.j2 "${HADES_CONFIG_DIR}/auth-dnsmasq.conf"
     exec python3 -m hades.dnsmasq.monitor "${HADES_CONFIG_DIR}/auth-dnsmasq.conf"
 }
 
@@ -65,7 +65,7 @@ run_database() {
     createuser "${HADES_AGENT_USER}"
     createuser "${HADES_PORTAL_USER}"
     createdb "${HADES_POSTGRESQL_DATABASE}"
-    python3 -m hades.config.generate postgresql-schema | psql --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "${HADES_POSTGRESQL_DATABASE}"
+    python3 -m hades.config.generate schema.sql.j2 | psql --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "${HADES_POSTGRESQL_DATABASE}"
     pg_ctl stop -w -s -o "-c config_file=${PGCONFIG}"
     exec postgres -c config_file="${PGCONFIG}"
 }
@@ -88,7 +88,7 @@ run_networking() {
             ip link set up dev "${interface}"
         done
     fi
-    python3 -m hades.config.generate iptables | iptables-restore
+    python3 -m hades.config.generate iptables.j2 | iptables-restore
     sysctl net.ipv4.ip_nonlocal_bind=1
     ip rule add fwmark "${HADES_AUTH_FWMARK}"   table "${HADES_AUTH_ROUTING_TABLE}"
     ip rule add fwmark "${HADES_UNAUTH_FWMARK}" table "${HADES_UNAUTH_ROUTING_TABLE}"
@@ -96,7 +96,7 @@ run_networking() {
 }
 
 run_portal() {
-    python3 -m hades.config.generate uwsgi "${HADES_CONFIG_DIR}/uwsgi.ini"
+    python3 -m hades.config.generate uwsgi.ini.j2 "${HADES_CONFIG_DIR}/uwsgi.ini"
     exec uwsgi --ini="${HADES_CONFIG_DIR}/uwsgi.ini"
 }
 
@@ -124,12 +124,12 @@ run_unauth_dhcp() {
 }
 
 run_unauth_dns() {
-    python3 -m hades.config.generate unauth-dnsmasq "${HADES_CONFIG_DIR}/unauth-dnsmasq.conf"
+    python3 -m hades.config.generate unauth-dnsmasq.conf.j2 "${HADES_CONFIG_DIR}/unauth-dnsmasq.conf"
     exec dnsmasq -k -C "${HADES_CONFIG_DIR}/unauth-dnsmasq.conf"
 }
 
 run_vrrp() {
-    python3 -m hades.config.generate keepalived "${HADES_CONFIG_DIR}/keepalived.conf"
+    python3 -m hades.config.generate keepalived.conf.j2 "${HADES_CONFIG_DIR}/keepalived.conf"
     exec keepalived --log-console --dont-fork --vrrp --use-file="${HADES_CONFIG_DIR}/keepalived.conf"
 }
 

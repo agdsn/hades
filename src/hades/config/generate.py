@@ -153,32 +153,22 @@ def write_directory_config(name, generator, args):
     return 0
 
 
-commands = {
-    'auth-dnsmasq': partial(write_single_file_config, 'auth-dnsmasq.conf.j2'),
-    'freeradius': partial(write_directory_config,'freeradius'),
-    'iptables': partial(write_single_file_config, "iptables.j2"),
-    'keepalived': partial(write_single_file_config, 'keepalived.conf.j2'),
-    'nginx': partial(write_directory_config, 'nginx'),
-    'postgresql-schema': partial(write_single_file_config, 'schema.sql.j2'),
-    'unauth-dnsmasq': partial(write_single_file_config,
-                              'unauth-dnsmasq.conf.j2'),
-    'unbound': partial(write_single_file_config, 'unbound.conf.j2'),
-    'uwsgi': partial(write_single_file_config, 'uwsgi.ini.j2'),
-}
-
-
 def main(args):
     if len(args) < 2:
         return os.EX_USAGE
     config = get_config()
     template_dir = pkg_resources.resource_filename('hades.config', 'templates')
     generator = ConfigGenerator(template_dir, config)
-    command = commands.get(args[1])
-    if command is None:
-        print("Unknown config generation command {}".format(args[1]),
+    name = args[1]
+    source_path = os.path.join(template_dir, name)
+    if os.path.isdir(source_path):
+        return write_directory_config(name, generator, args)
+    elif os.path.isfile(source_path):
+        return write_single_file_config(name, generator, args)
+    else:
+        print("No such file or directory {} in {}".format(name, template_dir),
               file=sys.stderr)
-        return os.EX_USAGE
-    return command(generator, args)
+        return os.EX_NOINPUT
 
 
 if __name__ == '__main__':
