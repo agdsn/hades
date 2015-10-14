@@ -4,6 +4,7 @@ import os
 import os.path
 import shutil
 import sys
+import itertools
 
 import jinja2
 from jinja2.exceptions import FilterArgumentError
@@ -69,6 +70,16 @@ def do_sorted(env, iterable, *, attribute=None, item=None, reverse=False):
     elif item is not None:
         key = partial(env.getitem, argument=item)
     return sorted(iterable, key=key, reverse=reverse)
+
+
+@template_filter('zip')
+def do_zip(*iterables):
+    return zip(*iterables)
+
+
+@template_filter('zip_longest')
+def do_zip_longest(*iterables, fillvalue=None):
+    return itertools.zip_longest(*iterables, fillvalue=fillvalue)
 
 
 class ConfigGenerator(object):
