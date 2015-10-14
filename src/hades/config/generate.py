@@ -97,6 +97,7 @@ class ConfigGenerator(object):
         )
         self.env.globals.update({
             'collections': collections,
+            'itertools': itertools,
             'netaddr': netaddr,
         })
         self.env.filters.update(template_filter.registered)
