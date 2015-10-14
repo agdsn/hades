@@ -557,8 +557,18 @@ class HADES_GRATUITOUS_ARP_INTERVAL(Option):
 ################
 
 
-class HADES_MASTER(Option):
-    """Flag that indicates if a site node instance is the default master"""
+class HADES_PRIORITY(Option):
+    """
+    Priority of the site node instance.
+    The available instance with the highest priority becomes master.
+    """
+    type = int
+    default = 100
+    static_check = check.between(1, 254)
+
+
+class HADES_INITIAL_MASTER(Option):
+    """Flag that indicates if site node instance starts in master state"""
     type = bool
     default = False
 

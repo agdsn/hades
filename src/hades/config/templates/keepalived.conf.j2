@@ -16,7 +16,7 @@ vrrp_script db_ready {
 }
 
 vrrp_instance unauth {
-    {%- if HADES_MASTER %}
+    {%- if HADES_INITIAL_MASTER %}
     state MASTER
     {%- else %}
     state BACKUP
@@ -43,11 +43,7 @@ vrrp_instance unauth {
 
     notify_master "/usr/bin/env python3 -m hades.vrrp.notify"
 
-    {%- if HADES_MASTER %}
-    priority 150
-    {%- else %}
-    priority 100
-    {%- endif %}
+    priority {{ HADES_PRIORITY }}
 
     authentication {
         auth_type PASS
