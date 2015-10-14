@@ -11,10 +11,12 @@ RUN apt-get update && apt-get install \
     dnsmasq \
     freeradius \
     freeradius-postgresql \
+    git \
     iptables \
     keepalived \
     libmysqlclient-dev \
     nginx \
+    npm \
     python3-pip \
     postgresql \
     postgresql-server-dev-${PG_VERSION} \
@@ -34,11 +36,13 @@ RUN apt-get update && apt-get install \
     curl \
     build-essential \
     unzip \
-    && \
-    apt-get clean && \
-    pip3 install \
+    && apt-get clean \
+    && ln -s /usr/bin/nodejs /usr/bin/node \
+    && npm install -g bower \
+    && pip3 install \
     Flask-Babel \
     pyroute2 \
+    && npm install -g bower \
     && \
     pg_dropcluster ${PG_VERSION} ${PG_CLUSTER} && \
     pg_createcluster --locale C -e UTF-8 ${PG_VERSION} ${PG_CLUSTER}
