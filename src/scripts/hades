@@ -118,8 +118,8 @@ run_shell() {
 }
 
 run_unauth_dhcp() {
-    echo "DHCP for the unauth VLAN is currently performed by the dnsmasq "
-    echo "instance that provides unauth DNS."
+    msg "DHCP for the unauth VLAN is currently performed by the dnsmasq "
+    msg "instance that provides unauth DNS."
     exit ${EX_OK}
 }
 
