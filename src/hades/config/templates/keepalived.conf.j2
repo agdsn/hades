@@ -10,8 +10,8 @@ static_ipaddress {
     {{ HADES_VRRP_LISTEN }} dev {{ HADES_VRRP_INTERFACE }}
 }
 
-vrrp_script db_ready {
-    script "true"
+vrrp_script check_db {
+    script "python3 -m hades.common.check_db"
     interval 5
 }
 
@@ -30,7 +30,7 @@ vrrp_instance unauth {
         {%- endfor %}
     }
     track_script {
-        db_ready
+        check_db
     }
 
     mcast_src_ip {{ HADES_VRRP_LISTEN.ip }}

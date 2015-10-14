@@ -102,6 +102,14 @@ run_portal() {
 
 run_radius() {
     python3 -m hades.config.generate freeradius "${HADES_CONFIG_DIR}/freeradius"
+    local -r timeout=30
+    local i
+    # Wait until database is available
+    for i in {0..${timeout}}; do
+        python3 -m hades.common.check_db 2 &>/dev/null && break
+        sleep 1
+    done
+    python3 -m hades.common.check_db
     exec freeradius -f -m -d "${HADES_CONFIG_DIR}/freeradius"
 }
 
