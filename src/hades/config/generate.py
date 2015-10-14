@@ -6,6 +6,8 @@ import shutil
 import sys
 
 import jinja2
+from jinja2.exceptions import FilterArgumentError
+from jinja2.filters import environmentfilter
 import netaddr
 import pkg_resources
 from hades.config.loader import get_config
@@ -52,6 +54,21 @@ def do_min(a):
 @template_filter('max')
 def do_max(a):
     return max(a)
+
+
+@template_filter('sorted')
+@environmentfilter
+def do_sorted(env, iterable, *, attribute=None, item=None, reverse=False):
+    if attribute is None and item is None:
+        key = None
+    elif attribute is not None and item is not None:
+        raise FilterArgumentError("Only one of attribute and item may be"
+                                  "specified")
+    elif attribute is not None:
+        key = partial(env.getattr, attribute=attribute)
+    elif item is not None:
+        key = partial(env.getitem, argument=item)
+    return sorted(iterable, key=key, reverse=reverse)
 
 
 class ConfigGenerator(object):
