@@ -549,6 +549,20 @@ ALTER TABLE ONLY radpostauth
 
 
 --
+-- Name: dhcphost_mac_idx; Type: INDEX; Schema: public; Owner: {{ HADES_AGENT_USER }}; Tablespace:
+--
+
+CREATE INDEX dhcphost_mac_idx ON dhcphost USING btree (mac);
+
+
+--
+-- Name: nas_nasname_idx; Type: INDEX; Schema: public; Owner: {{ HADES_AGENT_USER }}; Tablespace:
+--
+
+CREATE INDEX nas_nasname_idx ON nas USING btree (nasname);
+
+
+--
 -- Name: radacct_active_user_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace:
 --
 
@@ -563,10 +577,52 @@ CREATE INDEX radacct_start_user_idx ON radacct USING btree (acctstarttime, usern
 
 
 --
--- Name: radpostauth_username; Type: INDEX; Schema: public; Owner: postgres; Tablespace:
+-- Name: radcheck_username_idx; Type: INDEX; Schema: public; Owner: {{ HADES_AGENT_USER }}; Tablespace:
 --
 
-CREATE INDEX radpostauth_username ON radpostauth USING btree (username);
+CREATE INDEX radcheck_username_idx ON radcheck USING btree (username);
+
+
+--
+-- Name: radgroupcheck_groupname_idx; Type: INDEX; Schema: public; Owner: {{ HADES_AGENT_USER }}; Tablespace:
+--
+
+CREATE INDEX radgroupcheck_groupname_idx ON radgroupcheck USING btree (groupname);
+
+
+--
+-- Name: radgroupreply_groupname_idx; Type: INDEX; Schema: public; Owner: {{ HADES_AGENT_USER }}; Tablespace:
+--
+
+CREATE INDEX radgroupreply_groupname_idx ON radgroupreply USING btree (groupname);
+
+
+--
+-- Name: radpostauth_port_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE INDEX radpostauth_port_idx ON radpostauth USING btree (nasipaddress, nasportid);
+
+
+--
+-- Name: radpostauth_username_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE INDEX radpostauth_username_idx ON radpostauth USING btree (username);
+
+
+--
+-- Name: radreply_username_idx; Type: INDEX; Schema: public; Owner: {{ HADES_AGENT_USER }}; Tablespace:
+--
+
+CREATE INDEX radreply_username_idx ON radreply USING btree (username);
+
+
+--
+-- Name: radusergroup_username_idx; Type: INDEX; Schema: public; Owner: {{ HADES_AGENT_USER }}; Tablespace:
+--
+
+CREATE INDEX radusergroup_username_idx ON radusergroup USING btree (username);
 
 
 --
