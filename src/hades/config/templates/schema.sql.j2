@@ -46,6 +46,12 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 CREATE EXTENSION IF NOT EXISTS {{ HADES_POSTGRESQL_FOREIGN_SERVER_FDW }} WITH SCHEMA public;
 
 
+SET search_path = public, pg_catalog;
+
+--
+-- Name: master; Type: SERVER; Schema: -; Owner: postgres
+--
+
 {%- set server_name = 'master' %}
 CREATE SERVER {{ server_name }}
     {%- if  HADES_POSTGRESQL_FOREIGN_SERVER_TYPE is defined    %} TYPE    '{{ HADES_POSTGRESQL_FOREIGN_SERVER_TYPE }}'{% endif %}
@@ -56,12 +62,12 @@ CREATE SERVER {{ server_name }}
 
 
 ALTER SERVER master OWNER TO postgres;
-
---
--- Name: USER MAPPING public SERVER atlantis_mysql; Type: USER MAPPING; Schema: -; Owner: postgres
---
-
 {%- for user_name, options in HADES_POSTGRESQL_USER_MAPPINGS.items() %}
+
+--
+-- Name: USER MAPPING {{ user_name }} SERVER {{ server_name }}; Type: USER MAPPING; Schema: -; Owner: postgres
+--
+
 CREATE USER MAPPING FOR
 {%- if user_name == 'PUBLIC' -%}
 PUBLIC
@@ -73,8 +79,6 @@ SERVER {{ server_name }} OPTIONS (
 );
 {%- endfor %}
 
-
-SET search_path = public, pg_catalog;
 
 SET default_tablespace = '';
 
