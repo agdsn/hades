@@ -139,7 +139,7 @@ run_radius() {
     local -r timeout=30
     local i
     # Wait until database is available
-    for i in {0..${timeout}}; do
+    for i in $(seq "${timeout}"); do
         python3 -m hades.common.check_db 2 &>/dev/null && break
         sleep 1
     done
