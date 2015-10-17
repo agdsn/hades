@@ -49,6 +49,40 @@ CREATE EXTENSION IF NOT EXISTS {{ HADES_POSTGRESQL_FOREIGN_SERVER_FDW }} WITH SC
 SET search_path = public, pg_catalog;
 
 --
+-- Name: safe_inet_cast(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION safe_inet_cast(inp text) RETURNS inet
+    LANGUAGE plpgsql IMMUTABLE STRICT
+    AS $$
+BEGIN
+    RETURN CAST(inp AS inet);
+EXCEPTION WHEN data_exception THEN
+    RETURN NULL;
+END;
+$$;
+
+
+ALTER FUNCTION public.safe_inet_cast(inp text) OWNER TO postgres;
+
+--
+-- Name: safe_macaddr_cast(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION safe_macaddr_cast(inp text) RETURNS macaddr
+    LANGUAGE plpgsql IMMUTABLE STRICT
+    AS $$
+BEGIN
+    RETURN CAST(inp AS macaddr);
+EXCEPTION WHEN data_exception THEN
+    RETURN NULL;
+END;
+$$;
+
+
+ALTER FUNCTION public.safe_macaddr_cast(inp text) OWNER TO postgres;
+
+--
 -- Name: master; Type: SERVER; Schema: -; Owner: postgres
 --
 
@@ -88,8 +122,16 @@ SET default_tablespace = '';
 
 CREATE FOREIGN TABLE foreign_dhcphost (
     id integer NOT NULL,
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
+    mac character(17) NOT NULL,
+    {%- else %}
     mac macaddr NOT NULL,
+    {%- endif %}
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
+    ipaddress character varying(39) NOT NULL
+    {%- else %}
     ipaddress inet NOT NULL
+    {%- endif %}
 )
 SERVER {{ server_name }}
 OPTIONS (
@@ -105,8 +147,16 @@ ALTER FOREIGN TABLE foreign_dhcphost OWNER TO postgres;
 
 CREATE MATERIALIZED VIEW dhcphost AS
  SELECT foreign_dhcphost.id,
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
+    safe_macaddr_cast(foreign_dhcphost.mac) AS mac,
+    {%- else %}
     foreign_dhcphost.mac,
+    {%- endif %}
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
+    safe_inet_cast(foreign_dhcphost.ipaddress) AS ipaddress
+    {%- else %}
     foreign_dhcphost.ipaddress
+    {%- endif %}
    FROM foreign_dhcphost
   WITH DATA;
 
@@ -143,7 +193,11 @@ ALTER FOREIGN TABLE foreign_nas OWNER TO postgres;
 CREATE FOREIGN TABLE foreign_radcheck (
     id integer NOT NULL,
     username character varying(64) NOT NULL,
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
+    nasipaddress character varying(15) NOT NULL,
+    {%- else %}
     nasipaddress inet NOT NULL,
+    {%- endif %}
     nasportid character varying(15) NOT NULL,
     attribute character varying(64) NOT NULL,
     op character(2) NOT NULL,
@@ -202,7 +256,11 @@ ALTER FOREIGN TABLE foreign_radgroupreply OWNER TO postgres;
 CREATE FOREIGN TABLE foreign_radreply (
     id integer NOT NULL,
     username character varying(64) NOT NULL,
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
+    nasipaddress character varying(15) NOT NULL,
+    {%- else %}
     nasipaddress inet NOT NULL,
+    {%- endif %}
     nasportid character varying(15) NOT NULL,
     attribute character varying(64) NOT NULL,
     op character(2) DEFAULT '='::bpchar NOT NULL,
@@ -222,7 +280,11 @@ ALTER FOREIGN TABLE foreign_radreply OWNER TO postgres;
 
 CREATE FOREIGN TABLE foreign_radusergroup (
     username character varying(64) NOT NULL,
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
+    nasipaddress character varying(15) NOT NULL,
+    {%- else %}
     nasipaddress inet NOT NULL,
+    {%- endif %}
     nasportid character varying(15) NOT NULL,
     groupname character varying(64) NOT NULL,
     priority integer NOT NULL
@@ -321,7 +383,11 @@ ALTER SEQUENCE radacct_radacctid_seq OWNED BY radacct.radacctid;
 CREATE MATERIALIZED VIEW radcheck AS
  SELECT foreign_radcheck.id,
     foreign_radcheck.username,
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
+    safe_inet_cast(foreign_radcheck.nasipaddress) AS nasipaddress,
+    {%- else %}
     foreign_radcheck.nasipaddress,
+    {%- endif %}
     foreign_radcheck.nasportid,
     foreign_radcheck.attribute,
     foreign_radcheck.op,
@@ -409,7 +475,11 @@ ALTER SEQUENCE radpostauth_id_seq OWNED BY radpostauth.id;
 CREATE MATERIALIZED VIEW radreply AS
  SELECT foreign_radreply.id,
     foreign_radreply.username,
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
+    safe_inet_cast(foreign_radreply.nasipaddress) AS nasipaddress,
+    {%- else %}
     foreign_radreply.nasipaddress,
+    {%- endif %}
     foreign_radreply.nasportid,
     foreign_radreply.attribute,
     foreign_radreply.op,
@@ -426,7 +496,11 @@ ALTER TABLE radreply OWNER TO "{{ HADES_AGENT_USER }}";
 
 CREATE MATERIALIZED VIEW radusergroup AS
  SELECT foreign_radusergroup.username,
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
+    safe_inet_cast(foreign_radusergroup.nasipaddress) AS nasipaddress,
+    {%- else %}
     foreign_radusergroup.nasipaddress,
+    {%- endif %}
     foreign_radusergroup.nasportid,
     foreign_radusergroup.groupname,
     foreign_radusergroup.priority

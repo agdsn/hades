@@ -188,6 +188,18 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
     type = collections.Mapping
 
 
+class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING(Option):
+    """Whether the ipaddress column of dhcphost has a string type"""
+    type = bool
+    default = False
+
+
+class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING(Option):
+    """Whether the mac column of dhcphost has a string type"""
+    type = bool
+    default = False
+
+
 class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS(Option):
     """Foreign data wrapper options for the dhcphost table"""
     default = {
@@ -202,6 +214,12 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS(Option):
         'table_name': 'nas',
     }
     type = collections.Mapping
+
+
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING(Option):
+    """Whether the nasipaddress column of radcheck has a string type"""
+    type = bool
+    default = False
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS(Option):
@@ -228,12 +246,24 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS(Option):
     type = collections.Mapping
 
 
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING(Option):
+    """Whether the nasipaddress column of radgroupcheck has a string type"""
+    type = bool
+    default = False
+
+
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS(Option):
     """Foreign data wrapper options for the radreply table"""
     default = {
         'table_name': 'radreply',
     }
     type = collections.Mapping
+
+
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING(Option):
+    """Whether the nasipaddress column of radgroupcheck has a string type"""
+    type = bool
+    default = False
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS(Option):
