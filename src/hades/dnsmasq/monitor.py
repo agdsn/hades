@@ -13,18 +13,10 @@ import time
 
 import netaddr
 
+from hades.common.su import drop_privileges
 from hades.config.loader import get_config, CheckWrapper
 
 logger = logging.getLogger(__name__)
-
-
-def drop_privileges(passwd, group):
-    if os.geteuid() != 0:
-        logger.error("Can't drop privileges (EUID != 0)")
-        return
-    os.setgid(group.gr_gid)
-    os.initgroups(passwd.pw_name, group.gr_gid)
-    os.setuid(passwd.pw_uid)
 
 
 def send_reload(config):
