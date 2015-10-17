@@ -3,30 +3,35 @@ set -euo pipefail
 
 readonly EX_OK=0
 readonly EX_USAGE=64
+readonly EX_UNAVAILABLE=69
 
 msg() {
     echo "$@"
 }
 
 print_usage() {
-    msg "Usage: COMMAND"
+    msg "Usage: $0 COMMAND"
     msg ""
     msg "Available commands"
-    msg "  agent        Execute the site node agent (Celery worker)"
-    msg "  auth-dhcp    Execute the DHCP server for authenticated users"
-    msg "               (dnsmasq monitored by a SignalProxyDaemon)"
-    msg "  auth-dns     Execute the DNS resolver for the authenticated users (unbound)"
-    msg "  database     Execute the database (PostgreSQL)"
-    msg "  help         Print this help message"
-    msg "  http         Execute the captive portal web server (nginx)"
-    msg "  networking   Setup networking (iptables, routing)"
-    msg "  portal       Run the captive portal WSGI application (using uWSGI)"
-    msg "  radius       Run the RADIUS server (freeRADIUS)"
-    msg "  shell        Start a bash shell for debugging"
-    msg "  unauth-dhcp  Run the DHCP server for the unauthenticated users"
-    msg "               (no-op and handled by the unauth-dns dnsmasq)"
-    msg "  unauth-dns   Run the DNS resolver (dnsmasq) for the unauth VLAN"
-    msg "  vrrp         Run the VRRP daemon (keepalived)"
+    msg "  agent          Execute the site node agent (Celery worker)"
+    msg "  auth-dhcp      Execute the DHCP server for authenticated users"
+    msg "                 (dnsmasq monitored by a SignalProxyDaemon)"
+    msg "  auth-dns       Execute the DNS resolver for the authenticated users"
+    msg "                 (unbound)"
+    msg "  database       Execute the database (PostgreSQL)"
+    msg "  help           Print this help message"
+    msg "  http           Execute the captive portal web server (nginx)"
+    msg "  init-database  Create database cluster, database, roles, tables,"
+    msg "                 views and refresh materialized views."
+    msg "                 Add the --clear flag to delete the database."
+    msg "  networking     Setup networking (iptables, routing)"
+    msg "  portal         Run the captive portal WSGI application (using uWSGI)"
+    msg "  radius         Run the RADIUS server (freeRADIUS)"
+    msg "  shell          Start a bash shell for debugging"
+    msg "  unauth-dhcp    Run the DHCP server for the unauthenticated users"
+    msg "                 (no-op and handled by the unauth-dns dnsmasq)"
+    msg "  unauth-dns     Run the DNS resolver (dnsmasq) for the unauth VLAN"
+    msg "  vrrp           Run the VRRP daemon (keepalived)"
 }
 
 run_agent() {
@@ -43,31 +48,60 @@ run_auth_dhcp() {
     exec python3 -m hades.dnsmasq.monitor "${HADES_CONFIG_DIR}/auth-dnsmasq.conf"
 }
 
-run_database() {
-    # PostgreSQL offers no UID/GID configuration option that allows dropping
-    # root privileges after the start of PostgreSQL, one must start PostgreSQL
-    # as the postgres user.
-    # We cannot use su, because su does fork a child keeps running in the
-    # background instead of simply execing and becoming the target program,
-    # which caused very behavior with pg_ctl stop.
-    # Furthermore su would be PID 1 instead of the postgresql master process,
-    # which could potentially break some docker functionality
-    if [[ $(whoami) != postgres ]]; then
-        msg "This command must be run with the -u postgres option of docker run"
-        exit ${EX_USAGE}
+export_postgres_env() {
+    export PATH="/usr/lib/postgresql/${PGVERSION}/bin:${PATH}"
+    export PGDATA="/var/lib/postgresql/hades"
+}
+
+run_init_database() {
+    export_postgres_env
+    if [[ $(id -u) = 0 ]]; then
+        exec python3 -m hades.common.su postgres "$0" init-database "$@"
     fi
-    export PATH="/usr/lib/postgresql/${PG_VERSION}/bin:${PATH}"
-    export PGDATA="/var/lib/postgresql/${PG_VERSION}/${PG_CLUSTER}"
-    local -r PGCONFIG="/etc/postgresql/${PG_VERSION}/${PG_CLUSTER}/postgresql.conf"
-    mkdir -p "/var/run/postgresql/${PG_VERSION}-${PG_CLUSTER}.pg_stat_tmp"
-    pg_ctl start -w -s -o "-c config_file=${PGCONFIG}"
-    createuser "${HADES_RADIUS_USER}"
-    createuser "${HADES_AGENT_USER}"
-    createuser "${HADES_PORTAL_USER}"
+    local clear=
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --clear) clear=1;;
+            *)       msg "Unknown option $1"; exit "${EX_USAGE}";;
+        esac
+        shift
+    done
+    clear_pgdata() {
+        msg "Clearing ${PGDATA}"
+        shopt -s dotglob
+        rm -rf "${PGDATA}"/*
+        shopt -u dotglob
+    }
+    [[ -n ${clear} ]] && clear_pgdata
+    if [[ -f "${PGDATA}/.initialized" ]]; then
+        msg "Database already initialized. Use --clear to delete."
+        exit "${EX_UNAVAILABLE}"
+    fi
+    cleanup_failure() {
+        pg_ctl stop -s || true
+        clear_pgdata
+    }
+    trap cleanup_failure EXIT HUP INT QUIT ABRT
+    pg_ctl initdb -s -o "--auth-host=reject --auth-local=peer --encoding=UTF-8 --locale=C --nosync"
+    python3 -m hades.config.generate postgresql.conf.j2 > "${PGDATA}/postgresql.conf"
+    pg_ctl start -w -s
+    local user
+    for user in "${HADES_RADIUS_USER}" "${HADES_AGENT_USER}" "${HADES_PORTAL_USER}"; do
+        createuser "${user}"
+    done
     createdb "${HADES_POSTGRESQL_DATABASE}"
-    python3 -m hades.config.generate schema.sql.j2 | psql --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "${HADES_POSTGRESQL_DATABASE}"
-    pg_ctl stop -w -s -o "-c config_file=${PGCONFIG}"
-    exec postgres -c config_file="${PGCONFIG}"
+    python3 -m hades.config.generate schema.sql.j2 | psql --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "${HADES_POSTGRESQL_DATABASE}"
+    touch "${PGDATA}/.initialized"
+    pg_ctl stop -s
+    trap - EXIT HUP INT QUIT ABRT
+}
+
+run_database() {
+    export_postgres_env
+    if [[ ! -f "${PGDATA}/.initialized" ]]; then
+        $0 init-database "$@"
+    fi
+    exec python3 -m hades.common.su postgres postgres
 }
 
 run_http() {
@@ -143,7 +177,7 @@ main() {
         shift
     fi
     case "$command" in
-        agent|auth-dhcp|auth-dns|database|http|networking|portal|radius|shell|unauth-dhcp|unauth-dns|vrrp)
+        agent|auth-dhcp|auth-dns|database|http|init-database|networking|portal|radius|shell|unauth-dhcp|unauth-dns|vrrp)
             "run_${command//-/_}" "$@"
             ;;
         help|-h|--help)

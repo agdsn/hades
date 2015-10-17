@@ -3,7 +3,7 @@ MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
 
 # An undocumented variable named PGCLUSTER is apparently interpreted by newer
 # versions of psql, therefore we introduce an underscore
-ENV LANG=C.UTF-8 PG_VERSION=9.4 PG_CLUSTER=main
+ENV LANG=C.UTF-8 PGVERSION=9.4
 COPY docker/etc/apt/ /etc/apt/
 
 RUN apt-get update && apt-get install \
@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install \
     npm \
     python3-pip \
     postgresql \
-    postgresql-server-dev-${PG_VERSION} \
+    postgresql-server-dev-${PGVERSION} \
     python3-babel \
     python3-celery \
     python3-dev \
@@ -43,8 +43,7 @@ RUN apt-get update && apt-get install \
     Flask-Babel \
     pyroute2 \
     && npm install -g bower \
-    && pg_dropcluster ${PG_VERSION} ${PG_CLUSTER} \
-    && pg_createcluster --locale C -e UTF-8 ${PG_VERSION} ${PG_CLUSTER}
+    && pg_dropcluster ${PGVERSION} main
 
 COPY docker/rights.sh docker/mysql_fdw.sh /build/
 RUN /build/rights.sh && /build/mysql_fdw.sh
