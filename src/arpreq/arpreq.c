@@ -97,9 +97,8 @@ arpreq(PyObject * self, PyObject * args) {
                  eap[0], eap[1], eap[2], eap[3], eap[4], eap[5]);
         return Py_BuildValue("s", mac);
     } else {
-        PyObject * rv = Py_None;
-        Py_INCREF(rv);
-        return rv;
+        Py_INCREF(Py_None);
+        return Py_None;
     }
 }
 
