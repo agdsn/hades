@@ -85,7 +85,7 @@ authorize {
 	#
 	#  It takes care of processing the 'raddb/hints' and the
 	#  'raddb/huntgroups' files.
-	preprocess
+#	preprocess
 
 	#
 	#  If you want to have a log of authentication requests,
@@ -331,7 +331,7 @@ authenticate {
 #  Pre-accounting.  Decide which accounting type to use.
 #
 preacct {
-	preprocess
+#	preprocess
 
 	#
 	#  Session start times are *implied* in RADIUS.
