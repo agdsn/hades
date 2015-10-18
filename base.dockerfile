@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install \
     dnsmasq \
     freeradius \
     freeradius-postgresql \
+    freeradius-utils \
     git \
     iptables \
     keepalived \
