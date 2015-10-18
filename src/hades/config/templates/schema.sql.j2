@@ -49,7 +49,7 @@ CREATE EXTENSION IF NOT EXISTS {{ HADES_POSTGRESQL_FOREIGN_SERVER_FDW }} WITH SC
 SET search_path = public, pg_catalog;
 
 --
--- Name: safe_inet_cast(text); Type: FUNCTION; Schema: public; Owner: postgres
+-- Name: safe_inet_cast(text); Type: FUNCTION; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 CREATE FUNCTION safe_inet_cast(inp text) RETURNS inet
@@ -63,10 +63,10 @@ END;
 $$;
 
 
-ALTER FUNCTION public.safe_inet_cast(inp text) OWNER TO postgres;
+ALTER FUNCTION public.safe_inet_cast(inp text) OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
--- Name: safe_macaddr_cast(text); Type: FUNCTION; Schema: public; Owner: postgres
+-- Name: safe_macaddr_cast(text); Type: FUNCTION; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 CREATE FUNCTION safe_macaddr_cast(inp text) RETURNS macaddr
@@ -80,10 +80,10 @@ END;
 $$;
 
 
-ALTER FUNCTION public.safe_macaddr_cast(inp text) OWNER TO postgres;
+ALTER FUNCTION public.safe_macaddr_cast(inp text) OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
--- Name: master; Type: SERVER; Schema: -; Owner: postgres
+-- Name: master; Type: SERVER; Schema: -; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 {%- set server_name = 'master' %}
@@ -95,11 +95,11 @@ CREATE SERVER {{ server_name }}
 );
 
 
-ALTER SERVER master OWNER TO postgres;
+ALTER SERVER master OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 {%- for user_name, options in HADES_POSTGRESQL_USER_MAPPINGS.items() %}
 
 --
--- Name: USER MAPPING {{ user_name }} SERVER {{ server_name }}; Type: USER MAPPING; Schema: -; Owner: postgres
+-- Name: USER MAPPING {{ user_name }} SERVER {{ server_name }}; Type: USER MAPPING; Schema: -; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 CREATE USER MAPPING FOR
@@ -117,7 +117,7 @@ SERVER {{ server_name }} OPTIONS (
 SET default_tablespace = '';
 
 --
--- Name: foreign_dhcphost; Type: FOREIGN TABLE; Schema: public; Owner: postgres; Tablespace:
+-- Name: foreign_dhcphost; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE FOREIGN TABLE foreign_dhcphost (
@@ -139,7 +139,7 @@ OPTIONS (
 );
 
 
-ALTER FOREIGN TABLE foreign_dhcphost OWNER TO postgres;
+ALTER FOREIGN TABLE foreign_dhcphost OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
 -- Name: dhcphost; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ HADES_AGENT_USER }}; Tablespace:
@@ -164,7 +164,7 @@ CREATE MATERIALIZED VIEW dhcphost AS
 ALTER TABLE dhcphost OWNER TO "{{ HADES_AGENT_USER }}";
 
 --
--- Name: foreign_nas; Type: FOREIGN TABLE; Schema: public; Owner: postgres; Tablespace:
+-- Name: foreign_nas; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE FOREIGN TABLE foreign_nas (
@@ -184,10 +184,10 @@ OPTIONS (
 );
 
 
-ALTER FOREIGN TABLE foreign_nas OWNER TO postgres;
+ALTER FOREIGN TABLE foreign_nas OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
--- Name: foreign_radcheck; Type: FOREIGN TABLE; Schema: public; Owner: postgres; Tablespace:
+-- Name: foreign_radcheck; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE FOREIGN TABLE foreign_radcheck (
@@ -209,10 +209,10 @@ OPTIONS (
 );
 
 
-ALTER FOREIGN TABLE foreign_radcheck OWNER TO postgres;
+ALTER FOREIGN TABLE foreign_radcheck OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
--- Name: foreign_radgroupcheck; Type: FOREIGN TABLE; Schema: public; Owner: postgres; Tablespace:
+-- Name: foreign_radgroupcheck; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE FOREIGN TABLE foreign_radgroupcheck (
@@ -228,10 +228,10 @@ OPTIONS (
 );
 
 
-ALTER FOREIGN TABLE foreign_radgroupcheck OWNER TO postgres;
+ALTER FOREIGN TABLE foreign_radgroupcheck OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
--- Name: foreign_radgroupreply; Type: FOREIGN TABLE; Schema: public; Owner: postgres; Tablespace:
+-- Name: foreign_radgroupreply; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE FOREIGN TABLE foreign_radgroupreply (
@@ -247,10 +247,10 @@ OPTIONS (
 );
 
 
-ALTER FOREIGN TABLE foreign_radgroupreply OWNER TO postgres;
+ALTER FOREIGN TABLE foreign_radgroupreply OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
--- Name: foreign_radreply; Type: FOREIGN TABLE; Schema: public; Owner: postgres; Tablespace:
+-- Name: foreign_radreply; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE FOREIGN TABLE foreign_radreply (
@@ -272,10 +272,10 @@ OPTIONS (
 );
 
 
-ALTER FOREIGN TABLE foreign_radreply OWNER TO postgres;
+ALTER FOREIGN TABLE foreign_radreply OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
--- Name: foreign_radusergroup; Type: FOREIGN TABLE; Schema: public; Owner: postgres; Tablespace:
+-- Name: foreign_radusergroup; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE FOREIGN TABLE foreign_radusergroup (
@@ -295,7 +295,7 @@ OPTIONS (
 );
 
 
-ALTER FOREIGN TABLE foreign_radusergroup OWNER TO postgres;
+ALTER FOREIGN TABLE foreign_radusergroup OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
 -- Name: nas; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ HADES_AGENT_USER }}; Tablespace:
@@ -320,7 +320,7 @@ ALTER TABLE nas OWNER TO "{{ HADES_AGENT_USER }}";
 SET default_with_oids = false;
 
 --
--- Name: radacct; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+-- Name: radacct; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE TABLE radacct (
@@ -353,10 +353,10 @@ CREATE TABLE radacct (
 );
 
 
-ALTER TABLE radacct OWNER TO postgres;
+ALTER TABLE radacct OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
--- Name: radacct_radacctid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: radacct_radacctid_seq; Type: SEQUENCE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 CREATE SEQUENCE radacct_radacctid_seq
@@ -367,10 +367,10 @@ CREATE SEQUENCE radacct_radacctid_seq
     CACHE 1;
 
 
-ALTER TABLE radacct_radacctid_seq OWNER TO postgres;
+ALTER TABLE radacct_radacctid_seq OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
--- Name: radacct_radacctid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: radacct_radacctid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 ALTER SEQUENCE radacct_radacctid_seq OWNED BY radacct.radacctid;
@@ -431,7 +431,7 @@ CREATE MATERIALIZED VIEW radgroupreply AS
 ALTER TABLE radgroupreply OWNER TO "{{ HADES_AGENT_USER }}";
 
 --
--- Name: radpostauth; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+-- Name: radpostauth; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE TABLE radpostauth (
@@ -445,10 +445,10 @@ CREATE TABLE radpostauth (
 );
 
 
-ALTER TABLE radpostauth OWNER TO postgres;
+ALTER TABLE radpostauth OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
--- Name: radpostauth_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: radpostauth_id_seq; Type: SEQUENCE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 CREATE SEQUENCE radpostauth_id_seq
@@ -459,10 +459,10 @@ CREATE SEQUENCE radpostauth_id_seq
     CACHE 1;
 
 
-ALTER TABLE radpostauth_id_seq OWNER TO postgres;
+ALTER TABLE radpostauth_id_seq OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
--- Name: radpostauth_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: radpostauth_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 ALTER SEQUENCE radpostauth_id_seq OWNED BY radpostauth.id;
@@ -511,21 +511,21 @@ CREATE MATERIALIZED VIEW radusergroup AS
 ALTER TABLE radusergroup OWNER TO "{{ HADES_AGENT_USER }}";
 
 --
--- Name: radacctid; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: radacctid; Type: DEFAULT; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 ALTER TABLE ONLY radacct ALTER COLUMN radacctid SET DEFAULT nextval('radacct_radacctid_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: id; Type: DEFAULT; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 ALTER TABLE ONLY radpostauth ALTER COLUMN id SET DEFAULT nextval('radpostauth_id_seq'::regclass);
 
 
 --
--- Name: radacct_acctuniqueid_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace:
+-- Name: radacct_acctuniqueid_key; Type: CONSTRAINT; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 ALTER TABLE ONLY radacct
@@ -533,7 +533,7 @@ ALTER TABLE ONLY radacct
 
 
 --
--- Name: radacct_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace:
+-- Name: radacct_pkey; Type: CONSTRAINT; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 ALTER TABLE ONLY radacct
@@ -541,7 +541,7 @@ ALTER TABLE ONLY radacct
 
 
 --
--- Name: radpostauth_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace:
+-- Name: radpostauth_pkey; Type: CONSTRAINT; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 ALTER TABLE ONLY radpostauth
@@ -563,14 +563,14 @@ CREATE INDEX nas_nasname_idx ON nas USING btree (nasname);
 
 
 --
--- Name: radacct_active_user_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace:
+-- Name: radacct_active_user_idx; Type: INDEX; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE INDEX radacct_active_user_idx ON radacct USING btree (username, nasipaddress, acctsessionid) WHERE (acctstoptime IS NULL);
 
 
 --
--- Name: radacct_start_user_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace:
+-- Name: radacct_start_user_idx; Type: INDEX; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE INDEX radacct_start_user_idx ON radacct USING btree (acctstarttime, username);
@@ -598,14 +598,14 @@ CREATE INDEX radgroupreply_groupname_idx ON radgroupreply USING btree (groupname
 
 
 --
--- Name: radpostauth_port_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace:
+-- Name: radpostauth_port_idx; Type: INDEX; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE INDEX radpostauth_port_idx ON radpostauth USING btree (nasipaddress, nasportid);
 
 
 --
--- Name: radpostauth_username_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace:
+-- Name: radpostauth_username_idx; Type: INDEX; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE INDEX radpostauth_username_idx ON radpostauth USING btree (username);
@@ -626,22 +626,22 @@ CREATE INDEX radusergroup_username_idx ON radusergroup USING btree (username);
 
 
 --
--- Name: public; Type: ACL; Schema: -; Owner: postgres
+-- Name: public; Type: ACL; Schema: -; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM postgres;
-GRANT ALL ON SCHEMA public TO postgres;
+REVOKE ALL ON SCHEMA public FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON SCHEMA public TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --
--- Name: foreign_dhcphost; Type: ACL; Schema: public; Owner: postgres
+-- Name: foreign_dhcphost; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 REVOKE ALL ON TABLE foreign_dhcphost FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_dhcphost FROM postgres;
-GRANT ALL ON TABLE foreign_dhcphost TO postgres;
+REVOKE ALL ON TABLE foreign_dhcphost FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE foreign_dhcphost TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE foreign_dhcphost TO "{{ HADES_AGENT_USER }}";
 
 
@@ -652,66 +652,66 @@ GRANT SELECT ON TABLE foreign_dhcphost TO "{{ HADES_AGENT_USER }}";
 REVOKE ALL ON TABLE dhcphost FROM PUBLIC;
 REVOKE ALL ON TABLE dhcphost FROM "{{ HADES_AGENT_USER }}";
 GRANT ALL ON TABLE dhcphost TO "{{ HADES_AGENT_USER }}";
-GRANT ALL ON TABLE dhcphost TO postgres;
+GRANT ALL ON TABLE dhcphost TO "{{ HADES_POSTGRESQL_USER }}";
 
 
 --
--- Name: foreign_nas; Type: ACL; Schema: public; Owner: postgres
+-- Name: foreign_nas; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 REVOKE ALL ON TABLE foreign_nas FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_nas FROM postgres;
-GRANT ALL ON TABLE foreign_nas TO postgres;
+REVOKE ALL ON TABLE foreign_nas FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE foreign_nas TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE foreign_nas TO "{{ HADES_AGENT_USER }}";
 
 
 --
--- Name: foreign_radcheck; Type: ACL; Schema: public; Owner: postgres
+-- Name: foreign_radcheck; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 REVOKE ALL ON TABLE foreign_radcheck FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_radcheck FROM postgres;
-GRANT ALL ON TABLE foreign_radcheck TO postgres;
+REVOKE ALL ON TABLE foreign_radcheck FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE foreign_radcheck TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE foreign_radcheck TO "{{ HADES_AGENT_USER }}";
 
 
 --
--- Name: foreign_radgroupcheck; Type: ACL; Schema: public; Owner: postgres
+-- Name: foreign_radgroupcheck; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 REVOKE ALL ON TABLE foreign_radgroupcheck FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_radgroupcheck FROM postgres;
-GRANT ALL ON TABLE foreign_radgroupcheck TO postgres;
+REVOKE ALL ON TABLE foreign_radgroupcheck FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE foreign_radgroupcheck TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE foreign_radgroupcheck TO "{{ HADES_AGENT_USER }}";
 
 
 --
--- Name: foreign_radgroupreply; Type: ACL; Schema: public; Owner: postgres
+-- Name: foreign_radgroupreply; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 REVOKE ALL ON TABLE foreign_radgroupreply FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_radgroupreply FROM postgres;
-GRANT ALL ON TABLE foreign_radgroupreply TO postgres;
+REVOKE ALL ON TABLE foreign_radgroupreply FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE foreign_radgroupreply TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE foreign_radgroupreply TO "{{ HADES_AGENT_USER }}";
 
 
 --
--- Name: foreign_radreply; Type: ACL; Schema: public; Owner: postgres
+-- Name: foreign_radreply; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 REVOKE ALL ON TABLE foreign_radreply FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_radreply FROM postgres;
-GRANT ALL ON TABLE foreign_radreply TO postgres;
+REVOKE ALL ON TABLE foreign_radreply FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE foreign_radreply TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE foreign_radreply TO "{{ HADES_AGENT_USER }}";
 
 
 --
--- Name: foreign_radusergroup; Type: ACL; Schema: public; Owner: postgres
+-- Name: foreign_radusergroup; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 REVOKE ALL ON TABLE foreign_radusergroup FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_radusergroup FROM postgres;
-GRANT ALL ON TABLE foreign_radusergroup TO postgres;
+REVOKE ALL ON TABLE foreign_radusergroup FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE foreign_radusergroup TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE foreign_radusergroup TO "{{ HADES_AGENT_USER }}";
 
 
@@ -722,29 +722,29 @@ GRANT SELECT ON TABLE foreign_radusergroup TO "{{ HADES_AGENT_USER }}";
 REVOKE ALL ON TABLE nas FROM PUBLIC;
 REVOKE ALL ON TABLE nas FROM "{{ HADES_AGENT_USER }}";
 GRANT ALL ON TABLE nas TO "{{ HADES_AGENT_USER }}";
-GRANT ALL ON TABLE nas TO postgres;
+GRANT ALL ON TABLE nas TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE nas TO "{{ HADES_RADIUS_USER }}";
 
 
 --
--- Name: radacct; Type: ACL; Schema: public; Owner: postgres
+-- Name: radacct; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 REVOKE ALL ON TABLE radacct FROM PUBLIC;
-REVOKE ALL ON TABLE radacct FROM postgres;
-GRANT ALL ON TABLE radacct TO postgres;
+REVOKE ALL ON TABLE radacct FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE radacct TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT,INSERT,UPDATE ON TABLE radacct TO "{{ HADES_RADIUS_USER }}";
 GRANT SELECT,DELETE ON TABLE radacct TO "{{ HADES_AGENT_USER }}";
 GRANT SELECT ON TABLE radacct TO "{{ HADES_PORTAL_USER }}";
 
 
 --
--- Name: radacct_radacctid_seq; Type: ACL; Schema: public; Owner: postgres
+-- Name: radacct_radacctid_seq; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 REVOKE ALL ON SEQUENCE radacct_radacctid_seq FROM PUBLIC;
-REVOKE ALL ON SEQUENCE radacct_radacctid_seq FROM postgres;
-GRANT ALL ON SEQUENCE radacct_radacctid_seq TO postgres;
+REVOKE ALL ON SEQUENCE radacct_radacctid_seq FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON SEQUENCE radacct_radacctid_seq TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT,USAGE ON SEQUENCE radacct_radacctid_seq TO "{{ HADES_RADIUS_USER }}";
 
 
@@ -755,7 +755,7 @@ GRANT SELECT,USAGE ON SEQUENCE radacct_radacctid_seq TO "{{ HADES_RADIUS_USER }}
 REVOKE ALL ON TABLE radcheck FROM PUBLIC;
 REVOKE ALL ON TABLE radcheck FROM "{{ HADES_AGENT_USER }}";
 GRANT ALL ON TABLE radcheck TO "{{ HADES_AGENT_USER }}";
-GRANT ALL ON TABLE radcheck TO postgres;
+GRANT ALL ON TABLE radcheck TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE radcheck TO "{{ HADES_RADIUS_USER }}";
 
 
@@ -766,7 +766,7 @@ GRANT SELECT ON TABLE radcheck TO "{{ HADES_RADIUS_USER }}";
 REVOKE ALL ON TABLE radgroupcheck FROM PUBLIC;
 REVOKE ALL ON TABLE radgroupcheck FROM "{{ HADES_AGENT_USER }}";
 GRANT ALL ON TABLE radgroupcheck TO "{{ HADES_AGENT_USER }}";
-GRANT ALL ON TABLE radgroupcheck TO postgres;
+GRANT ALL ON TABLE radgroupcheck TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE radgroupcheck TO "{{ HADES_RADIUS_USER }}";
 
 
@@ -777,29 +777,29 @@ GRANT SELECT ON TABLE radgroupcheck TO "{{ HADES_RADIUS_USER }}";
 REVOKE ALL ON TABLE radgroupreply FROM PUBLIC;
 REVOKE ALL ON TABLE radgroupreply FROM "{{ HADES_AGENT_USER }}";
 GRANT ALL ON TABLE radgroupreply TO "{{ HADES_AGENT_USER }}";
-GRANT ALL ON TABLE radgroupreply TO postgres;
+GRANT ALL ON TABLE radgroupreply TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE radgroupreply TO "{{ HADES_RADIUS_USER }}";
 
 
 --
--- Name: radpostauth; Type: ACL; Schema: public; Owner: postgres
+-- Name: radpostauth; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 REVOKE ALL ON TABLE radpostauth FROM PUBLIC;
-REVOKE ALL ON TABLE radpostauth FROM postgres;
-GRANT ALL ON TABLE radpostauth TO postgres;
+REVOKE ALL ON TABLE radpostauth FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE radpostauth TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT,INSERT,UPDATE ON TABLE radpostauth TO "{{ HADES_RADIUS_USER }}";
 GRANT SELECT,DELETE ON TABLE radpostauth TO "{{ HADES_AGENT_USER }}";
 GRANT SELECT ON TABLE radpostauth TO "{{ HADES_PORTAL_USER }}";
 
 
 --
--- Name: radpostauth_id_seq; Type: ACL; Schema: public; Owner: postgres
+-- Name: radpostauth_id_seq; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
 REVOKE ALL ON SEQUENCE radpostauth_id_seq FROM PUBLIC;
-REVOKE ALL ON SEQUENCE radpostauth_id_seq FROM postgres;
-GRANT ALL ON SEQUENCE radpostauth_id_seq TO postgres;
+REVOKE ALL ON SEQUENCE radpostauth_id_seq FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON SEQUENCE radpostauth_id_seq TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT,USAGE ON SEQUENCE radpostauth_id_seq TO "{{ HADES_RADIUS_USER }}";
 
 
@@ -810,7 +810,7 @@ GRANT SELECT,USAGE ON SEQUENCE radpostauth_id_seq TO "{{ HADES_RADIUS_USER }}";
 REVOKE ALL ON TABLE radreply FROM PUBLIC;
 REVOKE ALL ON TABLE radreply FROM "{{ HADES_AGENT_USER }}";
 GRANT ALL ON TABLE radreply TO "{{ HADES_AGENT_USER }}";
-GRANT ALL ON TABLE radreply TO postgres;
+GRANT ALL ON TABLE radreply TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE radreply TO "{{ HADES_RADIUS_USER }}";
 GRANT SELECT ON TABLE radreply TO "{{ HADES_PORTAL_USER }}";
 
@@ -822,7 +822,7 @@ GRANT SELECT ON TABLE radreply TO "{{ HADES_PORTAL_USER }}";
 REVOKE ALL ON TABLE radusergroup FROM PUBLIC;
 REVOKE ALL ON TABLE radusergroup FROM "{{ HADES_AGENT_USER }}";
 GRANT ALL ON TABLE radusergroup TO "{{ HADES_AGENT_USER }}";
-GRANT ALL ON TABLE radusergroup TO postgres;
+GRANT ALL ON TABLE radusergroup TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE radusergroup TO "{{ HADES_RADIUS_USER }}";
 GRANT SELECT ON TABLE radusergroup TO "{{ HADES_PORTAL_USER }}";
 

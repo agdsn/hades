@@ -176,8 +176,6 @@ def user_mapping_for_user_exists(user_option_name):
         user_name = config[user_option_name]
         if 'PUBLIC' in config[user_option_name]:
             return
-        if 'postgres' not in value:
-            raise ConfigError(name, "No mapping for user postgres")
         if user_name not in value:
             raise ConfigError(name, "No mapping for user {} defined in "
                                     "option {}"

@@ -153,6 +153,12 @@ class HADES_AGENT_HOME(Option):
 ######################
 
 
+class HADES_POSTGRESQL_USER(Option):
+    """User the PostgreSQL database is running as"""
+    type = str
+    default = 'postgres'
+
+
 class HADES_POSTGRESQL_DATABASE(Option):
     """Name of the PostgreSQL database on the site node"""
     default = 'hades'
@@ -278,7 +284,10 @@ class HADES_POSTGRESQL_USER_MAPPINGS(Option):
     """User mappings from local database users to users on the foreign database
     server"""
     type = collections.Mapping
-    static_check = check.user_mapping_for_user_exists('HADES_AGENT_USER')
+    static_check = check.all(
+        check.user_mapping_for_user_exists('HADES_POSTGRESQL_USER'),
+        check.user_mapping_for_user_exists('HADES_AGENT_USER'),
+    )
 
 
 ########################

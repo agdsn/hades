@@ -56,7 +56,7 @@ export_postgres_env() {
 run_init_database() {
     export_postgres_env
     if [[ $(id -u) = 0 ]]; then
-        exec python3 -m hades.common.su postgres "$0" init-database "$@"
+        exec python3 -m hades.common.su "${HADES_POSTGRESQL_USER}" "$0" init-database "$@"
     fi
     local clear=
     while [[ $# -gt 0 ]]; do
@@ -101,7 +101,7 @@ run_database() {
     if [[ ! -f "${PGDATA}/.initialized" ]]; then
         $0 init-database "$@"
     fi
-    exec python3 -m hades.common.su postgres postgres
+    exec python3 -m hades.common.su "${HADES_POSTGRESQL_USER}" postgres
 }
 
 run_http() {
