@@ -7,6 +7,8 @@ ENV LANG=C.UTF-8 PGVERSION=9.4
 COPY docker/etc/apt/ /etc/apt/
 
 RUN apt-get update && apt-get install \
+    build-essential \
+    curl \
     dns-root-data \
     dnsmasq \
     freeradius \
@@ -17,7 +19,6 @@ RUN apt-get update && apt-get install \
     libmysqlclient-dev \
     nginx \
     npm \
-    python3-pip \
     postgresql \
     postgresql-server-dev-${PGVERSION} \
     python3-babel \
@@ -26,16 +27,15 @@ RUN apt-get update && apt-get install \
     python3-flask \
     python3-jinja2 \
     python3-netaddr \
+    python3-pip \
     python3-psycopg2 \
     python3-setuptools \
     python3-sqlalchemy \
     python3-sqlalchemy-ext \
     unbound \
+    unzip \
     uwsgi \
     uwsgi-plugin-python3 \
-    curl \
-    build-essential \
-    unzip \
     && apt-get clean \
     && ln -s /usr/bin/nodejs /usr/bin/node \
     && npm install -g bower \
