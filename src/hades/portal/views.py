@@ -33,17 +33,18 @@ messages = {
 
 @app.route("/")
 def index():
+    ip = request.remote_addr
     try:
-        mac = arpreq.arpreq(request.remote_addr)
-    except arpreq.ARPError as e:
+        mac = arpreq.arpreq(ip)
+    except OSError as e:
         content = render_template("error.html",
-                                  message=_("Could not determine your MAC "
-                                            "address (ARPError)."))
+                                  message=_("An error occurred while resolving "
+                                            "IP address into a MAC address."))
         return content, 500
     if mac is None:
         content = render_template("error.html",
-                                  error=_("Could not determine your MAC "
-                                          "address (no result)."))
+                                  error=_("No MAC address could be found for "
+                                          "your IP address {}".format(ip)))
         return content, 500
     mac_groups = get_groups(mac)
     latest_auth_attempt = get_latest_auth_attempt(mac)

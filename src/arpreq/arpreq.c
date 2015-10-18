@@ -15,7 +15,6 @@
 #include <ifaddrs.h>
 
 struct arpreq_state {
-    PyObject *error;
     int socket;
 };
 
@@ -64,8 +63,7 @@ arpreq(PyObject * self, PyObject * args) {
 
     struct ifaddrs * head_ifa;
     if (getifaddrs(&head_ifa) != 0) {
-        set_error(st->error, "getifaddrs: %s (%d)\n", strerror(errno), errno);
-        return NULL;
+        return PyErr_SetFromErrno(PyExc_OSError);
     }
 
     for (struct ifaddrs * ifa = head_ifa; ifa != NULL; ifa = ifa->ifa_next) {
@@ -89,8 +87,7 @@ arpreq(PyObject * self, PyObject * args) {
     }
 
     if (ioctl(st->socket, SIOCGARP, &arpreq) < 0) {
-        set_error(st->error, "ioctl failed: %s (%d)\n", strerror(errno), errno);
-        return NULL;
+        return PyErr_SetFromErrno(PyExc_OSError);
     }
 
     if (arpreq.arp_flags & ATF_COM) {
@@ -113,15 +110,8 @@ static PyMethodDef arpreq_methods[] = {
 
 #if PY_MAJOR_VERSION >= 3
 
-static int arpreq_traverse(PyObject *m, visitproc visit, void *arg) {
-    Py_VISIT(GETSTATE(m)->error);
-    return 0;
-}
-
 static int arpreq_clear(PyObject *m) {
-    struct arpreq_state *st = GETSTATE(m);
-    Py_CLEAR(st->error);
-    close(st->socket);
+    close(GETSTATE(m)->socket);
     return 0;
 }
 
@@ -132,7 +122,7 @@ static struct PyModuleDef moduledef = {
         sizeof(struct arpreq_state),
         arpreq_methods,
         NULL,
-        arpreq_traverse,
+        NULL,
         arpreq_clear,
         NULL
 };
@@ -161,16 +151,10 @@ initarpreq(void)
 
     st->socket = socket(AF_INET, SOCK_DGRAM, 0);
     if (st->socket == -1) {
-        PyErr_SetFromErrno(PyExc_IOError);
+        PyErr_SetFromErrno(PyExc_OSError);
         Py_DECREF(module);
         INITERROR;
     }
-    st->error = PyErr_NewException("arpreq.ARPError", PyExc_IOError, NULL);
-    if (st->error == NULL) {
-        Py_DECREF(module);
-        INITERROR;
-    }
-    PyModule_AddObject(module, "ARPError", st->error);
 #if PY_MAJOR_VERSION >= 3
     return module;
 #endif
