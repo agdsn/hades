@@ -109,9 +109,8 @@ static PyMethodDef arpreq_methods[] = {
 
 #if PY_MAJOR_VERSION >= 3
 
-static int arpreq_clear(PyObject *m) {
+static void arpreq_free(void *m) {
     close(GETSTATE(m)->socket);
-    return 0;
 }
 
 static struct PyModuleDef moduledef = {
@@ -122,8 +121,8 @@ static struct PyModuleDef moduledef = {
         arpreq_methods,
         NULL,
         NULL,
-        arpreq_clear,
-        NULL
+        NULL,
+        arpreq_free
 };
 
 #define INITERROR return NULL
