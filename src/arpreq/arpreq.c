@@ -84,8 +84,8 @@ arpreq(PyObject * self, PyObject * args) {
     }
     freeifaddrs(head_ifa);
     if (arpreq.arp_dev[0] == 0) {
-        set_error(st->error, "Requested address is not available on any local subnet.\n");
-        return NULL;
+        Py_INCREF(Py_None);
+        return Py_None;
     }
 
     if (ioctl(st->socket, SIOCGARP, &arpreq) < 0) {
