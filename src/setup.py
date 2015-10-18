@@ -1,7 +1,7 @@
 from setuptools import Extension, find_packages, setup
 
 arpreq = Extension('arpreq', sources=['arpreq/arpreq.c'],
-                   extra_compile_args=['-std=c11'])
+                   extra_compile_args=['-std=c99'])
 
 setup(name='hades',
       version='0.1',
