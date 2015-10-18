@@ -35,7 +35,8 @@ client localhost {
 
 	#  OR, you can use an IPv6 address, but not both
 	#  at the same time.
-#	ipv6addr = ::	# any.  ::1 == localhost
+	# :: == any,  ::1 == localhost
+	ipv6addr = ::1
 
 	#
 	#  A note on DNS:  We STRONGLY recommend using IP addresses
@@ -98,7 +99,7 @@ client localhost {
 	#  The default secret below is only for testing, and should
 	#  not be used in any real environment.
 	#
-	secret		= testing123
+	secret		= {{ HADES_RADIUS_LOCALHOST_SECRET }}
 
 	#
 	#  Old-style clients do not send a Message-Authenticator

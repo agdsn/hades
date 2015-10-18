@@ -354,6 +354,23 @@ listen {
 #	clients = per_socket_clients
 }
 
+# Listen directives for listening locally
+listen {
+	ipaddr = 127.0.0.1
+	ipv6addr = ::1
+	port = {{ HADES_RADIUS_AUTHENTICATION_PORT }}
+	type = auth
+	interface = lo
+}
+
+listen {
+	ipaddr = 127.0.0.1
+	ipv6addr = ::1
+	port = {{ HADES_RADIUS_ACCOUNTING_PORT }}
+	type = acct
+	interface = lo
+}
+
 #  hostname_lookups: Log the names of clients or just their IP addresses
 #  e.g., www.freeradius.org (on) or 206.47.27.232 (off).
 #

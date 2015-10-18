@@ -567,6 +567,11 @@ class HADES_RADIUS_ACCOUNTING_PORT(Option):
     default = 1813
 
 
+class HADES_RADIUS_LOCALHOST_SECRET(Option):
+    """Shared secret for the localhost RADIUS client"""
+    type = str
+
+
 ##########################
 # Gratuitous ARP options #
 ##########################
