@@ -1,0 +1,44 @@
+authorize {
+    if ((Service-Type == 'Call-Check') || User-Name =~ /^%{config:policy.mac-addr}$/) {
+        update control {
+            # Set the Cleartext-Password before normalizing the MAC address,
+            # otherwise the password verification can fail
+            Cleartext-Password := "%{User-Name}"
+        }
+        # Normalize MAC addresses in various attributes
+        rewrite.calling_station_id
+        rewrite.user_name
+
+        if ("%{Calling-Station-Id}" != "%{User-Name}") {
+            reject
+        }
+    } else {
+        rewrite.calling_station_id
+    }
+
+    eap
+    chap
+    sql
+    pap
+}
+
+authenticate {
+    # Check that the Calling-Station-Id reported by the NAS equals the User-Name
+    # to ensure that the request originated from the correct device, otherwise
+    # a user could enter the MAC address if Web-Auth is used
+    Auth-Type PAP {
+        pap
+    }
+    Auth-Type CHAP {
+        chap
+    }
+    eap
+}
+
+post-auth {
+    sql
+	Post-Auth-Type REJECT {
+		sql
+		attr_filter.access_reject
+	}
+}
