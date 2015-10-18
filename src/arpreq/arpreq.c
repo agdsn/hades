@@ -93,7 +93,7 @@ arpreq(PyObject * self, PyObject * args) {
     if (arpreq.arp_flags & ATF_COM) {
         unsigned char *eap = (unsigned char *) &arpreq.arp_ha.sa_data[0];
         char mac[18];
-        snprintf(mac, sizeof(mac), "%02x:%02x:%02x:%02x:%02x:%02x\n",
+        snprintf(mac, sizeof(mac), "%02x:%02x:%02x:%02x:%02x:%02x",
                  eap[0], eap[1], eap[2], eap[3], eap[4], eap[5]);
         return Py_BuildValue("s", mac);
     } else {
