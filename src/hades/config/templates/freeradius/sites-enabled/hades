@@ -49,8 +49,8 @@ authenticate {
 
 post-auth {
     sql
-	Post-Auth-Type REJECT {
-		sql
-		attr_filter.access_reject
-	}
+    Post-Auth-Type REJECT {
+        sql
+        attr_filter.access_reject
+    }
 }
