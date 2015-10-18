@@ -354,6 +354,14 @@ listen {
 #	clients = per_socket_clients
 }
 
+# Don't listen on the proxy port (default is acct + 2 = 1814)
+listen {
+	ipaddr = *
+	ipv6addr = ::
+	port = 0
+	type = proxy
+}
+
 # Listen directives for listening locally
 listen {
 	ipaddr = 127.0.0.1
@@ -603,8 +611,8 @@ security {
 #
 #  allowed values: {no, yes}
 #
-proxy_requests  = yes
-$INCLUDE proxy.conf
+#proxy_requests  = yes
+#$INCLUDE proxy.conf
 
 
 # CLIENTS CONFIGURATION
