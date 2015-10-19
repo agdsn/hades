@@ -25,7 +25,7 @@ struct arpreq_state {
 static struct arpreq_state _state;
 #endif
 
-void set_verror(PyObject * exc, const char *format, va_list args) {
+static void set_verror(PyObject * exc, const char *format, va_list args) {
     char * msg;
     if (vasprintf(&msg, format, args) == -1) {
         PyErr_NoMemory();
@@ -35,7 +35,7 @@ void set_verror(PyObject * exc, const char *format, va_list args) {
     free(msg);
 }
 
-void set_error(PyObject * exc, const char* format, ...) {
+static void set_error(PyObject * exc, const char* format, ...) {
     va_list args;
     va_start(args, format);
     set_verror(exc, format, args);
