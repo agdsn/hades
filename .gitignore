@@ -29,3 +29,5 @@ var/
 .installed.cfg
 *.egg
 
+# Compiled gettext catalogs
+*.mo
