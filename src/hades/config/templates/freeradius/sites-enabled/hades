@@ -12,7 +12,8 @@ authorize {
         if ("%{Calling-Station-Id}" != "%{User-Name}") {
             reject
         }
-    } else {
+    }
+    else {
         rewrite.calling_station_id
     }
 
