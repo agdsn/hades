@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Development &mdash; Hades 0.1.0-175-gbe2bc56 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.0-175-gbe2bc56',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Hades 0.1.0-175-gbe2bc56 documentation" href="index.html" />
+    <link rel="prev" title="Networking" href="networking.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="development">
+<h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="building-the-documentation">
+<h2>Building the Documentation<a class="headerlink" href="#building-the-documentation" title="Permalink to this headline">¶</a></h2>
+<p>The documentation for Hades is build with <cite>sphinx &lt;http://sphinx-doc.org&gt;</cite>.
+An html build is stored in the gh-pages branch in order to host the
+documentation using <cite>GitHub Pages &lt;https://pages.github.com/&gt;</cite>.</p>
+<p>After cloning a repository for the first time, initialize the git submodules of
+this repository:</p>
+<div class="highlight-python"><div class="highlight"><pre>git submodules update --init
+</pre></div>
+</div>
+<p>To build the documentation, change into the <code class="docutils literal"><span class="pre">docs</span></code> directory and run:</p>
+<div class="highlight-python"><div class="highlight"><pre>make html
+</pre></div>
+</div>
+<p>The documentation will built and stored in the <code class="docutils literal"><span class="pre">docs/build/html</span></code> directory.
+This directory is actually a git submodule with a clone of the same repository,
+but on a different branch, namely the special <code class="docutils literal"><span class="pre">gh-pages</span></code> branch.
+This branch does not contain the project sources like <code class="docutils literal"><span class="pre">master</span></code> and is also
+completely independent from the <code class="docutils literal"><span class="pre">master</span></code> branch.
+Never merge or rebase these branch with each other!</p>
+<p>You can view the documentation locally with your browser by opening the
+<code class="docutils literal"><span class="pre">index.html</span></code> file in the <code class="docutils literal"><span class="pre">docs/build/html</span></code> directory and if you are
+satisfied, you can publish it on <a class="reference external" href="https://agdsn.github.io/hades/">https://agdsn.github.io/hades/</a> by executing
+the following commands in <code class="docutils literal"><span class="pre">docs/build/html</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre>git add .
+git commit
+git push origin gh-pages
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Don&#8217;t mix up the root repository and its submodule in <code class="docutils literal"><span class="pre">docs/build/html</span></code> and
+be careful in which directory you are executing the git commands.</p>
+</div>
+<p>If you want you can then update the submodule relationship between root
+repository and the gh-pages submodule by executing the following commands in
+the <strong>root</strong> repository:</p>
+<div class="highlight-python"><div class="highlight"><pre>git add docs/build/html
+git commit
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Development</a><ul>
+<li><a class="reference internal" href="#building-the-documentation">Building the Documentation</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="networking.html" title="previous chapter">Networking</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/development.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN), Sebastian Schrader.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/development.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

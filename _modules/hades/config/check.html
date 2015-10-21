@@ -1,0 +1,270 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>hades.config.check &mdash; Hades 0.1.0-175-gbe2bc56 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0-175-gbe2bc56',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Hades 0.1.0-175-gbe2bc56 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for hades.config.check</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">grp</span>
+<span class="kn">import</span> <span class="nn">pwd</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="kn">import</span> <span class="nn">netaddr</span>
+<span class="kn">from</span> <span class="nn">pyroute2.iproute</span> <span class="kn">import</span> <span class="n">IPRoute</span>
+
+
+<span class="k">class</span> <span class="nc">ConfigError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ConfigError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;{}: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">super</span><span class="p">(</span><span class="n">ConfigError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__str__</span><span class="p">())</span>
+
+
+<span class="k">def</span> <span class="nf">check_option</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">runtime_checks</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">__name__</span>
+    <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">option</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
+        <span class="n">got</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">__module__</span> <span class="o">==</span> <span class="s">&#39;builtins&#39;</span><span class="p">:</span>
+            <span class="n">expected</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">expected</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">__module__</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">option</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;Must be a subtype of {}, was {}&quot;</span>
+                          <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">got</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">static_check</span><span class="p">:</span>
+        <span class="n">option</span><span class="o">.</span><span class="n">static_check</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">runtime_checks</span> <span class="ow">and</span> <span class="n">option</span><span class="o">.</span><span class="n">runtime_check</span><span class="p">:</span>
+        <span class="n">option</span><span class="o">.</span><span class="n">runtime_check</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">greater_than</span><span class="p">(</span><span class="n">threshold</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">checker</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;Must be greater than {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">threshold</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">checker</span>
+
+
+<span class="k">def</span> <span class="nf">between</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">checker</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">low</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="n">high</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;Must be between {} and {} inclusively&quot;</span>
+                              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">checker</span>
+
+
+<span class="k">def</span> <span class="nf">mapping</span><span class="p">(</span><span class="n">key_check</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">value_check</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key_check</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">key_check</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">value_check</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">value_check</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">ConfigError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;Error in key {}: {}&quot;</span>
+                                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+
+<span class="k">def</span> <span class="nf">type_is</span><span class="p">(</span><span class="n">types</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;Must be an instance of {}&quot;</span>
+                              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">types</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+
+<span class="k">def</span> <span class="nf">not_empty</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;Must not be empty&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="o">*</span><span class="n">checks</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">check</span> <span class="ow">in</span> <span class="n">checks</span><span class="p">:</span>
+            <span class="n">check</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+
+<span class="k">def</span> <span class="nf">network_ip</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">ip</span> <span class="o">==</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;The host part of {} is the network &quot;</span>
+                                <span class="s">&quot;address of the subnet. Must be an IP of the &quot;</span>
+                                <span class="s">&quot;subnet.&quot;</span>
+                          <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">ip</span> <span class="o">==</span> <span class="n">value</span><span class="o">.</span><span class="n">broadcast</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;The host part of {} is the broadcast &quot;</span>
+                                <span class="s">&quot;address of the subnet. Must be an IP of the &quot;</span>
+                                <span class="s">&quot;subnet.&quot;</span>
+                          <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">directory_exists</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;Directory {} does not exists&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;{} is not a directory&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">file_exists</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;File {} does not exists&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;{} is not a file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">file_creatable</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="n">directory_exists</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">interface_exists</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">socket</span><span class="o">.</span><span class="n">if_nametoindex</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;Interface {} not found&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">address_exists</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">ip</span> <span class="o">=</span> <span class="n">IPRoute</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">family</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span>
+    <span class="k">elif</span> <span class="n">value</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="n">family</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">AF_INET6</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;Unknown version {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">version</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">get_addr</span><span class="p">(</span><span class="n">family</span><span class="o">=</span><span class="n">family</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">ip</span><span class="p">,</span> <span class="n">prefixlen</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">prefixlen</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;No such address {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">ip_range_in_network</span><span class="p">(</span><span class="n">network_config</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">checker</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">network</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">network_config</span><span class="p">]</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">last</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">first</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">network</span> <span class="ow">or</span> <span class="n">last</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">network</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;Range not contained in network {}&quot;</span>
+                              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">network</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">checker</span>
+
+
+<span class="k">def</span> <span class="nf">user_exists</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pwd</span><span class="o">.</span><span class="n">getpwnam</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;User {} does not exists&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">group_exists</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">getgrnam</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;Group {} does not exists&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">has_key</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">keys</span><span class="p">):</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;{} is not a Mapping type&quot;</span>
+                              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;-&gt;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">)))</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;Missing key {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;-&gt;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">)))</span>
+
+
+<span class="k">def</span> <span class="nf">user_mapping_for_user_exists</span><span class="p">(</span><span class="n">user_option_name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">checker</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">user_name</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">user_option_name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;PUBLIC&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="n">user_option_name</span><span class="p">]:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">user_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;No mapping for user {} defined in &quot;</span>
+                                    <span class="s">&quot;option {}&quot;</span>
+                              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user_name</span><span class="p">,</span> <span class="n">user_option_name</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">checker</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN), Sebastian Schrader.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

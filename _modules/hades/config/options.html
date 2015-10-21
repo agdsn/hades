@@ -1,0 +1,871 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>hades.config.options &mdash; Hades 0.1.0-175-gbe2bc56 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0-175-gbe2bc56',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Hades 0.1.0-175-gbe2bc56 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for hades.config.options</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="kn">import</span> <span class="nn">netaddr</span>
+
+<span class="kn">from</span> <span class="nn">hades.config</span> <span class="kn">import</span> <span class="n">check</span>
+<span class="kn">from</span> <span class="nn">hades.config.check</span> <span class="kn">import</span> <span class="n">ConfigError</span>
+
+
+<div class="viewcode-block" id="OptionMeta"><a class="viewcode-back" href="../../../options.html#hades.config.options.OptionMeta">[docs]</a><span class="k">class</span> <span class="nc">OptionMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Metaclass for options. Classes that derive from options are registered</span>
+<span class="sd">    in a global dict&quot;&quot;&quot;</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">what</span><span class="p">,</span> <span class="n">bases</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">dict</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">class_</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">OptionMeta</span><span class="p">,</span> <span class="n">mcs</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">what</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+        <span class="n">mcs</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">what</span><span class="p">]</span> <span class="o">=</span> <span class="n">class_</span>
+        <span class="k">return</span> <span class="n">class_</span>
+
+</div>
+<div class="viewcode-block" id="Option"><a class="viewcode-back" href="../../../options.html#hades.config.options.Option">[docs]</a><span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">OptionMeta</span><span class="p">):</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="equal_to"><a class="viewcode-back" href="../../../options.html#hades.config.options.equal_to">[docs]</a><span class="k">def</span> <span class="nf">equal_to</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Option</span><span class="p">):</span>
+        <span class="n">other_name</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">__name__</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">other_name</span> <span class="o">=</span> <span class="n">other</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Expected Option subclass or str&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">config</span><span class="p">[</span><span class="n">other_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;Can not set equal to option {}, option is&quot;</span>
+                                    <span class="s">&quot; not defined&quot;</span>
+                              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">other_name</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+</div>
+<div class="viewcode-block" id="deferred_format"><a class="viewcode-back" href="../../../options.html#hades.config.options.deferred_format">[docs]</a><span class="k">def</span> <span class="nf">deferred_format</span><span class="p">(</span><span class="n">fmt_string</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluate a format string using values from others config options.</span>
+
+<span class="sd">    Names of options are given as positional arguments and the corresponding</span>
+<span class="sd">    values can be referred to using numbers in the format string.</span>
+<span class="sd">    Keywords arguments can be used as well to bind other option values to</span>
+<span class="sd">    specific names that are available in the format string.</span>
+<span class="sd">    :param fmt_string:</span>
+<span class="sd">    :param args:</span>
+<span class="sd">    :param kwargs:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fmt_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
+            <span class="n">fmt_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">config</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">}</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&quot;Option is missing (required by {})&quot;</span>
+                              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">e</span>
+        <span class="k">return</span> <span class="n">fmt_string</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="o">**</span><span class="n">fmt_kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+
+<span class="c">###################</span>
+<span class="c"># General options #</span>
+<span class="c">###################</span>
+
+</div>
+<div class="viewcode-block" id="HADES_SITE_NAME"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_SITE_NAME">[docs]</a><span class="k">class</span> <span class="nc">HADES_SITE_NAME</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Name of the site&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+</div>
+<div class="viewcode-block" id="HADES_SITE_NODE_ID"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_SITE_NODE_ID">[docs]</a><span class="k">class</span> <span class="nc">HADES_SITE_NODE_ID</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Unique name of the site node instance&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+</div>
+<div class="viewcode-block" id="HADES_CONFIG_DIR"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_CONFIG_DIR">[docs]</a><span class="k">class</span> <span class="nc">HADES_CONFIG_DIR</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Directory where generated config files will be saved&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;/etc/hades&#39;</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">directory_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_REAUTHENTICATION_INTERVAL"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_REAUTHENTICATION_INTERVAL">[docs]</a><span class="k">class</span> <span class="nc">HADES_REAUTHENTICATION_INTERVAL</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;RADIUS periodic reauthentication interval&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">timedelta</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">greater_than</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="HADES_RETENTION_INTERVAL"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_RETENTION_INTERVAL">[docs]</a><span class="k">class</span> <span class="nc">HADES_RETENTION_INTERVAL</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;RADIUS postauth and accounting data retention interval&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">timedelta</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">greater_than</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="HADES_CONTACT_ADDRESSES"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_CONTACT_ADDRESSES">[docs]</a><span class="k">class</span> <span class="nc">HADES_CONTACT_ADDRESSES</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Contact addresses displayed on the captive portal page&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span>
+
+</div>
+<div class="viewcode-block" id="HADES_USER_NETWORKS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_USER_NETWORKS">[docs]</a><span class="k">class</span> <span class="nc">HADES_USER_NETWORKS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Public networks of authenticated users.</span>
+
+<span class="sd">    Dictionary of networks. Keys are unique identifiers of the network,</span>
+<span class="sd">    values are netaddr.IPNetworks objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">check</span><span class="o">.</span><span class="n">not_empty</span><span class="p">,</span>
+                             <span class="n">check</span><span class="o">.</span><span class="n">mapping</span><span class="p">(</span><span class="n">value_check</span><span class="o">=</span><span class="n">check</span><span class="o">.</span><span class="n">network_ip</span><span class="p">))</span>
+
+
+<span class="c">#######################</span>
+<span class="c"># Hades Agent options #</span>
+<span class="c">#######################</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AGENT_USER"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AGENT_USER">[docs]</a><span class="k">class</span> <span class="nc">HADES_AGENT_USER</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;User of the site node agent&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;hades-agent&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">user_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AGENT_GROUP"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AGENT_GROUP">[docs]</a><span class="k">class</span> <span class="nc">HADES_AGENT_GROUP</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Group of the site node agent&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;hades-agent&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">group_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AGENT_HOME"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AGENT_HOME">[docs]</a><span class="k">class</span> <span class="nc">HADES_AGENT_HOME</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Working directory of the site node agent&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;/var/lib/hades/agent&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">directory_exists</span>
+
+
+<span class="c">######################</span>
+<span class="c"># PostgreSQL options #</span>
+<span class="c">######################</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_USER"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_USER">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_USER</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;User the PostgreSQL database is running as&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;postgres&#39;</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_DATABASE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_DATABASE">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_DATABASE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Name of the PostgreSQL database on the site node&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;hades&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_SOCKET"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_SOCKET">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_SOCKET</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Path to the PostgreSQL socket directory&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;/var/run/postgresql&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">directory_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_SERVER_FDW"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_SERVER_FDW">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_SERVER_FDW</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Name of the foreign data wrapper extensions that should be used&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;mysql_fdw&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Foreign data wrapper specific server options&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Foreign data wrapper options that are set on each foreign table.</span>
+<span class="sd">    The options can be overridden with table specific options.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;dbname&#39;</span><span class="p">:</span> <span class="s">&#39;hades&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Whether the ipaddress column of dhcphost has a string type&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">bool</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Whether the mac column of dhcphost has a string type&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">bool</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Foreign data wrapper options for the dhcphost table&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;table_name&#39;</span><span class="p">:</span> <span class="s">&#39;dhcphost&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Foreign data wrapper options for the nas table&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;table_name&#39;</span><span class="p">:</span> <span class="s">&#39;nas&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Whether the nasipaddress column of radcheck has a string type&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">bool</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Foreign data wrapper options for the radcheck table&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;table_name&#39;</span><span class="p">:</span> <span class="s">&#39;radcheck&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Foreign data wrapper options for the radgroupcheck table&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;table_name&#39;</span><span class="p">:</span> <span class="s">&#39;radgroupcheck&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Foreign data wrapper options for the radgroupreply table&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;table_name&#39;</span><span class="p">:</span> <span class="s">&#39;radgroupreply&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Whether the nasipaddress column of radgroupcheck has a string type&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">bool</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Foreign data wrapper options for the radreply table&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;table_name&#39;</span><span class="p">:</span> <span class="s">&#39;radreply&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Whether the nasipaddress column of radgroupcheck has a string type&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">bool</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Foreign data wrapper options for the radusergroup table&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;table_name&#39;</span><span class="p">:</span> <span class="s">&#39;radusergroup&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span>
+
+</div>
+<div class="viewcode-block" id="HADES_POSTGRESQL_USER_MAPPINGS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_POSTGRESQL_USER_MAPPINGS">[docs]</a><span class="k">class</span> <span class="nc">HADES_POSTGRESQL_USER_MAPPINGS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;User mappings from local database users to users on the foreign database</span>
+<span class="sd">    server&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
+        <span class="n">check</span><span class="o">.</span><span class="n">user_mapping_for_user_exists</span><span class="p">(</span><span class="s">&#39;HADES_POSTGRESQL_USER&#39;</span><span class="p">),</span>
+        <span class="n">check</span><span class="o">.</span><span class="n">user_mapping_for_user_exists</span><span class="p">(</span><span class="s">&#39;HADES_AGENT_USER&#39;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+
+<span class="c">########################</span>
+<span class="c"># Hades Portal options #</span>
+<span class="c">########################</span>
+
+</div>
+<div class="viewcode-block" id="HADES_PORTAL_DOMAIN"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_PORTAL_DOMAIN">[docs]</a><span class="k">class</span> <span class="nc">HADES_PORTAL_DOMAIN</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Fully qualified domain name of the captive portal&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;captive-portal.agdsn.de&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+</div>
+<div class="viewcode-block" id="HADES_PORTAL_USER"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_PORTAL_USER">[docs]</a><span class="k">class</span> <span class="nc">HADES_PORTAL_USER</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;User of the web server and captive portal application&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;hades-portal&#39;</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">user_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_PORTAL_GROUP"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_PORTAL_GROUP">[docs]</a><span class="k">class</span> <span class="nc">HADES_PORTAL_GROUP</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Group of the web server and captive portal application&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;hades-portal&#39;</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">group_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_PORTAL_HOME"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_PORTAL_HOME">[docs]</a><span class="k">class</span> <span class="nc">HADES_PORTAL_HOME</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Working directory of the captive portal application&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;/var/lib/hades/portal&#39;</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">directory_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_PORTAL_NGINX_WORKERS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_PORTAL_NGINX_WORKERS">[docs]</a><span class="k">class</span> <span class="nc">HADES_PORTAL_NGINX_WORKERS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Number of nginx worker processes&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">greater_than</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="HADES_PORTAL_SSL_CERTIFICATE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_PORTAL_SSL_CERTIFICATE">[docs]</a><span class="k">class</span> <span class="nc">HADES_PORTAL_SSL_CERTIFICATE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Path to the SSL certificate of the captive portal&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;/etc/ssl/certs/ssl-cert-snakeoil.pem&#39;</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">file_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_PORTAL_SSL_CERTIFICATE_KEY"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_PORTAL_SSL_CERTIFICATE_KEY">[docs]</a><span class="k">class</span> <span class="nc">HADES_PORTAL_SSL_CERTIFICATE_KEY</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Path to the SSL certificate key of the captive portal&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;/etc/ssl/private/ssl-cert-snakeoil.key&#39;</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">file_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_PORTAL_UWSGI_SOCKET"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_PORTAL_UWSGI_SOCKET">[docs]</a><span class="k">class</span> <span class="nc">HADES_PORTAL_UWSGI_SOCKET</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Path to uWSGI socket of the captive portal&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;/run/hades/portal/uwsgi.sock&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">file_creatable</span>
+
+</div>
+<div class="viewcode-block" id="HADES_PORTAL_UWSGI_WORKERS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_PORTAL_UWSGI_WORKERS">[docs]</a><span class="k">class</span> <span class="nc">HADES_PORTAL_UWSGI_WORKERS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Number of uWSGI worker processes&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">greater_than</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+
+<span class="c">###############################</span>
+<span class="c"># Authenticated users options #</span>
+<span class="c">###############################</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AUTH_DNSMASQ_USER"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AUTH_DNSMASQ_USER">[docs]</a><span class="k">class</span> <span class="nc">HADES_AUTH_DNSMASQ_USER</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    User of the dnsmasq instance for authenticated users and the</span>
+<span class="sd">    SignalProxyDaemon</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">equal_to</span><span class="p">(</span><span class="n">HADES_AGENT_USER</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">user_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AUTH_DNSMASQ_GROUP"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AUTH_DNSMASQ_GROUP">[docs]</a><span class="k">class</span> <span class="nc">HADES_AUTH_DNSMASQ_GROUP</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Group of the dnsmasq instance for authenticated users and the SignalProxyDaemon</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">equal_to</span><span class="p">(</span><span class="n">HADES_AGENT_GROUP</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">group_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AUTH_DNSMASQ_HOSTS_FILE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AUTH_DNSMASQ_HOSTS_FILE">[docs]</a><span class="k">class</span> <span class="nc">HADES_AUTH_DNSMASQ_HOSTS_FILE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Path to the DHCP hosts file of the dnsmasq instance for authenticated users.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&quot;/var/lib/hades/agent/auth-dnsmasq.hosts&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">file_creatable</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AUTH_DNSMASQ_LEASE_FILE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AUTH_DNSMASQ_LEASE_FILE">[docs]</a><span class="k">class</span> <span class="nc">HADES_AUTH_DNSMASQ_LEASE_FILE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Path to the DHCP lease file of the dnsmasq instance for authenticated users.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&quot;/var/lib/hades/agent/auth-dnsmasq.leases&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">file_creatable</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AUTH_DNSMASQ_SIGNAL_SOCKET"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AUTH_DNSMASQ_SIGNAL_SOCKET">[docs]</a><span class="k">class</span> <span class="nc">HADES_AUTH_DNSMASQ_SIGNAL_SOCKET</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Path to the Unix socket of the SignalProxyDaemon&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;/run/hades/agent/auth-dnsmasq.sock&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">file_creatable</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AUTH_DHCP_DOMAIN"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AUTH_DHCP_DOMAIN">[docs]</a><span class="k">class</span> <span class="nc">HADES_AUTH_DHCP_DOMAIN</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;DNS domain of authenticated users&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;users.agdsn.de&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AUTH_DHCP_LEASE_TIME"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AUTH_DHCP_LEASE_TIME">[docs]</a><span class="k">class</span> <span class="nc">HADES_AUTH_DHCP_LEASE_TIME</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;DHCP Lease time for authenticated users&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">timedelta</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">greater_than</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AUTH_LISTEN"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AUTH_LISTEN">[docs]</a><span class="k">class</span> <span class="nc">HADES_AUTH_LISTEN</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IP and network to listen on for requests from authenticated users&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPNetwork</span><span class="p">(</span><span class="s">&#39;10.66.67.1/24&#39;</span><span class="p">)</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">network_ip</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">address_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AUTH_INTERFACE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AUTH_INTERFACE">[docs]</a><span class="k">class</span> <span class="nc">HADES_AUTH_INTERFACE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interface where requests from the authenticated users arrive. Interface</span>
+<span class="sd">    must not be attached directly to the users networks.&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">interface_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AUTH_FWMARK"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AUTH_FWMARK">[docs]</a><span class="k">class</span> <span class="nc">HADES_AUTH_FWMARK</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Iptables connmark/mark for connections from authenticated users.&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AUTH_ALLOWED_TCP_PORTS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AUTH_ALLOWED_TCP_PORTS">[docs]</a><span class="k">class</span> <span class="nc">HADES_AUTH_ALLOWED_TCP_PORTS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Allowed TCP destination ports for unauthenticated users&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">(</span><span class="mi">53</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">443</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AUTH_ALLOWED_UDP_PORTS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AUTH_ALLOWED_UDP_PORTS">[docs]</a><span class="k">class</span> <span class="nc">HADES_AUTH_ALLOWED_UDP_PORTS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Allowed UDP destination ports for unauthenticated users&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">(</span><span class="mi">53</span><span class="p">,</span> <span class="mi">67</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="HADES_AUTH_ROUTING_TABLE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_AUTH_ROUTING_TABLE">[docs]</a><span class="k">class</span> <span class="nc">HADES_AUTH_ROUTING_TABLE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Routing table for connections from unauthenticated users.&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+
+
+<span class="c">#################################</span>
+<span class="c"># Unauthenticated users options #</span>
+<span class="c">#################################</span>
+
+</div>
+<div class="viewcode-block" id="HADES_UNAUTH_DHCP_LEASE_TIME"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_UNAUTH_DHCP_LEASE_TIME">[docs]</a><span class="k">class</span> <span class="nc">HADES_UNAUTH_DHCP_LEASE_TIME</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;DHCP lease time in the unauth VLAN&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">timedelta</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">greater_than</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="HADES_UNAUTH_INTERFACE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_UNAUTH_INTERFACE">[docs]</a><span class="k">class</span> <span class="nc">HADES_UNAUTH_INTERFACE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interface attached to the unauth VLAN&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">interface_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_UNAUTH_LISTEN"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_UNAUTH_LISTEN">[docs]</a><span class="k">class</span> <span class="nc">HADES_UNAUTH_LISTEN</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IP and network to listen for unauthenticated users&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPNetwork</span><span class="p">(</span><span class="s">&#39;10.66.0.1/19&#39;</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPNetwork</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">network_ip</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">address_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_UNAUTH_FWMARK"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_UNAUTH_FWMARK">[docs]</a><span class="k">class</span> <span class="nc">HADES_UNAUTH_FWMARK</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Iptables connmark/mark for connections from unauthenticated users&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="HADES_UNAUTH_ALLOWED_TCP_PORTS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_UNAUTH_ALLOWED_TCP_PORTS">[docs]</a><span class="k">class</span> <span class="nc">HADES_UNAUTH_ALLOWED_TCP_PORTS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Allowed TCP destination ports for unauthenticated users&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">(</span><span class="mi">53</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">443</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="HADES_UNAUTH_ALLOWED_UDP_PORTS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_UNAUTH_ALLOWED_UDP_PORTS">[docs]</a><span class="k">class</span> <span class="nc">HADES_UNAUTH_ALLOWED_UDP_PORTS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Allowed UDP destination ports for unauthenticated users&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">(</span><span class="mi">53</span><span class="p">,</span> <span class="mi">67</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="HADES_UNAUTH_CAPTURED_TCP_PORTS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_UNAUTH_CAPTURED_TCP_PORTS">[docs]</a><span class="k">class</span> <span class="nc">HADES_UNAUTH_CAPTURED_TCP_PORTS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    All traffic destined to these TCP ports is transparently redirected</span>
+<span class="sd">    (captured) to the unauth listen address of the site node</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">(</span><span class="mi">53</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">443</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="HADES_UNAUTH_CAPTURED_UDP_PORTS"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_UNAUTH_CAPTURED_UDP_PORTS">[docs]</a><span class="k">class</span> <span class="nc">HADES_UNAUTH_CAPTURED_UDP_PORTS</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    All traffic destined to these UDP ports is transparently redirected</span>
+<span class="sd">    (captured) to the unauth listen address of the site node</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">(</span><span class="mi">53</span><span class="p">,)</span>
+
+</div>
+<div class="viewcode-block" id="HADES_UNAUTH_ROUTING_TABLE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_UNAUTH_ROUTING_TABLE">[docs]</a><span class="k">class</span> <span class="nc">HADES_UNAUTH_ROUTING_TABLE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Routing table for connections from unauthenticated users.&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="HADES_UNAUTH_DHCP_RANGE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_UNAUTH_DHCP_RANGE">[docs]</a><span class="k">class</span> <span class="nc">HADES_UNAUTH_DHCP_RANGE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;DHCP range for the unauth VLAN. Must be contained within the</span>
+<span class="sd">    HADES_UNAUTH_LISTEN network.&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPRange</span><span class="p">(</span><span class="s">&#39;10.66.0.10&#39;</span><span class="p">,</span> <span class="s">&#39;10.66.31.254&#39;</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPRange</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">ip_range_in_network</span><span class="p">(</span><span class="n">HADES_UNAUTH_LISTEN</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<span class="c">##################</span>
+<span class="c"># RADIUS options #</span>
+<span class="c">##################</span>
+
+</div>
+<div class="viewcode-block" id="HADES_RADIUS_USER"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_RADIUS_USER">[docs]</a><span class="k">class</span> <span class="nc">HADES_RADIUS_USER</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;User of the freeRADIUS server&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;freerad&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">user_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_RADIUS_GROUP"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_RADIUS_GROUP">[docs]</a><span class="k">class</span> <span class="nc">HADES_RADIUS_GROUP</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Group of the freeRADIUS server&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;freerad&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">group_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_RADIUS_LISTEN"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_RADIUS_LISTEN">[docs]</a><span class="k">class</span> <span class="nc">HADES_RADIUS_LISTEN</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IP and network the RADIUS server is listening on&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPNetwork</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">network_ip</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">address_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_RADIUS_INTERFACE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_RADIUS_INTERFACE">[docs]</a><span class="k">class</span> <span class="nc">HADES_RADIUS_INTERFACE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interface the RADIUS server is listening on&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">interface_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_RADIUS_AUTHENTICATION_PORT"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_RADIUS_AUTHENTICATION_PORT">[docs]</a><span class="k">class</span> <span class="nc">HADES_RADIUS_AUTHENTICATION_PORT</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;RADIUS authentication port&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">1812</span>
+
+</div>
+<div class="viewcode-block" id="HADES_RADIUS_ACCOUNTING_PORT"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_RADIUS_ACCOUNTING_PORT">[docs]</a><span class="k">class</span> <span class="nc">HADES_RADIUS_ACCOUNTING_PORT</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;RADIUS accounting port&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">1813</span>
+
+</div>
+<div class="viewcode-block" id="HADES_RADIUS_LOCALHOST_SECRET"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_RADIUS_LOCALHOST_SECRET">[docs]</a><span class="k">class</span> <span class="nc">HADES_RADIUS_LOCALHOST_SECRET</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Shared secret for the localhost RADIUS client&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+
+<span class="c">##########################</span>
+<span class="c"># Gratuitous ARP options #</span>
+<span class="c">##########################</span>
+
+</div>
+<div class="viewcode-block" id="HADES_GRATUITOUS_ARP_INTERVAL"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_GRATUITOUS_ARP_INTERVAL">[docs]</a><span class="k">class</span> <span class="nc">HADES_GRATUITOUS_ARP_INTERVAL</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Period in which gratuitous ARP requests are broadcasted to notify</span>
+<span class="sd">    a) clients of the MAC address of current master site node instance</span>
+<span class="sd">    b) clients switching from the auth to the unauth VLAN of the new gateway MAC</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">timedelta</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="c">################</span>
+<span class="c"># VRRP options #</span>
+<span class="c">################</span>
+
+</div>
+<div class="viewcode-block" id="HADES_PRIORITY"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_PRIORITY">[docs]</a><span class="k">class</span> <span class="nc">HADES_PRIORITY</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Priority of the site node instance.</span>
+<span class="sd">    The available instance with the highest priority becomes master.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">254</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="HADES_INITIAL_MASTER"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_INITIAL_MASTER">[docs]</a><span class="k">class</span> <span class="nc">HADES_INITIAL_MASTER</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Flag that indicates if site node instance starts in master state&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">bool</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="HADES_VRRP_INTERFACE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_VRRP_INTERFACE">[docs]</a><span class="k">class</span> <span class="nc">HADES_VRRP_INTERFACE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interface for VRRP communication&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">interface_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_VRRP_LISTEN"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_VRRP_LISTEN">[docs]</a><span class="k">class</span> <span class="nc">HADES_VRRP_LISTEN</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IP and network for VRRP communication&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPNetwork</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">network_ip</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">address_exists</span>
+
+</div>
+<div class="viewcode-block" id="HADES_VRRP_PASSWORD"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_VRRP_PASSWORD">[docs]</a><span class="k">class</span> <span class="nc">HADES_VRRP_PASSWORD</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Shared secret to authenticate VRRP messages between site node instances.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+</div>
+<div class="viewcode-block" id="HADES_VRRP_VIRTUAL_ROUTER_ID"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_VRRP_VIRTUAL_ROUTER_ID">[docs]</a><span class="k">class</span> <span class="nc">HADES_VRRP_VIRTUAL_ROUTER_ID</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Virtual router ID used by Hades&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">66</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="HADES_VRRP_ADVERTISEMENT_INTERVAL"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_VRRP_ADVERTISEMENT_INTERVAL">[docs]</a><span class="k">class</span> <span class="nc">HADES_VRRP_ADVERTISEMENT_INTERVAL</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interval between VRRP advertisements&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">timedelta</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">greater_than</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="HADES_VRRP_PREEMPTION_DELAY"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_VRRP_PREEMPTION_DELAY">[docs]</a><span class="k">class</span> <span class="nc">HADES_VRRP_PREEMPTION_DELAY</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Delay before a MASTER transitions to BACKUP when a node with a higher</span>
+<span class="sd">    priority comes online</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">timedelta</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="n">check</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">1000</span><span class="p">))</span>
+
+
+<span class="c">################</span>
+<span class="c"># Test options #</span>
+<span class="c">################</span>
+
+</div>
+<div class="viewcode-block" id="HADES_CREATE_DUMMY_INTERFACES"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.HADES_CREATE_DUMMY_INTERFACES">[docs]</a><span class="k">class</span> <span class="nc">HADES_CREATE_DUMMY_INTERFACES</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create dummy interfaces if interfaces do not exist&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">bool</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+<span class="c">#################</span>
+<span class="c"># Flask options #</span>
+<span class="c">#################</span>
+
+</div>
+<div class="viewcode-block" id="SECRET_KEY"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.SECRET_KEY">[docs]</a><span class="k">class</span> <span class="nc">SECRET_KEY</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Flask secret key</span>
+<span class="sd">    The current portal application does not any feature of Flask that would</span>
+<span class="sd">    require a persistent secret key, therefore a random key is generated by</span>
+<span class="sd">    default</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">64</span><span class="p">))</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+</div>
+<div class="viewcode-block" id="DEBUG"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.DEBUG">[docs]</a><span class="k">class</span> <span class="nc">DEBUG</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Flask debug mode flag&quot;&quot;&quot;</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">bool</span>
+
+
+<span class="c">#######################</span>
+<span class="c"># Flask-Babel options #</span>
+<span class="c">#######################</span>
+
+</div>
+<div class="viewcode-block" id="BABEL_DEFAULT_LOCALE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.BABEL_DEFAULT_LOCALE">[docs]</a><span class="k">class</span> <span class="nc">BABEL_DEFAULT_LOCALE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Default locale of the portal application&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;de_DE&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+</div>
+<div class="viewcode-block" id="BABEL_DEFAULT_TIMEZONE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.BABEL_DEFAULT_TIMEZONE">[docs]</a><span class="k">class</span> <span class="nc">BABEL_DEFAULT_TIMEZONE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Default timezone of the portal application&quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;Europe/Berlin&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+
+<span class="c">############################</span>
+<span class="c"># Flask-SQLAlchemy options #</span>
+<span class="c">############################</span>
+
+</div>
+<div class="viewcode-block" id="SQLALCHEMY_DATABASE_URI"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.SQLALCHEMY_DATABASE_URI">[docs]</a><span class="k">class</span> <span class="nc">SQLALCHEMY_DATABASE_URI</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">deferred_format</span><span class="p">(</span><span class="s">&#39;postgresql:///{}&#39;</span><span class="p">,</span> <span class="s">&#39;HADES_POSTGRESQL_DATABASE&#39;</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+
+<span class="c">##################</span>
+<span class="c"># Celery options #</span>
+<span class="c">##################</span>
+
+</div>
+<div class="viewcode-block" id="BROKER_URL"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.BROKER_URL">[docs]</a><span class="k">class</span> <span class="nc">BROKER_URL</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+</div>
+<div class="viewcode-block" id="BROKER_CONNECTION_MAX_RETRIES"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.BROKER_CONNECTION_MAX_RETRIES">[docs]</a><span class="k">class</span> <span class="nc">BROKER_CONNECTION_MAX_RETRIES</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Maximum number of retries before giving up re-establishing the</span>
+<span class="sd">    connection to the broker.</span>
+
+<span class="sd">    Set to zero to retry forever in case of longer partitions between sites</span>
+<span class="sd">    and the main database.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span>
+
+</div>
+<div class="viewcode-block" id="CELERY_ENABLE_UTC"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.CELERY_ENABLE_UTC">[docs]</a><span class="k">class</span> <span class="nc">CELERY_ENABLE_UTC</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">bool</span>
+
+</div>
+<div class="viewcode-block" id="CELERY_TIMEZONE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.CELERY_TIMEZONE">[docs]</a><span class="k">class</span> <span class="nc">CELERY_TIMEZONE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;UTC&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+</div>
+<div class="viewcode-block" id="CELERY_DEFAULT_QUEUE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.CELERY_DEFAULT_QUEUE">[docs]</a><span class="k">class</span> <span class="nc">CELERY_DEFAULT_QUEUE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">deferred_format</span><span class="p">(</span><span class="s">&quot;hades-site-{}&quot;</span><span class="p">,</span> <span class="s">&#39;HADES_SITE_NAME&#39;</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+</div>
+<div class="viewcode-block" id="CELERY_ACCEPT_CONTENT"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.CELERY_ACCEPT_CONTENT">[docs]</a><span class="k">class</span> <span class="nc">CELERY_ACCEPT_CONTENT</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;json&#39;</span><span class="p">,</span> <span class="s">&#39;msgpack&#39;</span><span class="p">,</span> <span class="s">&#39;pickle&#39;</span><span class="p">,</span> <span class="s">&#39;yaml&#39;</span><span class="p">]</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span>
+
+</div>
+<div class="viewcode-block" id="CELERY_TASK_SERIALIZER"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.CELERY_TASK_SERIALIZER">[docs]</a><span class="k">class</span> <span class="nc">CELERY_TASK_SERIALIZER</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;pickle&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+
+</div>
+<div class="viewcode-block" id="CELERYBEAT_SCHEDULE"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.CELERYBEAT_SCHEDULE">[docs]</a><span class="k">class</span> <span class="nc">CELERYBEAT_SCHEDULE</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;refresh&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;task&#39;</span><span class="p">:</span> <span class="s">&#39;hades.agent.refresh&#39;</span><span class="p">,</span>
+            <span class="s">&#39;schedule&#39;</span><span class="p">:</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+        <span class="p">},</span>
+        <span class="s">&#39;delete-old&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;task&#39;</span><span class="p">:</span> <span class="s">&#39;hades.agent.delete_old&#39;</span><span class="p">,</span>
+            <span class="s">&#39;schedule&#39;</span><span class="p">:</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+
+</div>
+<div class="viewcode-block" id="CELERYBEAT_SCHEDULE_FILENAME"><a class="viewcode-back" href="../../../configuration.html#hades.config.options.CELERYBEAT_SCHEDULE_FILENAME">[docs]</a><span class="k">class</span> <span class="nc">CELERYBEAT_SCHEDULE_FILENAME</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;/var/lib/hades/agent/celerybeat-schedule&#39;</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN), Sebastian Schrader.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,14 @@
+Options Reference
+=================
+List of available options.
+
+Put the options without the ``hades.config.options`` prefix directly into your
+configuration file::
+
+   HADES_SITE_NAME = 'my_site'
+
+.. automodule:: hades.config.options
+   :member-order: bysource
+   :members:
+   :undoc-members:
+   :exclude-members: OptionMeta, Option, equal_to, deferred_format
