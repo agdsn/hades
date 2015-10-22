@@ -23,7 +23,7 @@ Contents
 
    components
    networking
-   options
+   configuration
    development
 
 Concepts
