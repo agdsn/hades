@@ -1,0 +1,4 @@
+[submodule "gh-pages"]
+	path = docs/build/html
+	url = git@github.com:agdsn/hades.git
+	branch = gh-pages
