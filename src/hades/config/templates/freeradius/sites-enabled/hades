@@ -9,6 +9,10 @@ authorize {
         rewrite.calling_station_id
         rewrite.user_name
 
+        # Check that the Calling-Station-Id reported by the NAS equals the
+        # User-Name to ensure that the request originated from the correct
+        # device, otherwise a user could enter the MAC address if Web-Auth is
+        # used
         if ("%{Calling-Station-Id}" != "%{User-Name}") {
             reject
         }
@@ -24,9 +28,6 @@ authorize {
 }
 
 authenticate {
-    # Check that the Calling-Station-Id reported by the NAS equals the User-Name
-    # to ensure that the request originated from the correct device, otherwise
-    # a user could enter the MAC address if Web-Auth is used
     Auth-Type PAP {
         pap
     }
