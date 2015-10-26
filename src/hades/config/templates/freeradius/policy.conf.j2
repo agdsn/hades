@@ -267,7 +267,9 @@ policy {
 		update request {
 			User-Name = "DHCP-%{DHCP-Client-Hardware-Address}"
 			Calling-Station-Id = "%{DHCP-Client-Hardware-Address}"
+			{%- raw %}
 			NAS-IP-Address = "%{%{DHCP-Gateway-IP-Address}:-127.0.0.1}"
+			{% endraw %}
 			Acct-Status-Type = Start
 		}
 
@@ -284,5 +286,18 @@ policy {
 				DHCP-Your-IP-Address = "%{reply:Framed-IP-Address}"
 			}
 		}
+	}
+
+	# Set Auth-Type to Accept and return ok
+	accept {
+		update control {
+			Auth-Type := Accept
+		}
+		update reply {
+			{%- for attribute, value in HADES_RADIUS_DATABASE_FAIL_REPLY_ATTRIBUTES.items() %}
+			{{ attribute }} := {{ value }}
+			{%- endfor %}
+		}
+		ok
 	}
 }

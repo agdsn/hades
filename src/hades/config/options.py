@@ -581,6 +581,26 @@ class HADES_RADIUS_LOCALHOST_SECRET(Option):
     type = str
 
 
+class HADES_RADIUS_DATABASE_FAIL_ACCEPT(Option):
+    """Send Access-Accept packets if the sql module fails"""
+    type = bool
+    default = True
+
+
+class HADES_RADIUS_DATABASE_FAIL_REPLY_ATTRIBUTES(Option):
+    """
+    Reply attributes that will be set in Access-Accept packets if the sql
+    module fails.
+
+    The attribute value must be specified in proper freeRADIUS syntax. That
+    means that string replies should be enclosed in single quotes.
+    """
+    type = collections.Mapping
+    default = {
+        'Reply-Message': "'database_down'",
+    }
+
+
 ##########################
 # Gratuitous ARP options #
 ##########################

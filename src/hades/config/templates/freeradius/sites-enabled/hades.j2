@@ -23,7 +23,14 @@ authorize {
 
     eap
     chap
+    {%- if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
+    redundant {
+        sql
+        accept
+    }
+    {%- else %}
     sql
+    {%- endif %}
     pap
 }
 
@@ -50,9 +57,23 @@ authenticate {
 }
 
 post-auth {
-    sql
-    Post-Auth-Type REJECT {
+    {%- if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
+    redundant {
         sql
+        ok
+    }
+    {%- else %}
+    sql
+    {%- endif %}
+    Post-Auth-Type REJECT {
+        {%- if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
+        redundant {
+            sql
+            ok
+        }
+        {%- else %}
+        sql
+        {%- endif %}
         attr_filter.access_reject
     }
 }
