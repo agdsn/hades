@@ -2,7 +2,7 @@
 set -euo pipefail
 
 download_from_pgxn() {
-	curl -O -L http://api.pgxn.org/dist/mysql_fdw/${VERSION}/mysql_fdw-${VERSION}.zip
+	curl --silent --show-error -O -L http://api.pgxn.org/dist/mysql_fdw/${VERSION}/mysql_fdw-${VERSION}.zip
 	sha512sum --status --strict --check <<-HASH
 	${SHA512} *mysql_fdw-${VERSION}.zip
 HASH
@@ -11,8 +11,8 @@ HASH
 }
 
 download_from_git() {
-	git clone https://github.com/EnterpriseDB/mysql_fdw/ mysql_fdw
-	git -C mysql_fdw checkout ${COMMIT}
+	git clone -q https://github.com/EnterpriseDB/mysql_fdw/ mysql_fdw
+	git -C mysql_fdw checkout -q ${COMMIT}
 }
 
 download() {
