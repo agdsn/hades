@@ -47,4 +47,4 @@ RUN apt-get update && apt-get install \
     && pg_dropcluster ${PGVERSION} main
 
 COPY docker/rights.sh docker/mysql_fdw.sh /build/
-RUN /build/rights.sh && /build/mysql_fdw.sh
+RUN /build/rights.sh && COMMIT=4226fd573d5d602f5b58f542c0bbd15514559235 /build/mysql_fdw.sh
