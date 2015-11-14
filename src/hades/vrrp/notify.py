@@ -142,11 +142,10 @@ def copy_routes(from_table, to_table, excludes):
     with pyroute2.iproute.IPRoute() as ip:
         for route in get_routes(ip, from_table):
             dst = route.attributes.get('RTA_DST')
-            if dst is None:
-                continue
-            dst_net = netaddr.IPNetwork("{}/{}".format(dst, route.dst_len))
-            if any(dst_net in network for network in excludes):
-                continue
+            if dst is not None:
+                dst_net = netaddr.IPNetwork("{}/{}".format(dst, route.dst_len))
+                if any(dst_net in network for network in excludes):
+                    continue
             new_routes.add(route)
         existing_routes = set(get_routes(ip, to_table))
         delete_routes(ip, to_table, existing_routes - new_routes)
