@@ -1,0 +1,12 @@
+[Unit]
+Description=Hades networking
+Documentation=https://agdsn.github.io/hades/
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=HADES_CONFIG=/etc/hades/config.py
+ExecStart=/usr/local/bin/hades networking
+
+[Install]
+WantedBy=multi-user.target

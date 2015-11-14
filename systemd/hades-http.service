@@ -1,0 +1,18 @@
+[Unit]
+Description=Hades http server (nginx)
+Documentation=https://agdsn.github.io/hades/
+After=hades-networking.service hades-portal.service
+Wants=hades-networking.service hades-portal.service
+
+[Service]
+Type=simple
+Environment=HADES_CONFIG=/etc/hades/config.py
+ExecStart=/usr/local/bin/hades http
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+KillSignal=SIGQUIT
+KillMode=mixed
+
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+[Unit]
+Description=Hades portal (Flask app on uWSGI)
+Documentation=https://agdsn.github.io/hades/
+After=hades-networking.service hades-database.service
+Wants=hades-networking.service hades-database.service
+
+[Service]
+Type=notify
+Environment=HADES_CONFIG=/etc/hades/config.py
+ExecStart=/usr/local/bin/hades portal
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+KillSignal=SIGINT
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target

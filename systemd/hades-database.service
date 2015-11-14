@@ -1,0 +1,16 @@
+[Unit]
+Description=Hades database service (PostgreSQL)
+Documentation=https://agdsn.github.io/hades/
+After=hades-networking.service
+Wants=hades-networking.service
+
+[Service]
+Type=simple
+Environment=HADES_CONFIG=/etc/hades/config.py
+ExecStart=/usr/local/bin/hades database
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
