@@ -11,6 +11,9 @@ ExecStart=/usr/local/bin/hades database
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 KillMode=mixed
+User=postgres
+Group=postgres
+RuntimeDirectory=postgresql
 
 [Install]
 WantedBy=multi-user.target
