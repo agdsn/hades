@@ -46,9 +46,9 @@ def unfreeze(value):
     return value
 
 
-Route = collections.namedtuple('BaseRoute', ('family', 'dst_len', 'src_len',
-                                             'tos', 'proto', 'scope', 'type',
-                                             'attributes', 'flags'))
+Route = collections.namedtuple('Route', ('family', 'dst_len', 'src_len', 'tos',
+                                         'proto', 'scope', 'type', 'attributes',
+                                         'flags'))
 INCLUDED_ATTRIBUTES = {
     'RTA_DST', 'RTA_SRC', 'RTA_OIF', 'RTA_GATEWAY', 'RTA_PRIORITY',
     'RTA_PREFSRC', 'RTA_MULTIPATH', 'RTA_METRICS', 'RTA_FLOW', 'RTA_VIA',
