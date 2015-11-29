@@ -21,7 +21,11 @@ fi
 #
 # Hint: User `docker attach' to get access to the running bash shell.
 #
-docker run --privileged --name hades -d -i -t -v "$(pwd)/src":/src:ro hades-dev
+docker run --privileged --name hades -d -i -t \
+	-v "$(pwd)/src":/src:ro \
+	-v "$(pwd)/configs/example.py":/tmp/config.py:ro \
+	--env HADES_CONFIG=/tmp/config.py \
+	hades-dev
 pid=$(docker inspect --type=container -f '{{.State.Pid}}' hades)
 
 #
