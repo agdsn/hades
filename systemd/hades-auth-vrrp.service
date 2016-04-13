@@ -1,13 +1,13 @@
 [Unit]
-Description=Hades VRRP service (keepalived)
+Description=Hades VRRP service (keepalived, auth)
 Documentation=https://agdsn.github.io/hades/
-After=hades-networking.service hades-database.service
-Wants=hades-networking.service hades-database.service
+After=hades-networking.service
+Wants=hades-networking.service
 
 [Service]
 Type=simple
 EnvironmentFile=/etc/hades/env
-ExecStart=/usr/local/bin/hades vrrp
+ExecStart=/sbin/ip netns exec auth hades auth-vrrp
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 

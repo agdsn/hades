@@ -1,0 +1,45 @@
+global_defs {
+    notification_email {
+        root@agdsn
+    }
+    notification_email_from {{ HADES_SITE_NODE_ID }}@agdsn
+    router_id {{ HADES_SITE_NAME }}
+}
+
+static_ipaddress {
+    {{ HADES_VRRP_LISTEN_UNAUTH }} dev vrrp
+    {{ HADES_NETNS_UNAUTH_LISTEN }} dev eth0
+}
+
+vrrp_instance unauth {
+    {%- if HADES_INITIAL_MASTER %}
+    state MASTER
+    {%- else %}
+    state BACKUP
+    {%- endif %}
+    preempt_delay {{ HADES_VRRP_PREEMPTION_DELAY.total_seconds()|int }}
+
+    interface eth0
+
+    mcast_src_ip {{ HADES_VRRP_LISTEN_UNAUTH.ip }}
+
+    garp_master_refresh {{ HADES_GRATUITOUS_ARP_INTERVAL.total_seconds()|int }}
+    garp_master_refresh_repeat 1
+
+    virtual_router_id {{ HADES_VRRP_VIRTUAL_ROUTER_ID_UNAUTH }}
+    advert_int {{ HADES_VRRP_ADVERTISEMENT_INTERVAL.total_seconds()|int }}
+
+    priority {{ HADES_PRIORITY }}
+
+    authentication {
+        auth_type PASS
+        auth_pass {{ HADES_VRRP_PASSWORD }}
+    }
+
+    virtual_ipaddress {
+        {{ HADES_UNAUTH_LISTEN }} dev {{ HADES_UNAUTH_INTERFACE }}
+        {%- for network in HADES_USER_NETWORKS.values() %}
+        {{ network }} dev {{ HADES_UNAUTH_INTERFACE }}
+        {%- endfor %}
+    }
+}

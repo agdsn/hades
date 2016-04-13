@@ -122,6 +122,35 @@ class HADES_USER_NETWORKS(Option):
                              check.mapping(value_check=check.network_ip))
 
 
+#############################
+# Network namespace options #
+#############################
+
+
+class HADES_NETNS_MAIN_AUTH_LISTEN(Option):
+    default = netaddr.IPNetwork('172.18.0.0/31')
+    static_check = check.network_ip
+    runtime_check = check.address_exists
+
+
+class HADES_NETNS_AUTH_LISTEN(Option):
+    default = netaddr.IPNetwork('172.18.0.1/31')
+    static_check = check.network_ip
+    runtime_check = check.address_exists
+
+
+class HADES_NETNS_MAIN_UNAUTH_LISTEN(Option):
+    default = netaddr.IPNetwork('172.18.0.2/31')
+    static_check = check.network_ip
+    runtime_check = check.address_exists
+
+
+class HADES_NETNS_UNAUTH_LISTEN(Option):
+    default = netaddr.IPNetwork('172.18.0.3/31')
+    static_check = check.network_ip
+    runtime_check = check.address_exists
+
+
 #######################
 # Hades Agent options #
 #######################
@@ -643,8 +672,28 @@ class HADES_VRRP_INTERFACE(Option):
     runtime_check = check.interface_exists
 
 
-class HADES_VRRP_LISTEN(Option):
-    """IP and network for VRRP communication"""
+class HADES_VRRP_BRIDGE(Option):
+    """Interface name for VRRP bridge (created if necessary)"""
+    type = str
+    default = 'br-vrrp'
+
+
+class HADES_VRRP_LISTEN_AUTH(Option):
+    """IP and network for VRRP communication (auth instance)"""
+    type = netaddr.IPNetwork
+    static_check = check.network_ip
+    runtime_check = check.address_exists
+
+
+class HADES_VRRP_LISTEN_RADIUS(Option):
+    """IP and network for VRRP communication (radius instance)"""
+    type = netaddr.IPNetwork
+    static_check = check.network_ip
+    runtime_check = check.address_exists
+
+
+class HADES_VRRP_LISTEN_UNAUTH(Option):
+    """IP and network for VRRP communication (unauth instance)"""
     type = netaddr.IPNetwork
     static_check = check.network_ip
     runtime_check = check.address_exists
@@ -657,10 +706,24 @@ class HADES_VRRP_PASSWORD(Option):
     type = str
 
 
-class HADES_VRRP_VIRTUAL_ROUTER_ID(Option):
-    """Virtual router ID used by Hades"""
+class HADES_VRRP_VIRTUAL_ROUTER_ID_AUTH(Option):
+    """Virtual router ID used by Hades (auth instance)"""
     type = int
     default = 66
+    static_check = check.between(0, 255)
+
+
+class HADES_VRRP_VIRTUAL_ROUTER_ID_RADIUS(Option):
+    """Virtual router ID used by Hades (radius instance)"""
+    type = int
+    default = 67
+    static_check = check.between(0, 255)
+
+
+class HADES_VRRP_VIRTUAL_ROUTER_ID_UNAUTH(Option):
+    """Virtual router ID used by Hades (unauth instance)"""
+    type = int
+    default = 68
     static_check = check.between(0, 255)
 
 

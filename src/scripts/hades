@@ -18,6 +18,7 @@ print_usage() {
     msg "                 (dnsmasq monitored by a SignalProxyDaemon)"
     msg "  auth-dns       Execute the DNS resolver for the authenticated users"
     msg "                 (unbound)"
+    msg "  auth-vrrp      Run the VRRP daemon (keepalived, auth)"
     msg "  database       Execute the database (PostgreSQL)"
     msg "  help           Print this help message"
     msg "  http           Execute the captive portal web server (nginx)"
@@ -27,11 +28,12 @@ print_usage() {
     msg "  networking     Setup networking (iptables, routing)"
     msg "  portal         Run the captive portal WSGI application (using uWSGI)"
     msg "  radius         Run the RADIUS server (freeRADIUS)"
+    msg "  radius-vrrp    Run the VRRP daemon (keepalived, radius)"
     msg "  shell          Start a bash shell for debugging"
     msg "  unauth-dhcp    Run the DHCP server for the unauthenticated users"
     msg "                 (no-op and handled by the unauth-dns dnsmasq)"
     msg "  unauth-dns     Run the DNS resolver (dnsmasq) for the unauth VLAN"
-    msg "  vrrp           Run the VRRP daemon (keepalived)"
+    msg "  unauth-vrrp    Run the VRRP daemon (keepalived, unauth)"
 }
 
 run_agent() {
@@ -46,6 +48,10 @@ run_auth_dns() {
 run_auth_dhcp() {
     python3 -m hades.config.generate auth-dnsmasq.conf.j2 "${HADES_CONFIG_DIR}/auth-dnsmasq.conf"
     exec python3 -m hades.dnsmasq.monitor "${HADES_CONFIG_DIR}/auth-dnsmasq.conf"
+}
+
+run_auth_vrrp() {
+    run_vrrp auth "$@"
 }
 
 export_postgres_env() {
@@ -164,8 +170,52 @@ run_networking() {
             ip link set up dev "${interface}"
         done
     fi
-    python3 -m hades.config.generate iptables.j2 | iptables-restore
+
     sysctl net.ipv4.ip_nonlocal_bind=1
+    for netns in auth unauth; do
+        ip netns add "${netns}"
+        ip netns exec "${netns}" ip link set dev lo up
+        ip netns exec "${netns}" sysctl net.ipv4.ip_nonlocal_bind=1
+    done
+
+    # After moving interfaces they are DOWN.
+    ip link set dev "${HADES_AUTH_INTERFACE}" netns auth
+    ip netns exec auth ip link set dev "${HADES_AUTH_INTERFACE}" up
+    ip link set dev "${HADES_UNAUTH_INTERFACE}" netns unauth
+    ip netns exec unauth ip link set dev "${HADES_UNAUTH_INTERFACE}" up
+
+    # Create virtual ethernet adapters and put the other end into the correct
+    # namespace.
+    ip link add name eth-auth type veth peer netns auth name eth0
+    ip link add name eth-unauth type veth peer netns unauth name eth0
+
+    # Create bridge
+    if [[ ! -d "/sys/class/net/${HADES_VRRP_BRIDGE}" ]]; then
+        ip link add name "${HADES_VRRP_BRIDGE}" type bridge
+        # Not all settings available with iproute2.
+        #brctl addbr "${HADES_VRRP_BRIDGE}"
+        #brctl setfd "${HADES_VRRP_BRIDGE}" 0
+        #brctl stp "${HADES_VRRP_BRIDGE}" off
+    fi
+
+    # Create bridge and virtual adapters for the separate VRRP network.
+    ip link add name eth-auth-vrrp type veth peer netns auth name vrrp
+    ip link add name eth-unauth-vrrp type veth peer netns unauth name vrrp
+    ip link set dev eth-auth-vrrp master "${HADES_VRRP_BRIDGE}" up
+    ip link set dev eth-unauth-vrrp master "${HADES_VRRP_BRIDGE}" up
+    ip link set dev "${HADES_VRRP_INTERFACE}" master "${HADES_VRRP_BRIDGE}" up
+    ip link set dev "${HADES_VRRP_BRIDGE}" up
+    ip netns exec auth ip link set vrrp up
+    ip netns exec unauth ip link set vrrp up
+
+    # Setup the interfaces virtual interfaces connecting the different
+    # namespaces.
+    ip link set dev eth-auth up
+    ip netns exec auth ip link set dev eth0 up
+    ip link set dev eth-unauth up
+    ip netns exec unauth ip link set dev eth0 up
+
+    python3 -m hades.config.generate iptables.j2 | iptables-restore
     ip rule add fwmark "${HADES_AUTH_FWMARK}"   table "${HADES_AUTH_ROUTING_TABLE}"
     ip rule add fwmark "${HADES_UNAUTH_FWMARK}" table "${HADES_UNAUTH_ROUTING_TABLE}"
     exit ${EX_OK}
@@ -189,6 +239,10 @@ run_radius() {
     exec freeradius -f -m -d "${HADES_CONFIG_DIR}/freeradius"
 }
 
+run_radius_vrrp() {
+    run_vrrp radius "$@"
+}
+
 run_shell() {
     exec bash
 }
@@ -204,9 +258,17 @@ run_unauth_dns() {
     exec dnsmasq -k -C "${HADES_CONFIG_DIR}/unauth-dnsmasq.conf"
 }
 
+run_unauth_vrrp() {
+    run_vrrp unauth "$@"
+}
+
 run_vrrp() {
-    python3 -m hades.config.generate keepalived.conf.j2 "${HADES_CONFIG_DIR}/keepalived.conf"
-    exec keepalived --log-console --dont-fork --vrrp --use-file="${HADES_CONFIG_DIR}/keepalived.conf"
+    case "$1" in
+        auth|radius|unauth) ;;
+        *) msg "Unknown option $1"; exit "${EX_USAGE}";;
+    esac
+    python3 -m hades.config.generate "keepalived-$1.conf.j2" "${HADES_CONFIG_DIR}/keepalived-$1.conf"
+    exec keepalived --log-console --dont-fork --vrrp --use-file="${HADES_CONFIG_DIR}/keepalived-$1.conf" --pid="/run/hades/vrrp/keepalived-$1.pid" --vrrp_pid="/run/hades/vrrp/vrrp-$1.pid"
 }
 
 main() {
@@ -219,7 +281,7 @@ main() {
         shift
     fi
     case "$command" in
-        agent|auth-dhcp|auth-dns|database|http|init-database|init-database-system|init-database-schema|networking|portal|radius|shell|unauth-dhcp|unauth-dns|vrrp)
+        agent|auth-dhcp|auth-dns|auth-vrrp|database|http|init-database|init-database-system|init-database-schema|networking|portal|radius|radius-vrrp|shell|unauth-dhcp|unauth-dns|unauth-vrrp)
             "run_${command//-/_}" "$@"
             ;;
         help|-h|--help)

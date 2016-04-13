@@ -88,7 +88,8 @@ def network_ip(config, name, value):
                                 "address of the subnet. Must be an IP of the "
                                 "subnet."
                           .format(value))
-    if value.ip == value.broadcast:
+    # Prefix length 31 is special, see RFC 3021
+    if value.prefixlen != 31 and value.ip == value.broadcast:
         raise ConfigError(name, "The host part of {} is the broadcast "
                                 "address of the subnet. Must be an IP of the "
                                 "subnet."
