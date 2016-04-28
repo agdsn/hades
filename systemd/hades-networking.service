@@ -5,7 +5,7 @@ Documentation=https://agdsn.github.io/hades/
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-Environment=HADES_CONFIG=/etc/hades/config.py
+EnvironmentFile=/etc/hades/env
 ExecStart=/usr/local/bin/hades networking
 
 [Install]

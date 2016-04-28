@@ -6,13 +6,12 @@ Wants=hades-networking.service hades-portal.service
 
 [Service]
 Type=simple
-Environment=HADES_CONFIG=/etc/hades/config.py
+EnvironmentFile=/etc/hades/env
 ExecStart=/usr/local/bin/hades http
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 KillSignal=SIGQUIT
 KillMode=mixed
-
 
 [Install]
 WantedBy=multi-user.target
