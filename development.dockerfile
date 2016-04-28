@@ -34,6 +34,7 @@ RUN printf '%s=%s\n' \
 COPY systemd/ /lib/systemd/system
 RUN . /etc/hades/env \
     && cd /lib/systemd/system \
-    && for i in hades-*.*; do systemctl enable "$i"; done
+    && for i in hades-*.*; do systemctl enable "$i"; done \
+    && python3 -m hades.config.generate tmpfiles.conf.j2 /etc/tmpfiles.d/hades.conf
 
 CMD ["/lib/systemd/systemd", "--system"]
