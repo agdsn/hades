@@ -53,10 +53,10 @@ export_postgres_env() {
     export PGDATA="/var/lib/postgresql/hades"
 }
 
-run_init_database() {
+run_init_database_cluster() {
     export_postgres_env
     if [[ $(id -u) = 0 ]]; then
-        exec python3 -m hades.common.su "${HADES_POSTGRESQL_USER}" "$0" init-database "$@"
+        exec python3 -m hades.common.su "${HADES_POSTGRESQL_USER}" "$0" init-database-cluster "$@"
     fi
     local clear=
     while [[ $# -gt 0 ]]; do
@@ -90,8 +90,23 @@ run_init_database() {
         createuser "${user}"
     done
     createdb "${HADES_POSTGRESQL_DATABASE}"
-    python3 -m hades.config.generate schema.sql.j2 | psql --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "${HADES_POSTGRESQL_DATABASE}"
     touch "${PGDATA}/.initialized"
+    pg_ctl stop -s
+    trap - EXIT HUP INT QUIT ABRT
+}
+
+run_init_database_schema() {
+    export_postgres_env
+    if [[ $(id -u) = 0 ]]; then
+        exec python3 -m hades.common.su "${HADES_POSTGRESQL_USER}" "$0" init-database-schema "$@"
+    fi
+    if [[ -f "${PGDATA}/.initialized_schema" ]]; then
+        msg "Database already initialized. Use --clear to delete."
+        exit "${EX_UNAVAILABLE}"
+    fi
+    pg_ctl start -w -s
+    python3 -m hades.config.generate schema.sql.j2 | psql --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "${HADES_POSTGRESQL_DATABASE}"
+    touch "${PGDATA}/.initialized_schema"
     pg_ctl stop -s
     trap - EXIT HUP INT QUIT ABRT
 }
@@ -99,7 +114,10 @@ run_init_database() {
 run_database() {
     export_postgres_env
     if [[ ! -f "${PGDATA}/.initialized" ]]; then
-        $0 init-database "$@"
+        "$0" init-database-cluster "$@"
+    fi
+    if [[ ! -f "${PGDATA}/.initialized_schema" ]]; then
+        "$0" init-database-schema "$@"
     fi
     exec python3 -m hades.common.su "${HADES_POSTGRESQL_USER}" postgres
 }
@@ -177,7 +195,7 @@ main() {
         shift
     fi
     case "$command" in
-        agent|auth-dhcp|auth-dns|database|http|init-database|networking|portal|radius|shell|unauth-dhcp|unauth-dns|vrrp)
+        agent|auth-dhcp|auth-dns|database|http|init-database-cluster|init-database-schema|networking|portal|radius|shell|unauth-dhcp|unauth-dns|vrrp)
             "run_${command//-/_}" "$@"
             ;;
         help|-h|--help)
