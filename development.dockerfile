@@ -37,4 +37,8 @@ RUN . /etc/hades/env \
     && for i in hades-*.*; do systemctl enable "$i"; done \
     && python3 -m hades.config.generate tmpfiles.conf.j2 /etc/tmpfiles.d/hades.conf
 
+# Setup local radius database used for development
+COPY docker/postgres_fdw.sh /build/
+RUN chmod 755 /build/postgres_fdw.sh && /build/postgres_fdw.sh && rm -rf /build/
+
 CMD ["/lib/systemd/systemd", "--system"]

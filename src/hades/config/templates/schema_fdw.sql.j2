@@ -1,0 +1,301 @@
+--
+-- PostgreSQL database dump
+--
+
+{%- macro join_options(options) %}
+    {%- if options %}
+    {%- set items = options.items()|list %}
+    {%- for name, value in items[:-1] %}
+    {{ name }} '{{ value }}',
+    {%- endfor %}
+    {{ items[-1][0] }} '{{ items[-1][1] }}'
+    {%- endif %}
+{%- endmacro %}
+
+
+{%- macro table_options(options) %}
+    {%- do options.update(HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS) %}
+    {{ join_options(options) }}
+{%- endmacro %}
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner:
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner:
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+--
+-- Name: {{ HADES_POSTGRESQL_FOREIGN_SERVER_FDW}}; Type: EXTENSION; Schema: -; Owner:
+--
+
+CREATE EXTENSION IF NOT EXISTS {{ HADES_POSTGRESQL_FOREIGN_SERVER_FDW }} WITH SCHEMA public;
+
+
+SET search_path = public, pg_catalog;
+
+--
+-- Name: safe_inet_cast(text); Type: FUNCTION; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
+--
+
+CREATE FUNCTION safe_inet_cast(inp text) RETURNS inet
+    LANGUAGE plpgsql IMMUTABLE STRICT
+    AS $$
+BEGIN
+    RETURN CAST(inp AS inet);
+EXCEPTION WHEN data_exception THEN
+    RETURN NULL;
+END;
+$$;
+
+
+ALTER FUNCTION public.safe_inet_cast(inp text) OWNER TO "{{ HADES_POSTGRESQL_USER }}";
+
+--
+-- Name: safe_macaddr_cast(text); Type: FUNCTION; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
+--
+
+CREATE FUNCTION safe_macaddr_cast(inp text) RETURNS macaddr
+    LANGUAGE plpgsql IMMUTABLE STRICT
+    AS $$
+BEGIN
+    RETURN CAST(inp AS macaddr);
+EXCEPTION WHEN data_exception THEN
+    RETURN NULL;
+END;
+$$;
+
+
+ALTER FUNCTION public.safe_macaddr_cast(inp text) OWNER TO "{{ HADES_POSTGRESQL_USER }}";
+
+
+SET default_tablespace = '';
+
+--
+-- Name: dhcphost; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+--
+
+CREATE TABLE dhcphost (
+    id integer NOT NULL,
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
+    mac character(17) NOT NULL,
+    {%- else %}
+    mac macaddr NOT NULL,
+    {%- endif %}
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
+    ipaddress character varying(39) NOT NULL
+    {%- else %}
+    ipaddress inet NOT NULL
+    {%- endif %}
+);
+
+
+ALTER TABLE dhcphost OWNER TO "{{ HADES_POSTGRESQL_USER }}";
+
+--
+-- Name: nas; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+--
+
+CREATE TABLE nas (
+    id integer NOT NULL,
+    nasname character varying(128) NOT NULL,
+    shortname character varying(32) NOT NULL,
+    type character varying(30) DEFAULT 'other'::character varying NOT NULL,
+    ports integer,
+    secret character varying(60) NOT NULL,
+    server character varying(64),
+    community character varying(50),
+    description character varying(200)
+);
+
+
+ALTER TABLE nas OWNER TO "{{ HADES_POSTGRESQL_USER }}";
+
+--
+-- Name: radcheck; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+--
+
+CREATE TABLE radcheck (
+    id integer NOT NULL,
+    username character varying(64) NOT NULL,
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
+    nasipaddress character varying(15) NOT NULL,
+    {%- else %}
+    nasipaddress inet NOT NULL,
+    {%- endif %}
+    nasportid character varying(15) NOT NULL,
+    attribute character varying(64) NOT NULL,
+    op character(2) NOT NULL,
+    value character varying(253) NOT NULL
+);
+
+
+ALTER TABLE radcheck OWNER TO "{{ HADES_POSTGRESQL_USER }}";
+
+--
+-- Name: radgroupcheck; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+--
+
+CREATE TABLE radgroupcheck (
+    id integer NOT NULL,
+    groupname character varying(64) NOT NULL,
+    attribute character varying(64) NOT NULL,
+    op character(2) NOT NULL,
+    value character varying(253) NOT NULL
+);
+
+
+ALTER TABLE radgroupcheck OWNER TO "{{ HADES_POSTGRESQL_USER }}";
+
+--
+-- Name: radgroupreply; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+--
+
+CREATE TABLE radgroupreply (
+    id integer NOT NULL,
+    groupname character varying(64) NOT NULL,
+    attribute character varying(64) NOT NULL,
+    op character(2) NOT NULL,
+    value character varying(253) NOT NULL
+);
+
+
+ALTER TABLE radgroupreply OWNER TO "{{ HADES_POSTGRESQL_USER }}";
+
+--
+-- Name: radreply; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+--
+
+CREATE TABLE radreply (
+    id integer NOT NULL,
+    username character varying(64) NOT NULL,
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
+    nasipaddress character varying(15) NOT NULL,
+    {%- else %}
+    nasipaddress inet NOT NULL,
+    {%- endif %}
+    nasportid character varying(15) NOT NULL,
+    attribute character varying(64) NOT NULL,
+    op character(2) DEFAULT '='::bpchar NOT NULL,
+    value character varying(253) NOT NULL
+);
+
+
+ALTER TABLE radreply OWNER TO "{{ HADES_POSTGRESQL_USER }}";
+
+--
+-- Name: radusergroup; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+--
+
+CREATE TABLE radusergroup (
+    username character varying(64) NOT NULL,
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
+    nasipaddress character varying(15) NOT NULL,
+    {%- else %}
+    nasipaddress inet NOT NULL,
+    {%- endif %}
+    nasportid character varying(15) NOT NULL,
+    groupname character varying(64) NOT NULL,
+    priority integer NOT NULL
+);
+
+
+ALTER TABLE radusergroup OWNER TO "{{ HADES_POSTGRESQL_USER }}";
+
+--
+-- Name: dhcphost; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
+--
+
+REVOKE ALL ON TABLE dhcphost FROM PUBLIC;
+REVOKE ALL ON TABLE dhcphost FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE dhcphost TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT SELECT ON TABLE dhcphost TO "{{ HADES_AGENT_USER }}";
+
+
+--
+-- Name: dhcphost; Type: ACL; Schema: public; Owner: {{ HADES_AGENT_USER }}
+--
+
+REVOKE ALL ON TABLE dhcphost FROM PUBLIC;
+REVOKE ALL ON TABLE dhcphost FROM "{{ HADES_AGENT_USER }}";
+GRANT ALL ON TABLE dhcphost TO "{{ HADES_AGENT_USER }}";
+GRANT ALL ON TABLE dhcphost TO "{{ HADES_POSTGRESQL_USER }}";
+
+
+--
+-- Name: nas; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
+--
+
+REVOKE ALL ON TABLE nas FROM PUBLIC;
+REVOKE ALL ON TABLE nas FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE nas TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT SELECT ON TABLE nas TO "{{ HADES_AGENT_USER }}";
+
+
+--
+-- Name: radcheck; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
+--
+
+REVOKE ALL ON TABLE radcheck FROM PUBLIC;
+REVOKE ALL ON TABLE radcheck FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE radcheck TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT SELECT ON TABLE radcheck TO "{{ HADES_AGENT_USER }}";
+
+
+--
+-- Name: radgroupcheck; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
+--
+
+REVOKE ALL ON TABLE radgroupcheck FROM PUBLIC;
+REVOKE ALL ON TABLE radgroupcheck FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE radgroupcheck TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT SELECT ON TABLE radgroupcheck TO "{{ HADES_AGENT_USER }}";
+
+
+--
+-- Name: radgroupreply; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
+--
+
+REVOKE ALL ON TABLE radgroupreply FROM PUBLIC;
+REVOKE ALL ON TABLE radgroupreply FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE radgroupreply TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT SELECT ON TABLE radgroupreply TO "{{ HADES_AGENT_USER }}";
+
+
+--
+-- Name: radreply; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
+--
+
+REVOKE ALL ON TABLE radreply FROM PUBLIC;
+REVOKE ALL ON TABLE radreply FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE radreply TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT SELECT ON TABLE radreply TO "{{ HADES_AGENT_USER }}";
+
+
+--
+-- Name: radusergroup; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
+--
+
+REVOKE ALL ON TABLE radusergroup FROM PUBLIC;
+REVOKE ALL ON TABLE radusergroup FROM "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE radusergroup TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT SELECT ON TABLE radusergroup TO "{{ HADES_AGENT_USER }}";
+
+
+--
+-- PostgreSQL database dump complete
+--
