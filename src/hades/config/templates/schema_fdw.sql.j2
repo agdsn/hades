@@ -2,22 +2,6 @@
 -- PostgreSQL database dump
 --
 
-{%- macro join_options(options) %}
-    {%- if options %}
-    {%- set items = options.items()|list %}
-    {%- for name, value in items[:-1] %}
-    {{ name }} '{{ value }}',
-    {%- endfor %}
-    {{ items[-1][0] }} '{{ items[-1][1] }}'
-    {%- endif %}
-{%- endmacro %}
-
-
-{%- macro table_options(options) %}
-    {%- do options.update(HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS) %}
-    {{ join_options(options) }}
-{%- endmacro %}
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -47,41 +31,6 @@ CREATE EXTENSION IF NOT EXISTS {{ HADES_POSTGRESQL_FOREIGN_SERVER_FDW }} WITH SC
 
 
 SET search_path = public, pg_catalog;
-
---
--- Name: safe_inet_cast(text); Type: FUNCTION; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
---
-
-CREATE FUNCTION safe_inet_cast(inp text) RETURNS inet
-    LANGUAGE plpgsql IMMUTABLE STRICT
-    AS $$
-BEGIN
-    RETURN CAST(inp AS inet);
-EXCEPTION WHEN data_exception THEN
-    RETURN NULL;
-END;
-$$;
-
-
-ALTER FUNCTION public.safe_inet_cast(inp text) OWNER TO "{{ HADES_POSTGRESQL_USER }}";
-
---
--- Name: safe_macaddr_cast(text); Type: FUNCTION; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
---
-
-CREATE FUNCTION safe_macaddr_cast(inp text) RETURNS macaddr
-    LANGUAGE plpgsql IMMUTABLE STRICT
-    AS $$
-BEGIN
-    RETURN CAST(inp AS macaddr);
-EXCEPTION WHEN data_exception THEN
-    RETURN NULL;
-END;
-$$;
-
-
-ALTER FUNCTION public.safe_macaddr_cast(inp text) OWNER TO "{{ HADES_POSTGRESQL_USER }}";
-
 
 SET default_tablespace = '';
 
