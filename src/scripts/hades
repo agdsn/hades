@@ -104,6 +104,7 @@ run_init_database_schema() {
         msg "Database already initialized. Use --clear to delete."
         exit "${EX_UNAVAILABLE}"
     fi
+    trap 'pg_ctl stop -s || true' EXIT HUP INT QUIT ABRT
     pg_ctl start -w -s
     python3 -m hades.config.generate schema.sql.j2 | psql --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "${HADES_POSTGRESQL_DATABASE}"
     touch "${PGDATA}/.initialized_schema"
