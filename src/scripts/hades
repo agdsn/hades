@@ -53,10 +53,10 @@ export_postgres_env() {
     export PGDATA="/var/lib/postgresql/hades"
 }
 
-run_init_database_cluster() {
+run_init_database_system() {
     export_postgres_env
     if [[ $(id -u) = 0 ]]; then
-        exec python3 -m hades.common.su "${HADES_POSTGRESQL_USER}" "$0" init-database-cluster "$@"
+        exec python3 -m hades.common.su "${HADES_POSTGRESQL_USER}" "$0" init-database-system "$@"
     fi
     local clear=
     while [[ $# -gt 0 ]]; do
@@ -73,8 +73,8 @@ run_init_database_cluster() {
         shopt -u dotglob
     }
     [[ -n ${clear} ]] && clear_pgdata
-    if [[ -f "${PGDATA}/.initialized" ]]; then
-        msg "Database already initialized. Use --clear to delete."
+    if [[ -f "${PGDATA}/.cluster-initialized" ]]; then
+        msg "Cluster already initialized. Use --clear to delete."
         exit "${EX_UNAVAILABLE}"
     fi
     cleanup_failure() {
@@ -89,8 +89,7 @@ run_init_database_cluster() {
     for user in "${HADES_RADIUS_USER}" "${HADES_AGENT_USER}" "${HADES_PORTAL_USER}"; do
         createuser "${user}"
     done
-    createdb "${HADES_POSTGRESQL_DATABASE}"
-    touch "${PGDATA}/.initialized"
+    touch "${PGDATA}/.cluster-initialized"
     pg_ctl stop -s
     trap - EXIT HUP INT QUIT ABRT
 }
@@ -100,26 +99,49 @@ run_init_database_schema() {
     if [[ $(id -u) = 0 ]]; then
         exec python3 -m hades.common.su "${HADES_POSTGRESQL_USER}" "$0" init-database-schema "$@"
     fi
-    if [[ -f "${PGDATA}/.initialized_schema" ]]; then
+    local clear=
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --clear) clear=1;;
+            *)       msg "Unknown option $1"; exit "${EX_USAGE}";;
+        esac
+        shift
+    done
+    drop_database() {
+        msg "Dropping ${HADES_POSTGRESQL_DATABASE}"
+        dropdb "${HADES_POSTGRESQL_DATABASE}" || true
+    }
+    [[ -n ${clear} ]] && drop_database
+    if [[ -f "${PGDATA}/.database-initialized" ]]; then
         msg "Database already initialized. Use --clear to delete."
         exit "${EX_UNAVAILABLE}"
     fi
-    trap 'pg_ctl stop -s || true' EXIT HUP INT QUIT ABRT
+    cleanup_failure() {
+        drop_database
+        pg_ctl stop -s || true
+    }
+    trap cleanup_failure EXIT HUP INT QUIT ABRT
     pg_ctl start -w -s
+    createdb "${HADES_POSTGRESQL_DATABASE}"
     python3 -m hades.config.generate schema.sql.j2 | psql --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "${HADES_POSTGRESQL_DATABASE}"
-    touch "${PGDATA}/.initialized_schema"
+    touch "${PGDATA}/.database-initialized"
     pg_ctl stop -s
     trap - EXIT HUP INT QUIT ABRT
 }
 
-run_database() {
+run_init_database() {
     export_postgres_env
-    if [[ ! -f "${PGDATA}/.initialized" ]]; then
-        "$0" init-database-cluster "$@"
+    if [[ ! -f "${PGDATA}/.cluster-initialized" ]]; then
+        "$0" init-database-system "$@"
     fi
-    if [[ ! -f "${PGDATA}/.initialized_schema" ]]; then
+    if [[ ! -f "${PGDATA}/.database-initialized" ]]; then
         "$0" init-database-schema "$@"
     fi
+}
+
+run_database() {
+    export_postgres_env
+    "$0" init-database "$@"
     exec python3 -m hades.common.su "${HADES_POSTGRESQL_USER}" postgres
 }
 
@@ -197,7 +219,7 @@ main() {
         shift
     fi
     case "$command" in
-        agent|auth-dhcp|auth-dns|database|http|init-database-cluster|init-database-schema|networking|portal|radius|shell|unauth-dhcp|unauth-dns|vrrp)
+        agent|auth-dhcp|auth-dns|database|http|init-database|init-database-system|init-database-schema|networking|portal|radius|shell|unauth-dhcp|unauth-dns|vrrp)
             "run_${command//-/_}" "$@"
             ;;
         help|-h|--help)

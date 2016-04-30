@@ -13,7 +13,7 @@ fi
 
 # Let the hades script configure the database cluster. This might use some
 # special arguments to pg_ctl initdb.
-hades init-postgres-cluster
+hades init-database-system
 
 # Create database 'radius' and populate the schema. This enables us to point
 # the foreign tables to the local running database instance for development.
