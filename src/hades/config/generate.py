@@ -82,6 +82,11 @@ def do_zip_longest(*iterables, fillvalue=None):
     return itertools.zip_longest(*iterables, fillvalue=fillvalue)
 
 
+@template_filter('dirname')
+def do_dirname(a):
+    return os.path.dirname(a)
+
+
 class ConfigGenerator(object):
     TEMPLATE_SUFFIX = ".j2"
 

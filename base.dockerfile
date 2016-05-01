@@ -17,10 +17,12 @@ RUN apt-get update && apt-get install \
     git \
     iptables \
     keepalived \
+    less \
     libmysqlclient-dev \
     nginx \
     npm \
     postgresql \
+    postgresql-contrib \
     postgresql-server-dev-${PGVERSION} \
     python3-babel \
     python3-celery \

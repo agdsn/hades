@@ -16,6 +16,7 @@ HADES_RADIUS_LOCALHOST_SECRET = 'testing123'
 HADES_CONTACT_ADDRESSES = OrderedDict([
     ("Support", "support@example.com"),
 ])
+HADES_POSTGRESQL_SOCKET = '/var/run/postgresql'
 HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING = True
 HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING = True
 HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING = True
@@ -32,22 +33,20 @@ HADES_USER_NETWORKS = {
     'UNEP': netaddr.IPNetwork('141.30.242.129/28'),
     'Bor34': netaddr.IPNetwork('141.76.121.1/24'),
 }
-HADES_POSTGRESQL_FOREIGN_SERVER_FDW = 'mysql_fdw'
+HADES_POSTGRESQL_FOREIGN_SERVER_FDW = 'postgres_fdw'
 HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS = {
-    'host': '172.17.0.1',
-    'port': '3306',
-    'init_command': 'SET lock_wait_timeout = 5;'
+    'host': HADES_POSTGRESQL_SOCKET,
+    'dbname': 'radius'
 }
 HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS = {
-    'dbname': 'radius',
 }
 HADES_POSTGRESQL_USER_MAPPINGS = {
     'hades-agent': {
-        'password': '',
-        'username': 'hades-agent',
+        'user': 'postgres',
+        'password': ''
     },
     'postgres': {
-        'password': '',
-        'username': 'hades-agent',
+        'user': 'postgres',
+        'password': ''
     },
 }
