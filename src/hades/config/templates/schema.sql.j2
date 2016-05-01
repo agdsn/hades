@@ -349,7 +349,8 @@ CREATE TABLE radacct (
     framedprotocol character varying(32),
     framedipaddress inet,
     acctstartdelay integer,
-    acctstopdelay integer
+    acctstopdelay integer,
+    lastupdatetime timestamp with time zone NOT NULL
 );
 
 
