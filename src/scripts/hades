@@ -191,11 +191,10 @@ run_networking() {
 
     # Create bridge
     if [[ ! -d "/sys/class/net/${HADES_VRRP_BRIDGE}" ]]; then
-        ip link add name "${HADES_VRRP_BRIDGE}" type bridge
         # Not all settings available with iproute2.
-        #brctl addbr "${HADES_VRRP_BRIDGE}"
-        #brctl setfd "${HADES_VRRP_BRIDGE}" 0
-        #brctl stp "${HADES_VRRP_BRIDGE}" off
+        brctl addbr "${HADES_VRRP_BRIDGE}"
+        brctl setfd "${HADES_VRRP_BRIDGE}" 0
+        brctl stp "${HADES_VRRP_BRIDGE}" off
     fi
 
     # Create bridge and virtual adapters for the separate VRRP network.

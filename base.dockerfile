@@ -8,6 +8,7 @@ COPY docker/etc/apt/ /etc/apt/
 
 RUN apt-get update && apt-get install \
     build-essential \
+    bridge-utils \
     curl \
     dns-root-data \
     dnsmasq \
