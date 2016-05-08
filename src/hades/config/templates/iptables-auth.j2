@@ -1,0 +1,31 @@
+*nat
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+COMMIT
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m conntrack --ctstate RELATED,ESTABLISHED,SNAT,DNAT -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i vrrp -p vrrp -j ACCEPT
+{%- for port in HADES_AUTH_ALLOWED_TCP_PORTS %}
+-A INPUT -i {{ HADES_AUTH_INTERFACE }} -p tcp -m tcp --dport {{ port }} -j ACCEPT
+{%- endfor %}
+{%- for port in HADES_AUTH_ALLOWED_UDP_PORTS %}
+-A INPUT -i {{ HADES_AUTH_INTERFACE }} -p udp -m udp --dport {{ port }} -j ACCEPT
+{%- endfor %}
+-A INPUT -p tcp -m tcp -j REJECT --reject-with tcp-reset
+-A INPUT -j REJECT --reject-with icmp-admin-prohibited
+-A FORWARD -j REJECT --reject-with icmp-admin-prohibited
+COMMIT
+*mangle
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+COMMIT

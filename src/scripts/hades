@@ -214,9 +214,10 @@ run_networking() {
     ip link set dev eth-unauth up
     ip netns exec unauth ip link set dev eth0 up
 
-    python3 -m hades.config.generate iptables.j2 | iptables-restore
-    ip rule add fwmark "${HADES_AUTH_FWMARK}"   table "${HADES_AUTH_ROUTING_TABLE}"
-    ip rule add fwmark "${HADES_UNAUTH_FWMARK}" table "${HADES_UNAUTH_ROUTING_TABLE}"
+    python3 -m hades.config.generate iptables-main.j2 | iptables-restore
+    for netns in auth unauth; do
+        python3 -m hades.config.generate "iptables-${netns}.j2" | ip netns exec "${netns}" iptables-restore
+    done
     exit ${EX_OK}
 }
 

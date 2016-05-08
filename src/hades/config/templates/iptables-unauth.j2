@@ -17,15 +17,7 @@ COMMIT
 -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED,SNAT,DNAT -j ACCEPT
 -A INPUT -i lo -j ACCEPT
 -A INPUT -p icmp -j ACCEPT
--A INPUT -i {{ HADES_VRRP_BRIDGE }} -p vrrp -j ACCEPT
--A INPUT -i {{ HADES_RADIUS_INTERFACE }} -p udp -m udp --dport {{ HADES_RADIUS_AUTHENTICATION_PORT }}
--A INPUT -i {{ HADES_RADIUS_INTERFACE }} -p udp -m udp --dport {{ HADES_RADIUS_ACCOUNTING_PORT     }}
-{%- for port in HADES_AUTH_ALLOWED_TCP_PORTS %}
--A INPUT -i {{ HADES_AUTH_INTERFACE }} -p tcp -m tcp --dport {{ port }} -j ACCEPT
-{%- endfor %}
-{%- for port in HADES_AUTH_ALLOWED_UDP_PORTS %}
--A INPUT -i {{ HADES_AUTH_INTERFACE }} -p udp -m udp --dport {{ port }} -j ACCEPT
-{%- endfor %}
+-A INPUT -i vrrp -p vrrp -j ACCEPT
 {%- for port in HADES_UNAUTH_ALLOWED_TCP_PORTS %}
 -A INPUT -i {{ HADES_UNAUTH_INTERFACE }} -p tcp -m tcp --dport {{ port }} -j ACCEPT
 {%- endfor %}
@@ -42,7 +34,4 @@ COMMIT
 :FORWARD ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
--A PREROUTING -i !{{ HADES_UNAUTH_INTERFACE }} -m conntrack --ctstate NEW,RELATED -j CONNMARK --set-mark {{ HADES_AUTH_FWMARK   }}
--A PREROUTING -i  {{ HADES_UNAUTH_INTERFACE }} -m conntrack --ctstate NEW,RELATED -j CONNMARK --set-mark {{ HADES_UNAUTH_FWMARK }}
--A PREROUTING -j CONNMARK --restore-mark
 COMMIT
