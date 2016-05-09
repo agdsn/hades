@@ -48,5 +48,7 @@ RUN apt-get update && apt-get install \
     && npm install -g bower \
     && pg_dropcluster ${PGVERSION} main
 
+RUN echo "LANG=$LANG" >/etc/locale.conf
+
 COPY docker/rights.sh docker/mysql_fdw.sh /build/
 RUN /build/rights.sh && COMMIT=4226fd573d5d602f5b58f542c0bbd15514559235 /build/mysql_fdw.sh
