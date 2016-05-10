@@ -14,7 +14,7 @@ messages = {
                              "Please contact our support."),
     'default_in_payment': lazy_gettext(
         "You are late with paying your fees. "
-        "Please pay the outstanding fees (including late fee). "
+        "Please pay the outstanding fees. "
         "To regain network connectivity immediately, inform our support. "
         "Otherwise your account will be re-enabled as soon as your money "
         "arrived on our bank account."),
