@@ -38,15 +38,13 @@ msgstr ""
 
 #: views.py:15
 msgid ""
-"You are late with paying your fees. Please pay the outstanding fees "
-"(including late fee). To regain network connectivity immediately, inform "
-"our support. Otherwise your account will be re-enabled as soon as your "
-"money arrived on our bank account."
+"You are late with paying your fees. Please pay the outstanding fees. To regain "
+"network connectivity immediately, inform our support. Otherwise your account "
+"will be re-enabled as soon as your money arrived on our bank account."
 msgstr ""
-"Du bist mit deinen Beiträgen im Rückstand. Bitte begleiche die "
-"ausstehenden Beträge (inklusive Versäumnisgebühr). Um deine "
-"Netzwerkverbindung sofort wieder zu erhalten, melde dich bei unserem "
-"Support. Anderenfalls wird dein Benutzerkonto erst wieder aktiviert "
+"Du bist mit deinen Beiträgen im Rückstand. Bitte begleiche die ausstehenden "
+"Beträge. Um deine Netzwerkverbindung sofort wieder zu erhalten, melde dich bei "
+"unserem Support. Anderenfalls wird dein Benutzerkonto erst wieder aktiviert "
 "sobald das Geld auf unserem Bankkonto eingegangen ist."
 
 #: views.py:21
@@ -124,4 +122,3 @@ msgstr ""
 #: templates/status.html:22
 msgid "Your MAC address is {}"
 msgstr "Deine MAC-Adresse ist {}"
-

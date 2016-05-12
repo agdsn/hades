@@ -33,10 +33,10 @@ msgstr ""
 
 #: views.py:15
 msgid ""
-"You are late with paying your fees. Please pay the outstanding fees "
-"(including late fee). To regain network connectivity immediately, inform "
-"our support. Otherwise your account will be re-enabled as soon as your "
-"money arrived on our bank account."
+"You are late with paying your fees. Please pay the outstanding fees. To "
+"regain network connectivity immediately, inform our support. Otherwise "
+"your account will be re-enabled as soon as your money arrived on our bank"
+" account."
 msgstr ""
 
 #: views.py:21
