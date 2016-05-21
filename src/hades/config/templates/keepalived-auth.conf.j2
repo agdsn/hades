@@ -15,7 +15,7 @@ static_routes {
     default via {{ HADES_NETNS_MAIN_AUTH_LISTEN }}
 }
 
-vrrp_instance unauth {
+vrrp_instance auth {
     {%- if HADES_INITIAL_MASTER %}
     state MASTER
     {%- else %}
