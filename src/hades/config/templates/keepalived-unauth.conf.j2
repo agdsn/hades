@@ -11,6 +11,10 @@ static_ipaddress {
     {{ HADES_NETNS_UNAUTH_LISTEN }} dev eth0
 }
 
+static_routes {
+    default via {{ HADES_NETNS_MAIN_UNAUTH_LISTEN }}
+}
+
 vrrp_instance unauth {
     {%- if HADES_INITIAL_MASTER %}
     state MASTER
