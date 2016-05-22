@@ -457,13 +457,6 @@ class HADES_AUTH_INTERFACE(Option):
     runtime_check = check.interface_exists
 
 
-class HADES_AUTH_FWMARK(Option):
-    """Iptables connmark/mark for connections from authenticated users."""
-    type = int
-    default = 1
-    static_check = check.between(0, 255)
-
-
 class HADES_AUTH_ALLOWED_TCP_PORTS(Option):
     """Allowed TCP destination ports for unauthenticated users"""
     type = collections.Iterable
@@ -474,13 +467,6 @@ class HADES_AUTH_ALLOWED_UDP_PORTS(Option):
     """Allowed UDP destination ports for unauthenticated users"""
     type = collections.Iterable
     default = (53, 67)
-
-
-class HADES_AUTH_ROUTING_TABLE(Option):
-    """Routing table for connections from unauthenticated users."""
-    type = int
-    default = 1
-    static_check = check.between(0, 255)
 
 
 #################################
@@ -507,13 +493,6 @@ class HADES_UNAUTH_LISTEN(Option):
     type = netaddr.IPNetwork
     static_check = check.network_ip
     runtime_check = check.address_exists
-
-
-class HADES_UNAUTH_FWMARK(Option):
-    """Iptables connmark/mark for connections from unauthenticated users"""
-    type = int
-    default = 2
-    static_check = check.between(0, 255)
 
 
 class HADES_UNAUTH_ALLOWED_TCP_PORTS(Option):
@@ -544,13 +523,6 @@ class HADES_UNAUTH_CAPTURED_UDP_PORTS(Option):
     """
     type = collections.Iterable
     default = (53,)
-
-
-class HADES_UNAUTH_ROUTING_TABLE(Option):
-    """Routing table for connections from unauthenticated users."""
-    type = int
-    default = 2
-    static_check = check.between(0, 255)
 
 
 class HADES_UNAUTH_DHCP_RANGE(Option):
