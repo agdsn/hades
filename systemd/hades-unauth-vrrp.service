@@ -1,5 +1,5 @@
 [Unit]
-Description=Hades DHCP service for authenticated users (dnsmasq)
+Description=Hades VRRP service (keepalived, unauth)
 Documentation=https://agdsn.github.io/hades/
 After=hades-networking.service
 Wants=hades-networking.service
@@ -7,7 +7,7 @@ Wants=hades-networking.service
 [Service]
 Type=simple
 EnvironmentFile=/etc/hades/env
-ExecStart=/sbin/ip netns exec auth hades auth-dhcp
+ExecStart=/sbin/ip netns exec unauth hades unauth-vrrp
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 

@@ -7,7 +7,7 @@ Wants=hades-networking.service
 [Service]
 Type=simple
 EnvironmentFile=/etc/hades/env
-ExecStart=/usr/local/bin/hades unauth-dns
+ExecStart=/sbin/ip netns exec unauth hades unauth-dns
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 
