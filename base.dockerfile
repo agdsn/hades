@@ -12,10 +12,12 @@ RUN apt-get update && apt-get install \
     curl \
     dns-root-data \
     dnsmasq \
+    dnsutils \
     freeradius \
     freeradius-postgresql \
     freeradius-utils \
     git \
+    ipset \
     iptables \
     keepalived \
     less \

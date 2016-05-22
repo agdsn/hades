@@ -2,18 +2,13 @@
 log-facility=-
 
 interface={{ HADES_UNAUTH_INTERFACE }}
-# Do not listen on the loopback interface
-# dnsmasq always adds the loopback interface if not told otherwise
-except-interface=lo
 listen-address={{ HADES_UNAUTH_LISTEN.ip }}
 # Explicitly bind to the interfaces specified above, otherwise any other DNS
 # server running on the same machine won't be able to listen on DNS port
 bind-interfaces
 
-# Don't read /etc/hosts /etc/resolv.conf or poll these files for changes
+# Don't read /etc/hosts
 no-hosts
-no-resolv
-no-poll
 
 # DNS-Record for the Captive Portal
 host-record={{ HADES_PORTAL_DOMAIN }},{{ HADES_UNAUTH_LISTEN.ip }}
@@ -24,6 +19,23 @@ address=/dns.msftncsi.com/131.107.255.255
 
 # Wildcard A-Record to redirect all domains to the captive portal
 address=/#/{{ HADES_UNAUTH_LISTEN.ip }}
+
+# Resolve the whitelisted domains by using the default resolver.
+# Note that this also applies to all subdomains.
+server=
+{%- for hostname in HADES_UNAUTH_WHITELIST_DNS -%}
+/{{ hostname }}
+{%- endfor -%}
+/#
+
+# Additional write the resolved IP addresses of all whitelisted domain entries
+# to the ipset. The netfilter rules will allow packets where the destination is
+# a member of this ipset.
+ipset=
+{%- for hostname in HADES_UNAUTH_WHITELIST_DNS -%}
+/{{ hostname }}
+{%- endfor -%}
+/{{ HADES_UNAUTH_WHITELIST_IPSET }}
 
 # Domain of DHCP hosts
 dhcp-range={{ netaddr.IPAddress(HADES_UNAUTH_DHCP_RANGE.first) }},{{ netaddr.IPAddress(HADES_UNAUTH_DHCP_RANGE.last) }},{{ HADES_UNAUTH_DHCP_LEASE_TIME.total_seconds()|int }}

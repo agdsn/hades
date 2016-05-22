@@ -52,3 +52,4 @@ HADES_POSTGRESQL_USER_MAPPINGS = {
         'password': ''
     },
 }
+HADES_UNAUTH_WHITELIST_DNS = ('www.agdsn.de',)

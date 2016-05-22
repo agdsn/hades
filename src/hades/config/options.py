@@ -533,6 +533,20 @@ class HADES_UNAUTH_DHCP_RANGE(Option):
     static_check = check.ip_range_in_network(HADES_UNAUTH_LISTEN.__name__)
 
 
+class HADES_UNAUTH_WHITELIST_DNS(Option):
+    """List of DNS names which are whitelisted for unauthenticated users.
+    """
+    default = ()
+    type = collections.Iterable
+
+
+class HADES_UNAUTH_WHITELIST_IPSET(Option):
+    """Name of ipset for whitelisted IPs.
+    """
+    default = "unauth_whitelist"
+    type = str
+
+
 ##################
 # RADIUS options #
 ##################
