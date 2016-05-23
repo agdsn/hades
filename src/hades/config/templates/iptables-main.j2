@@ -14,8 +14,8 @@ COMMIT
 -A INPUT -i lo -j ACCEPT
 -A INPUT -p icmp -j ACCEPT
 -A INPUT -i {{ HADES_VRRP_BRIDGE }} -p vrrp -j ACCEPT
--A INPUT -i {{ HADES_RADIUS_INTERFACE }} -p udp -m udp --dport {{ HADES_RADIUS_AUTHENTICATION_PORT }}
--A INPUT -i {{ HADES_RADIUS_INTERFACE }} -p udp -m udp --dport {{ HADES_RADIUS_ACCOUNTING_PORT     }}
+-A INPUT -i {{ HADES_RADIUS_INTERFACE }} -p udp -m udp --dport {{ HADES_RADIUS_AUTHENTICATION_PORT }} -j ACCEPT
+-A INPUT -i {{ HADES_RADIUS_INTERFACE }} -p udp -m udp --dport {{ HADES_RADIUS_ACCOUNTING_PORT     }} -j ACCEPT
 -A INPUT -p tcp -m tcp -j REJECT --reject-with tcp-reset
 -A INPUT -j REJECT --reject-with icmp-admin-prohibited
 -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED,SNAT,DNAT -j ACCEPT
