@@ -44,11 +44,11 @@ HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS = {
 }
 HADES_POSTGRESQL_USER_MAPPINGS = {
     'hades-agent': {
-        'user': 'postgres',
-        'password': ''
+        'user': 'fdw',
+        'password': 'correcthorsebatterystaple'
     },
     'postgres': {
-        'user': 'postgres',
-        'password': ''
+        'user': 'fdw',
+        'password': 'correcthorsebatterystaple'
     },
 }
