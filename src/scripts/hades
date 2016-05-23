@@ -164,6 +164,7 @@ run_networking() {
     fi
 
     sysctl net.ipv4.ip_nonlocal_bind=1
+    local netns
     for netns in auth unauth; do
         ip netns add "${netns}"
         ip netns exec "${netns}" ip link set dev lo up
@@ -211,6 +212,25 @@ run_networking() {
         python3 -m hades.config.generate "iptables-${netns}.j2" | ip netns exec "${netns}" iptables-restore
     done
     exit ${EX_OK}
+}
+
+run_networking_shutdown() {
+    # No early exit if some things fail.
+    set +e
+
+    sysctl net.ipv4.ip_nonlocal_bind=0
+    local netns
+    for netns in auth unauth; do
+        ip netns del "${netns}"
+        ip link del dev eth-"${netns}"
+    done
+
+    local i
+    local -a tables=(filter filter filter  nat        nat         nat)
+    local -a chains=(INPUT  OUTPUT FORWARD PREROUTING POSTROUTING OUTPUT)
+    for (( i = 0; i < "${#tables[@]}"; i++ )); do
+        iptables --table "${tables[$i]}" --flush "${chains[$i]}"
+    done
 }
 
 run_radius() {
@@ -281,7 +301,7 @@ main() {
         shift
     fi
     case "$command" in
-        agent|auth-dhcp|auth-dns|auth-vrrp|database|init-database|init-database-system|init-database-schema|networking|radius|radius-vrrp|shell|unauth-dhcp|unauth-dns|unauth-http|unauth-portal|unauth-vrrp)
+        agent|auth-dhcp|auth-dns|auth-vrrp|database|init-database|init-database-system|init-database-schema|networking|networking-shutdown|radius|radius-vrrp|shell|unauth-dhcp|unauth-dns|unauth-http|unauth-portal|unauth-vrrp)
             "run_${command//-/_}" "$@"
             ;;
         help|-h|--help)
