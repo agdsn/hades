@@ -1,13 +1,13 @@
 [Unit]
 Description=Hades http server (nginx)
 Documentation=https://agdsn.github.io/hades/
-After=hades-networking.service hades-portal.service
-Wants=hades-networking.service hades-portal.service
+After=hades-networking.service hades-unauth-portal.service
+Wants=hades-networking.service hades-unauth-portal.service
 
 [Service]
 Type=simple
 EnvironmentFile=/etc/hades/env
-ExecStart=/sbin/ip netns exec unauth hades http
+ExecStart=/sbin/ip netns exec unauth hades unauth-http
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 KillSignal=SIGQUIT

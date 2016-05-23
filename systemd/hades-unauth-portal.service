@@ -7,7 +7,7 @@ Wants=hades-networking.service hades-database.service
 [Service]
 Type=notify
 EnvironmentFile=/etc/hades/env
-ExecStart=/sbin/ip netns exec unauth hades portal
+ExecStart=/sbin/ip netns exec unauth hades unauth-portal
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 KillSignal=SIGINT
