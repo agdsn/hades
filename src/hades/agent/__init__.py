@@ -15,6 +15,9 @@ app.config_from_object(get_config())
 def refresh():
     logger.info("Refreshing materialized views")
     connection = get_connection()
+    # TODO: After updating the nas table, we have to restart (reload?)
+    # the freeradius server. Currently, this must be done manually.
+    connection.execute("REFRESH MATERIALIZED VIEW nas")
     connection.execute("REFRESH MATERIALIZED VIEW radcheck")
     connection.execute("REFRESH MATERIALIZED VIEW radgroupcheck")
     connection.execute("REFRESH MATERIALIZED VIEW radgroupreply")
