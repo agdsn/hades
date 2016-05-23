@@ -1,6 +1,7 @@
 [Unit]
 Description=Hades http server (nginx)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.target
 After=hades-networking.service hades-unauth-portal.service
 Wants=hades-networking.service hades-unauth-portal.service
 
@@ -12,6 +13,3 @@ ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 KillSignal=SIGQUIT
 KillMode=mixed
-
-[Install]
-WantedBy=multi-user.target
