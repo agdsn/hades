@@ -10,4 +10,3 @@ Type=simple
 EnvironmentFile=/etc/hades/env
 ExecStart=/usr/local/bin/hades agent
 KillMode=mixed
-Restart=always

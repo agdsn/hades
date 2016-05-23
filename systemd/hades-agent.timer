@@ -1,0 +1,8 @@
+[Unit]
+Description=Hades agent
+Documentation=https://agdsn.github.io/hades/
+PartOf=hades.target
+
+[Timer]
+OnActiveSec=10
+OnUnitActiveSec=60
