@@ -175,6 +175,9 @@ run_networking() {
         ip netns exec "${netns}" sysctl net.ipv4.ip_nonlocal_bind=1
     done
 
+    # Create ipset for whitelisted IPs in unauth netns
+    ip netns exec unauth ipset create "${HADES_UNAUTH_WHITELIST_IPSET}" hash:ip
+
     # After moving interfaces they are DOWN.
     ip link set dev "${HADES_AUTH_INTERFACE}" netns auth
     ip netns exec auth ip link set dev "${HADES_AUTH_INTERFACE}" up
