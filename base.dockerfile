@@ -54,4 +54,7 @@ RUN apt-get update && apt-get install \
 RUN echo "LANG=$LANG" >/etc/locale.conf
 
 COPY docker/rights.sh docker/mysql_fdw.sh /build/
-RUN /build/rights.sh && COMMIT=4226fd573d5d602f5b58f542c0bbd15514559235 /build/mysql_fdw.sh
+RUN /build/rights.sh \
+    && VERSION=2.1.2 \
+       SHA512=3da432c008025518b9fa71aa1b4cd35ad1850b192b6cedecd963a5347dc9f6fc005c45ab6c21329f2617a2a2edab841b44ac310ae7b3490a16e0d71ca896efbe \
+       /build/mysql_fdw.sh
