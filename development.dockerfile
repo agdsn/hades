@@ -30,11 +30,12 @@ RUN printf '%s=%s\n' \
         PGVERSION "$PGVERSION" \
         >/etc/hades/env
 
-# Copy hades systemd units and enable all of them
+# Copy hades systemd units. We do not enable the units, because this makes
+# things easier for development: We can start the container, inject all the
+# necessary interfaces and only afterwards start the systemd units.
 COPY systemd/ /lib/systemd/system
 RUN . /etc/hades/env \
     && cd /lib/systemd/system \
-    && for i in hades-*.*; do systemctl enable "$i"; done \
     && python3 -m hades.config.generate tmpfiles.conf.j2 /etc/tmpfiles.d/hades.conf
 
 # Setup local radius database used for development

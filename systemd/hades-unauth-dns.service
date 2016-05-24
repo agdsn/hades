@@ -1,6 +1,7 @@
 [Unit]
 Description=Hades DNS service for unauthenticated users (dnsmasq)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.target
 After=hades-networking.service
 Wants=hades-networking.service
 
@@ -10,6 +11,3 @@ EnvironmentFile=/etc/hades/env
 ExecStart=/sbin/ip netns exec unauth hades unauth-dns
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
-
-[Install]
-WantedBy=multi-user.target

@@ -1,6 +1,7 @@
 [Unit]
 Description=Hades database service (PostgreSQL)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.target
 After=hades-networking.service
 Wants=hades-networking.service
 
@@ -14,6 +15,3 @@ KillMode=mixed
 User=postgres
 Group=postgres
 RuntimeDirectory=postgresql
-
-[Install]
-WantedBy=multi-user.target

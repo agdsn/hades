@@ -1,12 +1,14 @@
 [Unit]
 Description=Hades networking
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.target
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
 EnvironmentFile=/etc/hades/env
 ExecStart=/usr/local/bin/hades networking
+ExecStop=/usr/local/bin/hades networking-shutdown
 
 [Install]
 WantedBy=multi-user.target

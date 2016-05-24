@@ -17,7 +17,9 @@ hades init-database-system
 
 # Create database 'radius' and populate the schema. This enables us to point
 # the foreign tables to the local running database instance for development.
+sed -ire 's/^# "local" .*$/&\nlocal all fdw password/' "$PGDATA"/pg_hba.conf
 pg_ctl start -w -s
+createuser fdw
 createdb radius
 python3 -m hades.config.generate schema_fdw.sql.j2 | psql --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- radius
 pg_ctl stop -s

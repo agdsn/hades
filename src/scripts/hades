@@ -21,23 +21,27 @@ print_usage() {
     msg "  auth-vrrp      Run the VRRP daemon (keepalived, auth)"
     msg "  database       Execute the database (PostgreSQL)"
     msg "  help           Print this help message"
-    msg "  http           Execute the captive portal web server (nginx)"
     msg "  init-database  Create database cluster, database, roles, tables,"
     msg "                 views and refresh materialized views."
     msg "                 Add the --clear flag to delete the database."
     msg "  networking     Setup networking (iptables, routing)"
-    msg "  portal         Run the captive portal WSGI application (using uWSGI)"
     msg "  radius         Run the RADIUS server (freeRADIUS)"
     msg "  radius-vrrp    Run the VRRP daemon (keepalived, radius)"
     msg "  shell          Start a bash shell for debugging"
     msg "  unauth-dhcp    Run the DHCP server for the unauthenticated users"
     msg "                 (no-op and handled by the unauth-dns dnsmasq)"
     msg "  unauth-dns     Run the DNS resolver (dnsmasq) for the unauth VLAN"
+    msg "  unauth-http    Execute the captive portal web server (nginx)"
+    msg "  unauth-portal  Run the captive portal WSGI application (using uWSGI)"
     msg "  unauth-vrrp    Run the VRRP daemon (keepalived, unauth)"
 }
 
 run_agent() {
-    exec python3 -m celery.bin.worker --beat --app=hades.agent --uid="${HADES_AGENT_USER}" --gid="${HADES_AGENT_GROUP}" --workdir="${HADES_AGENT_HOME}"
+    if [[ $(id -u) = 0 ]]; then
+        exec python3 -m hades.common.su "${HADES_AGENT_USER}" "$0" agent "$@"
+    fi
+    cd "${HADES_AGENT_HOME}"
+    exec python3 -m hades.agent
 }
 
 run_auth_dns() {
@@ -151,14 +155,6 @@ run_database() {
     exec python3 -m hades.common.su "${HADES_POSTGRESQL_USER}" postgres
 }
 
-run_http() {
-    python3 -m hades.config.generate nginx "${HADES_CONFIG_DIR}/nginx"
-    # Next two lines are not working, see https://bugzilla.redhat.com/show_bug.cgi?id=1212756
-    #ln -nsf /dev/stdout /var/log/nginx/access.log
-    #ln -nsf /dev/stderr /var/log/nginx/error.log
-    exec nginx -c "${HADES_CONFIG_DIR}/nginx/nginx.conf"
-}
-
 run_networking() {
     if [[ "${HADES_CREATE_DUMMY_INTERFACES-False}" = True ]]; then
         local interface
@@ -172,6 +168,7 @@ run_networking() {
     fi
 
     sysctl net.ipv4.ip_nonlocal_bind=1
+    local netns
     for netns in auth unauth; do
         ip netns add "${netns}"
         ip netns exec "${netns}" ip link set dev lo up
@@ -221,9 +218,23 @@ run_networking() {
     exit ${EX_OK}
 }
 
-run_portal() {
-    python3 -m hades.config.generate uwsgi.ini.j2 "${HADES_CONFIG_DIR}/uwsgi.ini"
-    exec uwsgi --ini="${HADES_CONFIG_DIR}/uwsgi.ini"
+run_networking_shutdown() {
+    # No early exit if some things fail.
+    set +e
+
+    sysctl net.ipv4.ip_nonlocal_bind=0
+    local netns
+    for netns in auth unauth; do
+        ip netns del "${netns}"
+        ip link del dev eth-"${netns}"
+    done
+
+    local i
+    local -a tables=(filter filter filter  nat        nat         nat)
+    local -a chains=(INPUT  OUTPUT FORWARD PREROUTING POSTROUTING OUTPUT)
+    for (( i = 0; i < "${#tables[@]}"; i++ )); do
+        iptables --table "${tables[$i]}" --flush "${chains[$i]}"
+    done
 }
 
 run_radius() {
@@ -258,6 +269,19 @@ run_unauth_dns() {
     exec dnsmasq -k -C "${HADES_CONFIG_DIR}/unauth-dnsmasq.conf"
 }
 
+run_unauth_http() {
+    python3 -m hades.config.generate nginx "${HADES_CONFIG_DIR}/nginx"
+    # Next two lines are not working, see https://bugzilla.redhat.com/show_bug.cgi?id=1212756
+    #ln -nsf /dev/stdout /var/log/nginx/access.log
+    #ln -nsf /dev/stderr /var/log/nginx/error.log
+    exec nginx -c "${HADES_CONFIG_DIR}/nginx/nginx.conf"
+}
+
+run_unauth_portal() {
+    python3 -m hades.config.generate uwsgi.ini.j2 "${HADES_CONFIG_DIR}/uwsgi.ini"
+    exec uwsgi --ini="${HADES_CONFIG_DIR}/uwsgi.ini"
+}
+
 run_unauth_vrrp() {
     run_vrrp unauth "$@"
 }
@@ -281,7 +305,7 @@ main() {
         shift
     fi
     case "$command" in
-        agent|auth-dhcp|auth-dns|auth-vrrp|database|http|init-database|init-database-system|init-database-schema|networking|portal|radius|radius-vrrp|shell|unauth-dhcp|unauth-dns|unauth-vrrp)
+        agent|auth-dhcp|auth-dns|auth-vrrp|database|init-database|init-database-system|init-database-schema|networking|networking-shutdown|radius|radius-vrrp|shell|unauth-dhcp|unauth-dns|unauth-http|unauth-portal|unauth-vrrp)
             "run_${command//-/_}" "$@"
             ;;
         help|-h|--help)
