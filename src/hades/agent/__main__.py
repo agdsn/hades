@@ -3,8 +3,10 @@ import logging
 from sqlalchemy import select, and_
 import sys
 
-from hades.common.db import (get_connection, radacct, radpostauth, utcnow)
+from hades.common.db import (
+    get_all_dhcp_hosts, get_connection, radacct, radpostauth, utcnow)
 from hades.config.loader import get_config
+from hades.dnsmasq.util import generate_dhcp_host_reservations
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +23,10 @@ def refresh():
         connection.execute("REFRESH MATERIALIZED VIEW radgroupcheck")
         connection.execute("REFRESH MATERIALIZED VIEW radgroupreply")
         connection.execute("REFRESH MATERIALIZED VIEW radusergroup")
+    logger.info("Generating DHCP hosts file")
+    hosts = get_all_dhcp_hosts()
+    hosts_file = app.conf['HADES_DNSMASQ_DHCP_HOSTS_FILE']
+    generate_dhcp_host_reservations(hosts)
 
 
 def delete_old():
