@@ -1,7 +1,7 @@
 [Unit]
 Description=Hades networking
 Documentation=https://agdsn.github.io/hades/
-PartOf=hades.target
+#PartOf=hades.target
 
 [Service]
 Type=oneshot

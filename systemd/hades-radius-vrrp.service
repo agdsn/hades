@@ -1,7 +1,7 @@
 [Unit]
 Description=Hades VRRP service (keepalived, radius)
 Documentation=https://agdsn.github.io/hades/
-PartOf=hades.target
+#PartOf=hades.target
 After=hades-networking.service hades-database.service
 Wants=hades-networking.service hades-database.service
 

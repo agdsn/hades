@@ -1,7 +1,7 @@
 [Unit]
 Description=Hades portal (Flask app on uWSGI)
 Documentation=https://agdsn.github.io/hades/
-PartOf=hades.target
+#PartOf=hades.target
 After=hades-networking.service hades-database.service
 Wants=hades-networking.service hades-database.service
 

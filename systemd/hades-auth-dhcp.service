@@ -1,7 +1,7 @@
 [Unit]
 Description=Hades DHCP service for authenticated users (dnsmasq)
 Documentation=https://agdsn.github.io/hades/
-PartOf=hades.target
+#PartOf=hades.target
 After=hades-networking.service
 Wants=hades-networking.service
 
