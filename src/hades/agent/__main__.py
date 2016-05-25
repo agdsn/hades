@@ -13,6 +13,7 @@ def refresh():
     logger.info("Refreshing materialized views")
     connection = get_connection()
     with connection.begin() as trans:
+        connection.execute("REFRESH MATERIALIZED VIEW dhcphost")
         # TODO: After updating the nas table, we have to restart (reload?)
         # the freeradius server. Currently, this must be done manually.
         connection.execute("REFRESH MATERIALIZED VIEW nas")
