@@ -80,7 +80,7 @@ ALTER TABLE nas OWNER TO fdw;
 --
 
 CREATE TABLE radcheck (
-    id integer NOT NULL,
+    priority integer NOT NULL,
     username character varying(64) NOT NULL,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
     nasipaddress character varying(15) NOT NULL,
@@ -101,7 +101,7 @@ ALTER TABLE radcheck OWNER TO fdw;
 --
 
 CREATE TABLE radgroupcheck (
-    id integer NOT NULL,
+    priority integer NOT NULL,
     groupname character varying(64) NOT NULL,
     attribute character varying(64) NOT NULL,
     op character(2) NOT NULL,
@@ -116,7 +116,7 @@ ALTER TABLE radgroupcheck OWNER TO fdw;
 --
 
 CREATE TABLE radgroupreply (
-    id integer NOT NULL,
+    priority integer NOT NULL,
     groupname character varying(64) NOT NULL,
     attribute character varying(64) NOT NULL,
     op character(2) NOT NULL,
@@ -131,7 +131,7 @@ ALTER TABLE radgroupreply OWNER TO fdw;
 --
 
 CREATE TABLE radreply (
-    id integer NOT NULL,
+    priority integer NOT NULL,
     username character varying(64) NOT NULL,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
     nasipaddress character varying(15) NOT NULL,

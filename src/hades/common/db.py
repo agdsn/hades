@@ -2,8 +2,8 @@ import logging
 import operator
 
 from sqlalchemy import (
-    BigInteger, Column, DateTime, Integer, MetaData, String, Table, select,
-    and_, create_engine)
+    BigInteger, Column, DateTime, Integer, MetaData, String, Table,
+    UniqueConstraint, and_, create_engine, select)
 from sqlalchemy.dialects.postgresql import INET, MACADDR
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
@@ -19,19 +19,24 @@ dhcphost = Table(
     'dhcphost', metadata,
     Column('mac', MACADDR, nullable=False),
     Column('ipaddress', INET, nullable=False),
+    UniqueConstraint('mac'),
+    UniqueConstraint('ipaddress'),
 )
 
 nas = Table(
     'nas', metadata,
-    Column('id', Integer, primary_key=True, nullable=False),
-    Column('nasname', String(128), nullable=False),
-    Column('shortname', String(32), nullable=False),
+    Column('id', Integer, unique=True, nullable=False),
+    Column('nasname', String(128), unique=True, nullable=False),
+    Column('shortname', String(32), unique=True, nullable=False),
     Column('type', String(30), default='other', nullable=False),
     Column('ports', Integer),
     Column('secret', String(60), nullable=False),
     Column('server', String(64)),
     Column('community', String(50)),
     Column('description', String(200)),
+    UniqueConstraint('id'),
+    UniqueConstraint('nasname'),
+    UniqueConstraint('shortname'),
 )
 
 radacct = Table(
@@ -66,31 +71,34 @@ radacct = Table(
 
 radcheck = Table(
     'radcheck', metadata,
-    Column('id', Integer, primary_key=True, nullable=False),
+    Column('priority', Integer, nullable=False),
     Column('username', String(64), nullable=False),
     Column('nasipaddress', INET, nullable=False),
     Column('nasportid', String(15), nullable=False),
     Column('attribute', String(64), nullable=False),
     Column('op', String(2), nullable=False),
     Column('value', String(253), nullable=False),
+    UniqueConstraint('username', 'nasipaddress', 'nasportid', 'priority'),
 )
 
 radgroupcheck = Table(
     'radgroupcheck', metadata,
-    Column('id', Integer, primary_key=True, nullable=False),
+    Column('priority', Integer, nullable=False),
     Column('groupname', String(64), nullable=False),
     Column('attribute', String(64), nullable=False),
     Column('op', String(2), nullable=False),
     Column('value', String(253), nullable=False),
+    UniqueConstraint('groupname', 'priority'),
 )
 
 radgroupreply = Table(
     'radgroupreply', metadata,
-    Column('id', Integer, primary_key=True, nullable=False),
+    Column('priority', Integer, nullable=False),
     Column('groupname', String(64), nullable=False),
     Column('attribute', String(64), nullable=False),
     Column('op', String(2), nullable=False),
     Column('value', String(253), nullable=False),
+    UniqueConstraint('groupname', 'priority'),
 )
 
 radpostauth = Table(
@@ -106,22 +114,24 @@ radpostauth = Table(
 
 radreply = Table(
     'radreply', metadata,
-    Column('id', Integer, primary_key=True, nullable=False),
+    Column('priority', Integer, nullable=False),
     Column('username', String(64), nullable=False),
     Column('nasipaddress', INET, nullable=False),
     Column('nasportid', String(15), nullable=False),
     Column('attribute', String(64), nullable=False),
     Column('op', String(2), default='=', nullable=False),
     Column('value', String(253), nullable=False),
+    UniqueConstraint('username', 'nasipaddress', 'nasportid', 'priority'),
 )
 
 radusergroup = Table(
     'radusergroup', metadata,
-    Column('id', Integer, primary_key=True, nullable=False),
+    Column('priority', Integer, nullable=False),
     Column('username', String(64), nullable=False),
     Column('nasipaddres', INET, nullable=False),
     Column('nasportid', String(15), nullable=False),
     Column('groupname', String(64), nullable=False),
+    UniqueConstraint('username', 'groupname', 'priority'),
 )
 
 
