@@ -158,6 +158,18 @@ CREATE MATERIALIZED VIEW dhcphost AS
     foreign_dhcphost.ipaddress
     {%- endif %}
    FROM foreign_dhcphost
+  WHERE
+   {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
+   safe_macaddr_cast(foreign_dhcphost.mac) IS NOT NULL
+   {%- else %}
+   foreign_dhcphost.mac IS NOT NULL
+   {%- endif %}
+   AND
+   {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
+   safe_inet_cast(foreign_dhcphost.ipaddress) IS NOT NULL
+   {%- else %}
+   foreign_dhcphost.ipaddress IS NOT NULL
+   {%- endif %}
   WITH DATA;
 
 
@@ -312,6 +324,11 @@ CREATE MATERIALIZED VIEW nas AS
     foreign_nas.community,
     foreign_nas.description
    FROM foreign_nas
+  WHERE foreign_nas.id IS NOT NULL
+   AND foreign_nas.nasname IS NOT NULL
+   AND foreign_nas.shortname IS NOT NULL
+   AND foreign_nas.type IS NOT NULL
+   AND foreign_nas.secret IS NOT NULL
   WITH DATA;
 
 
@@ -394,6 +411,10 @@ CREATE MATERIALIZED VIEW radcheck AS
     foreign_radcheck.op,
     foreign_radcheck.value
    FROM foreign_radcheck
+  WHERE foreign_radcheck.username IS NOT NULL
+    AND foreign_radcheck.attribute IS NOT NULL
+    AND foreign_radcheck.op IS NOT NULL
+    AND foreign_radcheck.value IS NOT NULL
   WITH DATA;
 
 
@@ -410,6 +431,10 @@ CREATE MATERIALIZED VIEW radgroupcheck AS
     foreign_radgroupcheck.op,
     foreign_radgroupcheck.value
    FROM foreign_radgroupcheck
+  WHERE foreign_radgroupcheck.groupname IS NOT NULL
+    AND foreign_radgroupcheck.attribute IS NOT NULL
+    AND foreign_radgroupcheck.op IS NOT NULL
+    AND foreign_radgroupcheck.value IS NOT NULL
   WITH DATA;
 
 
@@ -426,6 +451,10 @@ CREATE MATERIALIZED VIEW radgroupreply AS
     foreign_radgroupreply.op,
     foreign_radgroupreply.value
    FROM foreign_radgroupreply
+  WHERE foreign_radgroupreply.groupname IS NOT NULL
+   AND foreign_radgroupreply.attribute IS NOT NULL
+   AND foreign_radgroupreply.op IS NOT NULL
+   AND foreign_radgroupreply.value IS NOT NULL
   WITH DATA;
 
 
@@ -486,6 +515,10 @@ CREATE MATERIALIZED VIEW radreply AS
     foreign_radreply.op,
     foreign_radreply.value
    FROM foreign_radreply
+  WHERE foreign_radreply.username IS NOT NULL
+   AND foreign_radreply.attribute IS NOT NULL
+   AND foreign_radreply.op IS NOT NULL
+   AND foreign_radreply.value IS NOT NULL
   WITH DATA;
 
 
@@ -506,6 +539,8 @@ CREATE MATERIALIZED VIEW radusergroup AS
     foreign_radusergroup.groupname,
     foreign_radusergroup.priority
    FROM foreign_radusergroup
+  WHERE foreign_radusergroup.username IS NOT NULL
+   AND foreign_radusergroup.groupname IS NOT NULL
   WITH DATA;
 
 
