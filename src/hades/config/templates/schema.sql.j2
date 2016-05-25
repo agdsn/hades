@@ -121,7 +121,6 @@ SET default_tablespace = '';
 --
 
 CREATE FOREIGN TABLE foreign_dhcphost (
-    id integer NOT NULL,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
     mac character(17) NOT NULL,
     {%- else %}
@@ -146,7 +145,7 @@ ALTER FOREIGN TABLE foreign_dhcphost OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 --
 
 CREATE MATERIALIZED VIEW dhcphost AS
- SELECT foreign_dhcphost.id,
+ SELECT
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
     safe_macaddr_cast(foreign_dhcphost.mac) AS mac,
     {%- else %}

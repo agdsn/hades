@@ -41,7 +41,6 @@ SET default_tablespace = '';
 --
 
 CREATE TABLE dhcphost (
-    id integer NOT NULL,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
     mac character(17) NOT NULL,
     {%- else %}

@@ -17,7 +17,6 @@ metadata = MetaData(bind=engine)
 
 dhcphost = Table(
     'dhcphost', metadata,
-    Column('id', Integer, primary_key=True, nullable=False),
     Column('mac', MACADDR, nullable=False),
     Column('ipaddress', INET, nullable=False),
 )
