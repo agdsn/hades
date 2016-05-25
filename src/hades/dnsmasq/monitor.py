@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 def send_reload(config):
     client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    conn = client.connect(config['HADES_DNSMASQ_MONITOR_SOCKET'])
+    conn = client.connect(config['HADES_AUTH_DNSMASQ_MONITOR_SOCKET'])
     conn.send(signal.SIGHUP)
     result = conn.recv(1)
     conn.close()
