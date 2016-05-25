@@ -224,13 +224,15 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING(Option):
-    """Whether the ipaddress column of dhcphost has a string type"""
+    """
+    Whether the ipaddress column of the foreign dhcphost table has a string type
+    """
     type = bool
     default = False
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING(Option):
-    """Whether the mac column of dhcphost has a string type"""
+    """Whether the mac column of the foreign dhcphost table has a string type"""
     type = bool
     default = False
 
@@ -252,7 +254,10 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING(Option):
-    """Whether the nasipaddress column of radcheck has a string type"""
+    """
+    Whether the nasipaddress column of the foreign radcheck table has a string
+    type
+    """
     type = bool
     default = False
 
@@ -282,7 +287,10 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING(Option):
-    """Whether the nasipaddress column of radgroupcheck has a string type"""
+    """
+    Whether the nasipaddress column of the foreign radgroupcheck table has a
+    string type
+    """
     type = bool
     default = False
 
@@ -296,7 +304,10 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING(Option):
-    """Whether the nasipaddress column of radgroupcheck has a string type"""
+    """
+    Whether the nasipaddress column of the foreign radgroupcheck table has a
+    string type
+    """
     type = bool
     default = False
 
