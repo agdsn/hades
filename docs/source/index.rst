@@ -26,6 +26,13 @@ Contents
    configuration
    development
 
+Goals
+=====
+- Authenticate users without requiring any special software on the user side
+- Provide DNS and DHCP for authenticated users
+- Show an error page to unauthenticated users
+- Fault-Tolerance
+
 Concepts
 ========
 
