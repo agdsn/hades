@@ -1,6 +1,9 @@
 FROM hades-base
 MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
 
+# Install some development tools.
+RUN apt-get install -y vim-nox tcpdump dnsutils && apt-get clean
+
 # Delete unwanted systemd units and disable journal forwarding
 RUN for i in /etc/systemd /lib/systemd /lib/systemd; do \
         find "$i"/system -path '*.wants/*' -a -not -name '*journal*' -a -not -name '*tmpfiles*' -delete; \
