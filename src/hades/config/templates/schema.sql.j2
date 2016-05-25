@@ -194,11 +194,11 @@ CREATE FOREIGN TABLE foreign_radcheck (
     id integer NOT NULL,
     username character varying(64) NOT NULL,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
-    nasipaddress character varying(15) NOT NULL,
+    nasipaddress character varying(15),
     {%- else %}
-    nasipaddress inet NOT NULL,
+    nasipaddress inet,
     {%- endif %}
-    nasportid character varying(15) NOT NULL,
+    nasportid character varying(15),
     attribute character varying(64) NOT NULL,
     op character(2) NOT NULL,
     value character varying(253) NOT NULL
@@ -257,11 +257,11 @@ CREATE FOREIGN TABLE foreign_radreply (
     id integer NOT NULL,
     username character varying(64) NOT NULL,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
-    nasipaddress character varying(15) NOT NULL,
+    nasipaddress character varying(15),
     {%- else %}
-    nasipaddress inet NOT NULL,
+    nasipaddress inet,
     {%- endif %}
-    nasportid character varying(15) NOT NULL,
+    nasportid character varying(15),
     attribute character varying(64) NOT NULL,
     op character(2) DEFAULT '='::bpchar NOT NULL,
     value character varying(253) NOT NULL
@@ -281,11 +281,11 @@ ALTER FOREIGN TABLE foreign_radreply OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 CREATE FOREIGN TABLE foreign_radusergroup (
     username character varying(64) NOT NULL,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
-    nasipaddress character varying(15) NOT NULL,
+    nasipaddress character varying(15),
     {%- else %}
-    nasipaddress inet NOT NULL,
+    nasipaddress inet,
     {%- endif %}
-    nasportid character varying(15) NOT NULL,
+    nasportid character varying(15),
     groupname character varying(64) NOT NULL,
     priority integer NOT NULL
 )
