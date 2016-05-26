@@ -1,3 +1,4 @@
+import logging
 import operator
 
 from sqlalchemy import (
@@ -9,6 +10,7 @@ from sqlalchemy.sql import expression
 from hades.config.loader import CheckWrapper, get_config
 
 
+logger = logging.getLogger(__name__)
 config = CheckWrapper(get_config())
 engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
 metadata = MetaData(bind=engine)
@@ -135,6 +137,20 @@ def pg_utcnow(element, compiler, **kw):
 
 def get_connection():
     return engine.connect()
+
+
+def refresh_materialized_views():
+    logger.info("Refreshing materialized views")
+    connection = get_connection()
+    with connection.begin():
+        connection.execute("REFRESH MATERIALIZED VIEW dhcphost")
+        # TODO: After updating the nas table, we have to restart (reload?)
+        # the freeradius server. Currently, this must be done manually.
+        connection.execute("REFRESH MATERIALIZED VIEW nas")
+        connection.execute("REFRESH MATERIALIZED VIEW radcheck")
+        connection.execute("REFRESH MATERIALIZED VIEW radgroupcheck")
+        connection.execute("REFRESH MATERIALIZED VIEW radgroupreply")
+        connection.execute("REFRESH MATERIALIZED VIEW radusergroup")
 
 
 def get_groups(mac):

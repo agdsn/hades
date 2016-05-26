@@ -4,7 +4,7 @@ from sqlalchemy import select, and_
 import sys
 
 from hades.common.db import (
-    get_connection, radacct, radpostauth, utcnow)
+    get_connection, radacct, radpostauth, refresh_materialized_views, utcnow)
 from hades.config.loader import get_config
 from hades.dnsmasq.util import (
     generate_dhcp_hosts_file, reload_auth_dnsmasq)
@@ -13,17 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def refresh():
-    logger.info("Refreshing materialized views")
-    connection = get_connection()
-    with connection.begin() as trans:
-        connection.execute("REFRESH MATERIALIZED VIEW dhcphost")
-        # TODO: After updating the nas table, we have to restart (reload?)
-        # the freeradius server. Currently, this must be done manually.
-        connection.execute("REFRESH MATERIALIZED VIEW nas")
-        connection.execute("REFRESH MATERIALIZED VIEW radcheck")
-        connection.execute("REFRESH MATERIALIZED VIEW radgroupcheck")
-        connection.execute("REFRESH MATERIALIZED VIEW radgroupreply")
-        connection.execute("REFRESH MATERIALIZED VIEW radusergroup")
+    refresh_materialized_views()
     generate_dhcp_hosts_file()
     reload_auth_dnsmasq()
 
