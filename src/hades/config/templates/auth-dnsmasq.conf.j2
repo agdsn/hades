@@ -28,7 +28,7 @@ dhcp-option=option:dns-server,{{ HADES_AUTH_LISTEN.ip }}
 dhcp-option=option:domain-name,{{ HADES_AUTH_DHCP_DOMAIN }}
 
 # Ensure lease max is high enough (default is 1000)
-dhcp-lease-max={{ HADES_USER_NETWORKS|map('length')|sum }}
+dhcp-lease-max={{ HADES_USER_NETWORKS.values()|map('length')|sum }}
 
 # Set DHCP lease and hosts file
 dhcp-leasefile={{ HADES_AUTH_DNSMASQ_LEASE_FILE }}
