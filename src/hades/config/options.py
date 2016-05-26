@@ -465,7 +465,7 @@ class HADES_AUTH_DHCP_LEASE_TIME(Option):
 
 class HADES_AUTH_LISTEN(Option):
     """IP and network to listen on for requests from authenticated users"""
-    default = netaddr.IPNetwork('10.66.67.1/24')
+    default = netaddr.IPNetwork('10.66.67.10/24')
     static_check = check.network_ip
     runtime_check = check.address_exists
 
