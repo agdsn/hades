@@ -140,7 +140,8 @@ def ip_range_in_network(network_config):
         first = netaddr.IPAddress(value.first)
         last = netaddr.IPAddress(value.last)
         if first not in network or last not in network:
-            raise ConfigError(name, "Range not contained in network {}".format(network))
+            raise ConfigError(name, "Range not contained in network {}"
+                              .format(network))
     return checker
 
 
