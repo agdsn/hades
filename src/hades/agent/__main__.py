@@ -1,7 +1,8 @@
-from datetime import timedelta
 import logging
-from sqlalchemy import select, and_
 import sys
+from datetime import timedelta
+
+from sqlalchemy import select, and_
 
 from hades.common.db import (
     get_connection, radacct, radpostauth, refresh_materialized_views, utcnow)
