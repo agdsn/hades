@@ -416,6 +416,15 @@ class HADES_AUTH_DNSMASQ_GROUP(Option):
     runtime_check = check.group_exists
 
 
+class HADES_AUTH_DNSMASQ_PID_FILE(Option):
+    """
+    Path of the PID file of the dnsmasq instance for authenticated users.
+    """
+    default = "/var/run/hades/agent/auth-dnsmasq.pid"
+    type = str
+    runtime_check = check.file_creatable
+
+
 class HADES_AUTH_DNSMASQ_HOSTS_FILE(Option):
     """
     Path to the DHCP hosts file of the dnsmasq instance for authenticated users.
