@@ -23,20 +23,12 @@ address=/#/{{ HADES_UNAUTH_LISTEN.ip }}
 {% if HADES_UNAUTH_WHITELIST_DNS -%}
 # Resolve the whitelisted domains by using the default resolver.
 # Note that this also applies to all subdomains.
-server=
-{%- for hostname in HADES_UNAUTH_WHITELIST_DNS -%}
-/{{ hostname }}
-{%- endfor -%}
-/#
+server=/{{ HADES_UNAUTH_WHITELIST_DNS|join('/') }}/#
 
 # Additional write the resolved IP addresses of all whitelisted domain entries
 # to the ipset. The netfilter rules will allow packets where the destination is
 # a member of this ipset.
-ipset=
-{%- for hostname in HADES_UNAUTH_WHITELIST_DNS -%}
-/{{ hostname }}
-{%- endfor -%}
-/{{ HADES_UNAUTH_WHITELIST_IPSET }}
+ipset=/{{ HADES_UNAUTH_WHITELIST_DNS|join('/') }}/{{ HADES_UNAUTH_WHITELIST_IPSET }}
 {%- endif %}
 
 # Domain of DHCP hosts
