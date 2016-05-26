@@ -1,6 +1,11 @@
 # Log to stderr
 log-facility=-
 
+keep-in-foreground
+user={{ HADES_UNAUTH_DNSMASQ_USER }}
+group={{ HADES_UNAUTH_DNSMASQ_GROUP }}
+pid-file={{ HADES_UNAUTH_DNSMASQ_PID_FILE }}
+
 interface={{ HADES_UNAUTH_INTERFACE }}
 listen-address={{ HADES_UNAUTH_LISTEN.ip }}
 # Explicitly bind to the interfaces specified above, otherwise any other DNS

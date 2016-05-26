@@ -494,6 +494,33 @@ class HADES_AUTH_ALLOWED_UDP_PORTS(Option):
 #################################
 
 
+class HADES_UNAUTH_DNSMASQ_USER(Option):
+    """
+    User of the dnsmasq instance for unauthenticated users
+    """
+    default = "dnsmasq"
+    type = str
+    runtime_check = check.user_exists
+
+
+class HADES_UNAUTH_DNSMASQ_GROUP(Option):
+    """
+    Group of the dnsmasq instance for unauthenticated users
+    """
+    default = "nogroup"
+    type = str
+    runtime_check = check.group_exists
+
+
+class HADES_UNAUTH_DNSMASQ_PID_FILE(Option):
+    """
+    Path of the PID file of the dnsmasq instance for unauthenticated users.
+    """
+    default = "/var/run/dnsmasq/unauth-dnsmasq.pid"
+    type = str
+    runtime_check = check.file_creatable
+
+
 class HADES_UNAUTH_DHCP_LEASE_TIME(Option):
     """DHCP lease time in the unauth VLAN"""
     default = timedelta(minutes=2)
