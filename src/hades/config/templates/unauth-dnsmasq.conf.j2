@@ -10,6 +10,11 @@ bind-interfaces
 # Don't read /etc/hosts
 no-hosts
 
+# Do not randomize the outbound query port and use a single OS-assigned port
+# instead. Except for whitelisted domains, the unauth dnsmasq instance won't
+# query any other servers at all.
+query-port=0
+
 # DNS-Record for the Captive Portal
 host-record={{ HADES_PORTAL_DOMAIN }},{{ HADES_UNAUTH_LISTEN.ip }}
 
