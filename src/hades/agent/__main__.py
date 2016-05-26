@@ -6,7 +6,8 @@ import sys
 from hades.common.db import (
     get_all_dhcp_hosts, get_connection, radacct, radpostauth, utcnow)
 from hades.config.loader import get_config
-from hades.dnsmasq.util import generate_dhcp_host_reservations
+from hades.dnsmasq.util import (
+    generate_dhcp_hosts_file, reload_auth_dnsmasq)
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +28,7 @@ def refresh():
     hosts = get_all_dhcp_hosts()
     hosts_file = app.conf['HADES_DNSMASQ_DHCP_HOSTS_FILE']
     generate_dhcp_host_reservations(hosts)
+    reload_auth_dnsmasq()
 
 
 def delete_old():
