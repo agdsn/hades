@@ -4,6 +4,7 @@ import signal
 
 import netaddr
 
+from hades.common.db import get_all_dhcp_hosts
 from hades.config.loader import CheckWrapper, get_config
 
 logger = logging.getLogger(__name__)
@@ -42,3 +43,14 @@ def generate_dhcp_host_reservations(hosts):
             logger.error("Invalid IP address %s", ip)
             continue
         yield "{0},{1}\n".format(mac, ip)
+
+
+def generate_dhcp_hosts_file():
+    logger.info("Generating DHCP hosts file")
+    hosts = get_all_dhcp_hosts()
+    file_name = config['HADES_DNSMASQ_DHCP_HOSTS_FILE']
+    try:
+        with open(file_name) as f:
+            f.writelines(generate_dhcp_host_reservations(hosts))
+    except OSError as e:
+        logger.error("Error writing %s: %s", file_name, e.strerror)

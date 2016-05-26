@@ -4,7 +4,7 @@ from sqlalchemy import select, and_
 import sys
 
 from hades.common.db import (
-    get_all_dhcp_hosts, get_connection, radacct, radpostauth, utcnow)
+    get_connection, radacct, radpostauth, utcnow)
 from hades.config.loader import get_config
 from hades.dnsmasq.util import (
     generate_dhcp_hosts_file, reload_auth_dnsmasq)
@@ -24,10 +24,7 @@ def refresh():
         connection.execute("REFRESH MATERIALIZED VIEW radgroupcheck")
         connection.execute("REFRESH MATERIALIZED VIEW radgroupreply")
         connection.execute("REFRESH MATERIALIZED VIEW radusergroup")
-    logger.info("Generating DHCP hosts file")
-    hosts = get_all_dhcp_hosts()
-    hosts_file = app.conf['HADES_DNSMASQ_DHCP_HOSTS_FILE']
-    generate_dhcp_host_reservations(hosts)
+    generate_dhcp_hosts_file()
     reload_auth_dnsmasq()
 
 
