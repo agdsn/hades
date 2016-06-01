@@ -1,9 +1,6 @@
 from setuptools import Extension, find_packages, setup
 from babel.messages import frontend as babel
 
-arpreq = Extension('arpreq', sources=['arpreq/arpreq.c'],
-                   extra_compile_args=['-std=c99'])
-
 setup(name='hades',
       version='0.1',
       description="Distributed AG DSN RADIUS MAC authentication. "
@@ -15,12 +12,12 @@ setup(name='hades',
           "Flask",
           "Flask-Babel",
           "SQLAlchemy",
+          "arpreq",
           "celery",
           "netaddr",
           "psycopg2",
           "pyroute2",
       ],
-      ext_modules=[arpreq],
       scripts=['scripts/hades'],
       cmdclass={
           'compile_catalog': babel.compile_catalog,
