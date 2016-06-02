@@ -51,7 +51,7 @@ run_auth_dns() {
 
 run_auth_dhcp() {
     python3 -m hades.config.generate auth-dnsmasq.conf.j2 "${HADES_CONFIG_DIR}/auth-dnsmasq.conf"
-    exec python3 -m hades.dnsmasq.monitor "${HADES_CONFIG_DIR}/auth-dnsmasq.conf"
+    exec dnsmasq -k -C "${HADES_CONFIG_DIR}/auth-dnsmasq.conf"
 }
 
 run_auth_vrrp() {
