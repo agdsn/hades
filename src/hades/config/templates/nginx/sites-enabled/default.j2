@@ -7,11 +7,11 @@ server {
 
 	# Return 302 for clients using HTTP/1.0
 	if ($server_protocol = 'HTTP/1.0') {
-		return 302 http://{{ HADES_PORTAL_DOMAIN }}/;
+		return 302 {{ HADES_PORTAL_URL }};
 	}
 	# Return the more appropriate 303 status code for HTTP/1.1 and others
 	if ($server_protocol != 'HTTP/1.0') {
-		return 303 http://{{ HADES_PORTAL_DOMAIN }}/;
+		return 303 {{ HADES_PORTAL_URL }};
 	}
 }
 

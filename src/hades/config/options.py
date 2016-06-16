@@ -341,6 +341,12 @@ class HADES_PORTAL_DOMAIN(Option):
     type = str
 
 
+class HADES_PORTAL_URL(Option):
+    """URL of the landing page of the captive portal"""
+    default = deferred_format("http://{}/", HADES_PORTAL_DOMAIN)
+    type = str
+
+
 class HADES_PORTAL_USER(Option):
     """User of the web server and captive portal application"""
     default = 'hades-portal'

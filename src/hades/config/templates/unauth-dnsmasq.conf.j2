@@ -49,3 +49,6 @@ dhcp-authoritative
 
 # ignore the host names send in the DHCP request message
 dhcp-ignore-names
+
+# Set DHCP-Option 160 (RFC 7710)
+dhcp-option=160,"{{ HADES_PORTAL_URL }}"
