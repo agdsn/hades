@@ -5,14 +5,10 @@ server {
 	ssl_certificate {{ HADES_PORTAL_SSL_CERTIFICATE }};
 	ssl_certificate_key {{ HADES_PORTAL_SSL_CERTIFICATE_KEY }};
 
-	# Return 302 for clients using HTTP/1.0
-	if ($server_protocol = 'HTTP/1.0') {
-		return 302 {{ HADES_PORTAL_URL }};
-	}
-	# Return the more appropriate 303 status code for HTTP/1.1 and others
-	if ($server_protocol != 'HTTP/1.0') {
-		return 303 {{ HADES_PORTAL_URL }};
-	}
+	# Return a 511 error
+	root html;
+	error_page 511 /511.html;
+	return 511;
 }
 
 server {
