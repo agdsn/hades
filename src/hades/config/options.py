@@ -890,6 +890,11 @@ class CELERY_TASK_SERIALIZER(Option):
     type = str
 
 
+class CELERY_RESULT_BACKEND(Option):
+    default = 'rpc://'
+    type = str
+
+
 class CELERYBEAT_SCHEDULE(Option):
     default = {
         'refresh': {
