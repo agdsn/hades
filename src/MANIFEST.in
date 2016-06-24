@@ -1,4 +1,0 @@
-include hades/logging.ini
-recursive-include hades/config/templates *
-recursive-include hades/portal/templates *
-recursive-include hades/portal/static *

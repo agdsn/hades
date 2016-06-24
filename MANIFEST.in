@@ -1,0 +1,4 @@
+include src/hades/logging.ini
+recursive-include src/hades/config/templates *
+recursive-include src/hades/portal/templates *
+recursive-include src/hades/portal/static *

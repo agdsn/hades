@@ -14,17 +14,13 @@ RUN for i in /etc/systemd /lib/systemd /lib/systemd; do \
     && sed -i -re 's/^#?(ForwardTo[^=]+)=.*$/\1=no/' /etc/systemd/journald.conf
 
 # Install bower dependencies
-COPY src/bower.json /build/
+COPY .bowerrc bower.json /build/
 RUN cd /build && bower install --allow-root
 
 # Install hades
-COPY src/ /build/
-RUN cd /build \
-    && python3 setup.py install \
-    && python3 setup.py compile_catalog -d hades/portal/translations \
-    && python3 setup.py clean \
-    && cd / \
-    && rm -rf /build/
+COPY LICENSE README.md MANIFEST.in setup.py /build/
+COPY src/ /build/src/
+RUN cd /build && pip3 install .
 
 # Copy hades config to container
 COPY configs/example.py /etc/hades/config.py

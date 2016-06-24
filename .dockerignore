@@ -1,5 +1,5 @@
-src/build
-src/dist
+build
+dist
 src/*.egg-info
 src/hades/portal/static/dependencies
 .git

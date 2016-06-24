@@ -5,7 +5,8 @@ setup(name='hades',
       version='0.1',
       description="Distributed AG DSN RADIUS MAC authentication. "
                   "Site node agent and captive portal",
-      packages=find_packages(exclude=["*.tests"]),
+      packages=find_packages('src', exclude=["*.tests"]),
+      package_dir={'': 'src'},
       include_package_data=True,
       zip_safe=False,
       install_requires=[
@@ -18,7 +19,9 @@ setup(name='hades',
           "psycopg2",
           "pyroute2",
       ],
-      scripts=['scripts/hades'],
+      scripts=[
+          'src/scripts/hades',
+      ],
       cmdclass={
           'compile_catalog': babel.compile_catalog,
           'extract_messages': babel.extract_messages,
