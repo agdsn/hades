@@ -294,8 +294,8 @@ run_vrrp() {
         auth|radius|unauth) ;;
         *) msg "Unknown option $1"; exit "${EX_USAGE}";;
     esac
-    python3 -m hades.config.generate "keepalived-$1.conf.j2" "${HADES_CONFIG_DIR}/keepalived-$1.conf"
-    exec keepalived --log-console --dont-fork --vrrp --use-file="${HADES_CONFIG_DIR}/keepalived-$1.conf" --pid="/run/hades/vrrp/keepalived-$1.pid" --vrrp_pid="/run/hades/vrrp/vrrp-$1.pid"
+    python3 -m hades.config.generate "$1-keepalived.conf.j2" "${HADES_CONFIG_DIR}/$1-keepalived.conf"
+    exec keepalived --log-console --dont-fork --vrrp --use-file="${HADES_CONFIG_DIR}/$1-keepalived.conf" --pid="/run/hades/vrrp/$1-keepalived.pid" --vrrp_pid="/run/hades/vrrp/$1-vrrp.pid"
 }
 
 main() {
