@@ -1,17 +1,19 @@
 import collections
-from functools import partial
+import itertools
 import os
 import os.path
 import shutil
 import sys
-import itertools
+from functools import partial
 
 import jinja2
-from jinja2.exceptions import FilterArgumentError
-from jinja2.filters import environmentfilter
 import netaddr
 import pkg_resources
-from hades.config.loader import get_config
+from jinja2.exceptions import FilterArgumentError
+from jinja2.filters import environmentfilter
+
+from hades.common.cli import ArgumentParser, parser as common_parser
+from hades.config.loader import load_config
 
 
 def template_filter(name):
@@ -141,41 +143,32 @@ class ConfigGenerator(object):
         output.writelines(stream)
 
 
-def write_single_file_config(name, generator, args):
-    if len(args) < 3:
-        generator.from_file(name, sys.stdout)
-    else:
-        target_file = args[2]
-        with open(target_file, 'w', encoding='utf-8') as f:
-            generator.from_file(name, f)
-    return 0
-
-
-def write_directory_config(name, generator, args):
-    if len(args) < 3:
-        return os.EX_USAGE
-    target_dir = args[2]
-    generator.from_directory(name, target_dir)
-    return 0
-
-
-def main(args):
-    if len(args) < 2:
-        return os.EX_USAGE
-    config = get_config()
+def main():
+    parser = ArgumentParser(parents=[common_parser])
+    parser.add_argument(dest='source', metavar='SOURCE',
+                        help="Template file name or template directory name")
+    parser.add_argument(dest='destination', metavar='DESTINATION', nargs='?',
+                        help="Destination file or directory (default is stdout"
+                             "for files; required for directories)")
+    args = parser.parse_args()
+    config = load_config(args.config)
     template_dir = pkg_resources.resource_filename('hades.config', 'templates')
     generator = ConfigGenerator(template_dir, config)
-    name = args[1]
-    source_path = os.path.join(template_dir, name)
+    source_path = os.path.join(template_dir, args.source)
     if os.path.isdir(source_path):
-        return write_directory_config(name, generator, args)
+        generator.from_directory(args.source, args.destination)
     elif os.path.isfile(source_path):
-        return write_single_file_config(name, generator, args)
+        if args.destination is None:
+            generator.from_file(args.source, sys.stdout)
+        else:
+            with open(args.destination, 'w', encoding='utf-8') as f:
+                generator.from_file(args.source, f)
     else:
-        print("No such file or directory {} in {}".format(name, template_dir),
+        print("No such file or directory {} in {}".format(args.source,
+                                                          template_dir),
               file=sys.stderr)
         return os.EX_NOINPUT
 
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    sys.exit(main())

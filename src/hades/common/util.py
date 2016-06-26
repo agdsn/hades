@@ -1,19 +1,6 @@
 import collections
-import functools
-from functools import reduce
 import operator
-
-
-def memoize(f):
-    f._cache = None
-
-    @functools.wraps(f)
-    def wrapper():
-        if f._cache is None:
-            f._cache = f()
-        return f._cache
-
-    return wrapper
+from functools import reduce
 
 
 class frozendict(collections.Mapping):

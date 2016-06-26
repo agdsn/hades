@@ -1,11 +1,13 @@
-import logging
-import re
 import collections
+import logging
+import os
+import re
+import sys
 
 import netaddr
 
-from hades.config.loader import get_config
-
+from hades.common.cli import ArgumentParser, parser as parent_parser
+from hades.config.loader import load_config
 
 logger = logging.getLogger('hades.config.export')
 shell_types = (int, str, bool, netaddr.IPAddress, netaddr.IPNetwork)
@@ -22,7 +24,11 @@ def escape(value):
 
 
 def main():
-    config = get_config()
+    parser = ArgumentParser(description='Export options as shell '
+                                                 'variables',
+                            parents=[parent_parser])
+    args = parser.parse_args()
+    config = load_config(args.config)
     for name, value in config.items():
         escaped_name = escape(str(name))
         if isinstance(value, shell_types):
@@ -44,4 +50,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

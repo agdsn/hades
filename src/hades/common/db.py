@@ -7,13 +7,11 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import INET, MACADDR
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
-from hades.config.loader import CheckWrapper, get_config
+from hades.config.loader import get_config
 
 
 logger = logging.getLogger(__name__)
-config = CheckWrapper(get_config())
-engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
-metadata = MetaData(bind=engine)
+metadata = MetaData()
 
 dhcphost = Table(
     'dhcphost', metadata,
@@ -145,6 +143,8 @@ def pg_utcnow(element, compiler, **kw):
 
 
 def get_connection():
+    config = get_config(True)
+    engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
     return engine.connect()
 
 
@@ -192,6 +192,7 @@ def get_latest_auth_attempt(mac):
     :rtype: [([str], datetime)]|None
     """
     connection = get_connection()
+    config = get_config(True)
     interval = config.HADES_REAUTHENTICATION_INTERVAL
     result = connection.execute(
         select([radpostauth.c.replymessage, radpostauth.c.authdate])

@@ -3,7 +3,6 @@ import logging
 import os
 import types
 
-from hades.common.util import memoize
 from hades.config.check import check_option
 from hades.config.options import OptionMeta
 
@@ -109,34 +108,43 @@ def evaluate_callables(config):
             config[name] = value(config, name)
 
 
-@memoize
-def get_config():
+_config = None
+
+
+def get_config(runtime_checks=False):
+    if _config is None:
+        raise RuntimeError("Config has not been loaded")
+    return CheckWrapper(_config, runtime_checks=runtime_checks)
+
+
+def load_config(filename=None, runtime_checks=False):
     config = get_defaults()
-    filename = os.environ.get('HADES_CONFIG')
-    if filename is not None:
-        d = types.ModuleType('hades.config.user')
-        d.__file__ = filename
-        try:
-            with open(filename) as f:
-                exec(compile(f.read(), filename, 'exec'), d.__dict__)
-        except FileNotFoundError:
-            logger.exception("Config file %s not found", filename)
-            raise
-        except PermissionError:
-            logger.exception("Can't open config file %s (Permission denied)",
-                             filename)
-            raise
-        except IsADirectoryError:
-            logger.exception("Config file %s is a directory", filename)
-            raise
-        except IOError as e:
-            logger.exception("Config file %s (I/O error): %s", filename, str(e))
-            raise
-        except (SyntaxError, TypeError) as e:
-            logger.exception("Config file %s has errors: %s", filename, str(e))
-            raise
-        else:
-            config.update(from_object(d))
+    if filename is None:
+        filename = os.environ.get('HADES_CONFIG', '/etc/hades/config.py')
+    d = types.ModuleType('hades.config.user')
+    d.__file__ = filename
+    try:
+        with open(filename) as f:
+            exec(compile(f.read(), filename, 'exec'), d.__dict__)
+    except FileNotFoundError:
+        logger.exception("Config file %s not found", filename)
+        raise
+    except PermissionError:
+        logger.exception("Can't open config file %s (Permission denied)",
+                         filename)
+        raise
+    except IsADirectoryError:
+        logger.exception("Config file %s is a directory", filename)
+        raise
+    except IOError as e:
+        logger.exception("Config file %s (I/O error): %s", filename, str(e))
+        raise
+    except (SyntaxError, TypeError) as e:
+        logger.exception("Config file %s has errors: %s", filename, str(e))
+        raise
+    config.update(from_object(d))
     evaluate_callables(config)
     check_config(config)
-    return ConfigObject(config)
+    global _config
+    _config = config
+    return get_config(runtime_checks=runtime_checks)

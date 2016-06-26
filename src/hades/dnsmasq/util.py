@@ -5,13 +5,13 @@ import signal
 import netaddr
 
 from hades.common.db import get_all_dhcp_hosts
-from hades.config.loader import CheckWrapper, get_config
+from hades.config.loader import get_config
 
 logger = logging.getLogger(__name__)
-config = CheckWrapper(get_config())
 
 
 def reload_auth_dnsmasq():
+    config = get_config(runtime_checks=True)
     pid_file = config['HADES_AUTH_DNSMASQ_PID_FILE']
     try:
         with open(pid_file) as f:
@@ -46,6 +46,7 @@ def generate_dhcp_host_reservations(hosts):
 
 
 def generate_dhcp_hosts_file():
+    config = get_config(runtime_checks=True)
     logger.info("Generating DHCP hosts file")
     hosts = get_all_dhcp_hosts()
     file_name = config['HADES_AUTH_DNSMASQ_HOSTS_FILE']

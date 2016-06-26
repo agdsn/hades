@@ -7,8 +7,9 @@ import contextlib
 from sqlalchemy import func, select
 from sqlalchemy.exc import DBAPIError
 
+from hades.common.cli import ArgumentParser, parser as common_parser
 from . import db
-from hades.config.loader import get_config, CheckWrapper
+from hades.config.loader import load_config
 
 logger = logging.getLogger(__package__)
 
@@ -45,8 +46,10 @@ def check_table(conn, table):
     conn.execute(select([func.count()]).select_from(table)).scalar()
 
 
-def main(args):
-    config = CheckWrapper(get_config())
+def main():
+    parser = ArgumentParser(parents=[common_parser])
+    args = parser.parse_args()
+    config = load_config(args.config, runtime_checks=True)
     try:
         with user(config['HADES_AGENT_USER']) as user_name:
             check_database(user_name, db.metadata.tables.values())
@@ -63,4 +66,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    sys.exit(main())
