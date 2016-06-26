@@ -11,3 +11,4 @@ EnvironmentFile=/etc/hades/env
 ExecStart=/sbin/ip netns exec unauth hades unauth-vrrp
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
+RestartSec=5

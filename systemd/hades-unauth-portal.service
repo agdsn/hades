@@ -11,5 +11,6 @@ EnvironmentFile=/etc/hades/env
 ExecStart=/sbin/ip netns exec unauth hades unauth-portal
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
+RestartSec=5
 KillSignal=SIGINT
 KillMode=mixed
