@@ -4,7 +4,7 @@ MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
 ENV LANG=C.UTF-8 PGVERSION=9.4 container=docker
 COPY docker/etc/apt/ /etc/apt/
 
-RUN apt-get update && apt-get install \
+RUN apt-get update && apt-get install -t jessie-backports \
     build-essential \
     bridge-utils \
     curl \
