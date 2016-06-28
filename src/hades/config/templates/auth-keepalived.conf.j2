@@ -7,12 +7,7 @@ global_defs {
 }
 
 static_ipaddress {
-    {{ HADES_VRRP_LISTEN_AUTH }} dev vrrp
-    {{ HADES_NETNS_AUTH_LISTEN }} dev eth0
-}
-
-static_routes {
-    default via {{ HADES_NETNS_MAIN_AUTH_LISTEN }}
+    {{ HADES_VRRP_LISTEN_AUTH  }} dev eth1
 }
 
 vrrp_instance auth {
@@ -23,7 +18,7 @@ vrrp_instance auth {
     {%- endif %}
     preempt_delay {{ HADES_VRRP_PREEMPTION_DELAY.total_seconds()|int }}
 
-    interface vrrp
+    interface eth1
 
     mcast_src_ip {{ HADES_VRRP_LISTEN_AUTH.ip }}
 
@@ -41,6 +36,6 @@ vrrp_instance auth {
     }
 
     virtual_ipaddress {
-        {{ HADES_AUTH_LISTEN }} dev {{ HADES_AUTH_INTERFACE }}
+        {{ HADES_AUTH_LISTEN }} dev eth2
     }
 }

@@ -1,14 +1,19 @@
 [Unit]
-Description=Hades VRRP service (keepalived, radius)
+Description=Hades VRRP service for RADIUS services (keepalived)
 Documentation=https://agdsn.github.io/hades/
 #PartOf=hades.target
 After=hades-networking.service hades-database.service
 Wants=hades-networking.service hades-database.service
 
 [Service]
-Type=simple
-EnvironmentFile=/etc/hades/env
-ExecStart=/usr/local/bin/hades radius-vrrp
+Type=forking
+PIDFile=/run/hades/radius-vrrp/keepalived.pid
+KillMode=process
+SyslogIdentifier=hades-radius-vrrp
+EnvironmentFile=/etc/default/hades
+ExecStartPre=/usr/bin/python3 -m hades.config.generate radius-keepalived.conf.j2 /run/hades/radius-vrrp/keepalived.conf
+ExecStart=/usr/sbin/keepalived --log-console --vrrp --use-file=/run/hades/radius-vrrp/keepalived.conf --pid=/run/hades/radius-vrrp/keepalived.pid --vrrp_pid=/run/hades/radius-vrrp/keepalived-vrrp.pid
+ExecReload=/usr/bin/python3 -m hades.config.generate radius-keepalived.conf.j2 /run/hades/radius-vrpp/keepalived.conf
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 RestartSec=5

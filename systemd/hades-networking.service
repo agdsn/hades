@@ -6,9 +6,10 @@ Documentation=https://agdsn.github.io/hades/
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-EnvironmentFile=/etc/hades/env
-ExecStart=/usr/local/bin/hades networking
-ExecStop=/usr/local/bin/hades networking-shutdown
+SyslogIdentifier=hades-network
+EnvironmentFile=/etc/default/hades
+ExecStart=/usr/local/bin/control-network.sh start
+ExecStop=/usr/local/bin/control-network.sh stop
 
 [Install]
 WantedBy=multi-user.target

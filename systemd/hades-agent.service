@@ -7,8 +7,10 @@ Wants=hades-networking.service hades-database.service
 
 [Service]
 Type=simple
-EnvironmentFile=/etc/hades/env
+User=hades-agent
+Group=hades-agent
+SyslogIdentifier=hades-agent
+EnvironmentFile=/etc/default/hades
 ExecStart=/usr/local/bin/hades agent
-KillMode=mixed
 Restart=always
 RestartSec=5

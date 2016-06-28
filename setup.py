@@ -24,7 +24,9 @@ setup(name='hades',
           "pyroute2",
       ],
       scripts=[
-          'src/scripts/hades',
+          'src/scripts/control-database.sh',
+          'src/scripts/control-network.sh',
+          'src/scripts/functions.sh',
       ],
       cmdclass={
           'compile_catalog': babel.compile_catalog,

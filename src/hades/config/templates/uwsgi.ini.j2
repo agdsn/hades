@@ -1,6 +1,7 @@
 [uwsgi]
 immediate-gid = {{ HADES_PORTAL_GROUP }}
 immediate-uid = {{ HADES_PORTAL_USER }}
+safe-pidfile2 = /run/hades/unauth-portal/uwsgi.pid
 need-plugin = python3
 uwsgi-socket = {{ HADES_PORTAL_UWSGI_SOCKET }}
 need-app = true

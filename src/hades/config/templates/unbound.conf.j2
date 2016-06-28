@@ -1,14 +1,14 @@
 server:
     directory: "/etc/unbound"
-    username: unbound
+    username: {{ HADES_UNBOUND_USER }}
     do-daemonize: no
-    pidfile: "/run/unbound.pid"
+    pidfile: "/run/hades/auth-dns/unbound.pid"
     interface: 127.0.0.1
     interface: {{ HADES_AUTH_LISTEN.ip }}
     {%- for name, network in HADES_USER_NETWORKS.items() %}
     access-control: {{ network }} allow
     {%- endfor %}
-    auto-trust-anchor-file: "/var/lib/unbound/root.key"
+    auto-trust-anchor-file: "/var/lib/hades/auth-dns/root.key"
     root-hints: "/usr/share/dns/root.hints"
     # Log to stderr
     logfile: ""

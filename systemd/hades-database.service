@@ -6,12 +6,15 @@ After=hades-networking.service
 Wants=hades-networking.service
 
 [Service]
-Type=simple
-EnvironmentFile=/etc/hades/env
-ExecStart=/usr/local/bin/hades database
-ExecReload=/bin/kill -HUP $MAINPID
+Type=forking
+TimeoutSec=120
+SyslogIdentifier=hades-database
+Environment=PGDATA=/var/lib/hades/postgresql PATH=/usr/lib/postgresql/9.4/bin:/usr/sbin:/usr/bin:/sbin:/bin
+EnvironmentFile=/etc/default/hades
+ExecStartPre=/usr/local/bin/control-database.sh init
+ExecStart=/usr/local/bin/control-database.sh start
+ExecReload=/usr/local/bin/control-database.sh reload
+ExecStop=/usr/local/bin/control-database.sh stop
 Restart=always
-KillMode=mixed
 User=postgres
 Group=postgres
-RuntimeDirectory=postgresql

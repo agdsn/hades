@@ -1,8 +1,8 @@
 user {{ HADES_PORTAL_USER }} {{ HADES_PORTAL_GROUP }};
 working_directory {{ HADES_PORTAL_HOME }};
 worker_processes {{ HADES_PORTAL_NGINX_WORKERS }};
-pid /run/nginx.pid;
-daemon off;
+pid /run/hades/unauth-http/nginx.pid;
+daemon on;
 
 events {
 	worker_connections 768;

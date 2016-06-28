@@ -7,10 +7,14 @@ Wants=hades-networking.service hades-database.service
 
 [Service]
 Type=notify
-EnvironmentFile=/etc/hades/env
-ExecStart=/sbin/ip netns exec unauth hades unauth-portal
+SyslogIdentifier=hades-unauth-portal
+EnvironmentFile=/etc/default/hades
+ExecStartPre=/usr/bin/python3 -m hades.config.generate uwsgi.ini.j2 /run/hades/unauth-portal/uwsgi.ini
+ExecStart=/sbin/ip netns exec unauth /usr/bin/uwsgi --ini=/run/hades/unauth-portal/uwsgi.ini
+ExecReload=/usr/bin/python3 -m hades.config.generate uwsgi.ini.j2 /run/hades/unauth-portal/uwsgi.ini
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 RestartSec=5
 KillSignal=SIGINT
-KillMode=mixed
+StandardError=syslog
+NotifyAccess=all

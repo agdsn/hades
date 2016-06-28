@@ -1,0 +1,25 @@
+<!DOCTYPE busconfig PUBLIC
+ "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+<busconfig>
+        <policy user="root">
+                <allow own="de.agdsn.hades.auth_dnsmasq"/>
+                <allow own="de.agdsn.hades.unauth_dnsmasq"/>
+                <allow send_destination="de.agdsn.hades.auth_dnsmasq"/>
+                <allow send_destination="de.agdsn.hades.unauth_dnsmasq"/>
+        </policy>
+        <policy user="{{ HADES_AUTH_DNSMASQ_USER }}">
+                <allow own="de.agdsn.hades.auth_dnsmasq"/>
+                <allow send_destination="de.agdsn.hades.auth_dnsmasq"/>
+        </policy>
+        <policy user="{{ HADES_UNAUTH_DNSMASQ_USER }}">
+                <allow own="de.agdsn.hades.unauth_dnsmasq"/>
+                <allow send_destination="de.agdsn.hades.unauth_dnsmasq"/>
+        </policy>
+        <policy context="default">
+                <deny own="de.agdsn.hades.auth_dnsmasq"/>
+                <deny own="de.agdsn.hades.unauth_dnsmasq"/>
+                <deny send_destination="de.agdsn.hades.auth_dnsmasq"/>
+                <deny send_destination="de.agdsn.hades.unauth_dnsmasq"/>
+        </policy>
+</busconfig>

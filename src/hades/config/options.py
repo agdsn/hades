@@ -84,13 +84,6 @@ class HADES_SITE_NODE_ID(Option):
     type = str
 
 
-class HADES_CONFIG_DIR(Option):
-    """Directory where generated config files will be saved"""
-    type = str
-    default = '/etc/hades'
-    runtime_check = check.directory_exists
-
-
 class HADES_REAUTHENTICATION_INTERVAL(Option):
     """RADIUS periodic reauthentication interval"""
     default = timedelta(seconds=300)
@@ -343,7 +336,7 @@ class HADES_PORTAL_DOMAIN(Option):
 
 class HADES_PORTAL_URL(Option):
     """URL of the landing page of the captive portal"""
-    default = deferred_format("http://{}/", 'HADES_PORTAL_DOMAIN')
+    default = deferred_format("http://{}/", HADES_PORTAL_DOMAIN)
     type = str
 
 
@@ -361,7 +354,7 @@ class HADES_PORTAL_GROUP(Option):
 
 class HADES_PORTAL_HOME(Option):
     """Working directory of the captive portal application"""
-    default = '/var/lib/hades/portal'
+    default = '/var/lib/hades/unauth-portal'
     runtime_check = check.directory_exists
 
 
@@ -386,7 +379,7 @@ class HADES_PORTAL_SSL_CERTIFICATE_KEY(Option):
 
 class HADES_PORTAL_UWSGI_SOCKET(Option):
     """Path to uWSGI socket of the captive portal"""
-    default = '/run/hades/portal/uwsgi.sock'
+    default = '/run/hades/unauth-portal/uwsgi.sock'
     type = str
     runtime_check = check.file_creatable
 
@@ -426,7 +419,7 @@ class HADES_AUTH_DNSMASQ_PID_FILE(Option):
     """
     Path of the PID file of the dnsmasq instance for authenticated users.
     """
-    default = "/var/run/dnsmasq/auth-dnsmasq.pid"
+    default = "/run/hades/auth-dhcp/dnsmasq.pid"
     type = str
     runtime_check = check.file_creatable
 
@@ -435,7 +428,7 @@ class HADES_AUTH_DNSMASQ_HOSTS_FILE(Option):
     """
     Path to the DHCP hosts file of the dnsmasq instance for authenticated users.
     """
-    default = "/var/lib/hades/agent/auth-dnsmasq.hosts"
+    default = "/var/lib/hades/auth-dhcp/dnsmasq.hosts"
     type = str
     runtime_check = check.file_creatable
 
@@ -444,7 +437,7 @@ class HADES_AUTH_DNSMASQ_LEASE_FILE(Option):
     """
     Path to the DHCP lease file of the dnsmasq instance for authenticated users.
     """
-    default = "/var/lib/hades/agent/auth-dnsmasq.leases"
+    default = "/var/lib/hades/auth-dhcp/dnsmasq.leases"
     type = str
     runtime_check = check.file_creatable
 
@@ -467,6 +460,20 @@ class HADES_AUTH_DHCP_LEASE_TIME(Option):
     default = timedelta(hours=24)
     type = timedelta
     static_check = check.greater_than(timedelta(0))
+
+
+class HADES_UNBOUND_USER(Option):
+    """User of the unbound daemon"""
+    default = 'hades-auth-dns'
+    type = str
+    runtime_check = check.user_exists
+
+
+class HADES_UNBOUND_GROUP(Option):
+    """User of the unbound daemon"""
+    default = 'hades-auth-dns'
+    type = str
+    runtime_check = check.group_exists
 
 
 class HADES_AUTH_LISTEN(Option):
@@ -522,7 +529,7 @@ class HADES_UNAUTH_DNSMASQ_PID_FILE(Option):
     """
     Path of the PID file of the dnsmasq instance for unauthenticated users.
     """
-    default = "/var/run/dnsmasq/unauth-dnsmasq.pid"
+    default = "/run/hades/unauth-dns/dnsmasq.pid"
     type = str
     runtime_check = check.file_creatable
 
@@ -715,6 +722,7 @@ class HADES_VRRP_BRIDGE(Option):
     """Interface name for VRRP bridge (created if necessary)"""
     type = str
     default = 'br-vrrp'
+    static_check = check.not_empty
 
 
 class HADES_VRRP_LISTEN_AUTH(Option):

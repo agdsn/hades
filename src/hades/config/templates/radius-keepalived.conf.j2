@@ -8,8 +8,6 @@ global_defs {
 
 static_ipaddress {
     {{ HADES_VRRP_LISTEN_RADIUS }} dev {{ HADES_VRRP_BRIDGE }}
-    {{ HADES_NETNS_MAIN_AUTH_LISTEN }} dev eth-auth
-    {{ HADES_NETNS_MAIN_UNAUTH_LISTEN }} dev eth-unauth
 }
 
 vrrp_script check_db {
