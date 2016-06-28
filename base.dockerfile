@@ -3,7 +3,7 @@ MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
 
 # An undocumented variable named PGCLUSTER is apparently interpreted by newer
 # versions of psql, therefore we introduce an underscore
-ENV LANG=C.UTF-8 PGVERSION=9.4
+ENV LANG=C.UTF-8 PGVERSION=9.4 container=docker
 COPY docker/etc/apt/ /etc/apt/
 
 RUN apt-get update && apt-get install \
