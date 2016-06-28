@@ -148,18 +148,23 @@ def get_connection():
     return engine.connect()
 
 
+def refresh_materialized_view(transaction, view):
+    transaction.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY "{view}"'
+                        .format(view=view.name))
+
+
 def refresh_materialized_views():
     logger.info("Refreshing materialized views")
     connection = get_connection()
     with connection.begin():
-        connection.execute("REFRESH MATERIALIZED VIEW dhcphost")
+        refresh_materialized_view(connection, dhcphost)
         # TODO: After updating the nas table, we have to restart (reload?)
         # the freeradius server. Currently, this must be done manually.
-        connection.execute("REFRESH MATERIALIZED VIEW nas")
-        connection.execute("REFRESH MATERIALIZED VIEW radcheck")
-        connection.execute("REFRESH MATERIALIZED VIEW radgroupcheck")
-        connection.execute("REFRESH MATERIALIZED VIEW radgroupreply")
-        connection.execute("REFRESH MATERIALIZED VIEW radusergroup")
+        refresh_materialized_view(connection, nas)
+        refresh_materialized_view(connection, radcheck)
+        refresh_materialized_view(connection, radgroupcheck)
+        refresh_materialized_view(connection, radgroupreply)
+        refresh_materialized_view(connection, radusergroup)
 
 
 def get_groups(mac):
