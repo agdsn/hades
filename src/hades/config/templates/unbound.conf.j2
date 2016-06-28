@@ -9,7 +9,7 @@ server:
     access-control: {{ network }} allow
     {%- endfor %}
     auto-trust-anchor-file: "/var/lib/unbound/root.key"
-    root-hints: /usr/share/dns/root.hints
+    root-hints: "/usr/share/dns/root.hints"
     # Log to stderr
     logfile: ""
     log-time-ascii: yes
