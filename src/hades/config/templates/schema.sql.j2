@@ -122,14 +122,14 @@ SET default_tablespace = '';
 
 CREATE FOREIGN TABLE foreign_dhcphost (
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
-    mac character(17) NOT NULL,
+    mac character(17) /* NOT NULL */,
     {%- else %}
-    mac macaddr NOT NULL,
+    mac macaddr /* NOT NULL */,
     {%- endif %}
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
-    ipaddress character varying(39) NOT NULL
+    ipaddress character varying(39) /* NOT NULL */
     {%- else %}
-    ipaddress inet NOT NULL
+    ipaddress inet /* NOT NULL */
     {%- endif %}
 )
 SERVER {{ server_name }}
@@ -175,12 +175,12 @@ ALTER TABLE dhcphost OWNER TO "{{ HADES_AGENT_USER }}";
 --
 
 CREATE FOREIGN TABLE foreign_nas (
-    id integer NOT NULL,
-    nasname character varying(128) NOT NULL,
-    shortname character varying(32) NOT NULL,
-    type character varying(30) DEFAULT 'other'::character varying NOT NULL,
+    id integer /* NOT NULL */,
+    nasname character varying(128) /* NOT NULL */,
+    shortname character varying(32) /* NOT NULL */,
+    type character varying(30) DEFAULT 'other'::character varying /* NOT NULL */,
     ports integer,
-    secret character varying(60) NOT NULL,
+    secret character varying(60) /* NOT NULL */,
     server character varying(64),
     community character varying(50),
     description character varying(200)
@@ -198,17 +198,17 @@ ALTER FOREIGN TABLE foreign_nas OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 --
 
 CREATE FOREIGN TABLE foreign_radcheck (
-    priority integer NOT NULL,
-    username character varying(64) NOT NULL,
+    priority integer /* NOT NULL */,
+    username character varying(64)  /* NOT NULL */,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
     nasipaddress character varying(15),
     {%- else %}
     nasipaddress inet,
     {%- endif %}
     nasportid character varying(15),
-    attribute character varying(64) NOT NULL,
-    op character(2) NOT NULL,
-    value character varying(253) NOT NULL
+    attribute character varying(64) /* NOT NULL */,
+    op character(2) /* NOT NULL */,
+    value character varying(253) /* NOT NULL */
 )
 SERVER {{ server_name }}
 OPTIONS (
@@ -223,11 +223,11 @@ ALTER FOREIGN TABLE foreign_radcheck OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 --
 
 CREATE FOREIGN TABLE foreign_radgroupcheck (
-    priority integer NOT NULL,
-    groupname character varying(64) NOT NULL,
-    attribute character varying(64) NOT NULL,
-    op character(2) NOT NULL,
-    value character varying(253) NOT NULL
+    priority integer /* NOT NULL */,
+    groupname character varying(64) /* NOT NULL */,
+    attribute character varying(64) /* NOT NULL */,
+    op character(2) /* NOT NULL */,
+    value character varying(253) /* NOT NULL */
 )
 SERVER {{ server_name }}
 OPTIONS (
@@ -242,11 +242,11 @@ ALTER FOREIGN TABLE foreign_radgroupcheck OWNER TO "{{ HADES_POSTGRESQL_USER }}"
 --
 
 CREATE FOREIGN TABLE foreign_radgroupreply (
-    priority integer NOT NULL,
-    groupname character varying(64) NOT NULL,
-    attribute character varying(64) NOT NULL,
-    op character(2) NOT NULL,
-    value character varying(253) NOT NULL
+    priority integer /* NOT NULL */,
+    groupname character varying(64) /* NOT NULL */,
+    attribute character varying(64) /* NOT NULL */,
+    op character(2) /* NOT NULL */,
+    value character varying(253) /* NOT NULL */
 )
 SERVER {{ server_name }}
 OPTIONS (
@@ -261,17 +261,17 @@ ALTER FOREIGN TABLE foreign_radgroupreply OWNER TO "{{ HADES_POSTGRESQL_USER }}"
 --
 
 CREATE FOREIGN TABLE foreign_radreply (
-    priority integer NOT NULL,
-    username character varying(64) NOT NULL,
+    priority integer /* NOT NULL */,
+    username character varying(64) /* NOT NULL */,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
     nasipaddress character varying(15),
     {%- else %}
     nasipaddress inet,
     {%- endif %}
     nasportid character varying(15),
-    attribute character varying(64) NOT NULL,
-    op character(2) DEFAULT '='::bpchar NOT NULL,
-    value character varying(253) NOT NULL
+    attribute character varying(64) /* NOT NULL */,
+    op character(2) DEFAULT '='::bpchar /* NOT NULL */,
+    value character varying(253) /* NOT NULL */
 )
 SERVER {{ server_name }}
 OPTIONS (
@@ -286,15 +286,15 @@ ALTER FOREIGN TABLE foreign_radreply OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 --
 
 CREATE FOREIGN TABLE foreign_radusergroup (
-    username character varying(64) NOT NULL,
+    username character varying(64) /* NOT NULL */,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
     nasipaddress character varying(15),
     {%- else %}
     nasipaddress inet,
     {%- endif %}
     nasportid character varying(15),
-    groupname character varying(64) NOT NULL,
-    priority integer NOT NULL
+    groupname character varying(64) /* NOT NULL */,
+    priority integer /* NOT NULL */
 )
 SERVER {{ server_name }}
 OPTIONS (
