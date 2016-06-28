@@ -27,13 +27,18 @@ class Option(object, metaclass=OptionMeta):
     static_check = None
 
 
-def equal_to(other):
-    if isinstance(other, type) and issubclass(other, Option):
-        other_name = other.__name__
-    elif isinstance(other, str):
-        other_name = other
+def coerce(value):
+    if isinstance(value, type) and issubclass(value, Option):
+        return value.__name__
     else:
-        raise TypeError("Expected Option subclass or str")
+        return value
+
+
+def equal_to(other):
+    other_name = coerce(other)
+    if not isinstance(other_name, str):
+        raise TypeError("Expected Option subclass or str, was {}"
+                        .format(type(other_name)))
 
     def f(config, name):
         try:
@@ -58,6 +63,9 @@ def deferred_format(fmt_string, *args, **kwargs):
     :param kwargs:
     :return:
     """
+    args = tuple(coerce(arg) for arg in args)
+    kwargs = {k: coerce(v) for k, v in kwargs}
+
     def f(config, name):
         try:
             fmt_args = tuple(config[a] for a in args)
@@ -877,7 +885,7 @@ class CELERY_TIMEZONE(Option):
 
 
 class CELERY_DEFAULT_QUEUE(Option):
-    default = deferred_format("hades-site-{}", 'HADES_SITE_NAME')
+    default = deferred_format("hades-site-{}", HADES_SITE_NAME)
     type = str
 
 
