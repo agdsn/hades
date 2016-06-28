@@ -5,12 +5,8 @@ MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
 RUN apt-get install -y vim-nox tcpdump dnsutils && apt-get clean
 
 # Delete unwanted systemd units and disable journal forwarding
-RUN for i in /etc/systemd /lib/systemd /lib/systemd; do \
-        find "$i"/system -path '*.wants/*' -a -not -name '*journal*' -a -not -name '*tmpfiles*' -delete; \
-    done \
-    && for i in /etc/rc*.d; do \
-        find "$i" -type l -name 'S*' -delete; \
-    done \
+RUN  find /etc/systemd/system /lib/systemd/system -path '*.wants/*' ! -name '*journal*' ! -name '*tmpfiles*' -delete \
+    && find /etc/rc*.d -type l -delete \
     && sed -i -re 's/^#?(ForwardTo[^=]+)=.*$/\1=no/' /etc/systemd/journald.conf
 
 # Install bower dependencies
