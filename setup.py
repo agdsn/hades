@@ -1,4 +1,4 @@
-from setuptools import Extension, find_packages, setup
+from setuptools import find_packages, setup
 from babel.messages import frontend as babel
 
 setup(name='hades',
