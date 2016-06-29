@@ -48,7 +48,7 @@ check_cluster_version() {
 }
 
 generate_config() {
-	python3 -m hades.config.generate postgresql /run/hades/database
+	python3 -m hades.bin.generate_config postgresql /run/hades/database
 }
 
 do_init() {
@@ -75,13 +75,13 @@ do_init() {
 			CREATE ROLE "$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE" WITH LOGIN INHERIT UNENCRYPTED PASSWORD '$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE';
 			COMMAND
 		msg "Loading local foreign database schema"
-		python3 -m hades.config.generate schema_fdw.sql.j2 | psql --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE"
+		python3 -m hades.bin.generate_config schema_fdw.sql.j2 | psql --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE"
 	fi
 
 	msg "Creating database '$HADES_POSTGRESQL_DATABASE'"
 	createdb "$HADES_POSTGRESQL_DATABASE"
 	msg "Loading database schema"
-	python3 -m hades.config.generate schema.sql.j2 | psql --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "$HADES_POSTGRESQL_DATABASE"
+	python3 -m hades.bin.generate_config schema.sql.j2 | psql --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "$HADES_POSTGRESQL_DATABASE"
 	pg_ctl stop -s
 	msg "PostgreSQL cluster at $PGDATA successfully initialised."
 	trap - EXIT HUP INT QUIT ABRT

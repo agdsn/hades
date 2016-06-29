@@ -1,14 +1,14 @@
+import contextlib
 import logging
-import sys
 import os
 import pwd
-import contextlib
+import sys
 
 from sqlalchemy import exists, null, select
 from sqlalchemy.exc import DBAPIError
 
+from hades.common import db
 from hades.common.cli import ArgumentParser, parser as common_parser
-from . import db
 from hades.config.loader import load_config
 
 logger = logging.getLogger(__package__)

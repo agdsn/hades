@@ -10,9 +10,9 @@ Type=dbus
 BusName=de.agdsn.hades.unauth_dnsmasq
 SyslogIdentifier=hades-unauth-dns
 EnvironmentFile=/etc/default/hades
-ExecStartPre=/usr/bin/python3 -m hades.config.generate unauth-dnsmasq.conf.j2 /run/hades/unauth-dns/dnsmasq.conf
+ExecStartPre=/usr/bin/python3 -m hades.bin.generate_config unauth-dnsmasq.conf.j2 /run/hades/unauth-dns/dnsmasq.conf
 ExecStart=/sbin/ip netns exec unauth /usr/sbin/dnsmasq -k --enable-dbus=de.agdsn.hades.unauth_dnsmasq --conf-file=/run/hades/unauth-dns/dnsmasq.conf
-ExecReload=/usr/bin/python3 -m hades.config.generate unauth-dnsmasq.conf.j2 /run/hades/unauth-dns/dnsmasq.conf
+ExecReload=/usr/bin/python3 -m hades.bin.generate_config unauth-dnsmasq.conf.j2 /run/hades/unauth-dns/dnsmasq.conf
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 RestartSec=5

@@ -10,8 +10,8 @@ static_ipaddress {
     {{ HADES_VRRP_LISTEN_RADIUS }} dev {{ HADES_VRRP_BRIDGE }}
 }
 
-vrrp_script check_db {
-    script "python3 -m hades.common.check_db"
+vrrp_script check_database {
+    script "python3 -m hades.bin.check_database"
     interval 5
 }
 
@@ -28,7 +28,7 @@ vrrp_instance hades {
         {{ HADES_RADIUS_INTERFACE }}
     }
     track_script {
-        check_db
+        check_database
     }
 
     mcast_src_ip {{ HADES_VRRP_LISTEN_RADIUS.ip }}

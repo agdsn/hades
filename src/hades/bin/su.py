@@ -16,9 +16,10 @@ def drop_privileges(passwd, group):
     os.setuid(passwd.pw_uid)
 
 
-def main(args):
+def main():
+    args = sys.argv
     if len(args) < 3:
-        print("Usage: hades.common.su USER COMMANDS [ARGS...]")
+        print("Usage: {} USER COMMANDS [ARGS...]".format(args[0]))
         return os.EX_USAGE
     try:
         passwd = pwd.getpwnam(args[1])
@@ -39,4 +40,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    sys.exit(main())

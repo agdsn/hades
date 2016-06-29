@@ -23,6 +23,17 @@ setup(name='hades',
           "psycopg2",
           "pyroute2",
       ],
+      entry_points={
+          'console_scripts': [
+              'hades-check-database = hades.bin.check_database:main',
+              'hades-cleanup = hades.bin.cleanup:main',
+              'hades-export-options = hades.bin.export_options:main',
+              'hades-generate-template = hades.bin.generate_config:main',
+              'hades-refresh = hades.bin.refresh:main',
+              'hades-portal = hades.bin.portal:main',
+              'hades-su = hades.bin.su:main',
+          ],
+      },
       scripts=[
           'src/scripts/control-database.sh',
           'src/scripts/control-network.sh',

@@ -10,9 +10,9 @@ Type=dbus
 BusName=de.agdsn.hades.auth_dnsmasq
 SyslogIdentifier=hades-auth-dhcp
 EnvironmentFile=/etc/default/hades
-ExecStartPre=/usr/bin/python3 -m hades.config.generate auth-dnsmasq.conf.j2 /run/hades/auth-dhcp/dnsmasq.conf
+ExecStartPre=/usr/bin/python3 -m hades.bin.generate_config auth-dnsmasq.conf.j2 /run/hades/auth-dhcp/dnsmasq.conf
 ExecStart=/sbin/ip netns exec auth /usr/sbin/dnsmasq -k --enable-dbus=de.agdsn.hades.auth_dnsmasq --conf-file=/run/hades/auth-dhcp/dnsmasq.conf
-ExecReload=/usr/bin/python3 -m hades.config.generate auth-dnsmasq.conf.j2 /run/hades/auth-dhcp/dnsmasq.conf
+ExecReload=/usr/bin/python3 -m hades.bin.generate_config auth-dnsmasq.conf.j2 /run/hades/auth-dhcp/dnsmasq.conf
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 RestartSec=5

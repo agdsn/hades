@@ -10,5 +10,5 @@ error() {
 }
 
 load_config() {
-	source <(python3 -m hades.config.export --format=bash)
+	source <(python3 -m hades.bin.export_options --format=bash)
 }

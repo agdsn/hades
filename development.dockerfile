@@ -28,8 +28,8 @@ COPY docker/users.sh /build/
 COPY systemd/ /lib/systemd/system
 COPY systemd/hades.default /etc/default/hades
 RUN /build/users.sh \
-    && python3 -m hades.config.generate tmpfiles.conf.j2 /etc/tmpfiles.d/hades.conf \
-    && python3 -m hades.config.generate hades.busconfig.j2 /etc/dbus-1/system.d/hades.conf
+    && python3 -m hades.bin.generate_config tmpfiles.conf.j2 /etc/tmpfiles.d/hades.conf \
+    && python3 -m hades.bin.generate_config hades.busconfig.j2 /etc/dbus-1/system.d/hades.conf
 
 VOLUME [ "/sys/fs/cgroup" ]
 

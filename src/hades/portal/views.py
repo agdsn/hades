@@ -1,9 +1,10 @@
+import arpreq
 from flask import request, render_template
 from flask.ext.babel import _, lazy_gettext
 
-import arpreq
-from hades.portal import app
 from hades.common.db import get_groups, get_latest_auth_attempt
+from hades.portal import app, babel
+
 
 messages = {
     'traffic': lazy_gettext("You've exceeded your traffic limit."),
@@ -30,6 +31,12 @@ messages = {
                                      "allow network access. "
                                      "Please contact our support.")
 }
+
+
+@babel.localeselector
+def get_locale():
+    return request.accept_languages.best_match(['de', 'en'])
+
 
 @app.route("/")
 def index():

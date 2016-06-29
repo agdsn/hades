@@ -11,9 +11,9 @@ PIDFile=/run/hades/unauth-vrrp/keepalived.pid
 KillMode=process
 SyslogIdentifier=hades-unauth-vrrp
 EnvironmentFile=/etc/default/hades
-ExecStartPre=/usr/bin/python3 -m hades.config.generate unauth-keepalived.conf.j2 /run/hades/unauth-vrrp/keepalived.conf
+ExecStartPre=/usr/bin/python3 -m hades.bin.generate_config unauth-keepalived.conf.j2 /run/hades/unauth-vrrp/keepalived.conf
 ExecStart=/sbin/ip netns exec unauth /usr/sbin/keepalived --log-console --vrrp --use-file=/run/hades/unauth-vrrp/keepalived.conf --pid=/run/hades/unauth-vrrp/keepalived.pid --vrrp_pid=/run/hades/unauth-vrrp/keepalived-vrrp.pid
-ExecReload=/usr/bin/python3 -m hades.config.generate unauth-keepalived.conf.j2 /run/hades/unauth-vrrp/keepalived.conf
+ExecReload=/usr/bin/python3 -m hades.bin.generate_config unauth-keepalived.conf.j2 /run/hades/unauth-vrrp/keepalived.conf
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 RestartSec=5
