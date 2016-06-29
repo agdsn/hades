@@ -442,13 +442,6 @@ class HADES_AUTH_DNSMASQ_LEASE_FILE(Option):
     runtime_check = check.file_creatable
 
 
-class HADES_AUTH_DNSMASQ_SIGNAL_SOCKET(Option):
-    """Path to the Unix socket of the SignalProxyDaemon"""
-    default = '/run/hades/agent/auth-dnsmasq.sock'
-    type = str
-    runtime_check = check.file_creatable
-
-
 class HADES_AUTH_DHCP_DOMAIN(Option):
     """DNS domain of authenticated users"""
     default = 'users.agdsn.de'
