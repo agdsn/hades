@@ -4,7 +4,7 @@ import os
 import pwd
 import contextlib
 
-from sqlalchemy import func, select
+from sqlalchemy import exists, null, select
 from sqlalchemy.exc import DBAPIError
 
 from hades.common.cli import ArgumentParser, parser as common_parser
@@ -43,7 +43,7 @@ def check_database(user_name, tables):
 
 
 def check_table(conn, table):
-    conn.execute(select([func.count()]).select_from(table)).scalar()
+    conn.execute(select([exists(select([null()]).select_from(table))])).scalar()
 
 
 def main():
