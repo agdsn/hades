@@ -20,11 +20,9 @@ def as_user(user_name):
     Context manager for temporarily switching the effective UID
     :param user_name: Name of the user to switch to
     """
-    db.engine.dispose()
     uid = pwd.getpwnam(user_name).pw_uid
     os.seteuid(uid)
     yield user_name
-    db.engine.dispose()
     ruid, euid, suid = os.getresuid()
     os.seteuid(suid)
 
@@ -55,11 +53,14 @@ def main():
     args = parser.parse_args()
     config = load_config(args.config, runtime_checks=True)
     try:
+        db.engine.dispose()
         with as_user(config['HADES_AGENT_USER']) as user_name:
             check_database(user_name, db.metadata.tables.values())
+        db.engine.dispose()
         with as_user(config['HADES_PORTAL_USER']) as user_name:
             check_database(user_name, (db.radacct, db.radpostauth,
                                        db.radusergroup))
+        db.engine.dispose()
         with as_user(config['HADES_RADIUS_USER']) as user_name:
             check_database(user_name, (db.nas, db.radacct, db.radgroupcheck,
                                        db.radgroupreply, db.radpostauth,
