@@ -32,21 +32,19 @@ def main():
     for name, value in config.items():
         escaped_name = escape(str(name))
         if isinstance(value, shell_types):
-            print("export {}={}".format(escaped_name, escape(value)))
+            print("{}={}".format(escaped_name, escape(value)))
         elif isinstance(value, collections.Mapping):
             print("declare -A {}".format(name))
             for k, v in value.items():
                 if isinstance(v, shell_types):
                     print("{}[{}]={}".format(escaped_name, escape(str(k)),
                                              escape(str(v))))
-            print("export {}".format(escaped_name))
         elif isinstance(value, collections.Sequence):
             print("declare -a {}".format(name))
             for index, v in enumerate(value):
                 if isinstance(v, shell_types):
                     print("{}[{}]={}".format(escaped_name, index,
                                              escape(str(v))))
-            print("export {}".format(escaped_name))
 
 
 if __name__ == '__main__':
