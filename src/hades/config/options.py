@@ -1,7 +1,7 @@
-from datetime import timedelta
+import collections
 import random
 import string
-import collections
+from datetime import timedelta
 
 import netaddr
 

@@ -1,8 +1,8 @@
-import os
-import socket
-import grp
-import pwd
 import collections
+import grp
+import os
+import pwd
+import socket
 
 import netaddr
 from pyroute2.iproute import IPRoute
