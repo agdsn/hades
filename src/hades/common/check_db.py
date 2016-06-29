@@ -15,7 +15,11 @@ logger = logging.getLogger(__package__)
 
 
 @contextlib.contextmanager
-def user(user_name):
+def as_user(user_name):
+    """
+    Context manager for temporarily switching the effective UID
+    :param user_name: Name of the user to switch to
+    """
     db.engine.dispose()
     uid = pwd.getpwnam(user_name).pw_uid
     os.seteuid(uid)
@@ -51,12 +55,12 @@ def main():
     args = parser.parse_args()
     config = load_config(args.config, runtime_checks=True)
     try:
-        with user(config['HADES_AGENT_USER']) as user_name:
+        with as_user(config['HADES_AGENT_USER']) as user_name:
             check_database(user_name, db.metadata.tables.values())
-        with user(config['HADES_PORTAL_USER']) as user_name:
+        with as_user(config['HADES_PORTAL_USER']) as user_name:
             check_database(user_name, (db.radacct, db.radpostauth,
                                        db.radusergroup))
-        with user(config['HADES_RADIUS_USER']) as user_name:
+        with as_user(config['HADES_RADIUS_USER']) as user_name:
             check_database(user_name, (db.nas, db.radacct, db.radgroupcheck,
                                        db.radgroupreply, db.radpostauth,
                                        db.radreply, db.radusergroup))
