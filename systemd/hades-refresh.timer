@@ -1,5 +1,5 @@
 [Unit]
-Description=Hades agent
+Description=Hades refresh task (Timer)
 Documentation=https://agdsn.github.io/hades/
 PartOf=hades.target
 

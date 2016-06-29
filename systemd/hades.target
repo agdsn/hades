@@ -1,14 +1,15 @@
 [Unit]
 Description=Hades
 Documentation=https://agdsn.github.io/hades/
-Requires=hades-agent.timer
 Requires=hades-auth-dhcp.service
 Requires=hades-auth-dns.service
 Requires=hades-auth-vrrp.service
+Requires=hades-cleanup.timer
 Requires=hades-database.service
 Requires=hades-networking.service
 Requires=hades-radius.service
 Requires=hades-radius-vrrp.service
+Requires=hades-refresh.timer
 Requires=hades-unauth-dns.service
 Requires=hades-unauth-http.service
 Requires=hades-unauth-portal.service

@@ -1,0 +1,8 @@
+[Unit]
+Description=Hades cleanup task (Timer)
+Documentation=https://agdsn.github.io/hades/
+PartOf=hades.target
+
+[Timer]
+OnActiveSec=10
+OnUnitActiveSec=3600

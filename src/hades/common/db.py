@@ -167,6 +167,18 @@ def refresh_materialized_views():
         refresh_materialized_view(connection, radusergroup)
 
 
+def delete_old_sessions(transaction, interval):
+    transaction.execute(radacct.delete().where(and_(
+        radacct.c.lastupdatetime < utcnow() - interval
+    )))
+
+
+def delete_old_auth_attempts(transaction, interval):
+    transaction.execute(radpostauth.delete().where(and_(
+        radpostauth.c.authdate < utcnow() - interval
+    )))
+
+
 def get_groups(mac):
     """
     Get the groups of a user.
