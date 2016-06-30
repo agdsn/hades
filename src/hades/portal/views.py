@@ -1,9 +1,13 @@
+import logging
+
 import arpreq
 from flask import request, render_template
 from flask.ext.babel import _, lazy_gettext
 
 from hades.common.db import get_groups, get_latest_auth_attempt
 from hades.portal import app, babel
+
+logger = logging.getLogger(__name__)
 
 
 messages = {
@@ -44,6 +48,7 @@ def index():
     try:
         mac = arpreq.arpreq(ip)
     except OSError as e:
+        logger.execption("Could not resolve IP {} into MAC: {}".format(ip, e))
         content = render_template("error.html",
                                   message=_("An error occurred while resolving "
                                             "IP address into a MAC address."))
