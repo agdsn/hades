@@ -13,35 +13,40 @@ def from_object(obj):
     return {name: getattr(obj, name) for name in dir(obj) if name.isupper()}
 
 
-class ConfigObject(collections.Mapping):
+class ConfigObject(collections.MutableMapping):
     """
     An object suitable to be loaded by Flask or Celery.
     """
     def __init__(self, d):
-        self._data = d
-        for name, value in d.items():
-            setattr(self, name, value)
+        super().__init__()
+        self.__dict__.update(d)
 
     def __iter__(self):
-        return iter(self._data)
+        return iter(self.__dict__)
 
     def __len__(self):
-        return len(self._data)
+        return len(self.__dict__)
 
     def __contains__(self, x):
-        return x in self._data
+        return x in self.__dict__
 
     def __getitem__(self, item):
-        return self._data[item]
+        return self.__dict__[item]
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
+
+    def __delitem__(self, key):
+        del self.__dict__[key]
 
     def keys(self):
-        return self._data.keys()
+        return self.__dict__.keys()
 
     def values(self):
-        return self._data.values()
+        return self.__dict__.values()
 
     def items(self):
-        return self._data.items()
+        return self.__dict__.items()
 
 
 class CheckWrapper(collections.Mapping):
