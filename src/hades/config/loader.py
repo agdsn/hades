@@ -93,8 +93,9 @@ class CheckWrapper(collections.Mapping):
 
 
 def get_defaults():
-    return {name: option.default for name, option in OptionMeta.options.items()
-            if option.default is not None}
+    return ConfigObject((name, option.default)
+                        for name, option in OptionMeta.options.items()
+                        if option.default is not None)
 
 
 def check_config(config, runtime_checks=False):
