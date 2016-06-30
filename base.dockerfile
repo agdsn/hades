@@ -45,6 +45,7 @@ RUN apt-get update && apt-get install -y -t jessie-backports \
     && npm install -g bower \
     && pip3 install \
     Flask-Babel \
+    arpreq \
     pyroute2 \
     && npm install -g bower \
     && pg_dropcluster ${PGVERSION} main
