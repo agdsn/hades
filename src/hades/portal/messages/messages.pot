@@ -58,8 +58,10 @@ msgid ""
 "contact our support."
 msgstr ""
 
-#: views.py:41
-msgid "An error occurred while resolving IP address into a MAC address."
+#: src/hades/portal/views.py:53
+msgid ""
+"An unexpected error occurred while resolving your IP address into a MAC "
+"address."
 msgstr ""
 
 #: views.py:47

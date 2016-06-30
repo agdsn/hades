@@ -74,11 +74,13 @@ msgstr ""
 "Dein aktueller Mitgliedsstatus erlaubt keinen Netzwerkzugang. Bitte wende"
 " dich an unseren Support."
 
-#: views.py:41
-msgid "An error occurred while resolving IP address into a MAC address."
+#: src/hades/portal/views.py:53
+msgid ""
+"An unexpected error occurred while resolving your IP address into a MAC "
+"address."
 msgstr ""
-"Beim der Auflösung deiner IP-Adresse in eine MAC-Adresse ist ein Fehler "
-"aufgetreten."
+"Beim der Auflösung deiner IP-Adresse in eine MAC-Adresse ist ein "
+"unerwarteter Fehler aufgetreten."
 
 #: views.py:47
 msgid "No MAC address could be found for your IP address {}"

@@ -50,8 +50,9 @@ def index():
     except OSError as e:
         logger.execption("Could not resolve IP {} into MAC: {}".format(ip, e))
         content = render_template("error.html",
-                                  message=_("An error occurred while resolving "
-                                            "IP address into a MAC address."))
+                                  message=_("An unexpected error occurred "
+                                            "while resolving your IP address "
+                                            "into a MAC address."))
         return content, 500
     if mac is None:
         content = render_template("error.html",
