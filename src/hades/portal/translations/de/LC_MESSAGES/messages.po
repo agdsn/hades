@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: software@agdsn.de\n"
-"POT-Creation-Date: 2015-10-19 02:32+0200\n"
+"POT-Creation-Date: 2016-06-30 04:12+0200\n"
 "PO-Revision-Date: 2015-05-28 22:16+0200\n"
 "Last-Translator: Sebastian Schrader <schrader@agdsn.de>\n"
 "Language: de\n"
@@ -16,19 +16,19 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.1.1\n"
+"Generated-By: Babel 2.3.4\n"
 
-#: views.py:9
+#: src/hades/portal/views.py:14
 msgid "You've exceeded your traffic limit."
 msgstr "Du hast dein Traffic-Limit überschritten."
 
-#: views.py:10
+#: src/hades/portal/views.py:15
 msgid "You violated our Terms of Services. Please contact our support."
 msgstr ""
 "Du hast gegen unsere Nutzungsrichtlinien verstoßen. Bitte wende dich an "
 "unseren Support."
 
-#: views.py:12
+#: src/hades/portal/views.py:17
 msgid ""
 "We had to block you due to security problems with your devices. Please "
 "contact our support."
@@ -36,18 +36,20 @@ msgstr ""
 "Wir mussten dich aufgrund von Sicherheitsproblemen mit deinen Endgeräten "
 "blockieren. Bitte wende dich an unseren Support."
 
-#: views.py:15
+#: src/hades/portal/views.py:20
 msgid ""
-"You are late with paying your fees. Please pay the outstanding fees. To regain "
-"network connectivity immediately, inform our support. Otherwise your account "
-"will be re-enabled as soon as your money arrived on our bank account."
+"You are late with paying your fees. Please pay the outstanding fees. To "
+"regain network connectivity immediately, inform our support. Otherwise "
+"your account will be re-enabled as soon as your money arrived on our bank"
+" account."
 msgstr ""
-"Du bist mit deinen Beiträgen im Rückstand. Bitte begleiche die ausstehenden "
-"Beträge. Um deine Netzwerkverbindung sofort wieder zu erhalten, melde dich bei "
-"unserem Support. Anderenfalls wird dein Benutzerkonto erst wieder aktiviert "
-"sobald das Geld auf unserem Bankkonto eingegangen ist."
+"Du bist mit deinen Beiträgen im Rückstand. Bitte begleiche die "
+"ausstehenden Beträge. Um deine Netzwerkverbindung sofort wieder zu "
+"erhalten, melde dich bei unserem Support. Anderenfalls wird dein "
+"Benutzerkonto erst wieder aktiviert sobald das Geld auf unserem Bankkonto"
+" eingegangen ist."
 
-#: views.py:21
+#: src/hades/portal/views.py:26
 msgid ""
 "According to our records you live in a different room. Please inform us "
 "of your relocation."
@@ -55,7 +57,7 @@ msgstr ""
 "Laut unserer Datenbank wohnst du in einem anderem Zimmer. Bitte teile "
 "unserem Support deinen Umzug mit."
 
-#: views.py:24
+#: src/hades/portal/views.py:29
 msgid ""
 "We don't recognize your MAC address. If you are already a AG DSN member, "
 "you are probably using a different device, please tell us its MAC "
@@ -66,7 +68,7 @@ msgstr ""
 "MAC-Adresse mit. Wenn du noch kein Mitglied bist, stell bitte einen "
 "Antrag."
 
-#: views.py:29
+#: src/hades/portal/views.py:34
 msgid ""
 "Your current membership status does not allow network access. Please "
 "contact our support."
@@ -82,33 +84,33 @@ msgstr ""
 "Beim der Auflösung deiner IP-Adresse in eine MAC-Adresse ist ein "
 "unerwarteter Fehler aufgetreten."
 
-#: views.py:47
+#: src/hades/portal/views.py:60
 msgid "No MAC address could be found for your IP address {}"
 msgstr "Es konnte keine MAC-Adresse zu deiner IP-Adresse ermittelt werden."
 
-#: templates/base.html:7
+#: src/hades/portal/templates/base.html:7
 msgid "Captive Portal for unauthenticated and unauthorized users"
 msgstr "Captive Portal für nicht authentifizierte und nicht autorisierte Benutzer"
 
-#: templates/base.html:10
+#: src/hades/portal/templates/base.html:10
 msgid "AG DSN Captive Portal"
 msgstr "AG DSN Captive Portal"
 
-#: templates/error.html:4
+#: src/hades/portal/templates/error.html:4
 msgid "Oopps. This shouldn't have happened."
 msgstr "Upps. Dies sollte nicht passieren."
 
-#: templates/status.html:5
+#: src/hades/portal/templates/status.html:5
 msgid "We are very sorry ☹"
 msgstr "Es tut uns sehr Leid ☹!"
 
-#: templates/status.html:7
+#: src/hades/portal/templates/status.html:7
 msgid "We have to deny you from accessing the network for the following reasons:"
 msgstr ""
 "Wir müssen dir den Zugriff auf das Netzwerk aus folgenden Gründen leider "
 "verweigern: "
 
-#: templates/status.html:15
+#: src/hades/portal/templates/status.html:15
 msgid ""
 "Your account status is good. Your network connectivity should work in a "
 "few minutes. If does not work in a few minutes, try restarting your "
@@ -121,6 +123,7 @@ msgstr ""
 "starten. Falls du weiterhin diese Meldung erhälst, wende dich an unseren "
 "Support."
 
-#: templates/status.html:22
+#: src/hades/portal/templates/status.html:22
 msgid "Your MAC address is {}"
 msgstr "Deine MAC-Adresse ist {}"
+
