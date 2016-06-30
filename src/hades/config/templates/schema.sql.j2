@@ -14,6 +14,7 @@
 
 
 {%- macro table_options(options) %}
+    {%- set options = options.copy() %}
     {%- do options.update(HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS) %}
     {{ join_options(options) }}
 {%- endmacro %}
