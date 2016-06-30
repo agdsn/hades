@@ -213,6 +213,16 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS(Option):
     type = collections.Mapping
 
 
+class HADES_POSTGRESQL_FOREIGN_SERVER_TYPE(Option):
+    """Foreign data wrapper specific server type"""
+    type = str
+
+
+class HADES_POSTGRESQL_FOREIGN_SERVER_VERSION(Option):
+    """Foreign data wrapper specific server version"""
+    type = str
+
+
 class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
     """
     Foreign data wrapper options that are set on each foreign table.
