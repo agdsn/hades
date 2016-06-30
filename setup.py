@@ -25,6 +25,7 @@ setup(name='hades',
       ],
       entry_points={
           'console_scripts': [
+              'hades-agent = hades.bin.agent:main',
               'hades-check-database = hades.bin.check_database:main',
               'hades-cleanup = hades.bin.cleanup:main',
               'hades-export-options = hades.bin.export_options:main',

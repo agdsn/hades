@@ -10,4 +10,4 @@ Type=oneshot
 User=hades-agent
 Group=hades-agent
 SyslogIdentifier=hades-refresh
-ExecStart=/usr/bin/python3 -m hades.bin.refresh
+ExecStart=/usr/local/bin/hades-refresh

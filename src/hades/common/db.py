@@ -3,8 +3,8 @@ import operator
 
 from sqlalchemy import (
     BigInteger, Column, DateTime, Integer, MetaData, String, Table,
-    UniqueConstraint, and_, create_engine, select)
-from sqlalchemy.dialects.postgresql import INET, MACADDR
+    UniqueConstraint, and_, cast, create_engine, select)
+from sqlalchemy.dialects.postgresql import INET, INTERVAL, MACADDR
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
 from hades.config.loader import get_config
@@ -224,4 +224,45 @@ def get_latest_auth_attempt(mac):
 def get_all_dhcp_hosts():
     connection = get_connection()
     result = connection.execute(select([dhcphost.c.mac, dhcphost.c.ipaddress]))
+    return iter(result)
+
+
+def get_sessions(mac):
+    """
+    Return all sessions of a particular MAC address.
+
+    :param str mac: MAC address
+    :return: An iterable that yields (NAS-IP-Address, NAS-Port-ID,
+    Session-Start-Time, Session-Stop-Time)-tuples ordered by Session-Start-Time
+    descending
+    :rtype: iterable[(str, str, datetime, datetime)]
+    """
+    connection = get_connection()
+    result = connection.execute(
+        select([radacct.c.nasipaddress, radacct.c.nasportid,
+                radacct.c.acctstarttime + cast(radacct.c.acctstartdelay,
+                                               INTERVAL),
+                radacct.c.acctstoptime + cast(radacct.c.acctstopdelay,
+                                              INTERVAL)])
+        .where(and_(radacct.c.username == mac))
+        .order_by(radacct.c.acctstarttime.desc()))
+    return iter(result)
+
+
+def get_auth_attempts(mac):
+    """
+    Return all auth attempts of a particular MAC address.
+
+    :param str mac: MAC address
+    :return: An iterable that yields (NAS-IP-Address, NAS-Port-ID, Packet-Type,
+    Reply-Message, Auth-Date)-tuples ordered by Auth-Date descending
+    :rtype: iterable[(str, str, str, str, datetime)]
+    """
+    connection = get_connection()
+    result = connection.execute(
+        select([radpostauth.c.nasipaddress, radpostauth.c.nasportid,
+                radpostauth.c.packettype, radpostauth.c.replymessage,
+                radpostauth.c.authdate])
+        .where(and_(radpostauth.c.username == mac))
+        .order_by(radpostauth.c.authdate.desc()))
     return iter(result)

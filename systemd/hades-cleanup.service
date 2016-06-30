@@ -10,4 +10,4 @@ Type=oneshot
 User=freerad
 Group=freerad
 SyslogIdentifier=hades-cleanup
-ExecStart=/usr/bin/python3 -m hades.bin.cleanup
+ExecStart=/usr/local/bin/hades-cleanup
