@@ -204,7 +204,7 @@ class HADES_POSTGRESQL_SOCKET(Option):
 
 class HADES_POSTGRESQL_FOREIGN_SERVER_FDW(Option):
     """Name of the foreign data wrapper extensions that should be used"""
-    default = 'mysql_fdw'
+    default = 'postgres_fdw'
     type = str
 
 
