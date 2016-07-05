@@ -25,13 +25,6 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
---
--- Name: {{ HADES_POSTGRESQL_FOREIGN_SERVER_FDW}}; Type: EXTENSION; Schema: -; Owner:
---
-
-CREATE EXTENSION IF NOT EXISTS {{ HADES_POSTGRESQL_FOREIGN_SERVER_FDW }} WITH SCHEMA public;
-
-
 SET search_path = public, pg_catalog;
 
 SET default_tablespace = '';
