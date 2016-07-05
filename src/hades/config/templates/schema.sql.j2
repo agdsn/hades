@@ -165,7 +165,7 @@ CREATE MATERIALIZED VIEW dhcphost AS
           WHERE (({{ foreign_dhcphost_mac }} IS NOT NULL) AND ({{ foreign_dhcphost_ipaddress }} IS NOT NULL))
           WINDOW mac_window AS (PARTITION BY {{ foreign_dhcphost_mac }}), ipaddress_window AS (PARTITION BY {{ foreign_dhcphost_ipaddress }})) indexed
   WHERE ((indexed.mac_index = 1) AND (indexed.ipaddress_index = 1))
-  WITH DATA;
+  WITH NO DATA;
 
 
 ALTER TABLE dhcphost OWNER TO "{{ HADES_AGENT_USER }}";
@@ -336,7 +336,7 @@ CREATE MATERIALIZED VIEW nas AS
             AND (foreign_nas.secret IS NOT NULL))
           WINDOW nasname_window AS (PARTITION BY foreign_nas.nasname), shortname_window AS (PARTITION BY foreign_nas.shortname)) indexed
   WHERE ((indexed.nasname_index = 1) AND (indexed.shortname_index = 1))
-  WITH DATA;
+  WITH NO DATA;
 
 
 ALTER TABLE nas OWNER TO "{{ HADES_AGENT_USER }}";
@@ -880,6 +880,55 @@ GRANT ALL ON TABLE radusergroup TO "{{ HADES_AGENT_USER }}";
 GRANT ALL ON TABLE radusergroup TO "{{ HADES_POSTGRESQL_USER }}";
 GRANT SELECT ON TABLE radusergroup TO "{{ HADES_RADIUS_USER }}";
 GRANT SELECT ON TABLE radusergroup TO "{{ HADES_PORTAL_USER }}";
+
+
+--
+-- Name: dhcphost; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ HADES_AGENT_USER }}
+--
+
+REFRESH MATERIALIZED VIEW dhcphost;
+
+
+--
+-- Name: nas; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ HADES_AGENT_USER }}
+--
+
+REFRESH MATERIALIZED VIEW nas;
+
+
+--
+-- Name: radcheck; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ HADES_AGENT_USER }}
+--
+
+REFRESH MATERIALIZED VIEW radcheck;
+
+
+--
+-- Name: radgroupcheck; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ HADES_AGENT_USER }}
+--
+
+REFRESH MATERIALIZED VIEW radgroupcheck;
+
+
+--
+-- Name: radgroupreply; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ HADES_AGENT_USER }}
+--
+
+REFRESH MATERIALIZED VIEW radgroupreply;
+
+
+--
+-- Name: radreply; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ HADES_AGENT_USER }}
+--
+
+REFRESH MATERIALIZED VIEW radreply;
+
+
+--
+-- Name: radusergroup; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ HADES_AGENT_USER }}
+--
+
+REFRESH MATERIALIZED VIEW radusergroup;
 
 
 --
