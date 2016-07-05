@@ -170,15 +170,6 @@ GRANT ALL ON TABLE dhcphost TO "{{ HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE }}";
 
 
 --
--- Name: dhcphost; Type: ACL; Schema: public; Owner: {{ HADES_AGENT_USER }}
---
-
-REVOKE ALL ON TABLE dhcphost FROM PUBLIC;
-REVOKE ALL ON TABLE dhcphost FROM "{{ HADES_AGENT_USER }}";
-GRANT ALL ON TABLE dhcphost TO "{{ HADES_POSTGRESQL_USER }}";
-
-
---
 -- Name: nas; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
 --
 
