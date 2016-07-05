@@ -37,7 +37,7 @@ SET search_path = public, pg_catalog;
 SET default_tablespace = '';
 
 --
--- Name: dhcphost; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+-- Name: dhcphost; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE TABLE dhcphost (
@@ -57,7 +57,7 @@ CREATE TABLE dhcphost (
 ALTER TABLE dhcphost OWNER TO fdw;
 
 --
--- Name: nas; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+-- Name: nas; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE TABLE nas (
@@ -76,7 +76,7 @@ CREATE TABLE nas (
 ALTER TABLE nas OWNER TO fdw;
 
 --
--- Name: radcheck; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+-- Name: radcheck; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE TABLE radcheck (
@@ -97,7 +97,7 @@ CREATE TABLE radcheck (
 ALTER TABLE radcheck OWNER TO fdw;
 
 --
--- Name: radgroupcheck; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+-- Name: radgroupcheck; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE TABLE radgroupcheck (
@@ -112,7 +112,7 @@ CREATE TABLE radgroupcheck (
 ALTER TABLE radgroupcheck OWNER TO fdw;
 
 --
--- Name: radgroupreply; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+-- Name: radgroupreply; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE TABLE radgroupreply (
@@ -127,7 +127,7 @@ CREATE TABLE radgroupreply (
 ALTER TABLE radgroupreply OWNER TO fdw;
 
 --
--- Name: radreply; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+-- Name: radreply; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE TABLE radreply (
@@ -148,7 +148,7 @@ CREATE TABLE radreply (
 ALTER TABLE radreply OWNER TO fdw;
 
 --
--- Name: radusergroup; Type: FOREIGN TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
+-- Name: radusergroup; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
 --
 
 CREATE TABLE radusergroup (
