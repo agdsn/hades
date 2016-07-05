@@ -202,7 +202,7 @@ def get_latest_auth_attempt(mac):
     :param str mac: MAC address
     :return: A pair of list of group names and when or None if no attempt was
     found..
-    :rtype: [([str], datetime)]|None
+    :rtype: ([str], datetime)|None
     """
     connection = get_connection()
     config = get_config(True)
