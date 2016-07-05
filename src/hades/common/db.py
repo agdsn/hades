@@ -223,6 +223,12 @@ def get_latest_auth_attempt(mac):
 
 
 def get_all_dhcp_hosts():
+    """
+    Return all DHCP host configurations.
+
+    :return: An iterable that yields (mac, ip)-tuples
+    :rtype: iterable[(str, str)]
+    """
     connection = get_connection()
     result = connection.execute(select([dhcphost.c.mac, dhcphost.c.ipaddress]))
     return iter(result)
