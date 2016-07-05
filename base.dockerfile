@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y -t jessie-backports \
     npm \
     postgresql \
     postgresql-contrib \
-    postgresql-server-dev-${PGVERSION} \
+    postgresql-server-dev-all \
     python3-babel \
     python3-celery \
     python3-dev \
