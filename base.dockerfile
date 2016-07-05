@@ -48,6 +48,7 @@ RUN apt-get update && apt-get install -y -t jessie-backports \
     arpreq \
     pyroute2 \
     && npm install -g bower \
+    && pg_lsclusters -h | cut -d ' ' -f 1-2 | xargs -rn 2 pg_dropcluster \
     && pg_dropcluster ${PGVERSION} main
 
 RUN echo "LANG=$LANG" >/etc/locale.conf
