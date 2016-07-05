@@ -2,8 +2,8 @@
 Description=Hades VRRP service for auth services (keepalived)
 Documentation=https://agdsn.github.io/hades/
 #PartOf=hades.target
-After=hades-networking.service
-Wants=hades-networking.service
+After=hades-network.service
+Wants=hades-network.service
 
 [Service]
 Type=forking

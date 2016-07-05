@@ -2,8 +2,8 @@
 Description=Hades portal (Flask app on uWSGI)
 Documentation=https://agdsn.github.io/hades/
 #PartOf=hades.target
-After=hades-networking.service hades-database.service
-Wants=hades-networking.service hades-database.service
+After=hades-network.service hades-database.service
+Wants=hades-network.service hades-database.service
 
 [Service]
 Type=notify
