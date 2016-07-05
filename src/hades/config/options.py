@@ -202,24 +202,48 @@ class HADES_POSTGRESQL_SOCKET(Option):
     runtime_check = check.directory_exists
 
 
+class HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE(Option):
+    """
+    If set to a string, create and use a local “foreign” database with that
+    name.
+    """
+    type = str
+
+
 class HADES_POSTGRESQL_FOREIGN_SERVER_FDW(Option):
-    """Name of the foreign data wrapper extensions that should be used"""
+    """
+    Name of the foreign data wrapper extensions that should be used.
+
+    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    """
     default = 'postgres_fdw'
     type = str
 
 
 class HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS(Option):
-    """Foreign data wrapper specific server options"""
+    """
+    Foreign data wrapper specific server options
+
+    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    """
     type = collections.Mapping
 
 
 class HADES_POSTGRESQL_FOREIGN_SERVER_TYPE(Option):
-    """Foreign data wrapper specific server type"""
+    """
+    Foreign data wrapper specific server type
+
+    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    """
     type = str
 
 
 class HADES_POSTGRESQL_FOREIGN_SERVER_VERSION(Option):
-    """Foreign data wrapper specific server version"""
+    """
+    Foreign data wrapper specific server version
+
+    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    """
     type = str
 
 
@@ -227,6 +251,8 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
     """
     Foreign data wrapper options that are set on each foreign table.
     The options can be overridden with table specific options.
+
+    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
     """
     default = {
         'dbname': 'hades',
@@ -249,7 +275,11 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS(Option):
-    """Foreign data wrapper options for the dhcphost table"""
+    """
+    Foreign data wrapper options for the dhcphost table
+
+    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    """
     default = {
         'table_name': 'dhcphost',
     }
@@ -257,7 +287,11 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS(Option):
-    """Foreign data wrapper options for the nas table"""
+    """
+    Foreign data wrapper options for the nas table
+
+    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    """
     default = {
         'table_name': 'nas',
     }
@@ -274,7 +308,11 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS(Option):
-    """Foreign data wrapper options for the radcheck table"""
+    """
+    Foreign data wrapper options for the radcheck table
+
+    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    """
     default = {
         'table_name': 'radcheck',
     }
@@ -282,7 +320,11 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS(Option):
-    """Foreign data wrapper options for the radgroupcheck table"""
+    """
+    Foreign data wrapper options for the radgroupcheck table
+
+    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    """
     default = {
         'table_name': 'radgroupcheck',
     }
@@ -290,7 +332,11 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS(Option):
-    """Foreign data wrapper options for the radgroupreply table"""
+    """
+    Foreign data wrapper options for the radgroupreply table
+
+    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    """
     default = {
         'table_name': 'radgroupreply',
     }
@@ -307,7 +353,11 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS(Option):
-    """Foreign data wrapper options for the radreply table"""
+    """
+    Foreign data wrapper options for the radreply table
+
+    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    """
     default = {
         'table_name': 'radreply',
     }
@@ -324,7 +374,11 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS(Option):
-    """Foreign data wrapper options for the radusergroup table"""
+    """
+    Foreign data wrapper options for the radusergroup table
+
+    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    """
     default = {
         'table_name': 'radusergroup',
     }
@@ -332,8 +386,12 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_USER_MAPPINGS(Option):
-    """User mappings from local database users to users on the foreign database
-    server"""
+    """
+    User mappings from local database users to users on the foreign database
+    server
+
+    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    """
     type = collections.Mapping
     static_check = check.all(
         check.user_mapping_for_user_exists('HADES_POSTGRESQL_USER'),

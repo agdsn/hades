@@ -9,8 +9,6 @@ SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
-ALTER ROLE fdw PASSWORD 'correcthorsebatterystaple';
-
 --
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner:
 --
@@ -49,7 +47,7 @@ CREATE TABLE dhcphost (
 );
 
 
-ALTER TABLE dhcphost OWNER TO fdw;
+ALTER TABLE dhcphost OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
 -- Name: nas; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
@@ -68,7 +66,7 @@ CREATE TABLE nas (
 );
 
 
-ALTER TABLE nas OWNER TO fdw;
+ALTER TABLE nas OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
 -- Name: radcheck; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
@@ -89,7 +87,7 @@ CREATE TABLE radcheck (
 );
 
 
-ALTER TABLE radcheck OWNER TO fdw;
+ALTER TABLE radcheck OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
 -- Name: radgroupcheck; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
@@ -104,7 +102,7 @@ CREATE TABLE radgroupcheck (
 );
 
 
-ALTER TABLE radgroupcheck OWNER TO fdw;
+ALTER TABLE radgroupcheck OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
 -- Name: radgroupreply; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
@@ -119,7 +117,7 @@ CREATE TABLE radgroupreply (
 );
 
 
-ALTER TABLE radgroupreply OWNER TO fdw;
+ALTER TABLE radgroupreply OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
 -- Name: radreply; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
@@ -140,7 +138,7 @@ CREATE TABLE radreply (
 );
 
 
-ALTER TABLE radreply OWNER TO fdw;
+ALTER TABLE radreply OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
 -- Name: radusergroup; Type: TABLE; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}; Tablespace:
@@ -159,7 +157,7 @@ CREATE TABLE radusergroup (
 );
 
 
-ALTER TABLE radusergroup OWNER TO fdw;
+ALTER TABLE radusergroup OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 
 --
 -- Name: dhcphost; Type: ACL; Schema: public; Owner: {{ HADES_POSTGRESQL_USER }}
@@ -167,7 +165,8 @@ ALTER TABLE radusergroup OWNER TO fdw;
 
 REVOKE ALL ON TABLE dhcphost FROM PUBLIC;
 REVOKE ALL ON TABLE dhcphost FROM "{{ HADES_POSTGRESQL_USER }}";
-GRANT ALL ON TABLE dhcphost TO fdw;
+GRANT ALL ON TABLE dhcphost TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE dhcphost TO "{{ HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE }}";
 
 
 --
@@ -176,7 +175,7 @@ GRANT ALL ON TABLE dhcphost TO fdw;
 
 REVOKE ALL ON TABLE dhcphost FROM PUBLIC;
 REVOKE ALL ON TABLE dhcphost FROM "{{ HADES_AGENT_USER }}";
-GRANT ALL ON TABLE dhcphost TO fdw;
+GRANT ALL ON TABLE dhcphost TO "{{ HADES_POSTGRESQL_USER }}";
 
 
 --
@@ -185,7 +184,8 @@ GRANT ALL ON TABLE dhcphost TO fdw;
 
 REVOKE ALL ON TABLE nas FROM PUBLIC;
 REVOKE ALL ON TABLE nas FROM "{{ HADES_POSTGRESQL_USER }}";
-GRANT ALL ON TABLE nas TO fdw;
+GRANT ALL ON TABLE nas TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE nas TO "{{ HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE }}";
 
 
 --
@@ -194,7 +194,8 @@ GRANT ALL ON TABLE nas TO fdw;
 
 REVOKE ALL ON TABLE radcheck FROM PUBLIC;
 REVOKE ALL ON TABLE radcheck FROM "{{ HADES_POSTGRESQL_USER }}";
-GRANT ALL ON TABLE radcheck TO fdw;
+GRANT ALL ON TABLE radcheck TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE radcheck TO "{{ HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE }}";
 
 
 --
@@ -203,7 +204,8 @@ GRANT ALL ON TABLE radcheck TO fdw;
 
 REVOKE ALL ON TABLE radgroupcheck FROM PUBLIC;
 REVOKE ALL ON TABLE radgroupcheck FROM "{{ HADES_POSTGRESQL_USER }}";
-GRANT ALL ON TABLE radgroupcheck TO fdw;
+GRANT ALL ON TABLE radgroupcheck TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE radgroupcheck TO "{{ HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE }}";
 
 
 --
@@ -212,7 +214,8 @@ GRANT ALL ON TABLE radgroupcheck TO fdw;
 
 REVOKE ALL ON TABLE radgroupreply FROM PUBLIC;
 REVOKE ALL ON TABLE radgroupreply FROM "{{ HADES_POSTGRESQL_USER }}";
-GRANT ALL ON TABLE radgroupreply TO fdw;
+GRANT ALL ON TABLE radgroupreply TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE radgroupreply TO "{{ HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE }}";
 
 
 --
@@ -221,7 +224,8 @@ GRANT ALL ON TABLE radgroupreply TO fdw;
 
 REVOKE ALL ON TABLE radreply FROM PUBLIC;
 REVOKE ALL ON TABLE radreply FROM "{{ HADES_POSTGRESQL_USER }}";
-GRANT ALL ON TABLE radreply TO fdw;
+GRANT ALL ON TABLE radreply TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE radreply TO "{{ HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE }}";
 
 
 --
@@ -230,7 +234,8 @@ GRANT ALL ON TABLE radreply TO fdw;
 
 REVOKE ALL ON TABLE radusergroup FROM PUBLIC;
 REVOKE ALL ON TABLE radusergroup FROM "{{ HADES_POSTGRESQL_USER }}";
-GRANT ALL ON TABLE radusergroup TO fdw;
+GRANT ALL ON TABLE radusergroup TO "{{ HADES_POSTGRESQL_USER }}";
+GRANT ALL ON TABLE radusergroup TO "{{ HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE }}";
 
 
 --
