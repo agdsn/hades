@@ -217,8 +217,8 @@ def get_latest_auth_attempt(mac):
         .order_by(radpostauth.c.authdate.desc()).limit(1)
     ).first()
     if result:
-        m, d = result
-        return m.strip().split(), d
+        message, date = result
+        return message.strip().split(), date
     return None
 
 
