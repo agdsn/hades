@@ -65,6 +65,7 @@ radacct = Table(
     Column('framedipaddress', INET),
     Column('acctstartdelay', Integer),
     Column('acctstopdelay', Integer),
+    Column('lastupdatetime', DateTime, nullable=False),
 )
 
 radcheck = Table(
