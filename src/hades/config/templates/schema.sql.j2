@@ -103,11 +103,11 @@ ALTER SERVER master OWNER TO "{{ HADES_POSTGRESQL_USER }}";
 --
 
 CREATE USER MAPPING FOR
-{%- if user_name == 'PUBLIC' -%}
+{%- if user_name == 'PUBLIC' %}
 PUBLIC
-{%- else -%}
+{%- else %}
 "{{ user_name }}"
-{%- endif -%}
+{%- endif %}
 SERVER {{ server_name }} OPTIONS (
     {{ join_options(options) }}
 );
