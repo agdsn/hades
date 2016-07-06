@@ -22,14 +22,18 @@ class MissingOptionError(ConfigError):
         super(MissingOptionError, self).__init__(*args, **kwargs)
 
 
+def qualified_name(type_):
+    if type_.__module__ is None or type_.__module__ == 'builtins':
+        return type_.__qualname__
+    else:
+        return type_.__module__ + '.' + type_.__qualname__
+
+
 def check_option(config, option, value, runtime_checks=False):
     name = option.__name__
     if option.type is not None and not isinstance(value, option.type):
-        got = type(value).__name__
-        if option.type.__module__ == 'builtins':
-            expected = option.type.__name__
-        else:
-            expected = option.type.__module__ + '.' + option.type.__name__
+        expected = qualified_name(option.type)
+        got = qualified_name(type(value))
         raise ConfigError("Must be a subtype of {}, was {}"
                           .format(expected, got), option=name)
     if option.static_check:
