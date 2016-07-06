@@ -9,6 +9,7 @@ Wants=hades-network.service hades-database.service
 Type=notify
 SyslogIdentifier=hades-unauth-portal
 EnvironmentFile=/etc/default/hades
+Environment=PGAPPNAME=hades-unauth-portal
 ExecStartPre=/usr/bin/python3 -m hades.bin.generate_config uwsgi.ini.j2 /run/hades/unauth-portal/uwsgi.ini
 ExecStart=/sbin/ip netns exec unauth /usr/bin/uwsgi --ini=/run/hades/unauth-portal/uwsgi.ini
 ExecReload=/usr/bin/python3 -m hades.bin.generate_config uwsgi.ini.j2 /run/hades/unauth-portal/uwsgi.ini

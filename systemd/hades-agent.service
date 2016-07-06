@@ -12,6 +12,7 @@ KillMode=mixed
 User=hades-agent
 Group=hades-agent
 SyslogIdentifier=hades-agent
+Environment=PGAPPNAME=hades-agent
 EnvironmentFile=/etc/default/hades
 ExecStart=/usr/local/bin/hades-agent --pidfile=/run/hades/agent/worker.pid
 Restart=always

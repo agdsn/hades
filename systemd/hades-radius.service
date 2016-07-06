@@ -9,6 +9,7 @@ Wants=hades-network.service hades-database.service
 Type=forking
 PIDFile=/run/hades/radius/radiusd.pid
 SyslogIdentifier=hades-radius
+Environment=PGAPPNAME=hades-radius
 EnvironmentFile=/etc/default/hades
 ExecStartPre=/usr/bin/python3 -m hades.bin.generate_config freeradius /run/hades/radius
 ExecStartPre=/usr/sbin/freeradius -d /run/hades/radius -Cx -lstdout

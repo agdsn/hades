@@ -10,4 +10,5 @@ Type=oneshot
 User=hades-agent
 Group=hades-agent
 SyslogIdentifier=hades-refresh
+Environment=PGAPPNAME=hades-refresh
 ExecStart=/usr/local/bin/hades-refresh

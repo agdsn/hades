@@ -10,4 +10,5 @@ Type=oneshot
 User=freerad
 Group=freerad
 SyslogIdentifier=hades-cleanup
+Environment=PGAPPNAME=hades-cleanup
 ExecStart=/usr/local/bin/hades-cleanup
