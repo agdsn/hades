@@ -33,8 +33,8 @@ sql {
 	driver = "rlm_sql_${database}"
 
 	# Connection info:
-	server = "{{ HADES_POSTGRESQL_SOCKET }}"
-	#port = 5432
+	server = "{{ HADES_POSTGRESQL_SOCKET_DIRECTORY }}"
+	port = {{ HADES_POSTGRESQL_PORT }}
 	login = "{{ HADES_RADIUS_USER }}"
 	#password = "radpass"
 

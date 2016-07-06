@@ -60,12 +60,12 @@ ident_file = '/run/hades/database/pg_ident.conf'	# ident configuration file
 					# comma-separated list of addresses;
 					# defaults to 'localhost'; use '*' for all
 					# (change requires restart)
-#port = 5432				# (change requires restart)
+port = {{ HADES_POSTGRESQL_PORT }}				# (change requires restart)
 max_connections = 100			# (change requires restart)
 # Note:  Increasing max_connections costs ~400 bytes of shared memory per
 # connection slot, plus lock space (see max_locks_per_transaction).
 #superuser_reserved_connections = 3	# (change requires restart)
-unix_socket_directories = '/var/run/postgresql'	# comma-separated list of directories
+unix_socket_directories = '{{ HADES_POSTGRESQL_SOCKET_DIRECTORY }}'	# comma-separated list of directories
 					# (change requires restart)
 #unix_socket_group = ''			# (change requires restart)
 #unix_socket_permissions = 0777		# begin with 0 to use octal notation

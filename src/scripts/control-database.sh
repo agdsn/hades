@@ -132,6 +132,8 @@ main() {
 			;;
 		init|start|stop|reload|clear)
 			load_config
+			export PGHOST="$HADES_POSTGRESQL_SOCKET_DIRECTORY"
+			export PGPORT="$HADES_POSTGRESQL_PORT"
 			export PGDATA=/var/lib/hades/database
 			do_$1 "$@"
 			;;

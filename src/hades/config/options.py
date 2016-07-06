@@ -190,11 +190,18 @@ class HADES_POSTGRESQL_DATABASE(Option):
     type = str
 
 
-class HADES_POSTGRESQL_SOCKET(Option):
+class HADES_POSTGRESQL_SOCKET_DIRECTORY(Option):
     """Path to the PostgreSQL socket directory"""
-    default = '/var/run/postgresql'
+    default = '/run/hades/database'
     type = str
     runtime_check = check.directory_exists
+
+
+class HADES_POSTGRESQL_PORT(Option):
+    """Port and socket name of the PostgresSQL database"""
+    default = 5432
+    type = int
+    static_check = check.between(1, 65535)
 
 
 class HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE(Option):
@@ -912,7 +919,10 @@ class BABEL_DEFAULT_TIMEZONE(Option):
 
 
 class SQLALCHEMY_DATABASE_URI(Option):
-    default = deferred_format('postgresql:///{}', 'HADES_POSTGRESQL_DATABASE')
+    default = deferred_format('postgresql:///{}?host={}&port={}',
+                              HADES_POSTGRESQL_DATABASE,
+                              HADES_POSTGRESQL_SOCKET_DIRECTORY,
+                              HADES_POSTGRESQL_PORT)
     type = str
 
 
