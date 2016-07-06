@@ -14,9 +14,9 @@ class OptionMeta(type):
     in a global dict"""
     options = {}
 
-    def __new__(mcs, what, bases=None, dict=None):
-        class_ = super(OptionMeta, mcs).__new__(mcs, what, bases, dict)
-        mcs.options[what] = class_
+    def __new__(mcs, name, bases, attributes):
+        class_ = super(OptionMeta, mcs).__new__(mcs, name, bases, attributes)
+        mcs.options[name] = class_
         return class_
 
 
