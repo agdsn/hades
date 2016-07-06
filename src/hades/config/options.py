@@ -15,6 +15,9 @@ class OptionMeta(type):
     options = {}
 
     def __new__(mcs, name, bases, attributes):
+        if name in mcs.options:
+            raise TypeError("An option named {} is already defined."
+                            .format(name))
         class_ = super(OptionMeta, mcs).__new__(mcs, name, bases, attributes)
         mcs.options[name] = class_
         return class_
