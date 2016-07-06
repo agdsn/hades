@@ -184,6 +184,12 @@ class HADES_POSTGRESQL_USER(Option):
     default = 'postgres'
 
 
+class HADES_POSTGRESQL_GROUP(Option):
+    """Group the PostgreSQL database is running as"""
+    type = str
+    default = 'postgres'
+
+
 class HADES_POSTGRESQL_DATABASE(Option):
     """Name of the PostgreSQL database on the site node"""
     default = 'hades'
