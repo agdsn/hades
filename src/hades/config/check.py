@@ -9,12 +9,17 @@ from pyroute2.iproute import IPRoute
 
 
 class ConfigError(Exception):
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, *args, option=None, **kwargs):
         super(ConfigError, self).__init__(*args, **kwargs)
-        self.name = name
+        self.option = option
 
     def __str__(self):
-        return "{}: {}".format(self.name, super(ConfigError, self).__str__())
+        return "{}: {}".format(self.option, super(ConfigError, self).__str__())
+
+
+class MissingOptionError(ConfigError):
+    def __init__(self, *args, **kwargs):
+        super(MissingOptionError, self).__init__(*args, **kwargs)
 
 
 def check_option(config, option, value, runtime_checks=False):
@@ -25,8 +30,8 @@ def check_option(config, option, value, runtime_checks=False):
             expected = option.type.__name__
         else:
             expected = option.type.__module__ + '.' + option.type.__name__
-        raise ConfigError(name, "Must be a subtype of {}, was {}"
-                          .format(expected, got))
+        raise ConfigError("Must be a subtype of {}, was {}"
+                          .format(expected, got), option=name)
     if option.static_check:
         option.static_check(config, name, value)
     if runtime_checks and option.runtime_check:
@@ -36,15 +41,16 @@ def check_option(config, option, value, runtime_checks=False):
 def greater_than(threshold):
     def checker(config, name, value):
         if value <= threshold:
-            raise ConfigError(name, "Must be greater than {}".format(threshold))
+            raise ConfigError("Must be greater than {}".format(threshold),
+                              option=name)
     return checker
 
 
 def between(low, high):
     def checker(config, name, value):
         if not (low <= value <= high):
-            raise ConfigError(name, "Must be between {} and {} inclusively"
-                              .format(low, high))
+            raise ConfigError("Must be between {} and {} inclusively"
+                              .format(low, high), option=name)
     return checker
 
 
@@ -57,22 +63,22 @@ def mapping(key_check=None, value_check=None):
                 if value_check is not None:
                     value_check(config, name, v)
             except ConfigError as e:
-                raise ConfigError(name, "Error in key {}: {}"
-                                  .format(k, e.args[0]))
+                raise ConfigError("Error in key {}: {}".format(k, e.args[0]),
+                                  option=name)
     return f
 
 
 def type_is(types):
     def f(config, name, value):
         if not isinstance(value, types):
-            raise ConfigError(name, "Must be an instance of {}"
-                              .format(', '.join(types)))
+            raise ConfigError("Must be an instance of {}"
+                              .format(', '.join(types)), option=name)
     return f
 
 
 def not_empty(config, name, value):
     if len(value) <= 0:
-        raise ConfigError(name, "Must not be empty")
+        raise ConfigError("Must not be empty", option=name)
 
 
 def all(*checks):
@@ -84,30 +90,29 @@ def all(*checks):
 
 def network_ip(config, name, value):
     if value.ip == value.value:
-        raise ConfigError(name, "The host part of {} is the network "
-                                "address of the subnet. Must be an IP of the "
-                                "subnet."
-                          .format(value))
+        raise ConfigError("The host part of {} is the network address of the "
+                          "subnet. Must be an IP of the subnet.".format(value),
+                          option=name)
     # Prefix length 31 is special, see RFC 3021
     if value.prefixlen != 31 and value.ip == value.broadcast:
-        raise ConfigError(name, "The host part of {} is the broadcast "
-                                "address of the subnet. Must be an IP of the "
-                                "subnet."
-                          .format(value))
+        raise ConfigError("The host part of {} is the broadcast address of the "
+                          "subnet. Must be an IP of the subnet.".format(value),
+                          option=name)
 
 
 def directory_exists(config, name, value):
     if not os.path.exists(value):
-        raise ConfigError(name, "Directory {} does not exists".format(value))
+        raise ConfigError("Directory {} does not exists".format(value),
+                          option=name)
     if not os.path.isdir(value):
-        raise ConfigError(name, "{} is not a directory".format(value))
+        raise ConfigError("{} is not a directory".format(value), option=name)
 
 
 def file_exists(config, name, value):
     if not os.path.exists(value):
-        raise ConfigError(name, "File {} does not exists".format(value))
+        raise ConfigError("File {} does not exists".format(value), option=name)
     if not os.path.isfile(value):
-        raise ConfigError(name, "{} is not a file".format(value))
+        raise ConfigError("{} is not a file".format(value), option=name)
 
 
 def file_creatable(config, name, value):
@@ -119,7 +124,7 @@ def interface_exists(config, name, value):
     try:
         socket.if_nametoindex(value)
     except OSError:
-        raise ConfigError(name, "Interface {} not found".format(value))
+        raise ConfigError("Interface {} not found".format(value), option=name)
 
 
 def address_exists(config, name, value):
@@ -131,7 +136,7 @@ def address_exists(config, name, value):
     else:
         raise AssertionError("Unknown version {}".format(value.version))
     if ip.get_addr(family=family, address=value.ip, prefixlen=value.prefixlen):
-        raise ConfigError(name, "No such address {}".format(value))
+        raise ConfigError("No such address {}".format(value), option=name)
 
 
 def ip_range_in_network(network_config):
@@ -140,8 +145,8 @@ def ip_range_in_network(network_config):
         first = netaddr.IPAddress(value.first)
         last = netaddr.IPAddress(value.last)
         if first not in network or last not in network:
-            raise ConfigError(name, "Range not contained in network {}"
-                              .format(network))
+            raise ConfigError("Range not contained in network {}"
+                              .format(network), option=name)
     return checker
 
 
@@ -149,14 +154,14 @@ def user_exists(config, name, value):
     try:
         return pwd.getpwnam(value)
     except KeyError:
-        raise ConfigError(name, "User {} does not exists".format(value))
+        raise ConfigError("User {} does not exists".format(value), option=name)
 
 
 def group_exists(config, name, value):
     try:
         return grp.getgrnam(value)
     except KeyError:
-        raise ConfigError(name, "Group {} does not exists".format(value))
+        raise ConfigError("Group {} does not exists".format(value), option=name)
 
 
 def has_key(name, value, *keys):
@@ -164,13 +169,14 @@ def has_key(name, value, *keys):
     path = []
     for key in keys:
         if not isinstance(obj, collections.Mapping):
-            raise ConfigError(name, "{} is not a Mapping type"
-                              .format('->'.join(path)))
+            raise ConfigError("{} is not a Mapping type"
+                              .format('->'.join(path)), option=name)
         path.append(key)
         try:
             obj = obj.get(key)
         except KeyError:
-            raise ConfigError(name, "Missing key {}".format('->'.join(path)))
+            raise ConfigError("Missing key {}".format('->'.join(path)),
+                              option=name)
 
 
 def user_mapping_for_user_exists(user_option_name):
@@ -179,7 +185,6 @@ def user_mapping_for_user_exists(user_option_name):
         if 'PUBLIC' in config[user_option_name]:
             return
         if user_name not in value:
-            raise ConfigError(name, "No mapping for user {} defined in "
-                                    "option {}"
-                              .format(user_name, user_option_name))
+            raise ConfigError("No mapping for user {} defined in option {}"
+                              .format(user_name, user_option_name), option=name)
     return checker

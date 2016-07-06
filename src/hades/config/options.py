@@ -6,7 +6,7 @@ from datetime import timedelta
 import netaddr
 
 from hades.config import check
-from hades.config.check import ConfigError
+from hades.config.check import ConfigError, MissingOptionError
 
 
 class OptionMeta(type):
@@ -43,10 +43,9 @@ def equal_to(other):
     def f(config, name):
         try:
             return config[other_name]
-        except KeyError:
-            raise ConfigError(name, "Can not set equal to option {}, option is"
-                                    " not defined"
-                              .format(other_name))
+        except MissingOptionError as e:
+            raise ConfigError("Can not set equal to option {}, option is not "
+                              "defined".format(other_name), option=name) from e
     return f
 
 
@@ -67,12 +66,8 @@ def deferred_format(fmt_string, *args, **kwargs):
     kwargs = {k: coerce(v) for k, v in kwargs}
 
     def f(config, name):
-        try:
-            fmt_args = tuple(config[a] for a in args)
-            fmt_kwargs = {k: config[v] for k, v in kwargs}
-        except KeyError as e:
-            raise ConfigError(e.args[0], "Option is missing (required by {})"
-                              .format(name)) from e
+        fmt_args = tuple(config[a] for a in args)
+        fmt_kwargs = {k: config[v] for k, v in kwargs}
         return fmt_string.format(*fmt_args, **fmt_kwargs)
     return f
 
