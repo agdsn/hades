@@ -5,74 +5,8 @@ from datetime import timedelta
 
 import netaddr
 
-from hades.config import check
-from hades.config.check import ConfigError, MissingOptionError
-
-
-class OptionMeta(type):
-    """Metaclass for options. Classes that derive from options are registered
-    in a global dict"""
-    options = {}
-
-    def __new__(mcs, name, bases, attributes):
-        if name in mcs.options:
-            raise TypeError("An option named {} is already defined."
-                            .format(name))
-        class_ = super(OptionMeta, mcs).__new__(mcs, name, bases, attributes)
-        mcs.options[name] = class_
-        return class_
-
-
-class Option(object, metaclass=OptionMeta):
-    default = None
-    type = None
-    runtime_check = None
-    static_check = None
-
-
-def coerce(value):
-    if isinstance(value, type) and issubclass(value, Option):
-        return value.__name__
-    else:
-        return value
-
-
-def equal_to(other):
-    other_name = coerce(other)
-    if not isinstance(other_name, str):
-        raise TypeError("Expected Option subclass or str, was {}"
-                        .format(type(other_name)))
-
-    def f(config, name):
-        try:
-            return config[other_name]
-        except MissingOptionError as e:
-            raise ConfigError("Can not set equal to option {}, option is not "
-                              "defined".format(other_name), option=name) from e
-    return f
-
-
-def deferred_format(fmt_string, *args, **kwargs):
-    """
-    Evaluate a format string using values from others config options.
-
-    Names of options are given as positional arguments and the corresponding
-    values can be referred to using numbers in the format string.
-    Keywords arguments can be used as well to bind other option values to
-    specific names that are available in the format string.
-    :param fmt_string:
-    :param args:
-    :param kwargs:
-    :return:
-    """
-    args = tuple(coerce(arg) for arg in args)
-    kwargs = {k: coerce(v) for k, v in kwargs}
-
-    def f(config, name):
-        fmt_args = tuple(config[a] for a in args)
-        fmt_kwargs = {k: config[v] for k, v in kwargs}
-        return fmt_string.format(*fmt_args, **fmt_kwargs)
-    return f
+from hades.config import check, compute
+from hades.config.base import Option
 
 
 ###################
@@ -423,7 +357,7 @@ class HADES_PORTAL_DOMAIN(Option):
 
 class HADES_PORTAL_URL(Option):
     """URL of the landing page of the captive portal"""
-    default = deferred_format("http://{}/", HADES_PORTAL_DOMAIN)
+    default = compute.deferred_format("http://{}/", HADES_PORTAL_DOMAIN)
     type = str
 
 
@@ -488,7 +422,7 @@ class HADES_AUTH_DNSMASQ_USER(Option):
     User of the dnsmasq instance for authenticated users and the
     SignalProxyDaemon
     """
-    default = equal_to(HADES_AGENT_USER)
+    default = compute.equal_to(HADES_AGENT_USER)
     type = str
     runtime_check = check.user_exists
 
@@ -497,7 +431,7 @@ class HADES_AUTH_DNSMASQ_GROUP(Option):
     """
     Group of the dnsmasq instance for authenticated users and the SignalProxyDaemon
     """
-    default = equal_to(HADES_AGENT_GROUP)
+    default = compute.equal_to(HADES_AGENT_GROUP)
     type = str
     runtime_check = check.group_exists
 
@@ -928,10 +862,10 @@ class BABEL_DEFAULT_TIMEZONE(Option):
 
 
 class SQLALCHEMY_DATABASE_URI(Option):
-    default = deferred_format('postgresql:///{}?host={}&port={}',
-                              HADES_POSTGRESQL_DATABASE,
-                              HADES_POSTGRESQL_SOCKET_DIRECTORY,
-                              HADES_POSTGRESQL_PORT)
+    default = compute.deferred_format('postgresql:///{}?host={}&port={}',
+                                      HADES_POSTGRESQL_DATABASE,
+                                      HADES_POSTGRESQL_SOCKET_DIRECTORY,
+                                      HADES_POSTGRESQL_PORT)
     type = str
 
 
@@ -967,7 +901,7 @@ class CELERY_TIMEZONE(Option):
 
 
 class CELERY_DEFAULT_QUEUE(Option):
-    default = deferred_format("hades-site-{}", HADES_SITE_NAME)
+    default = compute.deferred_format("hades-site-{}", HADES_SITE_NAME)
     type = str
 
 

@@ -3,8 +3,10 @@ import logging
 import os
 import types
 
+# noinspection PyUnresolvedReferences
+import hades.config.options
+from hades.config.base import OptionMeta
 from hades.config.check import check_option
-from hades.config.options import OptionMeta
 
 logger = logging.getLogger(__name__)
 

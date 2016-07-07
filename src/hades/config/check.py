@@ -7,19 +7,7 @@ import socket
 import netaddr
 from pyroute2.iproute import IPRoute
 
-
-class ConfigError(Exception):
-    def __init__(self, *args, option=None, **kwargs):
-        super(ConfigError, self).__init__(*args, **kwargs)
-        self.option = option
-
-    def __str__(self):
-        return "{}: {}".format(self.option, super(ConfigError, self).__str__())
-
-
-class MissingOptionError(ConfigError):
-    def __init__(self, *args, **kwargs):
-        super(MissingOptionError, self).__init__(*args, **kwargs)
+from hades.config.base import ConfigError
 
 
 def qualified_name(type_):
