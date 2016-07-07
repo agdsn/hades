@@ -6,7 +6,7 @@ import netaddr
 
 logger = logging.getLogger(__name__)
 shell_types = (int, str, bool, netaddr.IPAddress, netaddr.IPNetwork)
-pattern = re.compile(r'([^a-zA-Z0-9_])')
+pattern = re.compile(r'([^a-zA-Z0-9%+./:=@_-])')
 replacement = r'\\\1'
 
 
