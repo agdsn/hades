@@ -5,14 +5,10 @@ import types
 
 # noinspection PyUnresolvedReferences
 import hades.config.options
-from hades.config.base import OptionMeta
+from hades.config.base import OptionMeta, is_option_name
 from hades.config.check import check_option
 
 logger = logging.getLogger(__name__)
-
-
-def from_object(obj):
-    return {name: getattr(obj, name) for name in dir(obj) if name.isupper()}
 
 
 class ConfigObject(collections.MutableMapping):
@@ -150,7 +146,8 @@ def load_config(filename=None, runtime_checks=False):
     except (SyntaxError, TypeError) as e:
         logger.exception("Config file %s has errors: %s", filename, str(e))
         raise
-    config.update(from_object(d))
+    config.update((name, getattr(d, name))
+                  for name in dir(d) if is_option_name(name))
     evaluate_callables(config)
     check_config(config)
     global _config

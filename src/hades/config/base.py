@@ -1,3 +1,29 @@
+import re
+
+
+option_name_regex = re.compile(r'\A[A-Z][A-Z0-9_]*\Z', re.ASCII)
+
+
+def is_option_name(name):
+    """
+    Check if a given object is a valid option name.
+
+    Valid option names are restricted to ASCII, start with an uppercase letter
+    followed by uppercase letters (A-Z), digits (0-9) or the underscore (_).
+    :param name: Name
+    :return: True, if name is string and a valid option name, False otherwise
+    :rtype: bool
+    """
+    return isinstance(name, str) and option_name_regex.match(name)
+
+
+def qualified_name(type_):
+    if type_.__module__ is None or type_.__module__ == 'builtins':
+        return type_.__qualname__
+    else:
+        return type_.__module__ + '.' + type_.__qualname__
+
+
 class OptionMeta(type):
     """
     Metaclass for options.
@@ -10,8 +36,10 @@ class OptionMeta(type):
 
     def __new__(mcs, name, bases, attributes, abstract=False):
         if name in mcs.options:
-            raise TypeError("An option named {} is already defined."
-                            .format(name))
+            raise TypeError("option named {} already defined as {}."
+                            .format(name, qualified_name(mcs.options[name])))
+        if not abstract and not is_option_name(name):
+            raise TypeError('not a valid option name')
         class_ = super(OptionMeta, mcs).__new__(mcs, name, bases, attributes)
         if not abstract:
             mcs.options[name] = class_

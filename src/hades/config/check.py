@@ -7,18 +7,11 @@ import socket
 import netaddr
 from pyroute2.iproute import IPRoute
 
-from hades.config.base import ConfigError, coerce
+from hades.config.base import ConfigError, coerce, qualified_name
 
 
 class OptionCheckError(ConfigError):
     pass
-
-
-def qualified_name(type_):
-    if type_.__module__ is None or type_.__module__ == 'builtins':
-        return type_.__qualname__
-    else:
-        return type_.__module__ + '.' + type_.__qualname__
 
 
 def check_option(config, option, value, runtime_checks=False):
