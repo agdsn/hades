@@ -113,7 +113,7 @@ def evaluate_callables(config):
     arguments"""
     for name, value in config.items():
         if callable(value):
-            config[name] = value(config, name)
+            config[name] = value(config)
 
 
 _config = None

@@ -7,12 +7,15 @@ def equal_to(other):
         raise TypeError("Expected Option subclass or str, was {}"
                         .format(type(other_name)))
 
-    def f(config, name):
+    # noinspection PyDecorator
+    @classmethod
+    def f(cls, config):
         try:
             return config[other_name]
         except MissingOptionError as e:
             raise ConfigError("Can not set equal to option {}, option is not "
-                              "defined".format(other_name), option=name) from e
+                              "defined".format(other_name),
+                              option=cls.__name__) from e
     return f
 
 
@@ -32,7 +35,9 @@ def deferred_format(fmt_string, *args, **kwargs):
     args = tuple(coerce(arg) for arg in args)
     kwargs = {k: coerce(v) for k, v in kwargs}
 
-    def f(config, name):
+    # noinspection PyDecorator,PyUnusedLocal
+    @classmethod
+    def f(cls, config):
         fmt_args = tuple(config[a] for a in args)
         fmt_kwargs = {k: config[v] for k, v in kwargs}
         return fmt_string.format(*fmt_args, **fmt_kwargs)

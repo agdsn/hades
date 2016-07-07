@@ -22,111 +22,137 @@ def qualified_name(type_):
 
 
 def check_option(config, option, value, runtime_checks=False):
-    name = option.__name__
     if option.type is not None and not isinstance(value, option.type):
         expected = qualified_name(option.type)
         got = qualified_name(type(value))
         raise OptionCheckError("Must be a subtype of {}, was {}"
-                               .format(expected, got), option=name)
+                               .format(expected, got), option=option.__name__)
     if option.static_check:
-        option.static_check(config, name, value)
+        option.static_check(config, value)
     if runtime_checks and option.runtime_check:
-        option.runtime_check(config, name, value)
+        option.runtime_check(config, value)
 
 
 def greater_than(threshold):
-    def checker(config, name, value):
+    # noinspection PyDecorator,PyUnusedLocal
+    @classmethod
+    def checker(cls, config, value):
         if value <= threshold:
             raise OptionCheckError("Must be greater than {}".format(threshold),
-                                   option=name)
+                                   option=cls.__name__)
     return checker
 
 
 def between(low, high):
-    def checker(config, name, value):
+    # noinspection PyDecorator,PyUnusedLocal
+    @classmethod
+    def checker(cls, config, value):
         if not (low <= value <= high):
             raise OptionCheckError("Must be between {} and {} inclusively"
-                                   .format(low, high), option=name)
+                                   .format(low, high), option=cls.__name__)
     return checker
 
 
 def mapping(key_check=None, value_check=None):
-    def f(config, name, value):
+    # noinspection PyDecorator
+    @classmethod
+    def f(cls, config, value):
         for k, v in value.items():
             try:
                 if key_check is not None:
-                    key_check(config, name, k)
+                    key_check.__get__(None, cls)(config, k)
                 if value_check is not None:
-                    value_check(config, name, v)
+                    value_check.__get__(None, cls)(config, v)
             except ConfigError as e:
                 raise OptionCheckError("Error in key {}: {}"
-                                       .format(k, e.args[0]), option=name)
+                                       .format(k, e.args[0]),
+                                       option=option.__name__)
     return f
 
 
 def type_is(types):
-    def f(config, name, value):
+    # noinspection PyDecorator,PyUnusedLocal
+    @classmethod
+    def f(cls, config, value):
         if not isinstance(value, types):
             raise OptionCheckError("Must be an instance of {}"
-                                   .format(', '.join(types)), option=name)
+                                   .format(', '.join(types)),
+                                   option=cls.__name__)
     return f
 
 
-def not_empty(config, name, value):
+# noinspection PyDecorator,PyUnusedLocal
+@classmethod
+def not_empty(cls, config, value):
     if len(value) <= 0:
-        raise OptionCheckError("Must not be empty", option=name)
+        raise OptionCheckError("Must not be empty", option=cls.__name__)
 
 
 def all(*checks):
-    def f(config, name, value):
+    # noinspection PyDecorator
+    @classmethod
+    def f(cls, config, value):
         for check in checks:
-            check(config, name, value)
+            check.__get__(None, cls)(config, value)
     return f
 
 
-def network_ip(config, name, value):
+# noinspection PyDecorator,PyUnusedLocal
+@classmethod
+def network_ip(cls, config, value):
     if value.ip == value.value:
         raise OptionCheckError("The host part of {} is the network address of "
                                "the subnet. Must be an IP of the subnet."
-                               .format(value), option=name)
+                               .format(value), option=cls.__name__)
     # Prefix length 31 is special, see RFC 3021
     if value.prefixlen != 31 and value.ip == value.broadcast:
         raise OptionCheckError("The host part of {} is the broadcast address "
                                "of the subnet. Must be an IP of the subnet."
-                               .format(value), option=name)
+                               .format(value), option=cls.__name__)
 
 
-def directory_exists(config, name, value):
+# noinspection PyDecorator,PyUnusedLocal
+@classmethod
+def directory_exists(cls, config, value):
     if not os.path.exists(value):
         raise OptionCheckError("Directory {} does not exists".format(value),
-                               option=name)
+                               option=cls.__name__)
     if not os.path.isdir(value):
         raise OptionCheckError("{} is not a directory".format(value),
-                               option=name)
+                               option=cls.__name__)
 
 
-def file_exists(config, name, value):
+# noinspection PyDecorator,PyUnusedLocal
+@classmethod
+def file_exists(cls, config, value):
     if not os.path.exists(value):
         raise OptionCheckError("File {} does not exists".format(value),
-                               option=name)
+                               option=cls.__name__)
     if not os.path.isfile(value):
-        raise OptionCheckError("{} is not a file".format(value), option=name)
+        raise OptionCheckError("{} is not a file".format(value),
+                               option=cls.__name__)
 
 
-def file_creatable(config, name, value):
+# noinspection PyDecorator
+@classmethod
+def file_creatable(cls, config, value):
     parent = os.path.dirname(value)
-    directory_exists(config, name, parent)
+    directory_exists.__get__(None, cls)(config, parent)
 
 
-def interface_exists(config, name, value):
+# noinspection PyDecorator,PyUnusedLocal
+@classmethod
+def interface_exists(cls, config, value):
     try:
         socket.if_nametoindex(value)
     except OSError:
         raise OptionCheckError("Interface {} not found".format(value),
-                               option=name)
+                               option=cls.__name__)
 
 
-def address_exists(config, name, value):
+# noinspection PyDecorator,PyUnusedLocal
+@classmethod
+def address_exists(cls, config, value):
     ip = IPRoute()
     if value.version == 4:
         family = socket.AF_INET
@@ -135,58 +161,70 @@ def address_exists(config, name, value):
     else:
         raise AssertionError("Unknown version {}".format(value.version))
     if ip.get_addr(family=family, address=value.ip, prefixlen=value.prefixlen):
-        raise OptionCheckError("No such address {}".format(value), option=name)
+        raise OptionCheckError("No such address {}".format(value),
+                               option=cls.__name__)
 
 
 def ip_range_in_network(network_config):
-    def checker(config, name, value):
+    # noinspection PyDecorator
+    @classmethod
+    def checker(cls, config, value):
         network = config[network_config]
         first = netaddr.IPAddress(value.first)
         last = netaddr.IPAddress(value.last)
         if first not in network or last not in network:
             raise OptionCheckError("Range not contained in network {}"
-                                   .format(network), option=name)
+                                   .format(network), option=cls.__name__)
     return checker
 
 
-def user_exists(config, name, value):
+# noinspection PyDecorator,PyUnusedLocal
+@classmethod
+def user_exists(cls, config, value):
     try:
         return pwd.getpwnam(value)
     except KeyError:
         raise OptionCheckError("User {} does not exists".format(value),
-                               option=name)
+                               option=cls.__name__)
 
 
-def group_exists(config, name, value):
+# noinspection PyDecorator,PyUnusedLocal
+@classmethod
+def group_exists(cls, config, value):
     try:
         return grp.getgrnam(value)
     except KeyError:
         raise OptionCheckError("Group {} does not exists".format(value),
-                               option=name)
+                               option=cls.__name__)
 
 
+# noinspection PyDecorator
+@classmethod
 def has_key(name, value, *keys):
     obj = value
     path = []
     for key in keys:
         if not isinstance(obj, collections.Mapping):
             raise OptionCheckError("{} is not a Mapping type"
-                                   .format('->'.join(path)), option=name)
+                                   .format('->'.join(path)),
+                                   option=cls.__name__)
         path.append(key)
         try:
             obj = obj.get(key)
         except KeyError:
             raise OptionCheckError("Missing key {}".format('->'.join(path)),
-                                   option=name)
+                                   option=cls.__name__)
 
 
 def user_mapping_for_user_exists(user_option_name):
-    def checker(config, name, value):
+    # noinspection PyDecorator
+    @classmethod
+    def checker(cls, config, value):
         user_name = config[user_option_name]
         if 'PUBLIC' in config[user_option_name]:
             return
         if user_name not in value:
             raise OptionCheckError("No mapping for user {} defined in option {}"
                                    .format(user_name, user_option_name),
-                                   option=name)
+                                   option=cls.__name__)
     return checker
