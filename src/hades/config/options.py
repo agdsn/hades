@@ -920,20 +920,3 @@ class CELERY_TASK_SERIALIZER(Option):
 class CELERY_RESULT_BACKEND(Option):
     default = 'rpc://'
     type = str
-
-
-class CELERYBEAT_SCHEDULE(Option):
-    default = {
-        'refresh': {
-            'task': 'hades.agent.refresh',
-            'schedule': timedelta(minutes=5),
-        },
-        'delete-old': {
-            'task': 'hades.agent.delete_old',
-            'schedule': timedelta(hours=1),
-        },
-    }
-
-
-class CELERYBEAT_SCHEDULE_FILENAME(Option):
-    default = '/var/lib/hades/agent/celerybeat-schedule'
