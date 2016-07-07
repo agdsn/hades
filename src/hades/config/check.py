@@ -7,7 +7,7 @@ import socket
 import netaddr
 from pyroute2.iproute import IPRoute
 
-from hades.config.base import ConfigError
+from hades.config.base import ConfigError, coerce
 
 
 class OptionCheckError(ConfigError):
@@ -165,11 +165,13 @@ def address_exists(cls, config, value):
                                option=cls.__name__)
 
 
-def ip_range_in_network(network_config):
+def ip_range_in_network(other_option):
+    other_option = coerce(other_option)
+
     # noinspection PyDecorator
     @classmethod
     def checker(cls, config, value):
-        network = config[network_config]
+        network = config[other_option]
         first = netaddr.IPAddress(value.first)
         last = netaddr.IPAddress(value.last)
         if first not in network or last not in network:
@@ -219,15 +221,17 @@ def has_keys(*keys):
     return f
 
 
-def user_mapping_for_user_exists(user_option_name):
+def user_mapping_for_user_exists(other_option):
+    other_option = coerce(other_option)
+
     # noinspection PyDecorator
     @classmethod
     def checker(cls, config, value):
-        user_name = config[user_option_name]
-        if 'PUBLIC' in config[user_option_name]:
+        user_name = config[other_option]
+        if 'PUBLIC' in config[other_option]:
             return
         if user_name not in value:
             raise OptionCheckError("No mapping for user {} defined in option {}"
-                                   .format(user_name, user_option_name),
+                                   .format(user_name, other_option),
                                    option=cls.__name__)
     return checker

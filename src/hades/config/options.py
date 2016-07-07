@@ -339,8 +339,8 @@ class HADES_POSTGRESQL_USER_MAPPINGS(Option):
     """
     type = collections.Mapping
     static_check = check.all(
-        check.user_mapping_for_user_exists('HADES_POSTGRESQL_USER'),
-        check.user_mapping_for_user_exists('HADES_AGENT_USER'),
+        check.user_mapping_for_user_exists(HADES_POSTGRESQL_USER),
+        check.user_mapping_for_user_exists(HADES_AGENT_USER),
     )
 
 
@@ -604,7 +604,7 @@ class HADES_UNAUTH_DHCP_RANGE(Option):
     HADES_UNAUTH_LISTEN network."""
     default = netaddr.IPRange('10.66.0.10', '10.66.31.254')
     type = netaddr.IPRange
-    static_check = check.ip_range_in_network(HADES_UNAUTH_LISTEN.__name__)
+    static_check = check.ip_range_in_network(HADES_UNAUTH_LISTEN)
 
 
 class HADES_UNAUTH_WHITELIST_DNS(Option):
