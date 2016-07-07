@@ -10,6 +10,10 @@ from pyroute2.iproute import IPRoute
 from hades.config.base import ConfigError
 
 
+class OptionCheckError(ConfigError):
+    pass
+
+
 def qualified_name(type_):
     if type_.__module__ is None or type_.__module__ == 'builtins':
         return type_.__qualname__
@@ -22,8 +26,8 @@ def check_option(config, option, value, runtime_checks=False):
     if option.type is not None and not isinstance(value, option.type):
         expected = qualified_name(option.type)
         got = qualified_name(type(value))
-        raise ConfigError("Must be a subtype of {}, was {}"
-                          .format(expected, got), option=name)
+        raise OptionCheckError("Must be a subtype of {}, was {}"
+                               .format(expected, got), option=name)
     if option.static_check:
         option.static_check(config, name, value)
     if runtime_checks and option.runtime_check:
@@ -33,16 +37,16 @@ def check_option(config, option, value, runtime_checks=False):
 def greater_than(threshold):
     def checker(config, name, value):
         if value <= threshold:
-            raise ConfigError("Must be greater than {}".format(threshold),
-                              option=name)
+            raise OptionCheckError("Must be greater than {}".format(threshold),
+                                   option=name)
     return checker
 
 
 def between(low, high):
     def checker(config, name, value):
         if not (low <= value <= high):
-            raise ConfigError("Must be between {} and {} inclusively"
-                              .format(low, high), option=name)
+            raise OptionCheckError("Must be between {} and {} inclusively"
+                                   .format(low, high), option=name)
     return checker
 
 
@@ -55,22 +59,22 @@ def mapping(key_check=None, value_check=None):
                 if value_check is not None:
                     value_check(config, name, v)
             except ConfigError as e:
-                raise ConfigError("Error in key {}: {}".format(k, e.args[0]),
-                                  option=name)
+                raise OptionCheckError("Error in key {}: {}"
+                                       .format(k, e.args[0]), option=name)
     return f
 
 
 def type_is(types):
     def f(config, name, value):
         if not isinstance(value, types):
-            raise ConfigError("Must be an instance of {}"
-                              .format(', '.join(types)), option=name)
+            raise OptionCheckError("Must be an instance of {}"
+                                   .format(', '.join(types)), option=name)
     return f
 
 
 def not_empty(config, name, value):
     if len(value) <= 0:
-        raise ConfigError("Must not be empty", option=name)
+        raise OptionCheckError("Must not be empty", option=name)
 
 
 def all(*checks):
@@ -82,29 +86,31 @@ def all(*checks):
 
 def network_ip(config, name, value):
     if value.ip == value.value:
-        raise ConfigError("The host part of {} is the network address of the "
-                          "subnet. Must be an IP of the subnet.".format(value),
-                          option=name)
+        raise OptionCheckError("The host part of {} is the network address of "
+                               "the subnet. Must be an IP of the subnet."
+                               .format(value), option=name)
     # Prefix length 31 is special, see RFC 3021
     if value.prefixlen != 31 and value.ip == value.broadcast:
-        raise ConfigError("The host part of {} is the broadcast address of the "
-                          "subnet. Must be an IP of the subnet.".format(value),
-                          option=name)
+        raise OptionCheckError("The host part of {} is the broadcast address "
+                               "of the subnet. Must be an IP of the subnet."
+                               .format(value), option=name)
 
 
 def directory_exists(config, name, value):
     if not os.path.exists(value):
-        raise ConfigError("Directory {} does not exists".format(value),
-                          option=name)
+        raise OptionCheckError("Directory {} does not exists".format(value),
+                               option=name)
     if not os.path.isdir(value):
-        raise ConfigError("{} is not a directory".format(value), option=name)
+        raise OptionCheckError("{} is not a directory".format(value),
+                               option=name)
 
 
 def file_exists(config, name, value):
     if not os.path.exists(value):
-        raise ConfigError("File {} does not exists".format(value), option=name)
+        raise OptionCheckError("File {} does not exists".format(value),
+                               option=name)
     if not os.path.isfile(value):
-        raise ConfigError("{} is not a file".format(value), option=name)
+        raise OptionCheckError("{} is not a file".format(value), option=name)
 
 
 def file_creatable(config, name, value):
@@ -116,7 +122,8 @@ def interface_exists(config, name, value):
     try:
         socket.if_nametoindex(value)
     except OSError:
-        raise ConfigError("Interface {} not found".format(value), option=name)
+        raise OptionCheckError("Interface {} not found".format(value),
+                               option=name)
 
 
 def address_exists(config, name, value):
@@ -128,7 +135,7 @@ def address_exists(config, name, value):
     else:
         raise AssertionError("Unknown version {}".format(value.version))
     if ip.get_addr(family=family, address=value.ip, prefixlen=value.prefixlen):
-        raise ConfigError("No such address {}".format(value), option=name)
+        raise OptionCheckError("No such address {}".format(value), option=name)
 
 
 def ip_range_in_network(network_config):
@@ -137,8 +144,8 @@ def ip_range_in_network(network_config):
         first = netaddr.IPAddress(value.first)
         last = netaddr.IPAddress(value.last)
         if first not in network or last not in network:
-            raise ConfigError("Range not contained in network {}"
-                              .format(network), option=name)
+            raise OptionCheckError("Range not contained in network {}"
+                                   .format(network), option=name)
     return checker
 
 
@@ -146,14 +153,16 @@ def user_exists(config, name, value):
     try:
         return pwd.getpwnam(value)
     except KeyError:
-        raise ConfigError("User {} does not exists".format(value), option=name)
+        raise OptionCheckError("User {} does not exists".format(value),
+                               option=name)
 
 
 def group_exists(config, name, value):
     try:
         return grp.getgrnam(value)
     except KeyError:
-        raise ConfigError("Group {} does not exists".format(value), option=name)
+        raise OptionCheckError("Group {} does not exists".format(value),
+                               option=name)
 
 
 def has_key(name, value, *keys):
@@ -161,14 +170,14 @@ def has_key(name, value, *keys):
     path = []
     for key in keys:
         if not isinstance(obj, collections.Mapping):
-            raise ConfigError("{} is not a Mapping type"
-                              .format('->'.join(path)), option=name)
+            raise OptionCheckError("{} is not a Mapping type"
+                                   .format('->'.join(path)), option=name)
         path.append(key)
         try:
             obj = obj.get(key)
         except KeyError:
-            raise ConfigError("Missing key {}".format('->'.join(path)),
-                              option=name)
+            raise OptionCheckError("Missing key {}".format('->'.join(path)),
+                                   option=name)
 
 
 def user_mapping_for_user_exists(user_option_name):
@@ -177,6 +186,7 @@ def user_mapping_for_user_exists(user_option_name):
         if 'PUBLIC' in config[user_option_name]:
             return
         if user_name not in value:
-            raise ConfigError("No mapping for user {} defined in option {}"
-                              .format(user_name, user_option_name), option=name)
+            raise OptionCheckError("No mapping for user {} defined in option {}"
+                                   .format(user_name, user_option_name),
+                                   option=name)
     return checker
