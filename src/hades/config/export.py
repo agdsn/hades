@@ -28,7 +28,6 @@ def export(config, output_format, file):
     mappings = output_format in ('bash', 'ksh', 'zsh')
     sequences = output_format in ('bash', 'ksh', 'zsh')
     for name, value in config.items():
-        name = escape(name)
         if isinstance(value, shell_types):
             print("{}={}".format(name, escape(value)), file=file)
         elif isinstance(value, collections.Mapping) and mappings:
