@@ -88,7 +88,7 @@ def not_empty(cls, config, value):
         raise OptionCheckError("Must not be empty", option=cls.__name__)
 
 
-def all(*checks):
+def satisfy_all(*checks):
     # noinspection PyDecorator
     @classmethod
     def f(cls, config, value):

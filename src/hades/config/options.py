@@ -51,8 +51,10 @@ class HADES_USER_NETWORKS(Option):
     values are netaddr.IPNetworks objects
     """
     type = collections.Mapping
-    static_check = check.all(check.not_empty,
-                             check.mapping(value_check=check.network_ip))
+    static_check = check.satisfy_all(
+        check.not_empty,
+        check.mapping(value_check=check.network_ip)
+    )
 
 
 #############################
@@ -338,7 +340,7 @@ class HADES_POSTGRESQL_USER_MAPPINGS(Option):
     If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
     """
     type = collections.Mapping
-    static_check = check.all(
+    static_check = check.satisfy_all(
         check.user_mapping_for_user_exists(HADES_POSTGRESQL_USER),
         check.user_mapping_for_user_exists(HADES_AGENT_USER),
     )
