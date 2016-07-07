@@ -198,22 +198,25 @@ def group_exists(cls, config, value):
                                option=cls.__name__)
 
 
-# noinspection PyDecorator
-@classmethod
-def has_key(name, value, *keys):
-    obj = value
-    path = []
-    for key in keys:
-        if not isinstance(obj, collections.Mapping):
-            raise OptionCheckError("{} is not a Mapping type"
-                                   .format('->'.join(path)),
-                                   option=cls.__name__)
-        path.append(key)
-        try:
-            obj = obj.get(key)
-        except KeyError:
-            raise OptionCheckError("Missing key {}".format('->'.join(path)),
-                                   option=cls.__name__)
+def has_keys(*keys):
+    # noinspection PyDecorator,PyUnusedLocal
+    @classmethod
+    def f(cls, config, value):
+        obj = value
+        checked = []
+
+        for key in keys:
+            if not isinstance(obj, collections.Mapping):
+                path = cls.__name__ + ''.join(map('[{!r}]'.format, checked))
+                raise OptionCheckError("must be a mapping type like dict",
+                                       option=path)
+            checked.append(key)
+            try:
+                obj = obj[key]
+            except KeyError:
+                path = cls.__name__ + ''.join(map('[{!r}]'.format, checked))
+                raise OptionCheckError("Missing key", option=path) from None
+    return f
 
 
 def user_mapping_for_user_exists(user_option_name):
