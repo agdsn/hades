@@ -1,6 +1,7 @@
 import collections
 import random
 import string
+import urllib.parse
 from datetime import timedelta
 
 import netaddr
@@ -864,10 +865,22 @@ class BABEL_DEFAULT_TIMEZONE(Option):
 
 
 class SQLALCHEMY_DATABASE_URI(Option):
-    default = compute.deferred_format('postgresql:///{}?host={}&port={}',
-                                      HADES_POSTGRESQL_DATABASE,
-                                      HADES_POSTGRESQL_SOCKET_DIRECTORY,
-                                      HADES_POSTGRESQL_PORT)
+    @staticmethod
+    def default(config):
+        if 'postgresql' not in urllib.parse.uses_netloc:
+            urllib.parse.uses_netloc.append('postgresql')
+        if 'postgresql' not in urllib.parse.uses_query:
+            urllib.parse.uses_query.append('postgresql')
+        query = urllib.parse.urlencode({
+            'host': config.HADES_POSTGRESQL_SOCKET_DIRECTORY,
+            'port': config.HADES_POSTGRESQL_PORT,
+            'requirepeer': config.HADES_POSTGRESQL_USER,
+            'client_encoding': 'utf-8',
+            'connect_timeout': 5,
+        })
+        return urllib.parse.urlunsplit(('postgresql', '',
+                                        config.HADES_POSTGRESQL_DATABASE,
+                                        query, ''))
     type = str
 
 
