@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source /usr/local/bin/functions.sh
+source /opt/hades/bin/functions.sh
 
 print_usage() {
 	msg "\
@@ -120,7 +120,7 @@ setup_namespace_common_post() {
 	local -r interface="$2"
 
 	msg "Loading iptables rules for network namespace $namespace"
-	python3 -m hades.bin.generate_config "iptables-${namespace}.j2" | ip netns exec "$namespace" iptables-restore
+	/opt/hades/bin/python3 -m hades.bin.generate_config "iptables-${namespace}.j2" | ip netns exec "$namespace" iptables-restore
 }
 
 setup_host_network() {
@@ -138,7 +138,7 @@ setup_host_network() {
 	fi
 	create_bridge_if_not_exists "$HADES_VRRP_BRIDGE" "$HADES_VRRP_LISTEN_RADIUS"
 
-	python3 -m hades.bin.generate_config iptables-main.j2 | iptables-restore
+	/opt/hades/bin/python3 -m hades.bin.generate_config iptables-main.j2 | iptables-restore
 }
 
 do_start() {

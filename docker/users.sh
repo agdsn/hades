@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-source /usr/local/bin/functions.sh
+source /opt/hades/bin/functions.sh
 load_config
 mkdir -p /etc/hades /var/lib/hades
 

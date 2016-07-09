@@ -16,7 +16,7 @@ RUN cd /build && bower install --allow-root
 # Install hades
 COPY LICENSE README.md MANIFEST.in setup.py /build/
 COPY src/ /build/src/
-RUN cd /build && pip3 install .
+RUN cd /build && . /opt/hades/bin/activate && pip3 install .
 
 # Copy hades config to container
 COPY configs/example.py /etc/hades/config.py
@@ -28,8 +28,8 @@ COPY docker/users.sh /build/
 COPY systemd/ /lib/systemd/system
 COPY systemd/hades.default /etc/default/hades
 RUN /build/users.sh \
-    && python3 -m hades.bin.generate_config tmpfiles.conf.j2 /etc/tmpfiles.d/hades.conf \
-    && python3 -m hades.bin.generate_config hades.busconfig.j2 /etc/dbus-1/system.d/hades.conf
+    && /opt/hades/bin/python3 -m hades.bin.generate_config tmpfiles.conf.j2 /etc/tmpfiles.d/hades.conf \
+    && /opt/hades/bin/python3 -m hades.bin.generate_config hades.busconfig.j2 /etc/dbus-1/system.d/hades.conf
 
 VOLUME [ "/sys/fs/cgroup" ]
 

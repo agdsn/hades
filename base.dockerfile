@@ -26,31 +26,24 @@ RUN apt-get update && apt-get install -y -t jessie-backports \
     postgresql \
     postgresql-contrib \
     postgresql-server-dev-all \
-    python3-babel \
-    python3-celery \
     python3-dev \
-    python3-flask \
-    python3-jinja2 \
-    python3-netaddr \
     python3-pip \
-    python3-psycopg2 \
     python3-setuptools \
-    python3-sqlalchemy \
-    python3-sqlalchemy-ext \
+    python3-venv \
     unbound \
     unzip \
     uwsgi \
     uwsgi-plugin-python3 \
     && apt-get clean \
-    && ln -s /usr/bin/nodejs /usr/bin/node \
-    && npm install -g bower \
-    && pip3 install \
-    Flask-Babel \
-    arpreq \
-    pyroute2 \
-    && npm install -g bower \
     && pg_lsclusters -h | cut -d ' ' -f 1-2 | xargs -rn 2 pg_dropcluster \
-    && pg_dropcluster ${PGVERSION} main
+    && ln -s /usr/bin/nodejs /usr/bin/node \
+    && npm install -g bower
+
+COPY requirements.txt /opt/hades/requirements.txt
+RUN pyvenv /opt/hades \
+    && . /opt/hades/bin/activate \
+    && pip install --upgrade pip setuptools \
+    && pip install -r /opt/hades/requirements.txt
 
 RUN echo "LANG=$LANG" >/etc/locale.conf
 

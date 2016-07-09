@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source /usr/local/bin/functions.sh
+source /opt/hades/bin/functions.sh
 
 print_usage() {
 	msg "\

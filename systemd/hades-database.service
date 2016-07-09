@@ -11,10 +11,10 @@ TimeoutSec=120
 SyslogIdentifier=hades-database
 Environment=PGDATA=/var/lib/hades/postgresql PATH=/usr/lib/postgresql/9.4/bin:/usr/sbin:/usr/bin:/sbin:/bin
 EnvironmentFile=/etc/default/hades
-ExecStartPre=/usr/local/bin/control-database.sh init
-ExecStart=/usr/local/bin/control-database.sh start
-ExecReload=/usr/local/bin/control-database.sh reload
-ExecStop=/usr/local/bin/control-database.sh stop
+ExecStartPre=/opt/hades/bin/control-database.sh init
+ExecStart=/opt/hades/bin/control-database.sh start
+ExecReload=/opt/hades/bin/control-database.sh reload
+ExecStop=/opt/hades/bin/control-database.sh stop
 Restart=always
 User=postgres
 Group=postgres

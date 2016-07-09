@@ -11,7 +11,7 @@ error() {
 
 load_config() {
 	local CONFIG
-	if ! CONFIG="$(python3 -m hades.bin.export_options --format=bash)"; then
+	if ! CONFIG="$(/opt/hades/bin/python3 -m hades.bin.export_options --format=bash)"; then
 		error "error: could not load config"
 		return 2
 	fi

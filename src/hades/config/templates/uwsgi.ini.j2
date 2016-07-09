@@ -7,6 +7,7 @@ uwsgi-socket = {{ HADES_PORTAL_UWSGI_SOCKET }}
 need-app = true
 reaper = true
 chdir = {{ HADES_PORTAL_HOME }}
+venv = /opt/hades
 die-on-term = false
 module = hades.bin.portal
 master = true
