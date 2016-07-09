@@ -1,18 +1,28 @@
 class OptionMeta(type):
-    """Metaclass for options. Classes that derive from options are registered
-    in a global dict"""
+    """
+    Metaclass for options.
+
+    Classes with this metaclass, which are named not declared abstract by
+    setting the abstract keyword argument are added to the :attr:`.options`
+    dictionary.
+    """
     options = {}
 
-    def __new__(mcs, name, bases, attributes):
+    def __new__(mcs, name, bases, attributes, abstract=False):
         if name in mcs.options:
             raise TypeError("An option named {} is already defined."
                             .format(name))
         class_ = super(OptionMeta, mcs).__new__(mcs, name, bases, attributes)
-        mcs.options[name] = class_
+        if not abstract:
+            mcs.options[name] = class_
         return class_
 
+    # noinspection PyUnusedLocal
+    def __init__(cls, name, bases, attributes, abstract=False):
+        super().__init__(name, bases, attributes)
 
-class Option(object, metaclass=OptionMeta):
+
+class Option(object, metaclass=OptionMeta, abstract=True):
     default = None
     type = None
     runtime_check = None
