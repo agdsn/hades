@@ -40,7 +40,11 @@ class OptionMeta(type):
                             .format(name, qualified_name(mcs.options[name])))
         if not abstract and not is_option_name(name):
             raise TypeError('not a valid option name')
+        if not abstract and 'default' in attributes:
+            attributes['has_default'] = True
         class_ = super(OptionMeta, mcs).__new__(mcs, name, bases, attributes)
+        if class_.has_default and class_.required:
+            raise TypeError("required options can't have defaults")
         if not abstract:
             mcs.options[name] = class_
         return class_
@@ -51,6 +55,7 @@ class OptionMeta(type):
 
 
 class Option(object, metaclass=OptionMeta, abstract=True):
+    has_default = False
     required = False
     default = None
     type = None

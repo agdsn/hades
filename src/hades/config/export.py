@@ -5,7 +5,10 @@ import re
 import netaddr
 
 logger = logging.getLogger(__name__)
-shell_types = (int, str, bool, netaddr.IPAddress, netaddr.IPNetwork)
+shell_types = (int, str, bool, type(None), netaddr.IPAddress, netaddr.IPNetwork)
+conversions = collections.defaultdict(lambda: str, {
+    type(None): lambda x: '',
+})
 pattern = re.compile(r'([^a-zA-Z0-9%+./:=@_-])')
 replacement = r'\\\1'
 
@@ -15,7 +18,7 @@ def escape(value):
     Escape a string for shell argument use.
     shlex.quote breaks unfortunately on certain strings
     """
-    return pattern.sub(replacement, str(value))
+    return pattern.sub(replacement, conversions[type(value)](value))
 
 
 def export(config, output_format, file):

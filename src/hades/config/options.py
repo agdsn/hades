@@ -159,7 +159,8 @@ class HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE(Option):
     If set to a string, create and use a local “foreign” database with that
     name.
     """
-    type = str
+    type = (str, type(None))
+    default = None
 
 
 class HADES_POSTGRESQL_FOREIGN_SERVER_FDW(Option):
@@ -179,6 +180,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS(Option):
     If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
     """
     type = collections.Mapping
+    default = {}
 
 
 class HADES_POSTGRESQL_FOREIGN_SERVER_TYPE(Option):
@@ -187,7 +189,8 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_TYPE(Option):
 
     If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
     """
-    type = str
+    type = (str, type(None))
+    default = None
 
 
 class HADES_POSTGRESQL_FOREIGN_SERVER_VERSION(Option):
@@ -196,7 +199,8 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_VERSION(Option):
 
     If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
     """
-    type = str
+    type = (str, type(None))
+    default = None
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
