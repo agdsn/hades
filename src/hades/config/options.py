@@ -1,5 +1,6 @@
 import collections
 import random
+import re
 import string
 import urllib.parse
 from datetime import timedelta
@@ -19,6 +20,12 @@ class HADES_SITE_NAME(Option):
     """Name of the site"""
     type = str
     required = True
+
+    # noinspection PyUnusedLocal
+    @classmethod
+    def static_check(cls, config, value):
+        if not re.match(r'\A[a-z][a-z0-9-]*\Z', value, re.ASCII):
+            raise check.OptionCheckError("not a valid site name", option=cls)
 
 
 class HADES_SITE_NODE_ID(Option):
