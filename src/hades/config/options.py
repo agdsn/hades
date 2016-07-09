@@ -437,8 +437,7 @@ class HADES_PORTAL_UWSGI_WORKERS(Option):
 
 class HADES_AUTH_DNSMASQ_USER(Option):
     """
-    User of the dnsmasq instance for authenticated users and the
-    SignalProxyDaemon
+    User of the dnsmasq instance for authenticated users
     """
     default = compute.equal_to(HADES_AGENT_USER)
     type = str
@@ -447,7 +446,7 @@ class HADES_AUTH_DNSMASQ_USER(Option):
 
 class HADES_AUTH_DNSMASQ_GROUP(Option):
     """
-    Group of the dnsmasq instance for authenticated users and the SignalProxyDaemon
+    Group of the dnsmasq instance for authenticated users
     """
     default = compute.equal_to(HADES_AGENT_GROUP)
     type = str
