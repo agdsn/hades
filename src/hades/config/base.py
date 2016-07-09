@@ -51,6 +51,7 @@ class OptionMeta(type):
 
 
 class Option(object, metaclass=OptionMeta, abstract=True):
+    required = False
     default = None
     type = None
     runtime_check = None

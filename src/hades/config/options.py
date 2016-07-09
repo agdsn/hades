@@ -18,11 +18,13 @@ from hades.config.base import Option
 class HADES_SITE_NAME(Option):
     """Name of the site"""
     type = str
+    required = True
 
 
 class HADES_SITE_NODE_ID(Option):
     """Unique name of the site node instance"""
     type = str
+    required = True
 
 
 class HADES_REAUTHENTICATION_INTERVAL(Option):
@@ -42,6 +44,7 @@ class HADES_RETENTION_INTERVAL(Option):
 class HADES_CONTACT_ADDRESSES(Option):
     """Contact addresses displayed on the captive portal page"""
     type = collections.Mapping
+    required = True
 
 
 class HADES_USER_NETWORKS(Option):
@@ -52,6 +55,7 @@ class HADES_USER_NETWORKS(Option):
     values are netaddr.IPNetworks objects
     """
     type = collections.Mapping
+    required = True
     static_check = check.satisfy_all(
         check.not_empty,
         check.mapping(value_check=check.network_ip)
@@ -504,6 +508,7 @@ class HADES_AUTH_INTERFACE(Option):
     """Interface where requests from the authenticated users arrive. Interface
     must not be attached directly to the users networks."""
     type = str
+    required = True
     runtime_check = check.interface_exists
 
 
@@ -561,6 +566,7 @@ class HADES_UNAUTH_DHCP_LEASE_TIME(Option):
 class HADES_UNAUTH_INTERFACE(Option):
     """Interface attached to the unauth VLAN"""
     type = str
+    required = True
     runtime_check = check.interface_exists
 
 
@@ -653,6 +659,7 @@ class HADES_RADIUS_LISTEN(Option):
 class HADES_RADIUS_INTERFACE(Option):
     """Interface the RADIUS server is listening on"""
     type = str
+    required = True
     runtime_check = check.interface_exists
 
 
@@ -767,6 +774,7 @@ class HADES_VRRP_PASSWORD(Option):
     """
     Shared secret to authenticate VRRP messages between site node instances.
     """
+    required = True
     type = str
 
 

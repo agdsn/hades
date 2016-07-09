@@ -5,7 +5,7 @@ import types
 
 # noinspection PyUnresolvedReferences
 import hades.config.options
-from hades.config.base import OptionMeta, is_option_name
+from hades.config.base import ConfigError, OptionMeta, is_option_name
 from hades.config.check import check_option
 
 logger = logging.getLogger(__name__)
@@ -97,6 +97,9 @@ def get_defaults():
 
 
 def check_config(config, runtime_checks=False):
+    for name, option in OptionMeta.options.items():
+        if option.required and name not in config:
+            raise ConfigError("required option", option=name)
     for name, value in config.items():
         option = OptionMeta.options.get(name)
         if option:
