@@ -10,5 +10,10 @@ error() {
 }
 
 load_config() {
-	source <(python3 -m hades.bin.export_options --format=bash)
+	local CONFIG
+	if ! CONFIG="$(python3 -m hades.bin.export_options --format=bash)"; then
+		error "error: could not load config"
+		return 2
+	fi
+	source /dev/stdin <<<"$CONFIG"
 }
