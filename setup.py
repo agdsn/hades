@@ -39,6 +39,7 @@ setup(name='hades',
           'src/scripts/control-database.sh',
           'src/scripts/control-network.sh',
           'src/scripts/functions.sh',
+          'src/scripts/update-trust-anchor.sh',
       ],
       cmdclass={
           'compile_catalog': babel.compile_catalog,
