@@ -1,5 +1,6 @@
 build
 dist
+docs/build
 src/*.egg-info
 src/hades/portal/static/dependencies
 .git
