@@ -2,7 +2,7 @@ import logging
 
 import arpreq
 from flask import request, render_template
-from flask.ext.babel import _, lazy_gettext
+from flask_babel import _, lazy_gettext
 
 from hades.common.db import get_groups, get_latest_auth_attempt
 from hades.portal import app, babel
