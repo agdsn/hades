@@ -2,7 +2,10 @@
 Common maintenance functionality
 """
 import logging
+import os
+import signal
 
+import netaddr
 from sqlalchemy import null
 
 from hades.common.db import (
@@ -10,11 +13,63 @@ from hades.common.db import (
     nas, radcheck, radgroupcheck, radgroupreply, radusergroup,
     refresh_and_diff_materialized_view, refresh_materialized_view,
     temp_dhcphost)
+from hades.common.db import get_all_dhcp_hosts
 from hades.config.loader import get_config
-from hades.dnsmasq.util import (
-    generate_dhcp_hosts_file, reload_auth_dnsmasq)
 
 logger = logging.getLogger(__name__)
+
+
+def sighup_from_pid_file(pid_file):
+    try:
+        with open(pid_file, mode='rb') as f:
+            data = f.readline()
+    except OSError as e:
+        logger.error("Could not read PID file %s: %s", pid_file, e.strerror)
+        return
+    try:
+        pid = int(data)
+    except ValueError:
+        logger.error("Invalid PID in PID file %s: %s", pid_file, data)
+        return
+    if pid < 1:
+        logger.error("Invalid PID in PID file %s: %d", pid_file, pid)
+    try:
+        os.kill(pid, signal.SIGHUP)
+    except OSError as e:
+        logger.error("Can't send SIGHUP to pid %d from PID file %s: %s", pid,
+                     pid_file, e.strerror)
+
+
+def reload_auth_dnsmasq():
+    config = get_config(runtime_checks=True)
+    sighup_from_pid_file(config['HADES_AUTH_DNSMASQ_PID_FILE'])
+
+
+def generate_dhcp_host_reservations(hosts):
+    for mac, ip in hosts:
+        try:
+            mac = netaddr.EUI(mac, dialect=netaddr.mac_unix_expanded)
+        except netaddr.AddrFormatError:
+            logger.error("Invalid MAC address %s", mac)
+            continue
+        try:
+            ip = netaddr.IPAddress(ip)
+        except netaddr.AddrFormatError:
+            logger.error("Invalid IP address %s", ip)
+            continue
+        yield "{0},{1}\n".format(mac, ip)
+
+
+def generate_dhcp_hosts_file():
+    config = get_config(runtime_checks=True)
+    logger.info("Generating DHCP hosts file")
+    hosts = get_all_dhcp_hosts()
+    file_name = config['HADES_AUTH_DNSMASQ_HOSTS_FILE']
+    try:
+        with open(file_name) as f:
+            f.writelines(generate_dhcp_host_reservations(hosts))
+    except OSError as e:
+        logger.error("Error writing %s: %s", file_name, e.strerror)
 
 
 def refresh():
