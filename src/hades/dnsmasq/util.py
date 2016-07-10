@@ -48,7 +48,7 @@ def generate_dhcp_host_reservations(hosts):
 def generate_dhcp_hosts_file():
     logger.info("Generating DHCP hosts file")
     hosts = get_all_dhcp_hosts()
-    file_name = config['HADES_DNSMASQ_DHCP_HOSTS_FILE']
+    file_name = config['HADES_AUTH_DNSMASQ_HOSTS_FILE']
     try:
         with open(file_name) as f:
             f.writelines(generate_dhcp_host_reservations(hosts))

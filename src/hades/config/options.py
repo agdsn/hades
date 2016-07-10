@@ -343,7 +343,7 @@ class HADES_PORTAL_DOMAIN(Option):
 
 class HADES_PORTAL_URL(Option):
     """URL of the landing page of the captive portal"""
-    default = deferred_format("http://{}/", HADES_PORTAL_DOMAIN)
+    default = deferred_format("http://{}/", 'HADES_PORTAL_DOMAIN')
     type = str
 
 
@@ -426,7 +426,7 @@ class HADES_AUTH_DNSMASQ_PID_FILE(Option):
     """
     Path of the PID file of the dnsmasq instance for authenticated users.
     """
-    default = "/var/run/hades/agent/auth-dnsmasq.pid"
+    default = "/var/run/dnsmasq/auth-dnsmasq.pid"
     type = str
     runtime_check = check.file_creatable
 
