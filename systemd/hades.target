@@ -4,3 +4,15 @@ Documentation=https://agdsn.github.io/hades/
 
 [Install]
 WantedBy=multi-user.target
+Also=hades-agent.service
+Also=hades-auth-dhcp.service
+Also=hades-auth-dns.service
+Also=hades-auth-vrrp.service
+Also=hades-database.service
+Also=hades-network.service
+Also=hades-radius.service
+Also=hades-radius-vrrp.service
+Also=hades-unauth-dns.service
+Also=hades-unauth-http.service
+Also=hades-unauth-portal.service
+Also=hades-unauth-vrrp.service
