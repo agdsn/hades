@@ -12,7 +12,7 @@ from hades.common.db import (
     delete_old_auth_attempts, delete_old_sessions, dhcphost, get_connection,
     nas, radcheck, radgroupcheck, radgroupreply, radusergroup,
     refresh_and_diff_materialized_view, refresh_materialized_view,
-    temp_dhcphost)
+    temp_dhcphost, temp_nas)
 from hades.common.db import get_all_dhcp_hosts
 from hades.config.loader import get_config
 
@@ -43,6 +43,11 @@ def sighup_from_pid_file(pid_file):
 def reload_auth_dnsmasq():
     config = get_config(runtime_checks=True)
     sighup_from_pid_file(config['HADES_AUTH_DNSMASQ_PID_FILE'])
+
+
+def reload_freeradius():
+    config = get_config(runtime_checks=True)
+    sighup_from_pid_file(config['HADES_RADIUS_PID_FILE'])
 
 
 def generate_dhcp_host_reservations(hosts):
@@ -80,9 +85,10 @@ def refresh():
     if result != ([], [], []):
         generate_dhcp_hosts_file()
         reload_auth_dnsmasq()
-    # TODO: After updating the nas table, we have to restart (reload?)
-    # the freeradius server. Currently, this must be done manually.
-    refresh_materialized_view(connection, nas)
+    result = refresh_and_diff_materialized_view(connection, nas,
+                                                temp_nas, [null()])
+    if result != ([], [], []):
+        reload_freeradius()
     refresh_materialized_view(connection, radcheck)
     refresh_materialized_view(connection, radgroupcheck)
     refresh_materialized_view(connection, radgroupreply)

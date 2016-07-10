@@ -659,6 +659,14 @@ class HADES_RADIUS_GROUP(Option):
     runtime_check = check.group_exists
 
 
+class HADES_RADIUS_PID_FILE(Option):
+    """PID file of the freeRADIUS server"""
+    default = '/run/hades/radius/radiusd.pid'
+    type = str
+    static_check = check.not_empty
+    runtime_check = check.file_creatable
+
+
 class HADES_RADIUS_LISTEN(Option):
     """IP and network the RADIUS server is listening on"""
     type = netaddr.IPNetwork

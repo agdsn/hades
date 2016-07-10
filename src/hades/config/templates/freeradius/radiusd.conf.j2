@@ -114,7 +114,7 @@ libdir = /usr/lib/freeradius
 #
 #  e.g.:  kill -HUP `cat /var/run/radiusd/radiusd.pid`
 #
-pidfile = /run/hades/radius/radiusd.pid
+pidfile = {{ HADES_RADIUS_PID_FILE }}
 
 #  chroot: directory where the server does "chroot".
 #
