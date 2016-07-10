@@ -14,20 +14,23 @@ def reload_auth_dnsmasq():
     config = get_config(runtime_checks=True)
     pid_file = config['HADES_AUTH_DNSMASQ_PID_FILE']
     try:
-        with open(pid_file) as f:
-            pid = int(f.readline())
-            if pid < 1:
-                raise ValueError("PID must be > 0: %d", pid)
+        with open(pid_file, mode='rb') as f:
+            data = f.readline()
     except OSError as e:
         logger.error("Could not read PID file %s: %s", pid_file, e.strerror)
         return
-    except (ValueError, OverflowError) as e:
-        logger.error("Could not convert into PID: %s", str(e))
+    try:
+        pid = int(data)
+    except ValueError:
+        logger.error("Invalid PID in PID file %s: %s", pid_file, data)
         return
+    if pid < 1:
+        logger.error("Invalid PID in PID file %s: %d", pid_file, pid)
     try:
         os.kill(pid, signal.SIGHUP)
     except OSError as e:
-        logger.error("Can't send SIGHUP to pid %d: %s", pid, e.strerror)
+        logger.error("Can't send SIGHUP to pid %d from PID file %s: %s", pid,
+                     pid_file, e.strerror)
 
 
 def generate_dhcp_host_reservations(hosts):
