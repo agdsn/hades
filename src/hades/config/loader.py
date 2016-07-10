@@ -112,32 +112,31 @@ def evaluate_callables(config):
 @memoize
 def get_config():
     config = get_defaults()
-    try:
-        filename = os.environ['HADES_CONFIG']
-    except KeyError:
-        return ConfigObject(config)
-    d = types.ModuleType('hades.config.user')
-    d.__file__ = filename
-    try:
-        with open(filename) as f:
-            exec(compile(f.read(), filename, 'exec'), d.__dict__)
-    except FileNotFoundError:
-        logger.exception("Config file %s not found", filename)
-        raise
-    except PermissionError:
-        logger.exception("Can't open config file %s (Permission denied)",
-                         filename)
-        raise
-    except IsADirectoryError:
-        logger.exception("Config file %s is a directory", filename)
-        raise
-    except IOError as e:
-        logger.exception("Config file %s (I/O error): %s", filename, str(e))
-        raise
-    except (SyntaxError, TypeError) as e:
-        logger.exception("Config file %s has errors: %s", filename, str(e))
-        raise
-    config.update(from_object(d))
+    filename = os.environ.get('HADES_CONFIG')
+    if filename is not None:
+        d = types.ModuleType('hades.config.user')
+        d.__file__ = filename
+        try:
+            with open(filename) as f:
+                exec(compile(f.read(), filename, 'exec'), d.__dict__)
+        except FileNotFoundError:
+            logger.exception("Config file %s not found", filename)
+            raise
+        except PermissionError:
+            logger.exception("Can't open config file %s (Permission denied)",
+                             filename)
+            raise
+        except IsADirectoryError:
+            logger.exception("Config file %s is a directory", filename)
+            raise
+        except IOError as e:
+            logger.exception("Config file %s (I/O error): %s", filename, str(e))
+            raise
+        except (SyntaxError, TypeError) as e:
+            logger.exception("Config file %s has errors: %s", filename, str(e))
+            raise
+        else:
+            config.update(from_object(d))
     evaluate_callables(config)
     check_config(config)
     return ConfigObject(config)
