@@ -13,6 +13,13 @@ from hades.config.loader import get_config
 logger = logging.getLogger(__name__)
 metadata = MetaData()
 
+
+def as_copy(original_table, new_name):
+    return Table(new_name, original_table.metadata,
+                 *(Column(col.name, col.type)
+                   for col in original_table.columns))
+
+
 dhcphost = Table(
     'dhcphost', metadata,
     Column('mac', MACADDR, nullable=False),
@@ -20,6 +27,7 @@ dhcphost = Table(
     UniqueConstraint('mac'),
     UniqueConstraint('ipaddress'),
 )
+temp_dhcphost = as_copy(dhcphost, 'temp_dhcphost')
 
 nas = Table(
     'nas', metadata,
@@ -36,6 +44,7 @@ nas = Table(
     UniqueConstraint('nasname'),
     UniqueConstraint('shortname'),
 )
+temp_nas = as_copy(nas, 'temp_nas')
 
 radacct = Table(
     'radacct', metadata,
@@ -79,6 +88,7 @@ radcheck = Table(
     Column('value', String(253), nullable=False),
     UniqueConstraint('username', 'nasipaddress', 'nasportid', 'priority'),
 )
+temp_radcheck = as_copy(radcheck, 'temp_radcheck')
 
 radgroupcheck = Table(
     'radgroupcheck', metadata,
@@ -89,6 +99,7 @@ radgroupcheck = Table(
     Column('value', String(253), nullable=False),
     UniqueConstraint('groupname', 'priority'),
 )
+temp_radgroupcheck = as_copy(radgroupcheck, 'temp_radgroupcheck')
 
 radgroupreply = Table(
     'radgroupreply', metadata,
@@ -99,6 +110,7 @@ radgroupreply = Table(
     Column('value', String(253), nullable=False),
     UniqueConstraint('groupname', 'priority'),
 )
+temp_radgroupreply = as_copy(radgroupreply, 'temp_radgroupreply')
 
 radpostauth = Table(
     'radpostauth', metadata,
@@ -122,6 +134,7 @@ radreply = Table(
     Column('value', String(253), nullable=False),
     UniqueConstraint('username', 'nasipaddress', 'nasportid', 'priority'),
 )
+temp_radreply = as_copy(radreply, 'temp_radreply')
 
 radusergroup = Table(
     'radusergroup', metadata,
@@ -132,6 +145,7 @@ radusergroup = Table(
     Column('groupname', String(64), nullable=False),
     UniqueConstraint('username', 'groupname', 'priority'),
 )
+temp_radusergroup = as_copy(radusergroup, 'temp_radusergroup')
 
 
 class utcnow(expression.FunctionElement):
