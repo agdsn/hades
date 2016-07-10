@@ -104,6 +104,7 @@ class ConfigGenerator(object):
             'collections': collections,
             'itertools': itertools,
             'netaddr': netaddr,
+            'dirname': os.path.dirname
         })
         self.env.filters.update(template_filter.registered)
 
