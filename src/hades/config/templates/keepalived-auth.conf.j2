@@ -23,7 +23,7 @@ vrrp_instance auth {
     {%- endif %}
     preempt_delay {{ HADES_VRRP_PREEMPTION_DELAY.total_seconds()|int }}
 
-    interface eth0
+    interface vrrp
 
     mcast_src_ip {{ HADES_VRRP_LISTEN_AUTH.ip }}
 
