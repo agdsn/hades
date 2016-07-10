@@ -25,6 +25,9 @@ class ConfigObject(collections.MutableMapping):
     def __len__(self):
         return len(self.__dict__)
 
+    def __bool__(self):
+        return bool(self.__dict__)
+
     def __contains__(self, x):
         return x in self.__dict__
 
@@ -70,6 +73,9 @@ class CheckWrapper(collections.Mapping):
         option = OptionMeta.options.get(key)
         if option:
             check_option(self._config, option, value, self._runtime_checks)
+
+    def __bool__(self):
+        return bool(self._config)
 
     def __len__(self):
         len(self._config)
