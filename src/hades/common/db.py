@@ -2,8 +2,9 @@ import logging
 import operator
 
 from sqlalchemy import (
-    BigInteger, Column, DateTime, Integer, MetaData, String, Table,
-    UniqueConstraint, and_, cast, create_engine, select)
+    BigInteger, Column, DateTime, Integer, MetaData, PrimaryKeyConstraint,
+    String, Table, UniqueConstraint, and_, cast, column, create_engine, func,
+    null, or_, select, table)
 from sqlalchemy.dialects.postgresql import INET, INTERVAL, MACADDR
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
@@ -163,23 +164,107 @@ def get_connection():
     return engine.connect()
 
 
+def lock_table(connection, target_table):
+    """
+    Lock a table using a PostgreSQL advisory lock
+
+    The OID of the table in the pg_class relation is used as lock id.
+    :param connection: DB connection
+    :param target_table: Table object
+    """
+    oid = connection.execute(select([column("oid")])
+                             .select_from(table("pg_class"))
+                             .where((column("relname") == target_table.name))
+                             ).scalar()
+    connection.execute(select([func.pg_advisory_xact_lock(oid)])).scalar()
+
+
+def create_temp_copy(connection, source, destination):
+    """
+    Create a temporary table as a copy of a source table that will be dropped
+    at the end of the running transaction.
+    :param connection: DB connection
+    :param source: Source table
+    :param destination: Destination table
+    """
+    if not connection.in_transaction():
+        raise RuntimeError("must be executed in a transaction to have any "
+                           "effect")
+    connection.execute(
+        'CREATE TEMPORARY TABLE "{destination}" ON COMMIT DROP AS '
+        'SELECT * FROM "{source}"'.format(source=source.name,
+                                          destination=destination.name)
+    )
+
+
+def diff_tables(connection, master, copy, result_columns):
+    """
+    Compute the differences in the contents of two tables with identical
+    columns.
+
+    The master table must have at least one PrimaryKeyConstraint or
+    UniqueConstraint with only non-null columns defined.
+
+    If there are multiple constraints defined the constraints that contains the
+    least number of columns are used.
+    :param connection: DB connection
+    :param master: Master table
+    :param copy: Copy of master table
+    :param result_columns: columns to return
+    :return: True, if the contents differ, otherwise False
+    """
+    result_columns = tuple(result_columns)
+    unique_columns = min(
+        (constraint.columns
+         for constraint in master.constraints
+         if isinstance(constraint, (UniqueConstraint, PrimaryKeyConstraint)) and
+         constraint.columns and not any(map(operator.attrgetter('nullable'),
+                                            constraint.columns))),
+        key=len, default=[])
+    if not unique_columns:
+        raise AssertionError("To diff table {} it must have at least one "
+                             "PrimaryKeyConstraint/UniqueConstraint with only "
+                             "NOT NULL columns defined on it."
+                             .format(master.name))
+    unique_column_names = tuple(col.name for col in unique_columns)
+    other_column_names = tuple(col.name for col in master.c
+                               if col.name not in unique_column_names)
+    on_clause = and_(*(getattr(master.c, column_name) ==
+                       getattr(copy.c, column_name)
+                       for column_name in unique_column_names))
+    added = connection.execute(
+        select(result_columns)
+        .select_from(master.outerjoin(copy, on_clause))
+        .where(or_(*(getattr(copy.c, column_name).is_(null())
+                     for column_name in unique_column_names)))
+    ).fetchall()
+    deleted = connection.execute(
+        select(result_columns)
+        .select_from(copy.outerjoin(master, on_clause))
+        .where(or_(*(getattr(master.c, column_name).is_(null())
+                     for column_name in unique_column_names)))
+    ).fetchall()
+    modified = connection.execute(
+        select(result_columns)
+        .select_from(master.join(copy, on_clause))
+        .where(or_(*(getattr(master.c, column_name) !=
+                     getattr(copy.c, column_name)
+                     for column_name in other_column_names)))
+    ).fetchall()
+    return added, deleted, modified
+
+
 def refresh_materialized_view(transaction, view):
     transaction.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY "{view}"'
                         .format(view=view.name))
 
 
-def refresh_materialized_views():
-    logger.info("Refreshing materialized views")
-    connection = get_connection()
+def refresh_and_diff_materialized_view(connection, view, copy, result_columns):
     with connection.begin():
-        refresh_materialized_view(connection, dhcphost)
-        # TODO: After updating the nas table, we have to restart (reload?)
-        # the freeradius server. Currently, this must be done manually.
-        refresh_materialized_view(connection, nas)
-        refresh_materialized_view(connection, radcheck)
-        refresh_materialized_view(connection, radgroupcheck)
-        refresh_materialized_view(connection, radgroupreply)
-        refresh_materialized_view(connection, radusergroup)
+        lock_table(connection, view)
+        create_temp_copy(connection, view, copy)
+        refresh_materialized_view(connection, view)
+        return diff_tables(connection, view, copy, result_columns)
 
 
 def delete_old_sessions(transaction, interval):
