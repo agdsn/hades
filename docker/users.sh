@@ -30,6 +30,7 @@ readonly -A groups=(
 	['unauth-portal']="$HADES_PORTAL_GROUP"
 	['unauth-vrrp']='root'
 )
+addgroup --quiet --system "$HADES_SYSTEM_GROUP"
 for service in "${!users[@]}"; do
 	user="${users[$service]}"
 	group="${groups[$service]}"
@@ -39,5 +40,6 @@ for service in "${!users[@]}"; do
 	if ! getent passwd "$user" &>/dev/null; then
 		adduser --quiet --system --home "/var/lib/hades/$service" --no-create-home --ingroup "$group" --disabled-password "$user"
 	fi
+	adduser --quiet "$user" "$HADES_SYSTEM_GROUP"
 	install --directory --owner="$user" --group="$group" --mode=0755 "/var/lib/hades/$service"
 done

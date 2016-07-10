@@ -69,6 +69,21 @@ class HADES_USER_NETWORKS(Option):
     )
 
 
+class HADES_SYSTEM_GROUP(Option):
+    """
+    Group of all Hades users
+
+    See also :class:`HADES_AGENT_USER`, :class:`HADES_AUTH_DNSMASQ_USER`,
+    :class:`HADES_PORTAL_USER`, :class:`HADES_POSTGRESQL_USER`,
+    :class:`HADES_RADIUS_USER` :class:`HADES_UNAUTH_DNSMASQ_USER`,
+    :class:`HADES_UNBOUND_USER`
+    """
+    type = str
+    default = 'hades'
+    static_check = check.not_empty
+    runtime_check = check.group_exists
+
+
 #############################
 # Network namespace options #
 #############################
