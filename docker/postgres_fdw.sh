@@ -1,7 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+set -a
 . /etc/hades/env
+set +a
 export PATH="/usr/lib/postgresql/${PGVERSION}/bin:${PATH}"
 export PGDATA="/var/lib/postgresql/hades"
 source <(python3 -m hades.config.export)

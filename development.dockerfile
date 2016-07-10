@@ -37,7 +37,7 @@ RUN printf '%s=%s\n' \
 # things easier for development: We can start the container, inject all the
 # necessary interfaces and only afterwards start the systemd units.
 COPY systemd/ /lib/systemd/system
-RUN . /etc/hades/env \
+RUN set -a && . /etc/hades/env && set +a \
     && cd /lib/systemd/system \
     && python3 -m hades.config.generate tmpfiles.conf.j2 /etc/tmpfiles.d/hades.conf
 
