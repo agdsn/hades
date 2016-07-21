@@ -1,0 +1,19 @@
+[Unit]
+Description=Hades agent (Celery Worker)
+Documentation=https://agdsn.github.io/hades/
+#PartOf=hades.target
+After=hades-network.service hades-database.service
+Wants=hades-network.service hades-database.service
+
+[Service]
+Type=simple
+PIDFile=@PKGRUNSTATEDIR@/agent/worker.pid
+KillMode=mixed
+User=@AGENT_USER@
+Group=@AGENT_GROUP@
+SyslogIdentifier=hades-agent
+Environment=PGAPPNAME=hades-agent
+EnvironmentFile=@SYSTEMDENVDIR@/hades
+ExecStart=@VENVDIR@/bin/hades-agent --pidfile=@PKGRUNSTATEDIR@/agent/worker.pid
+Restart=always
+RestartSec=5

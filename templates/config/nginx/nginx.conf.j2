@@ -1,0 +1,67 @@
+user {{ constants.PORTAL_USER }} {{ constants.PORTAL_GROUP }};
+working_directory {{ constants.PORTAL_HOME }};
+worker_processes {{ HADES_PORTAL_NGINX_WORKERS }};
+pid {{ constants.PKGRUNSTATEDIR }}/unauth-http/nginx.pid;
+daemon on;
+
+events {
+	worker_connections 768;
+	# multi_accept on;
+}
+
+http {
+
+	##
+	# Basic Settings
+	##
+
+	sendfile on;
+	tcp_nopush on;
+	tcp_nodelay on;
+	keepalive_timeout 65;
+	types_hash_max_size 2048;
+	# server_tokens off;
+
+	# server_names_hash_bucket_size 64;
+	# server_name_in_redirect off;
+
+	include {{ BASE_DIRECTORY }}/mime.types;
+	default_type application/octet-stream;
+
+	##
+	# SSL Settings
+	##
+
+	ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE
+	ssl_prefer_server_ciphers on;
+	ssl_ciphers 'EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH:+CAMELLIA256:+AES256:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!ECDSA:CAMELLIA256-SHA:AES256-SHA:CAMELLIA128-SHA:AES128-SHA';
+	ssl_session_tickets off;
+
+	##
+	# Logging Settings
+	##
+
+	access_log off;
+	error_log stderr;
+
+	##
+	# Gzip Settings
+	##
+
+	gzip off;
+	#gzip_disable "msie6";
+
+	# gzip_vary on;
+	# gzip_proxied any;
+	# gzip_comp_level 6;
+	# gzip_buffers 16 8k;
+	# gzip_http_version 1.1;
+	# gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+	##
+	# Virtual Host Configs
+	##
+
+	include {{ BASE_DIRECTORY }}/conf.d/*.conf;
+	include {{ BASE_DIRECTORY }}/sites-enabled/*;
+}

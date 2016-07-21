@@ -1,0 +1,21 @@
+[Unit]
+Description=Hades DNS service for unauthenticated users (dnsmasq)
+Documentation=https://agdsn.github.io/hades/
+#PartOf=hades.target
+After=hades-network.service
+Wants=hades-network.service
+
+[Service]
+Type=dbus
+BusName=de.agdsn.hades.unauth_dnsmasq
+SyslogIdentifier=hades-unauth-dns
+EnvironmentFile=@SYSTEMDENVDIR@/hades
+ExecStartPre=@VENVDIR@/bin/hades-generate-config unauth-dnsmasq.conf.j2 @PKGRUNSTATEDIR@/unauth-dns/dnsmasq.conf
+ExecStart=@IP@ netns exec unauth /usr/sbin/dnsmasq -k --enable-dbus=de.agdsn.hades.unauth_dnsmasq --conf-file=@PKGRUNSTATEDIR@/unauth-dns/dnsmasq.conf
+ExecReload=@VENVDIR@/bin/hades-generate-config unauth-dnsmasq.conf.j2 @PKGRUNSTATEDIR@/unauth-dns/dnsmasq.conf
+ExecReload=@KILL@ -HUP $MAINPID
+Restart=always
+RestartSec=5
+
+[Install]
+Alias=hades-unauth-dhcp.service

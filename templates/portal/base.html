@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{ _("Captive Portal for unauthenticated and unauthorized users") }}">
+    <meta name="author" content="Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN)">
+    <link rel="icon" href="{{ url_for('static', filename='hades/img/favicon.ico') }}">
+    <title>{{ _("AG DSN Captive Portal") }}</title>
+
+    <link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='hades/css/cover.css') }}" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="{{ url_for('static', filename='html5shiv/html5shiv.min.js') }}"></script>
+      <script src="{{ url_for('static', filename='respond/respond.min.js') }}"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="site-wrapper">
+
+      <div class="site-wrapper-inner">
+
+        <div class="cover-container">
+
+          <div class="masthead clearfix">
+            <div class="inner">
+              <h3 class="masthead-brand"><img style="height: 8ex" src="{{ url_for('static', filename='hades/img/agdsn_logo_weiß.png') }}"/></h3>
+            </div>
+          </div>
+
+        {% block content %}
+        {% endblock %}
+
+          <div class="mastfoot">
+            <div class="inner">
+              <p>Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN)</p>
+              <ul class="list-unstyled">
+                {% for name, address in config["HADES_CONTACT_ADDRESSES"].items() %}
+                  <li>{{ name }}: <a href="mailto:{{ address }}">{{ address }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='jquery/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug. See http://getbootstrap.com/getting-started/#support-ie10-width -->
+    <script src="{{ url_for('static', filename='hades/js/ie10-viewport-bug-workaround.js') }}"></script>
+  </body>
+</html>

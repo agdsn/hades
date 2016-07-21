@@ -10,6 +10,8 @@ import netaddr
 from jinja2.exceptions import FilterArgumentError
 from jinja2.filters import environmentfilter
 
+from hades import constants
+
 
 def template_filter(name):
     def decorator(f):
@@ -101,7 +103,8 @@ class ConfigGenerator(object):
             'collections': collections,
             'itertools': itertools,
             'netaddr': netaddr,
-            'dirname': os.path.dirname
+            'dirname': os.path.dirname,
+            'constants': constants,
         })
         self.env.filters.update(template_filter.registered)
 

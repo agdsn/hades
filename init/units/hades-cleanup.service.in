@@ -1,0 +1,14 @@
+[Unit]
+Description=Hades cleanup task (Service)
+Documentation=https://agdsn.github.io/hades/
+PartOf=hades.target
+After=hades-database.service
+Wants=hades-database.service
+
+[Service]
+Type=oneshot
+User=@RADIUS_USER@
+Group=@RADIUS_GROUP@
+SyslogIdentifier=hades-cleanup
+Environment=PGAPPNAME=hades-cleanup
+ExecStart=@VENVDIR@/bin/hades-cleanup

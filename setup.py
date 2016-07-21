@@ -35,12 +35,6 @@ setup(name='hades',
               'hades-su = hades.bin.su:main',
           ],
       },
-      scripts=[
-          'src/scripts/control-database.sh',
-          'src/scripts/control-network.sh',
-          'src/scripts/functions.sh',
-          'src/scripts/update-trust-anchor.sh',
-      ],
       cmdclass={
           'compile_catalog': babel.compile_catalog,
           'extract_messages': babel.extract_messages,

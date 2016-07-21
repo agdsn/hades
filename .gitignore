@@ -31,3 +31,5 @@ var/
 
 # Compiled gettext catalogs
 *.mo
+
+/bower.json

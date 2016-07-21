@@ -1,6 +1,2 @@
 include LICENSE README.md
 include src/hades/logging.ini
-recursive-include src/scripts *
-recursive-include src/hades/config/templates *
-recursive-include src/hades/portal/templates *
-recursive-include src/hades/portal/static *

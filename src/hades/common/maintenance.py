@@ -41,13 +41,11 @@ def sighup_from_pid_file(pid_file):
 
 
 def reload_auth_dnsmasq():
-    config = get_config(runtime_checks=True)
-    sighup_from_pid_file(config['HADES_AUTH_DNSMASQ_PID_FILE'])
+    sighup_from_pid_file(constants.PKGRUNSTATEDIR + '/auth-dhcp/dnsmasq.pid')
 
 
 def reload_freeradius():
-    config = get_config(runtime_checks=True)
-    sighup_from_pid_file(config['HADES_RADIUS_PID_FILE'])
+    sighup_from_pid_file(constants.PKGRUNSTATEDIR + '/radius/radiusd.pid')
 
 
 def generate_dhcp_host_reservations(hosts):
@@ -66,10 +64,9 @@ def generate_dhcp_host_reservations(hosts):
 
 
 def generate_dhcp_hosts_file():
-    config = get_config(runtime_checks=True)
     logger.info("Generating DHCP hosts file")
     hosts = get_all_dhcp_hosts()
-    file_name = config['HADES_AUTH_DNSMASQ_HOSTS_FILE']
+    file_name = constants.PKGLOCALSTATEDIR + '/auth-dhcp/dnsmasq-dhcp.hosts'
     try:
         with open(file_name) as f:
             f.writelines(generate_dhcp_host_reservations(hosts))

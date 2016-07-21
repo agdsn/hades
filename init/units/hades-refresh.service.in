@@ -1,0 +1,14 @@
+[Unit]
+Description=Hades refresh task (Service)
+Documentation=https://agdsn.github.io/hades/
+PartOf=hades.target
+After=hades-network.service hades-database.service
+Wants=hades-network.service hades-database.service
+
+[Service]
+Type=oneshot
+User=@AGENT_USER@
+Group=@AGENT_GROUP@
+SyslogIdentifier=hades-refresh
+Environment=PGAPPNAME=hades-refresh
+ExecStart=@VENVDIR@/bin/hades-refresh

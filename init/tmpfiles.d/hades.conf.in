@@ -1,0 +1,11 @@
+d @PKGRUNSTATEDIR@/agent            2755    @AGENT_USER@ @AGENT_GROUP@
+d @PKGRUNSTATEDIR@/auth-dhcp        2755    @AGENT_USER@ @AGENT_GROUP@
+d @PKGRUNSTATEDIR@/auth-dns         2755    @AUTH_DNS_USER@ @AUTH_DNS_GROUP@
+d @PKGRUNSTATEDIR@/auth-vrrp        0755    root root
+d @PKGRUNSTATEDIR@/database         2755    @DATABASE_USER@ @DATABASE_GROUP@
+d @PKGRUNSTATEDIR@/radius           2755    @RADIUS_USER@ @RADIUS_GROUP@
+d @PKGRUNSTATEDIR@/radius-vrrp      0755    root root
+d @PKGRUNSTATEDIR@/unauth-dns       2755    @UNAUTH_DNS_USER@ @UNAUTH_DNS_GROUP@
+d @PKGRUNSTATEDIR@/unauth-http      2755    @PORTAL_USER@ @PORTAL_GROUP@
+d @PKGRUNSTATEDIR@/unauth-portal    2755    @PORTAL_USER@ @PORTAL_GROUP@
+d @PKGRUNSTATEDIR@/unauth-vrrp      0755    root root

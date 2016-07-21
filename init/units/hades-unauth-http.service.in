@@ -1,0 +1,21 @@
+[Unit]
+Description=Hades http server (nginx)
+Documentation=https://agdsn.github.io/hades/
+#PartOf=hades.target
+After=hades-network.service hades-unauth-portal.service
+Wants=hades-network.service hades-unauth-portal.service
+
+[Service]
+Type=forking
+PIDFile=@PKGRUNSTATEDIR@/unauth-http/nginx.pid
+SyslogIdentifier=hades-unauth-http
+EnvironmentFile=@SYSTEMDENVDIR@/hades
+ExecStartPre=@VENVDIR@/bin/hades-generate-config nginx @PKGRUNSTATEDIR@/unauth-http
+ExecStart=@IP@ netns exec unauth nginx -c @PKGRUNSTATEDIR@/unauth-http/nginx.conf
+ExecReload=@VENVDIR@/bin/hades-generate-config nginx @PKGRUNSTATEDIR@/unauth-http
+ExecReload=@KILL@ -HUP $MAINPID
+Restart=always
+RestartSec=5
+KillSignal=SIGQUIT
+KillMode=mixed
+SyslogLevel=err

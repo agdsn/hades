@@ -1,0 +1,15 @@
+[uwsgi]
+immediate-gid = {{ constants.PORTAL_GROUP }}
+immediate-uid = {{ constants.PORTAL_USER }}
+safe-pidfile2 = {{ constants.PKGRUNSTATEDIR }}/unauth-portal/uwsgi.pid
+need-plugin = python3
+uwsgi-socket = {{ constants.PKGRUNSTATEDIR }}/unauth-portal/uwsgi.sock
+need-app = true
+reaper = true
+chdir = {{ constants.PORTAL_HOME }}
+venv = {{ constants.VIRTUALENVDIR }}
+die-on-term = false
+module = hades.bin.portal
+master = true
+workers = {{ HADES_PORTAL_UWSGI_WORKERS }}
+thunder-lock = true

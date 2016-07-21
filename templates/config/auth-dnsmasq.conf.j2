@@ -1,0 +1,36 @@
+# Log to stderr
+log-facility=-
+
+# Disable DNS
+port=0
+
+keep-in-foreground
+user={{ constants.AGENT_USER }}
+group={{ constants.AGENT_GROUP }}
+pid-file={{ constants.PKGRUNSTATEDIR }}/auth-dns/dnsmasq.pid
+
+interface=eth2
+except-interface=lo
+
+listen-address={{ HADES_AUTH_LISTEN.ip }}
+
+# Bind to listed interfaces only
+bind-interfaces
+
+# Enable authoritative DHCP
+dhcp-authoritative
+
+# Define DHCP ranges
+{% for name, network in HADES_USER_NETWORKS.items() %}
+dhcp-range=set:{{ name }},{{ network.network }},static,{{ network.netmask }},{{ network.broadcast }},{{ HADES_AUTH_DHCP_LEASE_TIME.total_seconds()|int }}s
+dhcp-option=tag:{{ name }},option:router,{{ network.ip }}
+{% endfor %}
+dhcp-option=option:dns-server,{{ HADES_AUTH_LISTEN.ip }}
+dhcp-option=option:domain-name,{{ HADES_AUTH_DHCP_DOMAIN }}
+
+# Ensure lease max is high enough (default is 1000)
+dhcp-lease-max={{ HADES_USER_NETWORKS.values()|map('length')|sum }}
+
+# Set DHCP lease and hosts file
+dhcp-leasefile={{ constants.PKGLOCALSTATEDIR }}/auth-dhcp/dnsmasq-dhcp.leases
+dhcp-hostsfile={{ constants.PKGLOCALSTATEDIR }}/auth-dhcp/dnsmasq-dhcp.hosts

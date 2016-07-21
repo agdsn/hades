@@ -1,0 +1,15 @@
+[Unit]
+Description=Hades networking
+Documentation=https://agdsn.github.io/hades/
+#PartOf=hades.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+SyslogIdentifier=hades-network
+EnvironmentFile=@SYSTEMDENVDIR@/hades
+ExecStart=@PKGLIBEXECDIR@/control-network.sh start
+ExecStop=@PKGLIBEXECDIR@/control-network.sh stop
+
+[Install]
+WantedBy=multi-user.target

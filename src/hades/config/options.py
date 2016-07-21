@@ -7,6 +7,7 @@ from datetime import timedelta
 
 import netaddr
 
+from hades import constants
 from hades.config import check, compute
 from hades.config.base import Option
 
@@ -69,21 +70,6 @@ class HADES_USER_NETWORKS(Option):
     )
 
 
-class HADES_SYSTEM_GROUP(Option):
-    """
-    Group of all Hades users
-
-    See also :class:`HADES_AGENT_USER`, :class:`HADES_AUTH_DNSMASQ_USER`,
-    :class:`HADES_PORTAL_USER`, :class:`HADES_POSTGRESQL_USER`,
-    :class:`HADES_RADIUS_USER` :class:`HADES_UNAUTH_DNSMASQ_USER`,
-    :class:`HADES_UNBOUND_USER`
-    """
-    type = str
-    default = 'hades'
-    static_check = check.not_empty
-    runtime_check = check.group_exists
-
-
 #############################
 # Network namespace options #
 #############################
@@ -113,47 +99,9 @@ class HADES_NETNS_UNAUTH_LISTEN(Option):
     runtime_check = check.address_exists
 
 
-#######################
-# Hades Agent options #
-#######################
-
-
-class HADES_AGENT_USER(Option):
-    """User of the site node agent"""
-    default = 'hades-agent'
-    type = str
-    runtime_check = check.user_exists
-
-
-class HADES_AGENT_GROUP(Option):
-    """Group of the site node agent"""
-    default = 'hades-agent'
-    type = str
-    runtime_check = check.group_exists
-
-
-class HADES_AGENT_HOME(Option):
-    """Working directory of the site node agent"""
-    default = '/var/lib/hades/agent'
-    type = str
-    runtime_check = check.directory_exists
-
-
 ######################
 # PostgreSQL options #
 ######################
-
-
-class HADES_POSTGRESQL_USER(Option):
-    """User the PostgreSQL database is running as"""
-    type = str
-    default = 'postgres'
-
-
-class HADES_POSTGRESQL_GROUP(Option):
-    """Group the PostgreSQL database is running as"""
-    type = str
-    default = 'postgres'
 
 
 class HADES_POSTGRESQL_DATABASE(Option):
@@ -164,7 +112,7 @@ class HADES_POSTGRESQL_DATABASE(Option):
 
 class HADES_POSTGRESQL_SOCKET_DIRECTORY(Option):
     """Path to the PostgreSQL socket directory"""
-    default = '/run/hades/database'
+    default = constants.PKGRUNSTATEDIR + '/database'
     type = str
     runtime_check = check.directory_exists
 
@@ -372,8 +320,9 @@ class HADES_POSTGRESQL_USER_MAPPINGS(Option):
     """
     type = collections.Mapping
     static_check = check.satisfy_all(
-        check.user_mapping_for_user_exists(HADES_POSTGRESQL_USER),
-        check.user_mapping_for_user_exists(HADES_AGENT_USER),
+        check.user_mapping_for_user_exists(constants.AGENT_USER),
+        check.user_mapping_for_user_exists(constants.PORTAL_USER),
+        check.user_mapping_for_user_exists(constants.RADIUS_USER),
     )
 
 
@@ -392,24 +341,6 @@ class HADES_PORTAL_URL(Option):
     """URL of the landing page of the captive portal"""
     default = compute.deferred_format("http://{}/", HADES_PORTAL_DOMAIN)
     type = str
-
-
-class HADES_PORTAL_USER(Option):
-    """User of the web server and captive portal application"""
-    default = 'hades-portal'
-    runtime_check = check.user_exists
-
-
-class HADES_PORTAL_GROUP(Option):
-    """Group of the web server and captive portal application"""
-    default = 'hades-portal'
-    runtime_check = check.group_exists
-
-
-class HADES_PORTAL_HOME(Option):
-    """Working directory of the captive portal application"""
-    default = '/var/lib/hades/unauth-portal'
-    runtime_check = check.directory_exists
 
 
 class HADES_PORTAL_NGINX_WORKERS(Option):
@@ -431,13 +362,6 @@ class HADES_PORTAL_SSL_CERTIFICATE_KEY(Option):
     runtime_check = check.file_exists
 
 
-class HADES_PORTAL_UWSGI_SOCKET(Option):
-    """Path to uWSGI socket of the captive portal"""
-    default = '/run/hades/unauth-portal/uwsgi.sock'
-    type = str
-    runtime_check = check.file_creatable
-
-
 class HADES_PORTAL_UWSGI_WORKERS(Option):
     """Number of uWSGI worker processes"""
     default = 4
@@ -448,51 +372,6 @@ class HADES_PORTAL_UWSGI_WORKERS(Option):
 ###############################
 # Authenticated users options #
 ###############################
-
-
-class HADES_AUTH_DNSMASQ_USER(Option):
-    """
-    User of the dnsmasq instance for authenticated users
-    """
-    default = compute.equal_to(HADES_AGENT_USER)
-    type = str
-    runtime_check = check.user_exists
-
-
-class HADES_AUTH_DNSMASQ_GROUP(Option):
-    """
-    Group of the dnsmasq instance for authenticated users
-    """
-    default = compute.equal_to(HADES_AGENT_GROUP)
-    type = str
-    runtime_check = check.group_exists
-
-
-class HADES_AUTH_DNSMASQ_PID_FILE(Option):
-    """
-    Path of the PID file of the dnsmasq instance for authenticated users.
-    """
-    default = "/run/hades/auth-dhcp/dnsmasq.pid"
-    type = str
-    runtime_check = check.file_creatable
-
-
-class HADES_AUTH_DNSMASQ_HOSTS_FILE(Option):
-    """
-    Path to the DHCP hosts file of the dnsmasq instance for authenticated users.
-    """
-    default = "/var/lib/hades/auth-dhcp/dnsmasq.hosts"
-    type = str
-    runtime_check = check.file_creatable
-
-
-class HADES_AUTH_DNSMASQ_LEASE_FILE(Option):
-    """
-    Path to the DHCP lease file of the dnsmasq instance for authenticated users.
-    """
-    default = "/var/lib/hades/auth-dhcp/dnsmasq.leases"
-    type = str
-    runtime_check = check.file_creatable
 
 
 class HADES_AUTH_DHCP_DOMAIN(Option):
@@ -552,33 +431,6 @@ class HADES_AUTH_ALLOWED_UDP_PORTS(Option):
 #################################
 # Unauthenticated users options #
 #################################
-
-
-class HADES_UNAUTH_DNSMASQ_USER(Option):
-    """
-    User of the dnsmasq instance for unauthenticated users
-    """
-    default = "dnsmasq"
-    type = str
-    runtime_check = check.user_exists
-
-
-class HADES_UNAUTH_DNSMASQ_GROUP(Option):
-    """
-    Group of the dnsmasq instance for unauthenticated users
-    """
-    default = "nogroup"
-    type = str
-    runtime_check = check.group_exists
-
-
-class HADES_UNAUTH_DNSMASQ_PID_FILE(Option):
-    """
-    Path of the PID file of the dnsmasq instance for unauthenticated users.
-    """
-    default = "/run/hades/unauth-dns/dnsmasq.pid"
-    type = str
-    runtime_check = check.file_creatable
 
 
 class HADES_UNAUTH_DHCP_LEASE_TIME(Option):
@@ -676,7 +528,7 @@ class HADES_RADIUS_GROUP(Option):
 
 class HADES_RADIUS_PID_FILE(Option):
     """PID file of the freeRADIUS server"""
-    default = '/run/hades/radius/radiusd.pid'
+    default = constants.PKGRUNSTATEDIR + '/radius/radiusd.pid'
     type = str
     static_check = check.not_empty
     runtime_check = check.file_creatable
@@ -901,7 +753,7 @@ class SQLALCHEMY_DATABASE_URI(Option):
         if 'postgresql' not in urllib.parse.uses_query:
             urllib.parse.uses_query.append('postgresql')
         query = urllib.parse.urlencode({
-            'host': config.HADES_POSTGRESQL_SOCKET_DIRECTORY,
+            'host': constants.PKGRUNSTATEDIR + '/database',
             'port': config.HADES_POSTGRESQL_PORT,
             'requirepeer': config.HADES_POSTGRESQL_USER,
             'client_encoding': 'utf-8',

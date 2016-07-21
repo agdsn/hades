@@ -1,0 +1,4 @@
+/control-database.sh
+/control-network.sh
+/functions.sh
+/update-trust-anchor.sh

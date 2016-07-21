@@ -1,0 +1,22 @@
+{
+  "name": "@PACKAGE_NAME@",
+  "version": "@PACKAGE_VERSION@",
+  "homepage": "@PACKAGE_URL@",
+  "authors": [
+    "@PACKAGE_AUTHOR@ <@PACKAGE_AUTHOR_EMAIL@>"
+  ],
+  "description": "AG DSN Site Node",
+  "license": "@PACKAGE_LICENSE@",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.4",
+    "html5shiv": "~3.7.2",
+    "respond": "~1.4.2"
+  }
+}

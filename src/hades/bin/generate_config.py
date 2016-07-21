@@ -1,8 +1,7 @@
 import os
 import sys
 
-import pkg_resources
-
+from hades import constants
 from hades.common.cli import ArgumentParser, parser as common_parser
 from hades.config.generate import ConfigGenerator
 from hades.config.loader import load_config
@@ -17,7 +16,7 @@ def main():
                              "for files; required for directories)")
     args = parser.parse_args()
     config = load_config(args.config)
-    template_dir = pkg_resources.resource_filename('hades.config', 'templates')
+    template_dir = constants.TEMPLATESDIR
     generator = ConfigGenerator(template_dir, config)
     source_path = os.path.join(template_dir, args.source)
     if os.path.isdir(source_path):
