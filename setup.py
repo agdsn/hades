@@ -38,12 +38,6 @@ setup(name='hades',
               'hades-su = hades.bin.su:main',
           ],
       },
-      cmdclass={
-          'compile_catalog': babel.compile_catalog,
-          'extract_messages': babel.extract_messages,
-          'init_catalog': babel.init_catalog,
-          'update_catalog': babel.update_catalog,
-      },
       classifiers=[
           'Development Status :: 5 - Production/Stable',
           'License :: OSI Approved :: MIT License',
