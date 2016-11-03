@@ -43,6 +43,7 @@ RUN apt-get update && apt-get install -y -t jessie-backports \
     unzip \
     uwsgi \
     uwsgi-plugin-python3 \
+    vim-nox \
     && apt-get clean \
     && pg_lsclusters -h | cut -d ' ' -f 1-2 | xargs -rn 2 pg_dropcluster \
     && ln -s /usr/bin/nodejs /usr/bin/node \
