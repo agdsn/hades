@@ -9,23 +9,31 @@ RUN apt-get update && apt-get install -y -t jessie-backports \
     bridge-utils \
     curl \
     dbus \
+    devscripts \
+    dh-virtualenv \
+    dnsutils \
     dns-root-data \
     dnsmasq \
     dnsutils \
+    equivs \
+    fakeroot \
     freeradius \
     freeradius-postgresql \
     freeradius-utils \
     git \
+    git-buildpackage \
     ipset \
     iptables \
     keepalived \
     less \
     libmysqlclient-dev \
+    lintian \
     nginx \
     npm \
     postgresql \
     postgresql-contrib \
     postgresql-server-dev-all \
+    packaging-dev \
     python3-dev \
     python3-pip \
     python3-setuptools \
