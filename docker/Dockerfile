@@ -2,7 +2,7 @@ FROM debian:jessie
 MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
 
 ENV LANG=C.UTF-8 container=docker
-COPY docker/etc/apt/ /etc/apt/
+COPY etc/apt/ /etc/apt/
 
 RUN apt-get update && apt-get install -y -t jessie-backports \
     build-essential \
