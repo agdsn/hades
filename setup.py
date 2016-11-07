@@ -1,5 +1,51 @@
 from setuptools import find_packages, setup
 from babel.messages import frontend as babel
+from distutils.cmd import Command
+from distutils.command.build import build
+import shutil
+
+class BuildProxy(build):
+    user_options = build.user_options + [
+        ('disable-bower', None, 'disable bower update during build'),
+        ('disable-compile-catalog', None, 'disable babel compilation during build'),
+    ]
+
+    boolean_options = build.boolean_options + ['disable-bower', 'disable-compile-catalog']
+
+    def initialize_options(self):
+        self.disable_compile_catalog = False
+        self.disable_bower = False
+        super().initialize_options()
+
+    def finalize_options(self):
+        super().finalize_options()
+
+    def run(self):
+        if not self.disable_compile_catalog:
+            self.run_command('compile_catalog')
+        if not self.disable_bower:
+            self.run_command('run_bower')
+        super().run()
+
+class BowerCommand(Command):
+    user_options = []
+
+    def initialize_options(self):
+        self.disable_bower = False
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        self.spawn(['npm', 'install', 'bower'])
+
+        # Debian installs node binary as nodejs.
+        node_cmd = 'node'
+        if not shutil.which(node_cmd):
+            node_cmd = 'nodejs'
+
+        # Debian packaging process uses fakeroot.
+        self.spawn([node_cmd, 'node_modules/bower/bin/bower', 'install', '--allow-root'])
 
 setup(name='hades',
       version='0.1',
@@ -14,14 +60,16 @@ setup(name='hades',
       include_package_data=True,
       zip_safe=False,
       install_requires=[
+          "arpreq",
+          "Babel",
+          "Celery",
           "Flask",
           "Flask-Babel",
-          "SQLAlchemy",
-          "arpreq",
-          "celery",
+          "Jinja2",
           "netaddr",
           "psycopg2",
           "pyroute2",
+          "SQLAlchemy",
       ],
       entry_points={
           'console_scripts': [
@@ -42,6 +90,8 @@ setup(name='hades',
           'src/scripts/update-trust-anchor.sh',
       ],
       cmdclass={
+          'build': BuildProxy,
+          'run_bower': BowerCommand,
           'compile_catalog': babel.compile_catalog,
           'extract_messages': babel.extract_messages,
           'init_catalog': babel.init_catalog,
