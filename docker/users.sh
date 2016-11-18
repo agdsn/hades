@@ -2,7 +2,7 @@
 set -euo pipefail
 source /opt/hades/bin/functions.sh
 load_config
-mkdir -p /etc/hades /var/lib/hades
+mkdir -p /var/lib/hades
 
 readonly -A users=(
 	['agent']="$HADES_AGENT_USER"
