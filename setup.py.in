@@ -1,12 +1,12 @@
 from setuptools import find_packages, setup
 from babel.messages import frontend as babel
 
-setup(name='hades',
-      version='0.1',
-      author='Sebastian Schrader',
-      author_email='sebastian.schrader@agdsn.de',
-      url='https://github.com/agdsn/hades/',
-      license='MIT',
+setup(name='@PACKAGE_NAME@',
+      version='@PACKAGE_VERSION@',
+      author='@PACKAGE_AUTHOR@',
+      author_email='@PACKAGE_AUTHOR_EMAIL@',
+      url='@PACKAGE_URL@',
+      license='@PACKAGE_LICENSE@',
       description="Distributed AG DSN RADIUS MAC authentication. "
                   "Site node agent and captive portal",
       packages=find_packages('src', exclude=["*.tests"]),

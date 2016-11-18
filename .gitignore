@@ -33,3 +33,4 @@ var/
 *.mo
 
 /bower.json
+/setup.py
