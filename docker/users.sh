@@ -31,10 +31,12 @@ readonly -A groups=(
 )
 
 if [[ ! -d /var/lib/hades ]]; then
+	echo "Creating /var/lib/hades directory ..."
 	mkdir -p /var/lib/hades
 fi
 
 if ! getent group "$HADES_SYSTEM_GROUP" &>/dev/null; then
+	echo "Creating @SYSTEM_GROUP@ group ..."
 	addgroup --quiet --system "$HADES_SYSTEM_GROUP"
 fi
 
@@ -43,13 +45,16 @@ for service in "${!users[@]}"; do
 	group="${groups[$service]}"
 	directory="/var/lib/hades/$service"
 	if ! getent group "$group" &>/dev/null; then
+		echo "Creating $group group ..."
 		addgroup --quiet --system "$group"
 	fi
 	if ! getent passwd "$user" &>/dev/null; then
+		echo "Creating $user user ..."
 		adduser --quiet --system --home "$directory" --no-create-home --ingroup "$group" --disabled-password "$user"
 		adduser --quiet "$user" "$HADES_SYSTEM_GROUP"
 	fi
 	if [[ ! -d "$directory" ]]; then
+		echo "Creating $directory directory ..."
 		install --directory --owner="$user" --group="$group" --mode=0755 "$directory"
 	fi
 done
