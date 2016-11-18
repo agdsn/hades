@@ -5,7 +5,7 @@
   "authors": [
     "@PACKAGE_AUTHOR@ <@PACKAGE_AUTHOR_EMAIL@>"
   ],
-  "description": "AG DSN Site Node",
+  "description": "Distributed AG DSN RADIUS MAC authentication system. Frontend assets.",
   "license": "@PACKAGE_LICENSE@",
   "ignore": [
     "**/.*",
