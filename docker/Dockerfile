@@ -29,10 +29,10 @@ RUN apt-get update && apt-get install -y -t jessie-backports \
     lintian \
     nginx \
     npm \
-    postgresql \
-    postgresql-contrib \
-    postgresql-server-dev-all \
     packaging-dev \
+    postgresql-9.4 \
+    postgresql-contrib-9.4 \
+    postgresql-server-dev-9.4 \
     python3-dev \
     python3-pip \
     python3-setuptools \
