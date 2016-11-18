@@ -47,9 +47,9 @@ for service in "${!users[@]}"; do
 	fi
 	if ! getent passwd "$user" &>/dev/null; then
 		adduser --quiet --system --home "$directory" --no-create-home --ingroup "$group" --disabled-password "$user"
+		adduser --quiet "$user" "$HADES_SYSTEM_GROUP"
 	fi
 	if [[ ! -d "$directory" ]]; then
 		install --directory --owner="$user" --group="$group" --mode=0755 "$directory"
 	fi
-	adduser --quiet "$user" "$HADES_SYSTEM_GROUP"
 done
