@@ -1,0 +1,13 @@
+init/units/*.service usr/lib/systemd/system
+init/units/*.target usr/lib/systemd/system
+init/units/*.timer usr/lib/systemd/system
+init/env/hades etc/defaults
+init/dbus/de.agdsn.hades.conf etc/dbus-1/system.d
+init/tmpfiles.d/hades.conf etc/tmpfiles.d
+assets/bower/bootstrap/dist/* usr/share/hades/assets/bootstrap
+assets/bower/html5shiv/dist/* usr/share/hades/assets/html5shiv
+assets/bower/jquery/dist/* usr/share/hades/assets/jquery
+assets/bower/respond/dest/* usr/share/hades/assets/respond
+assets/hades/* usr/share/hades/assets/hades
+templates/* usr/share/hades/templates
+locales/de/LC_MESSAGES/hades.mo usr/share/locales/de/LC_MESSAGES

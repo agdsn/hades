@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+
+export DH_VIRTUALENV_ARGUMENTS=--python python3
+export DH_VIRTUALENV_INSTALL_ROOT=/usr/lib
+export DH_UPGRADE_PIP
+export DH_UPGRADE_SETUPTOOLS
+export DH_UPGRADE_WHEEL
+
+DESTDIR = $(CURDIR)/debian/hades
+
+%:
+	dh $@ --buildsystem=dh_virtualenv
+
+override_dh_auto_configure:
+	make -rf configure.mk PREFIX=/usr LIBEXECDIR=/usr/lib SYSCONFDIR=/etc LOCALSTATEDIR=/var RUNSTATEDIR=/run
+	dh_auto_configure

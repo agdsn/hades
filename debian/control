@@ -1,0 +1,14 @@
+Source: hades
+Section: net
+Priority: extra
+Maintainer: Sebastian Schrader <sebastian.schrader@agdsn.de>
+Build-Depends: debhelper (>= 9), python, dh-virtualenv (>= 0.8)
+Standards-Version: 3.9.5
+
+Package: hades
+Architecture: amd64
+Pre-Depends: dpkg (>= 1.16.1), python3, ${misc:Pre-Depends}
+Depends: dnsmasq, freeradius (< 3.0), freeradius-postgresql (< 3.0), postgresql-9.4, nginx, ipset, iptables, keepalived, unbound, uwsgi, uwsgi-plugin-python3, ${python:Depends}, ${misc:Depends}
+Description: distributed RADIUS MAC authentication
+ Hades is a distributed RADIUS MAC authentication system developed for the
+ residential network Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN).
