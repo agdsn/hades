@@ -5,8 +5,8 @@ ENV LANG=C.UTF-8 container=docker
 COPY etc/apt/ /etc/apt/
 
 RUN apt-get update && apt-get install -y -t jessie-backports \
-    build-essential \
     bridge-utils \
+    build-essential \
     curl \
     dbus \
     devscripts \
