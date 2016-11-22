@@ -257,6 +257,7 @@ all: $(CONFIGURE_FILES) src/hades/constants.py
 $(CONFIGURE_FILES): %: %.in configure.mk .FORCE
 	@echo Configuring $@
 	@$(SED) $(foreach var,$(SUBSTITUTIONS),-e 's|@$(var)@|$($(var))|g' ) < $< > $@
+	@chmod --reference=$< $@
 
 src/hades/constants.py: configure.mk .FORCE
 	@echo Creating $@
