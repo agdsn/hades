@@ -9,10 +9,10 @@ Wants=hades-network.service
 Type=dbus
 BusName=de.agdsn.hades.unauth_dnsmasq
 SyslogIdentifier=hades-unauth-dns
-EnvironmentFile=@SYSTEMDENVDIR@/hades
-ExecStartPre=@VENVDIR@/bin/hades-generate-config unauth-dnsmasq.conf.j2 @PKGRUNSTATEDIR@/unauth-dns/dnsmasq.conf
-ExecStart=@IP@ netns exec unauth /usr/sbin/dnsmasq -k --enable-dbus=de.agdsn.hades.unauth_dnsmasq --conf-file=@PKGRUNSTATEDIR@/unauth-dns/dnsmasq.conf
-ExecReload=@VENVDIR@/bin/hades-generate-config unauth-dnsmasq.conf.j2 @PKGRUNSTATEDIR@/unauth-dns/dnsmasq.conf
+EnvironmentFile=@systemdenvdir@/hades
+ExecStartPre=@venvdir@/bin/hades-generate-config unauth-dnsmasq.conf.j2 @pkgrunstatedir@/unauth-dns/dnsmasq.conf
+ExecStart=@IP@ netns exec unauth /usr/sbin/dnsmasq -k --enable-dbus=de.agdsn.hades.unauth_dnsmasq --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf
+ExecReload=@venvdir@/bin/hades-generate-config unauth-dnsmasq.conf.j2 @pkgrunstatedir@/unauth-dns/dnsmasq.conf
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5

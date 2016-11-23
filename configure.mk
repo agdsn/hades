@@ -15,45 +15,45 @@ PACKAGE_URL          := http://github.com/agdsn/hades
 # ----------- #
 
 # GNU Coding Standards directories
-PREFIX         = /usr/local
-EXEC_PREFIX    = $(PREFIX)
-BINDIR         = $(EXEC_PREFIX)/bin
-SBINDIR        = $(EXEC_PREFIX)/sbin
-LIBEXECDIR     = $(EXEC_PREFIX)/libexec
-DATAROOTDIR    = $(PREFIX)/share
-DATADIR        = $(DATAROOTDIR)
-SYSCONFDIR     = $(PREFIX)/etc
-SHAREDSTATEDIR = $(PREFIX)/com
-LOCALSTATEDIR  = $(PREFIX)/var
-RUNSTATEDIR    = $(LOCALSTATEDIR)/run
-INCLUDEDIR     = $(PREFIX)/include
-DOCDIR         = $(DATAROOTDIR)/doc/$(PACKAGE_NAME)
-INFODIR        = $(DATAROOTDIR)/info
-HTMLDIR        = $(DOCDIR)
-DVIDIR         = $(DOCDIR)
-PDFDIR         = $(DOCDIR)
-PSDIR          = $(DOCDIR)
-LIBDIR         = $(EXEC_PREFIX)/lib
-LISPDIR        = $(DATAROOTDIR)/emacs/site-lisp
-LOCALEDIR      = $(DATAROOTDIR)/locale
-MANDIR         = $(DATAROOTDIR)/man
+prefix         = /usr/local
+exec_prefix    = $(prefix)
+bindir         = $(exec_prefix)/bin
+sbindir        = $(exec_prefix)/sbin
+libexecdir     = $(exec_prefix)/libexec
+datarootdir    = $(prefix)/share
+datadir        = $(datarootdir)
+sysconfdir     = $(prefix)/etc
+sharedstatedir = $(prefix)/com
+localstatedir  = $(prefix)/var
+runstatedir    = $(localstatedir)/run
+includedir     = $(prefix)/include
+docdir         = $(datarootdir)/doc/$(PACKAGE_NAME)
+infodir        = $(datarootdir)/info
+htmldir        = $(docdir)
+dvidir         = $(docdir)
+pdfdir         = $(docdir)
+psdir          = $(docdir)
+libdir         = $(exec_prefix)/lib
+lispdir        = $(datarootdir)/emacs/site-lisp
+localedir      = $(datarootdir)/locale
+mandir         = $(datarootdir)/man
 
 # Automake-style package directories
-PKGLIBEXECDIR    = $(LIBEXECDIR)/$(PACKAGE_NAME)
-PKGSYSCONFDIR    = $(SYSCONFDIR)/$(PACKAGE_NAME)
-PKGLOCALSTATEDIR = $(LOCALSTATEDIR)/$(PACKAGE_NAME)
-PKGRUNSTATEDIR   = $(RUNSTATEDIR)/$(PACKAGE_NAME)
-PKGLIBDIR        = $(LIBDIR)/$(PACKAGE_NAME)
-PKGDATADIR       = $(DATADIR)/$(PACKAGE_NAME)
+pkglibexecdir    = $(libexecdir)/$(PACKAGE_NAME)
+pkgsysconfdir    = $(sysconfdir)/$(PACKAGE_NAME)
+pkglocalstatedir = $(localstatedir)/$(PACKAGE_NAME)
+pkgrunstatedir   = $(runstatedir)/$(PACKAGE_NAME)
+pkglibdir        = $(libdir)/$(PACKAGE_NAME)
+pkgdatadir       = $(datadir)/$(PACKAGE_NAME)
 
 # Additional directories
-ASSETSDIR      = $(PKGDATADIR)/assests
-DBUSCONFDIR    = $(SYSCONFDIR)/dbus-1/system.d
-SYSTEMDENVDIR  = /etc/default
-SYSTEMDUNITDIR = /usr/lib/systemd/system
-TEMPLATEDIR    = $(PKGDATADIR)/templates
-TMPFILESDDIR   = $(SYSCONFDIR)/tmpfiles.d
-VENVDIR        = $(PKGLIBDIR)
+assetsdir      = $(pkgdatadir)/assests
+dbusconfdir    = $(sysconfdir)/dbus-1/system.d
+systemdenvdir  = /etc/default
+systemdunitdir = /usr/lib/systemd/system
+templatedir    = $(pkgdatadir)/templates
+tmpfilesddir   = $(sysconfdir)/tmpfiles.d
+venvdir        = $(pkglibdir)
 
 # -------- #
 # Programs #
@@ -109,33 +109,33 @@ $(eval $(call require_program,UNBOUND,unbound))
 $(eval $(call require_program,UNBOUND_CHECKCONF,unbound-checkconf))
 $(eval $(call require_program,UNBOUND_CONTROL,unbound-control))
 
-PGBINDIR := $(shell $(PG_CONFIG) --bindir)
+pgbindir := $(shell $(PG_CONFIG) --bindir)
 
-$(eval $(call require_program,CREATEDB,createdb,$(PGBINDIR)))
-$(eval $(call require_program,CREATEUSER,createuser,$(PGBINDIR)))
-$(eval $(call require_program,PG_CTL,pg_ctl,$(PGBINDIR)))
-$(eval $(call require_program,POSTGRES,postgres,$(PGBINDIR)))
+$(eval $(call require_program,CREATEDB,createdb,$(pgbindir)))
+$(eval $(call require_program,CREATEUSER,createuser,$(pgbindir)))
+$(eval $(call require_program,PG_CTL,pg_ctl,$(pgbindir)))
+$(eval $(call require_program,POSTGRES,postgres,$(pgbindir)))
 
 # User and group settings
 SYSTEM_GROUP     := hades
 AGENT_USER       := hades-agent
 AGENT_GROUP      := hades-agent
-AGENT_HOME       := $(PKGLOCALSTATEDIR)/agent
+AGENT_HOME       := $(pkglocalstatedir)/agent
 AUTH_DNS_USER    := hades-auth-dns
 AUTH_DNS_GROUP   := hades-auth-dns
-AUTH_DNS_HOME    := $(PKGLOCALSTATEDIR)/auth-dns
+AUTH_DNS_HOME    := $(pkglocalstatedir)/auth-dns
 DATABASE_USER    := hades-database
 DATABASE_GROUP   := hades-database
-DATABASE_HOME    := $(PKGLOCALSTATEDIR)/database
+DATABASE_HOME    := $(pkglocalstatedir)/database
 PORTAL_USER      := hades-portal
 PORTAL_GROUP     := hades-portal
-PORTAL_HOME      := $(PKGLOCALSTATEDIR)/portal
+PORTAL_HOME      := $(pkglocalstatedir)/portal
 RADIUS_USER      := hades-radius
 RADIUS_GROUP     := hades-radius
-RADIUS_HOME      := $(PKGLOCALSTATEDIR)/radius
+RADIUS_HOME      := $(pkglocalstatedir)/radius
 UNAUTH_DNS_USER  := hades-unauth
 UNAUTH_DNS_GROUP := hades-unauth
-UNAUTH_DNS_HOME  := $(PKGLOCALSTATEDIR)/unauth-dns
+UNAUTH_DNS_HOME  := $(pkglocalstatedir)/unauth-dns
 
 NULL :=
 
@@ -151,41 +151,42 @@ SUBSTITUTIONS = \
     PACKAGE_AUTHOR_EMAIL \
     PACKAGE_LICENSE \
     PACKAGE_URL \
-    PREFIX \
-    EXEC_PREFIX \
-    BINDIR \
-    SBINDIR \
-    LIBEXECDIR \
-    DATAROOTDIR \
-    DATADIR \
-    SYSCONFDIR \
-    SHAREDSTATEDIR \
-    LOCALSTATEDIR \
-    RUNSTATEDIR \
-    INCLUDEDIR \
-    DOCDIR \
-    INFODIR \
-    HTMLDIR \
-    DVIDIR \
-    PDFDIR \
-    PSDIR \
-    LIBDIR \
-    LISPDIR \
-    LOCALEDIR \
-    MANDIR \
-    PKGLIBEXECDIR \
-    PKGSYSCONFDIR \
-    PKGLOCALSTATEDIR \
-    PKGRUNSTATEDIR \
-    PKGLIBDIR \
-    PKGDATADIR \
-    ASSETSDIR \
-    DBUSCONFDIR \
-    SYSTEMDENVDIR \
-    SYSTEMDUNITDIR \
-    TEMPLATESDIR \
-    TMPFILESDDIR \
-    VENVDIR \
+    prefix \
+    exec_prefix \
+    bindir \
+    sbindir \
+    libexecdir \
+    datarootdir \
+    datadir \
+    sysconfdir \
+    sharedstatedir \
+    localstatedir \
+    runstatedir \
+    includedir \
+    docdir \
+    infodir \
+    htmldir \
+    dvidir \
+    pdfdir \
+    psdir \
+    libdir \
+    lispdir \
+    localedir \
+    mandir \
+    pkglibexecdir \
+    pkgsysconfdir \
+    pkglocalstatedir \
+    pkgrunstatedir \
+    pkglibdir \
+    pkgdatadir \
+    assetsdir \
+    dbusconfdir \
+    systemdenvdir \
+    systemdunitdir \
+    templatesdir \
+    tmpfilesddir \
+    venvdir \
+    pgbindir \
     SYSTEM_GROUP \
     DNSMASQ \
     IP \

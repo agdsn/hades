@@ -7,13 +7,13 @@ Wants=hades-network.service hades-database.service
 
 [Service]
 Type=simple
-PIDFile=@PKGRUNSTATEDIR@/agent/worker.pid
+PIDFile=@pkgrunstatedir@/agent/worker.pid
 KillMode=mixed
 User=@AGENT_USER@
 Group=@AGENT_GROUP@
 SyslogIdentifier=hades-agent
 Environment=PGAPPNAME=hades-agent
-EnvironmentFile=@SYSTEMDENVDIR@/hades
-ExecStart=@VENVDIR@/bin/hades-agent --pidfile=@PKGRUNSTATEDIR@/agent/worker.pid
+EnvironmentFile=@systemdenvdir@/hades
+ExecStart=@venvdir@/bin/hades-agent --pidfile=@pkgrunstatedir@/agent/worker.pid
 Restart=always
 RestartSec=5

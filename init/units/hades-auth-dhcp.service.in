@@ -9,10 +9,10 @@ Wants=hades-network.service
 Type=dbus
 BusName=de.agdsn.hades.auth_dnsmasq
 SyslogIdentifier=hades-auth-dhcp
-EnvironmentFile=@SYSTEMDENVDIR@/hades
-ExecStartPre=@VENVDIR@/bin/hades-generate-config auth-dnsmasq.conf.j2 @PKGRUNSTATEDIR@/auth-dhcp/dnsmasq.conf
-ExecStart=@IP@ netns exec auth @DNSMASQ@ -k --enable-dbus=de.agdsn.hades.auth_dnsmasq --conf-file=@PKGRUNSTATEDIR@/auth-dhcp/dnsmasq.conf
-ExecReload=@VENVDIR@/bin/hades-generate-config auth-dnsmasq.conf.j2 @PKGRUNSTATEDIR@/auth-dhcp/dnsmasq.conf
+EnvironmentFile=@systemdenvdir@/hades
+ExecStartPre=@venvdir@/bin/hades-generate-config auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
+ExecStart=@IP@ netns exec auth @DNSMASQ@ -k --enable-dbus=de.agdsn.hades.auth_dnsmasq --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf
+ExecReload=@venvdir@/bin/hades-generate-config auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5

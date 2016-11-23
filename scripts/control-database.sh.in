@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "@PKGLIBEXECDIR@/functions.sh"
+source "@pkglibexecdir@/functions.sh"
 
 print_usage() {
 	msg "\
@@ -48,7 +48,7 @@ check_cluster_version() {
 }
 
 generate_config() {
-	@VENVDIR@/bin/hades-generate-config postgresql "@PKGRUNSTATEDIR@/database"
+	@venvdir@/bin/hades-generate-config postgresql "@pkgrunstatedir@/database"
 }
 
 do_init() {
@@ -63,7 +63,7 @@ do_init() {
 	@PG_CTL@ initdb -s -o "--auth-host=password --auth-local=peer --encoding=UTF-8 --locale=C"
 	rm "$PGDATA"/postgresql.conf "$PGDATA"/pg_hba.conf "$PGDATA"/pg_ident.conf
 	generate_config
-	@PG_CTL@ start -w -s -o '-c config_file=@PKGRUNSTATEDIR@/database/postgresql.conf'
+	@PG_CTL@ start -w -s -o '-c config_file=@pkgrunstatedir@/database/postgresql.conf'
 	for user in "$HADES_RADIUS_USER" "$HADES_AGENT_USER" "$HADES_PORTAL_USER"; do
 		@CREATEUSER@ "$user"
 	done
@@ -75,13 +75,13 @@ do_init() {
 			CREATE ROLE "$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE" WITH LOGIN INHERIT UNENCRYPTED PASSWORD '$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE';
 			COMMAND
 		msg "Loading local foreign database schema"
-		@VENVDIR@/bin/hades-generate-config schema_fdw.sql.j2 | @PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE"
+		@venvdir@/bin/hades-generate-config schema_fdw.sql.j2 | @PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE"
 	fi
 
 	msg "Creating database '$HADES_POSTGRESQL_DATABASE'"
 	@CREATEDB@ "$HADES_POSTGRESQL_DATABASE"
 	msg "Loading database schema"
-	@VENVDIR@/bin/hades-generate-config schema.sql.j2 | @PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "$HADES_POSTGRESQL_DATABASE"
+	@venvdir@/bin/hades-generate-config schema.sql.j2 | @PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "$HADES_POSTGRESQL_DATABASE"
 	@PG_CTL@ stop -s
 	msg "PostgreSQL cluster at $PGDATA successfully initialised."
 	trap - EXIT HUP INT QUIT ABRT
@@ -100,7 +100,7 @@ do_start() {
 		return 2
 	fi
 	generate_config
-	@PG_CTL@ start -s -w -t 30 -o '-c config_file=@PKGRUNSTATEDIR@/database/postgresql.conf'
+	@PG_CTL@ start -s -w -t 30 -o '-c config_file=@pkgrunstatedir@/database/postgresql.conf'
 }
 
 do_stop() {
@@ -132,9 +132,9 @@ main() {
 			;;
 		init|start|stop|reload|clear)
 			load_config
-			export PGHOST="@PKGRUNSTATEDIR@/database"
+			export PGHOST="@pkgrunstatedir@/database"
 			export PGPORT="$HADES_POSTGRESQL_PORT"
-			export PGDATA="@PKGLOCALSTATEDIR@/database"
+			export PGDATA="@pkglocalstatedir@/database"
 			do_$1 "$@"
 			;;
 		*)

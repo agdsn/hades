@@ -57,7 +57,7 @@ sysconfdir = /etc
 localstatedir = /var
 sbindir = ${exec_prefix}/sbin
 logdir = /var/log/freeradius
-raddbdir = {{ constants.PKGRUNSTATEDIR }}/radius
+raddbdir = {{ constants.pkgrunstatedir }}/radius
 radacctdir = ${logdir}/radacct
 
 #
@@ -66,7 +66,7 @@ name = freeradius
 
 #  Location of config and logfiles.
 confdir = ${raddbdir}
-run_dir = {{ constants.PKGRUNSTATEDIR }}/radius
+run_dir = {{ constants.pkgrunstatedir }}/radius
 
 # Should likely be ${localstatedir}/lib/radiusd
 db_dir = ${raddbdir}
@@ -114,7 +114,7 @@ libdir = /usr/lib/freeradius
 #
 #  e.g.:  kill -HUP `cat /var/run/radiusd/radiusd.pid`
 #
-pidfile = {{ constants.PKGRUNSTATEDIR }}/radius/radiusd.pid
+pidfile = {{ constants.pkgrunstatedir }}/radius/radiusd.pid
 
 #  chroot: directory where the server does "chroot".
 #

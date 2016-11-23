@@ -11,4 +11,4 @@ User=@RADIUS_USER@
 Group=@RADIUS_GROUP@
 SyslogIdentifier=hades-cleanup
 Environment=PGAPPNAME=hades-cleanup
-ExecStart=@VENVDIR@/bin/hades-cleanup
+ExecStart=@venvdir@/bin/hades-cleanup

@@ -12,5 +12,5 @@ DESTDIR = $(CURDIR)/debian/hades
 	dh $@ --buildsystem=dh_virtualenv
 
 override_dh_auto_configure:
-	make -rf configure.mk PREFIX=/usr LIBEXECDIR=/usr/lib SYSCONFDIR=/etc LOCALSTATEDIR=/var RUNSTATEDIR=/run
+	make -rf configure.mk prefix=/usr libexecdir=/usr/lib sysconfdir=/etc localstatedir=/var runstatedir=/run
 	dh_auto_configure

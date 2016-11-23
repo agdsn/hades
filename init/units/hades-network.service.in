@@ -7,9 +7,9 @@ Documentation=https://agdsn.github.io/hades/
 Type=oneshot
 RemainAfterExit=yes
 SyslogIdentifier=hades-network
-EnvironmentFile=@SYSTEMDENVDIR@/hades
-ExecStart=@PKGLIBEXECDIR@/control-network.sh start
-ExecStop=@PKGLIBEXECDIR@/control-network.sh stop
+EnvironmentFile=@systemdenvdir@/hades
+ExecStart=@pkglibexecdir@/control-network.sh start
+ExecStop=@pkglibexecdir@/control-network.sh stop
 
 [Install]
 WantedBy=multi-user.target

@@ -7,12 +7,12 @@ Wants=hades-network.service hades-unauth-portal.service
 
 [Service]
 Type=forking
-PIDFile=@PKGRUNSTATEDIR@/unauth-http/nginx.pid
+PIDFile=@pkgrunstatedir@/unauth-http/nginx.pid
 SyslogIdentifier=hades-unauth-http
-EnvironmentFile=@SYSTEMDENVDIR@/hades
-ExecStartPre=@VENVDIR@/bin/hades-generate-config nginx @PKGRUNSTATEDIR@/unauth-http
-ExecStart=@IP@ netns exec unauth nginx -c @PKGRUNSTATEDIR@/unauth-http/nginx.conf
-ExecReload=@VENVDIR@/bin/hades-generate-config nginx @PKGRUNSTATEDIR@/unauth-http
+EnvironmentFile=@systemdenvdir@/hades
+ExecStartPre=@venvdir@/bin/hades-generate-config nginx @pkgrunstatedir@/unauth-http
+ExecStart=@IP@ netns exec unauth nginx -c @pkgrunstatedir@/unauth-http/nginx.conf
+ExecReload=@venvdir@/bin/hades-generate-config nginx @pkgrunstatedir@/unauth-http
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5

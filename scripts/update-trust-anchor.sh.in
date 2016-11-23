@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "@PKGLIBEXECDIR@/functions.sh"
+source "@pkglibexecdir@/functions.sh"
 
 print_usage() {
 	msg "\
@@ -14,7 +14,7 @@ Options:
 }
 
 readonly DNS_ROOT_KEY_FILE="/usr/share/dns/root.key"
-readonly ROOT_TRUST_ANCHOR_FILE="@PKGLOCALSTATEDIR@/auth-dns/root.key"
+readonly ROOT_TRUST_ANCHOR_FILE="@pkglocalstatedir@/auth-dns/root.key"
 
 main() {
 	if (( $# > 0 )); then

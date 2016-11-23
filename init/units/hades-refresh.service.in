@@ -11,4 +11,4 @@ User=@AGENT_USER@
 Group=@AGENT_GROUP@
 SyslogIdentifier=hades-refresh
 Environment=PGAPPNAME=hades-refresh
-ExecStart=@VENVDIR@/bin/hades-refresh
+ExecStart=@venvdir@/bin/hades-refresh

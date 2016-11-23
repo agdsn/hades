@@ -112,7 +112,7 @@ class HADES_POSTGRESQL_DATABASE(Option):
 
 class HADES_POSTGRESQL_SOCKET_DIRECTORY(Option):
     """Path to the PostgreSQL socket directory"""
-    default = constants.PKGRUNSTATEDIR + '/database'
+    default = constants.pkgrunstatedir + '/database'
     type = str
     runtime_check = check.directory_exists
 
@@ -528,7 +528,7 @@ class HADES_RADIUS_GROUP(Option):
 
 class HADES_RADIUS_PID_FILE(Option):
     """PID file of the freeRADIUS server"""
-    default = constants.PKGRUNSTATEDIR + '/radius/radiusd.pid'
+    default = constants.pkgrunstatedir + '/radius/radiusd.pid'
     type = str
     static_check = check.not_empty
     runtime_check = check.file_creatable
@@ -753,7 +753,7 @@ class SQLALCHEMY_DATABASE_URI(Option):
         if 'postgresql' not in urllib.parse.uses_query:
             urllib.parse.uses_query.append('postgresql')
         query = urllib.parse.urlencode({
-            'host': constants.PKGRUNSTATEDIR + '/database',
+            'host': constants.pkgrunstatedir + '/database',
             'port': config.HADES_POSTGRESQL_PORT,
             'requirepeer': config.HADES_POSTGRESQL_USER,
             'client_encoding': 'utf-8',

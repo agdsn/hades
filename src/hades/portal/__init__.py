@@ -9,8 +9,8 @@ from hades.portal.session import NullSessionInterface
 app = Flask(
     __name__,
     static_url_path='assets',
-    template_folder=os.path.join(constants.TEMPLATESDIR, 'portal'),
-    static_folder=constants.ASSETSDIR,
+    template_folder=os.path.join(constants.templatesdir, 'portal'),
+    static_folder=constants.assetsdir,
 )
 app.session_interface = NullSessionInterface()
 babel = Babel(app)

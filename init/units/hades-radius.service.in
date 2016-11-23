@@ -7,14 +7,14 @@ Wants=hades-network.service hades-database.service
 
 [Service]
 Type=forking
-PIDFile=@PKGRUNSTATEDIR@/radius/radiusd.pid
+PIDFile=@pkgrunstatedir@/radius/radiusd.pid
 SyslogIdentifier=hades-radius
 Environment=PGAPPNAME=hades-radius
-EnvironmentFile=@SYSTEMDENVDIR@/hades
-ExecStartPre=@VENVDIR@/bin/hades-generate-config freeradius @PKGRUNSTATEDIR@/radius
-ExecStartPre=@RADIUSD@ -d @PKGRUNSTATEDIR@/radius -Cx -lstdout
-ExecStart=@RADIUSD@ -d @PKGRUNSTATEDIR@/radius
-ExecReload=@VENVDIR@/bin/hades-generate-config freeradius @PKGRUNSTATEDIR@/radius
+EnvironmentFile=@systemdenvdir@/hades
+ExecStartPre=@venvdir@/bin/hades-generate-config freeradius @pkgrunstatedir@/radius
+ExecStartPre=@RADIUSD@ -d @pkgrunstatedir@/radius -Cx -lstdout
+ExecStart=@RADIUSD@ -d @pkgrunstatedir@/radius
+ExecReload=@venvdir@/bin/hades-generate-config freeradius @pkgrunstatedir@/radius
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
