@@ -39,18 +39,18 @@ HADES_USER_NETWORKS = {
 HADES_POSTGRESQL_FOREIGN_SERVER_FDW = 'postgres_fdw'
 HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS = {
     'host': HADES_POSTGRESQL_SOCKET,
-    'dbname': 'radius'
+    'dbname': 'radius',
 }
 HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS = {
 }
 HADES_POSTGRESQL_USER_MAPPINGS = {
     'hades-agent': {
         'user': 'fdw',
-        'password': 'correcthorsebatterystaple'
+        'password': 'correcthorsebatterystaple',
     },
     'postgres': {
         'user': 'fdw',
-        'password': 'correcthorsebatterystaple'
+        'password': 'correcthorsebatterystaple',
     },
 }
 
