@@ -214,17 +214,12 @@ def has_keys(*keys):
     return f
 
 
-def user_mapping_for_user_exists(other_option):
-    other_option = coerce(other_option)
+def user_mapping_for_user_exists(user_name):
 
     # noinspection PyDecorator
     @classmethod
     def checker(cls, config, value):
-        user_name = config[other_option]
-        if 'PUBLIC' in config[other_option]:
-            return
-        if user_name not in value:
-            raise OptionCheckError("No mapping for user {} defined in option {}"
-                                   .format(user_name, other_option),
+        if 'PUBLIC' not in value and user_name not in value:
+            raise OptionCheckError("No mapping for user {}".format(user_name),
                                    option=cls.__name__)
     return checker

@@ -321,6 +321,7 @@ class HADES_POSTGRESQL_USER_MAPPINGS(Option):
     type = collections.Mapping
     static_check = check.satisfy_all(
         check.user_mapping_for_user_exists(constants.AGENT_USER),
+        check.user_mapping_for_user_exists(constants.DATABASE_USER),
         check.user_mapping_for_user_exists(constants.PORTAL_USER),
         check.user_mapping_for_user_exists(constants.RADIUS_USER),
     )
@@ -755,7 +756,7 @@ class SQLALCHEMY_DATABASE_URI(Option):
         query = urllib.parse.urlencode({
             'host': constants.pkgrunstatedir + '/database',
             'port': config.HADES_POSTGRESQL_PORT,
-            'requirepeer': config.HADES_POSTGRESQL_USER,
+            'requirepeer': constants.DATABASE_USER,
             'client_encoding': 'utf-8',
             'connect_timeout': 5,
         })

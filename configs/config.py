@@ -48,7 +48,15 @@ HADES_POSTGRESQL_USER_MAPPINGS = {
         'user': 'fdw',
         'password': 'correcthorsebatterystaple',
     },
-    'postgres': {
+    'hades-database': {
+        'user': 'fdw',
+        'password': 'correcthorsebatterystaple',
+    },
+    'hades-portal': {
+        'user': 'fdw',
+        'password': 'correcthorsebatterystaple',
+    },
+    'hades-radius': {
         'user': 'fdw',
         'password': 'correcthorsebatterystaple',
     },
