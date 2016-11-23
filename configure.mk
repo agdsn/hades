@@ -88,6 +88,8 @@ else
 endif
 endef
 
+$(eval $(call require_program,SHELL,bash))
+
 # Runtime programs
 $(eval $(call require_program,DNSMASQ,dnsmasq))
 $(eval $(call require_program,IP,ip))
