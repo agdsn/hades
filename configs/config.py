@@ -57,5 +57,7 @@ HADES_POSTGRESQL_USER_MAPPINGS = {
 # Set some timeout values for the mysql foreign data wrapper. This
 # SQL statement will be run after connecting to the foreign database.
 if HADES_POSTGRESQL_FOREIGN_SERVER_FDW == 'mysql_fdw':
-    HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS['init_command'] = \
-        'SET SESSION lock_wait_timeout = 5, SESSION innodb_lock_wait_timeout = 5;'
+    HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS['init_command'] = (
+        'SET SESSION lock_wait_timeout = 5, '
+        'SESSION innodb_lock_wait_timeout = 5;'
+    )
