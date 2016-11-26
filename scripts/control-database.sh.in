@@ -61,7 +61,7 @@ do_init() {
 	trap cleanup EXIT HUP INT QUIT ABRT
 	msg "Initialising new PostgreSQL cluster at $PGDATA"
 	@PG_CTL@ initdb -s -o "--auth-host=password --auth-local=peer --encoding=UTF-8 --locale=C"
-	rm "$PGDATA"/postgresql.conf "$PGDATA"/pg_hba.conf "$PGDATA"/pg_ident.conf
+	@RM@ "$PGDATA"/postgresql.conf "$PGDATA"/pg_hba.conf "$PGDATA"/pg_ident.conf
 	generate_config
 	@PG_CTL@ start -w -s -o '-c config_file=@pkgrunstatedir@/database/postgresql.conf'
 	for user in "$HADES_RADIUS_USER" "$HADES_AGENT_USER" "$HADES_PORTAL_USER"; do
