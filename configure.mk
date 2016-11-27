@@ -122,6 +122,9 @@ SYSTEM_GROUP     := hades
 AGENT_USER       := hades-agent
 AGENT_GROUP      := hades-agent
 AGENT_HOME       := $(pkglocalstatedir)/agent
+AUTH_DHCP_USER   := hades-auth-dhcp
+AUTH_DHCP_GROUP  := hades-auth-dhcp
+AUTH_DHCP_HOME   := $(pkglocalstatedir)/auth-dhcp
 AUTH_DNS_USER    := hades-auth-dns
 AUTH_DNS_GROUP   := hades-auth-dns
 AUTH_DNS_HOME    := $(pkglocalstatedir)/auth-dns
@@ -214,6 +217,9 @@ SUBSTITUTIONS = \
     AGENT_USER \
     AGENT_GROUP \
     AGENT_HOME \
+    AUTH_DHCP_USER \
+    AUTH_DHCP_GROUP \
+    AUTH_DHCP_HOME \
     AUTH_DNS_USER \
     AUTH_DNS_GROUP \
     AUTH_DNS_HOME \
