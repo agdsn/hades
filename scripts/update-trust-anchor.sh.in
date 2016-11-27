@@ -37,7 +37,7 @@ main() {
 		fi
 		install --mode=0644 --owner='@AUTH_DNS_USER@' --group='@AUTH_DNS_GROUP@' "$DNS_ROOT_KEY_FILE" "$ROOT_TRUST_ANCHOR_FILE"
 	fi
-	/usr/sbin/unbound-anchor -a "$ROOT_TRUST_ANCHOR_FILE" || :
+	@UNBOUND_ANCHOR@ -a "$ROOT_TRUST_ANCHOR_FILE" || :
 }
 
 main "$@"

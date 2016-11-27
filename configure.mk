@@ -106,6 +106,7 @@ $(eval $(call require_program,RM,rm))
 $(eval $(call require_program,SED,sed))
 $(eval $(call require_program,SYSCTL,sysctl))
 $(eval $(call require_program,UNBOUND,unbound))
+$(eval $(call require_program,UNBOUND_ANCHOR,unbound-anchor))
 $(eval $(call require_program,UNBOUND_CHECKCONF,unbound-checkconf))
 $(eval $(call require_program,UNBOUND_CONTROL,unbound-control))
 
@@ -200,6 +201,7 @@ SUBSTITUTIONS = \
     SED \
     SYSCTL \
     UNBOUND \
+    UNBOUND_ANCHOR \
     UNBOUND_CHECKCONF \
     UNBOUND_CONTROL \
     PGBINDIR \
