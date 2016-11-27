@@ -388,20 +388,6 @@ class HADES_AUTH_DHCP_LEASE_TIME(Option):
     static_check = check.greater_than(timedelta(0))
 
 
-class HADES_UNBOUND_USER(Option):
-    """User of the unbound daemon"""
-    default = 'hades-auth-dns'
-    type = str
-    runtime_check = check.user_exists
-
-
-class HADES_UNBOUND_GROUP(Option):
-    """User of the unbound daemon"""
-    default = 'hades-auth-dns'
-    type = str
-    runtime_check = check.group_exists
-
-
 class HADES_AUTH_LISTEN(Option):
     """IP and network to listen on for requests from authenticated users"""
     default = netaddr.IPNetwork('10.66.67.10/24')
@@ -511,20 +497,6 @@ class HADES_UNAUTH_WHITELIST_IPSET(Option):
 ##################
 # RADIUS options #
 ##################
-
-
-class HADES_RADIUS_USER(Option):
-    """User of the freeRADIUS server"""
-    default = 'freerad'
-    type = str
-    runtime_check = check.user_exists
-
-
-class HADES_RADIUS_GROUP(Option):
-    """Group of the freeRADIUS server"""
-    default = 'freerad'
-    type = str
-    runtime_check = check.group_exists
 
 
 class HADES_RADIUS_PID_FILE(Option):
