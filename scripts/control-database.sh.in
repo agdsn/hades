@@ -64,7 +64,7 @@ do_init() {
 	@RM@ "$PGDATA"/postgresql.conf "$PGDATA"/pg_hba.conf "$PGDATA"/pg_ident.conf
 	generate_config
 	@PG_CTL@ start -w -s -o '-c config_file=@pkgrunstatedir@/database/postgresql.conf'
-	for user in "$HADES_RADIUS_USER" "$HADES_AGENT_USER" "$HADES_PORTAL_USER"; do
+	for user in '@AGENT_USER@' '@PORTAL_USER@' '@RADIUS_USER@'; do
 		@CREATEUSER@ "$user"
 	done
 

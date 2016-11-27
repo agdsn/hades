@@ -35,7 +35,7 @@ sql {
 	# Connection info:
 	server = "{{ constants.pkgrunstatedir }}/database"
 	port = {{ HADES_POSTGRESQL_PORT }}
-	login = "{{ HADES_RADIUS_USER }}"
+	login = "{{ constants.RADIUS_USER }}"
 	#password = "radpass"
 
 	# Database table configuration for everything except Oracle
