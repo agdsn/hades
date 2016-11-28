@@ -8,12 +8,7 @@ import signal
 import netaddr
 from sqlalchemy import null
 
-from hades.common.db import (
-    delete_old_auth_attempts, delete_old_sessions, dhcphost, get_connection,
-    nas, radcheck, radgroupcheck, radgroupreply, radusergroup,
-    refresh_and_diff_materialized_view, refresh_materialized_view,
-    temp_dhcphost, temp_nas)
-from hades.common.db import get_all_dhcp_hosts
+import hades.common.db as db
 from hades import constants
 from hades.config.loader import get_config
 
@@ -68,9 +63,9 @@ def generate_dhcp_host_reservations(hosts):
 
 def generate_dhcp_hosts_file():
     logger.info("Generating DHCP hosts file")
-    hosts = get_all_dhcp_hosts()
     file_name = os.path.join(constants.pkglocalstatedir,
                              '/auth-dhcp/dnsmasq-dhcp.hosts')
+    hosts = db.get_all_dhcp_hosts()
     try:
         with open(file_name, mode='w', encoding='ascii') as f:
             f.writelines(generate_dhcp_host_reservations(hosts))
@@ -80,26 +75,27 @@ def generate_dhcp_hosts_file():
 
 def refresh():
     logger.info("Refreshing materialized views")
-    connection = get_connection()
-    result = refresh_and_diff_materialized_view(connection, dhcphost,
-                                                temp_dhcphost, [null()])
+    connection = db.get_connection()
+    result = db.refresh_and_diff_materialized_view(connection, db.dhcphost,
+                                                   db.temp_dhcphost, [null()])
     if result != ([], [], []):
         generate_dhcp_hosts_file()
         reload_auth_dnsmasq()
-    result = refresh_and_diff_materialized_view(connection, nas,
-                                                temp_nas, [null()])
+    result = db.refresh_and_diff_materialized_view(connection, db.nas,
+                                                   db.temp_nas, [null()])
     if result != ([], [], []):
         reload_freeradius()
-    refresh_materialized_view(connection, radcheck)
-    refresh_materialized_view(connection, radgroupcheck)
-    refresh_materialized_view(connection, radgroupreply)
-    refresh_materialized_view(connection, radusergroup)
+    db.refresh_materialized_view(connection, db.radcheck)
+    db.refresh_materialized_view(connection, db.radgroupcheck)
+    db.refresh_materialized_view(connection, db.radgroupreply)
+    db.refresh_materialized_view(connection, db.radusergroup)
 
 
 def cleanup():
     logger.info("Cleaning up old records")
     conf = get_config()
-    connection = get_connection()
+    interval = conf["HADES_RETENTION_INTERVAL"]
+    connection = db.get_connection()
     with connection.begin():
-        delete_old_sessions(connection, conf["HADES_RETENTION_INTERVAL"])
-        delete_old_auth_attempts(connection, conf["HADES_RETENTION_INTERVAL"])
+        db.delete_old_sessions(connection, interval)
+        db.delete_old_auth_attempts(connection, interval)
