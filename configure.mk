@@ -47,7 +47,7 @@ pkglibdir        = $(libdir)/$(PACKAGE_NAME)
 pkgdatadir       = $(datadir)/$(PACKAGE_NAME)
 
 # Additional directories
-assetsdir      = $(pkgdatadir)/assests
+assetdir       = $(pkgdatadir)/assests
 dbusconfdir    = $(sysconfdir)/dbus-1/system.d
 systemdenvdir  = /etc/default
 systemdunitdir = /usr/lib/systemd/system
@@ -183,11 +183,11 @@ SUBSTITUTIONS = \
     pkgrunstatedir \
     pkglibdir \
     pkgdatadir \
-    assetsdir \
+    assetdir \
     dbusconfdir \
     systemdenvdir \
     systemdunitdir \
-    templatesdir \
+    templatedir \
     tmpfilesddir \
     venvdir \
     pgbindir \

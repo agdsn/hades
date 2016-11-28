@@ -16,7 +16,7 @@ def main():
                              "for files; required for directories)")
     args = parser.parse_args()
     config = load_config(args.config)
-    template_dir = constants.templatesdir
+    template_dir = constants.templatedir
     generator = ConfigGenerator(template_dir, config)
     source_path = os.path.join(template_dir, args.source)
     if os.path.isdir(source_path):
