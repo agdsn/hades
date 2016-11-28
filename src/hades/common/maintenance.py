@@ -71,7 +71,7 @@ def generate_dhcp_hosts_file():
     file_name = os.path.join(constants.pkglocalstatedir,
                              '/auth-dhcp/dnsmasq-dhcp.hosts')
     try:
-        with open(file_name) as f:
+        with open(file_name, mode='w', encoding='ascii') as f:
             f.writelines(generate_dhcp_host_reservations(hosts))
     except OSError as e:
         logger.error("Error writing %s: %s", file_name, e.strerror)
