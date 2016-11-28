@@ -14,6 +14,7 @@ from hades.common.db import (
     refresh_and_diff_materialized_view, refresh_materialized_view,
     temp_dhcphost, temp_nas)
 from hades.common.db import get_all_dhcp_hosts
+from hades import constants
 from hades.config.loader import get_config
 
 logger = logging.getLogger(__name__)
