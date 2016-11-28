@@ -62,9 +62,9 @@ def generate_dhcp_host_reservations(hosts):
 
 
 def generate_dhcp_hosts_file():
-    logger.info("Generating DHCP hosts file")
     file_name = os.path.join(constants.pkglocalstatedir,
                              '/auth-dhcp/dnsmasq-dhcp.hosts')
+    logger.info("Generating DHCP hosts file %s", file_name)
     hosts = db.get_all_dhcp_hosts()
     try:
         with open(file_name, mode='w', encoding='ascii') as f:
