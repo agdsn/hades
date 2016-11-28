@@ -1,10 +1,9 @@
 import argparse
 import os
 import sys
-
-# noinspection PyUnresolvedReferences
 import textwrap
 
+# noinspection PyUnresolvedReferences
 from hades.agent import app, tasks
 from hades.common.cli import ArgumentParser, parser as common_parser
 from hades.config.loader import load_config
