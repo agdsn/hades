@@ -80,42 +80,44 @@ endef
 # Find a program and store the full path in a variable
 # Abort if the program can not be found
 define require_program
+$(eval
 $1 := $$(call find_program,$2,$3)
 ifeq "$$(strip $$($1))" ""
     $$(error Could not find $2)
 else
     $$(info Found $2 at $$($1))
 endif
+)
 endef
 
-$(eval $(call require_program,SHELL,bash))
+$(call require_program,SHELL,bash)
 
 # Runtime programs
-$(eval $(call require_program,DNSMASQ,dnsmasq))
-$(eval $(call require_program,IP,ip))
-$(eval $(call require_program,IPSET,ipset))
-$(eval $(call require_program,IPTABLES,iptables))
-$(eval $(call require_program,IPTABLES_RESTORE,iptables-restore))
-$(eval $(call require_program,KEEPALIVED,keepalived))
-$(eval $(call require_program,KILL,kill))
-$(eval $(call require_program,PG_CONFIG,pg_config))
-$(eval $(call require_program,PSQL,psql))
-$(eval $(call require_program,PYTHON3,python3))
-$(eval $(call require_program,RADIUSD,radiusd freeradius))
-$(eval $(call require_program,RM,rm))
-$(eval $(call require_program,SED,sed))
-$(eval $(call require_program,SYSCTL,sysctl))
-$(eval $(call require_program,UNBOUND,unbound))
-$(eval $(call require_program,UNBOUND_ANCHOR,unbound-anchor))
-$(eval $(call require_program,UNBOUND_CHECKCONF,unbound-checkconf))
-$(eval $(call require_program,UNBOUND_CONTROL,unbound-control))
+$(call require_program,DNSMASQ,dnsmasq)
+$(call require_program,IP,ip)
+$(call require_program,IPSET,ipset)
+$(call require_program,IPTABLES,iptables)
+$(call require_program,IPTABLES_RESTORE,iptables-restore)
+$(call require_program,KEEPALIVED,keepalived)
+$(call require_program,KILL,kill)
+$(call require_program,PG_CONFIG,pg_config)
+$(call require_program,PSQL,psql)
+$(call require_program,PYTHON3,python3)
+$(call require_program,RADIUSD,radiusd freeradius)
+$(call require_program,RM,rm)
+$(call require_program,SED,sed)
+$(call require_program,SYSCTL,sysctl)
+$(call require_program,UNBOUND,unbound)
+$(call require_program,UNBOUND_ANCHOR,unbound-anchor)
+$(call require_program,UNBOUND_CHECKCONF,unbound-checkconf)
+$(call require_program,UNBOUND_CONTROL,unbound-control)
 
 pgbindir := $(shell $(PG_CONFIG) --bindir)
 
-$(eval $(call require_program,CREATEDB,createdb,$(pgbindir)))
-$(eval $(call require_program,CREATEUSER,createuser,$(pgbindir)))
-$(eval $(call require_program,PG_CTL,pg_ctl,$(pgbindir)))
-$(eval $(call require_program,POSTGRES,postgres,$(pgbindir)))
+$(call require_program,CREATEDB,createdb,$(pgbindir))
+$(call require_program,CREATEUSER,createuser,$(pgbindir))
+$(call require_program,PG_CTL,pg_ctl,$(pgbindir))
+$(call require_program,POSTGRES,postgres,$(pgbindir))
 
 # User and group settings
 SYSTEM_GROUP     := hades
