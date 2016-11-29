@@ -1,5 +1,4 @@
 from setuptools import find_packages, setup
-from babel.messages import frontend as babel
 
 setup(name='@PACKAGE_NAME@',
       version='@PACKAGE_VERSION@',
