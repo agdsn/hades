@@ -252,11 +252,6 @@ CONFIGURE_FILES = \
     setup.py \
     $(NULL)
 
-#config.mk::
-#	test -f config.mk && $(print_config) | cmp - config.mk || $(print_config) > config.mk
-#
-#-include config.mk
-
 all: $(CONFIGURE_FILES) src/hades/constants.py
 
 $(CONFIGURE_FILES): %: %.in configure.mk .FORCE
