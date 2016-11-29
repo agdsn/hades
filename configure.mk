@@ -3,6 +3,17 @@
 # Functions #
 # --------- #
 
+# add_substitution(VARIABLE, VALUE)
+# ---------------------------------
+# Set a variable to a given value and add it to the list of substitution
+# variables.
+define add_substitution
+$(eval
+$1 = $2
+SUBSTITUTIONS += $1
+)
+endef
+
 # find_program(NAMES, [PATH])
 # -------------------------------------
 # Find the full path of a program. A specific PATH may be specified optionally.
@@ -28,6 +39,7 @@ endef
 # Find the full path of program and store the full path in a given variable.
 # Abort if the program can not be found. A specific PATH may be specified
 # optionally.
+# The variable is added to list of substitution variables.
 define require_program
 $(eval
 $1 := $$(call find_program,$2,$3)
@@ -36,6 +48,7 @@ ifeq "$$(strip $$($1))" ""
 else
     $$(info Found $2 at $$($1))
 endif
+SUBSTITUTIONS += $1
 )
 endef
 
@@ -44,57 +57,57 @@ endef
 # Metadata #
 # -------- #
 
-PACKAGE_NAME         := hades
-PACKAGE_VERSION      := 0.2.0.dev0
-PACKAGE_AUTHOR       := Sebastian Schrader
-PACKAGE_AUTHOR_EMAIL := sebastian.schrader@agdsn.de
-PACKAGE_LICENSE      := MIT
-PACKAGE_URL          := http://github.com/agdsn/hades
+$(call add_substitution, PACKAGE_NAME,         hades)
+$(call add_substitution, PACKAGE_VERSION,      0.2.0.dev0)
+$(call add_substitution, PACKAGE_AUTHOR,       Sebastian Schrader)
+$(call add_substitution, PACKAGE_AUTHOR_EMAIL, sebastian.schrader@agdsn.de)
+$(call add_substitution, PACKAGE_LICENSE,      MIT)
+$(call add_substitution, PACKAGE_URL,          http://github.com/agdsn/hades)
 
 # ----------- #
 # Directories #
 # ----------- #
 
 # GNU Coding Standards directories
-prefix         = /usr/local
-exec_prefix    = $(prefix)
-bindir         = $(exec_prefix)/bin
-sbindir        = $(exec_prefix)/sbin
-libexecdir     = $(exec_prefix)/libexec
-datarootdir    = $(prefix)/share
-datadir        = $(datarootdir)
-sysconfdir     = $(prefix)/etc
-sharedstatedir = $(prefix)/com
-localstatedir  = $(prefix)/var
-runstatedir    = $(localstatedir)/run
-includedir     = $(prefix)/include
-docdir         = $(datarootdir)/doc/$(PACKAGE_NAME)
-infodir        = $(datarootdir)/info
-htmldir        = $(docdir)
-dvidir         = $(docdir)
-pdfdir         = $(docdir)
-psdir          = $(docdir)
-libdir         = $(exec_prefix)/lib
-lispdir        = $(datarootdir)/emacs/site-lisp
-localedir      = $(datarootdir)/locale
-mandir         = $(datarootdir)/man
+$(call add_substitution, prefix,         /usr/local)
+$(call add_substitution, exec_prefix,    $(prefix))
+$(call add_substitution, bindir,         $(exec_prefix)/bin)
+$(call add_substitution, sbindir,        $(exec_prefix)/sbin)
+$(call add_substitution, libexecdir,     $(exec_prefix)/libexec)
+$(call add_substitution, datarootdir,    $(prefix)/share)
+$(call add_substitution, datadir,        $(datarootdir))
+$(call add_substitution, sysconfdir,     $(prefix)/etc)
+$(call add_substitution, sharedstatedir, $(prefix)/com)
+$(call add_substitution, localstatedir,  $(prefix)/var)
+$(call add_substitution, runstatedir,    $(localstatedir)/run)
+$(call add_substitution, includedir,     $(prefix)/include)
+$(call add_substitution, docdir,         $(datarootdir)/doc/$(PACKAGE_NAME))
+$(call add_substitution, infodir,        $(datarootdir)/info)
+$(call add_substitution, htmldir,        $(docdir))
+$(call add_substitution, dvidir,         $(docdir))
+$(call add_substitution, pdfdir,         $(docdir))
+$(call add_substitution, psdir,          $(docdir))
+$(call add_substitution, libdir,         $(exec_prefix)/lib)
+$(call add_substitution, lispdir,        $(datarootdir)/emacs/site-lisp)
+$(call add_substitution, localedir,      $(datarootdir)/locale)
+$(call add_substitution, mandir,         $(datarootdir)/man)
 
 # Automake-style package directories
-pkglibexecdir    = $(libexecdir)/$(PACKAGE_NAME)
-pkgsysconfdir    = $(sysconfdir)/$(PACKAGE_NAME)
-pkglocalstatedir = $(localstatedir)/$(PACKAGE_NAME)
-pkgrunstatedir   = $(runstatedir)/$(PACKAGE_NAME)
-pkglibdir        = $(libdir)/$(PACKAGE_NAME)
-pkgdatadir       = $(datadir)/$(PACKAGE_NAME)
+$(call add_substitution, pkglibexecdir,    $(libexecdir)/$(PACKAGE_NAME))
+$(call add_substitution, pkgsysconfdir,    $(sysconfdir)/$(PACKAGE_NAME))
+$(call add_substitution, pkglocalstatedir, $(localstatedir)/$(PACKAGE_NAME))
+$(call add_substitution, pkgrunstatedir,   $(runstatedir)/$(PACKAGE_NAME))
+$(call add_substitution, pkglibdir,        $(libdir)/$(PACKAGE_NAME))
+$(call add_substitution, pkgdatadir,       $(datadir)/$(PACKAGE_NAME))
 
 # Additional directories
-assetdir       = $(pkgdatadir)/assests
-dbusconfdir    = $(sysconfdir)/dbus-1/system.d
-systemdenvdir  = /etc/default
-systemdunitdir = /usr/lib/systemd/system
-templatedir    = $(pkgdatadir)/templates
-tmpfilesddir   = $(sysconfdir)/tmpfiles.d
-venvdir        = $(pkglibdir)
+$(call add_substitution, assetdir,       $(pkgdatadir)/assests)
+$(call add_substitution, dbusconfdir,    $(sysconfdir)/dbus-1/system.d)
+$(call add_substitution, systemdenvdir,  /etc/default)
+$(call add_substitution, systemdunitdir, /usr/lib/systemd/system)
+$(call add_substitution, templatedir,    $(pkgdatadir)/templates)
+$(call add_substitution, tmpfilesddir,   $(sysconfdir)/tmpfiles.d)
+$(call add_substitution, venvdir,        $(pkglibdir))
 
 # -------- #
 # Programs #
@@ -130,124 +143,33 @@ $(call require_program,PG_CTL,pg_ctl,$(pgbindir))
 $(call require_program,POSTGRES,postgres,$(pgbindir))
 
 # User and group settings
-SYSTEM_GROUP     := hades
-AGENT_USER       := hades-agent
-AGENT_GROUP      := hades-agent
-AGENT_HOME       := $(pkglocalstatedir)/agent
-AUTH_DHCP_USER   := hades-auth-dhcp
-AUTH_DHCP_GROUP  := hades-auth-dhcp
-AUTH_DHCP_HOME   := $(pkglocalstatedir)/auth-dhcp
-AUTH_DNS_USER    := hades-auth-dns
-AUTH_DNS_GROUP   := hades-auth-dns
-AUTH_DNS_HOME    := $(pkglocalstatedir)/auth-dns
-DATABASE_USER    := hades-database
-DATABASE_GROUP   := hades-database
-DATABASE_HOME    := $(pkglocalstatedir)/database
-PORTAL_USER      := hades-portal
-PORTAL_GROUP     := hades-portal
-PORTAL_HOME      := $(pkglocalstatedir)/portal
-RADIUS_USER      := hades-radius
-RADIUS_GROUP     := hades-radius
-RADIUS_HOME      := $(pkglocalstatedir)/radius
-UNAUTH_DNS_USER  := hades-unauth
-UNAUTH_DNS_GROUP := hades-unauth
-UNAUTH_DNS_HOME  := $(pkglocalstatedir)/unauth-dns
+$(call add_substitution, SYSTEM_GROUP,     hades)
+$(call add_substitution, AGENT_USER,       hades-agent)
+$(call add_substitution, AGENT_GROUP,      hades-agent)
+$(call add_substitution, AGENT_HOME,       $(pkglocalstatedir)/agent)
+$(call add_substitution, AUTH_DHCP_USER,   hades-auth-dhcp)
+$(call add_substitution, AUTH_DHCP_GROUP,  hades-auth-dhcp)
+$(call add_substitution, AUTH_DHCP_HOME,   $(pkglocalstatedir)/auth-dhcp)
+$(call add_substitution, AUTH_DNS_USER,    hades-auth-dns)
+$(call add_substitution, AUTH_DNS_GROUP,   hades-auth-dns)
+$(call add_substitution, AUTH_DNS_HOME,    $(pkglocalstatedir)/auth-dns)
+$(call add_substitution, DATABASE_USER,    hades-database)
+$(call add_substitution, DATABASE_GROUP,   hades-database)
+$(call add_substitution, DATABASE_HOME,    $(pkglocalstatedir)/database)
+$(call add_substitution, PORTAL_USER,      hades-portal)
+$(call add_substitution, PORTAL_GROUP,     hades-portal)
+$(call add_substitution, PORTAL_HOME,      $(pkglocalstatedir)/portal)
+$(call add_substitution, RADIUS_USER,      hades-radius)
+$(call add_substitution, RADIUS_GROUP,     hades-radius)
+$(call add_substitution, RADIUS_HOME,      $(pkglocalstatedir)/radius)
+$(call add_substitution, UNAUTH_DNS_USER,  hades-unauth)
+$(call add_substitution, UNAUTH_DNS_GROUP, hades-unauth)
+$(call add_substitution, UNAUTH_DNS_HOME,  $(pkglocalstatedir)/unauth-dns)
 
 NULL :=
 
 # Disable make's built-in suffix rules
 .SUFFIXES:
-
-# The following variables are substituted in .in files and are cached in
-# cache.mk for subsequent make runs.
-SUBSTITUTIONS = \
-    PACKAGE_NAME \
-    PACKAGE_VERSION \
-    PACKAGE_AUTHOR \
-    PACKAGE_AUTHOR_EMAIL \
-    PACKAGE_LICENSE \
-    PACKAGE_URL \
-    prefix \
-    exec_prefix \
-    bindir \
-    sbindir \
-    libexecdir \
-    datarootdir \
-    datadir \
-    sysconfdir \
-    sharedstatedir \
-    localstatedir \
-    runstatedir \
-    includedir \
-    docdir \
-    infodir \
-    htmldir \
-    dvidir \
-    pdfdir \
-    psdir \
-    libdir \
-    lispdir \
-    localedir \
-    mandir \
-    pkglibexecdir \
-    pkgsysconfdir \
-    pkglocalstatedir \
-    pkgrunstatedir \
-    pkglibdir \
-    pkgdatadir \
-    assetdir \
-    dbusconfdir \
-    systemdenvdir \
-    systemdunitdir \
-    templatedir \
-    tmpfilesddir \
-    venvdir \
-    pgbindir \
-    SYSTEM_GROUP \
-    DNSMASQ \
-    IP \
-    IPSET \
-    IPTABLES \
-    IPTABLES_RESTORE \
-    KEEPALIVED \
-    KILL \
-    RADIUSD \
-    RM \
-    SED \
-    SYSCTL \
-    UNBOUND \
-    UNBOUND_ANCHOR \
-    UNBOUND_CHECKCONF \
-    UNBOUND_CONTROL \
-    PGBINDIR \
-    CREATEDB \
-    CREATEUSER \
-    PG_CONFIG \
-    PG_CTL \
-    POSTGRES \
-    PSQL \
-    AGENT_USER \
-    AGENT_GROUP \
-    AGENT_HOME \
-    AUTH_DHCP_USER \
-    AUTH_DHCP_GROUP \
-    AUTH_DHCP_HOME \
-    AUTH_DNS_USER \
-    AUTH_DNS_GROUP \
-    AUTH_DNS_HOME \
-    DATABASE_USER \
-    DATABASE_GROUP \
-    DATABASE_HOME \
-    PORTAL_USER \
-    PORTAL_GROUP \
-    PORTAL_HOME \
-    RADIUS_USER \
-    RADIUS_GROUP \
-    RADIUS_HOME \
-    UNAUTH_DNS_USER \
-    UNAUTH_DNS_GROUP \
-    UNAUTH_DNS_HOME \
-    $(NULL)
 
 CONFIGURE_FILES = \
     bower.json \
