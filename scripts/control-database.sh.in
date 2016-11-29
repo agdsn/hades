@@ -71,7 +71,7 @@ do_init() {
 	if [[ -n "$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE" ]]; then
 		msg "Creating local foreign database '$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE' for testing."
 		@CREATEDB@ "$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE"
-		@PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction <<-COMMAND
+		@PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction postgres <<-COMMAND
 			CREATE ROLE "$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE" WITH LOGIN INHERIT UNENCRYPTED PASSWORD '$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE';
 			COMMAND
 		msg "Loading local foreign database schema"
