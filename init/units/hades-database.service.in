@@ -8,6 +8,8 @@ Wants=hades-network.service
 [Service]
 Type=forking
 TimeoutSec=120
+User=@DATABASE_USER@
+Group=@DATABASE_GROUP@
 SyslogIdentifier=hades-database
 EnvironmentFile=@systemdenvdir@/hades
 ExecStartPre=@pkglibexecdir@/control-database.sh init
@@ -15,5 +17,3 @@ ExecStart=@pkglibexecdir@/control-database.sh start
 ExecReload=@pkglibexecdir@/control-database.sh reload
 ExecStop=@pkglibexecdir@/control-database.sh stop
 Restart=always
-User=postgres
-Group=postgres
