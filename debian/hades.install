@@ -1,3 +1,4 @@
+configs/config.py etc/hades
 init/units/*.service usr/lib/systemd/system
 init/units/*.target usr/lib/systemd/system
 init/units/*.timer usr/lib/systemd/system
