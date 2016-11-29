@@ -1,4 +1,45 @@
 #!/usr/bin/make -f
+# --------- #
+# Functions #
+# --------- #
+
+# find_program(NAMES, [PATH])
+# -------------------------------------
+# Find the full path of a program. A specific PATH may be specified optionally.
+define find_program
+$(shell
+    $(if $2,PATH="$2";,)
+    IFS=':';
+    for path in $$PATH; do
+        IFS=;
+        for exec in $1; do
+            if [ -x "$${path}/$${exec}" ]; then
+                printf "%s/%s" "$$path" "$$exec";
+            exit 0;
+            fi;
+        done;
+    done;
+    exit 127
+)
+endef
+
+# require_program(VARIABLE, NAMES, [PATH])
+# ----------------------------------------
+# Find the full path of program and store the full path in a given variable.
+# Abort if the program can not be found. A specific PATH may be specified
+# optionally.
+define require_program
+$(eval
+$1 := $$(call find_program,$2,$3)
+ifeq "$$(strip $$($1))" ""
+    $$(error Could not find $2)
+else
+    $$(info Found $2 at $$($1))
+endif
+)
+endef
+
+
 # -------- #
 # Metadata #
 # -------- #
@@ -58,37 +99,6 @@ venvdir        = $(pkglibdir)
 # -------- #
 # Programs #
 # -------- #
-
-# Find a program on PATH
-define find_program
-$(shell
-    $(if $2,PATH="$2";,)
-    IFS=':';
-    for path in $$PATH; do
-        IFS=;
-        for exec in $1; do
-            if [ -x "$${path}/$${exec}" ]; then
-                printf "%s/%s" "$$path" "$$exec";
-            exit 0;
-            fi;
-        done;
-    done;
-    exit 127
-)
-endef
-
-# Find a program and store the full path in a variable
-# Abort if the program can not be found
-define require_program
-$(eval
-$1 := $$(call find_program,$2,$3)
-ifeq "$$(strip $$($1))" ""
-    $$(error Could not find $2)
-else
-    $$(info Found $2 at $$($1))
-endif
-)
-endef
 
 $(call require_program,SHELL,bash)
 
