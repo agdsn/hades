@@ -14,3 +14,8 @@ DESTDIR = $(CURDIR)/debian/hades
 override_dh_auto_configure:
 	make -rf configure.mk prefix=/usr libexecdir=/usr/lib sysconfdir=/etc localstatedir=/var runstatedir=/run
 	dh_auto_configure
+
+override_dh_auto_install:
+	npm install bower
+	node_modules/.bin/bower install --allow-root
+	dh_auto_install
