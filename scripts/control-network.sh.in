@@ -37,7 +37,7 @@ netaddr_ip() {
 
 create_bridge_if_not_exists() {
 	local -r interface="$1"
-	local -r address="$2"
+	local -r address="${2-}"
 	local -r sysfs_path="/sys/class/net/$interface"
 	msg "Creating bridge $interface"
 	if [[ -d "$sysfs_path" ]]; then
@@ -68,17 +68,17 @@ attach_bridge_port() {
 link_namespace() {
 	local -r namespace="$1"
 	local -r parent_interface="$2"
-	local -r parent_address="$3"
-	local -r namespace_interface="$4"
-	local -r namespace_address="$5"
+	local -r namespace_interface="$3"
+	local -r parent_address="${4-}"
+	local -r namespace_address="${5-}"
 
 	msg "Linking network namespace $namespace via veth pair $parent_interface <-> $namespace_interface"
 	@IP@ link add name "$parent_interface" type veth peer netns "$namespace" name "$namespace_interface"
-	if [[ -n "$parent_address" && -n "$namespace_address" ]]; then
-		add_address "" "$parent_interface" "$parent_address" "$namespace_address"
+	if [[ -n "$parent_address" ]]; then
+		add_address "" "$parent_interface" "$(netaddr_ip "$parent_address")" ${namespace_address+"$(netaddr_ip "$namespace_address")"}
 	fi
-	if [[ -n "$parent_address" && -n "$namespace_address" ]]; then
-		add_address "$namespace" "$namespace_interface" "$namespace_address" "$parent_address"
+	if [[ -n "$namespace_address" ]]; then
+		add_address "$namespace" "$namespace_interface" "$(netaddr_ip "$namespace_address")" ${parent_address+"$(netaddr_ip "$parent_address")"}
 	fi
 	@IP@ link set dev "$parent_interface" up
 	@IP@ netns exec "$namespace" @IP@ link set dev "$namespace_interface" up
@@ -95,10 +95,10 @@ setup_namespace_common_pre() {
 	@IP@ netns exec "$namespace" @IP@ link set dev lo up
 	@IP@ netns exec "$namespace" @SYSCTL@ --quiet net.ipv4.ip_nonlocal_bind=1
 
-	link_namespace "$namespace" "${namespace}-veth0" "$parent_address" eth0 "$namespace_address"
+	link_namespace "$namespace" "${namespace}-veth0" eth0 "$parent_address" "$namespace_address"
 	@IP@ netns exec "$namespace" @IP@ route add default via $(netaddr_ip "$namespace_address")
 
-	link_namespace "$namespace" "${namespace}-veth1" "" eth1 ""
+	link_namespace "$namespace" "${namespace}-veth1" eth1
 	attach_bridge_port "$HADES_VRRP_BRIDGE" "${namespace}-veth1"
 
 	msg "Moving interface $interface to network namespace $namespace as eth2"
