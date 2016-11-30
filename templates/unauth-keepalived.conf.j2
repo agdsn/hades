@@ -10,7 +10,7 @@ static_ipaddress {
     {{ HADES_VRRP_LISTEN_UNAUTH  }} dev eth1
 }
 
-vrrp_instance unauth {
+vrrp_instance hades-unauth {
     {%- if HADES_INITIAL_MASTER %}
     state MASTER
     {%- else %}

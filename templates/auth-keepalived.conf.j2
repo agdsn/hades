@@ -10,7 +10,7 @@ static_ipaddress {
     {{ HADES_VRRP_LISTEN_AUTH  }} dev eth1
 }
 
-vrrp_instance auth {
+vrrp_instance hades-auth {
     {%- if HADES_INITIAL_MASTER %}
     state MASTER
     {%- else %}
