@@ -158,10 +158,21 @@ def pg_utcnow(element, compiler, **kw):
     return "CURRENT_TIMESTAMP AT TIME ZONE 'UTC'"
 
 
-def get_connection():
+def get_engine():
+    """
+    Get a SQLAlchemy database engine that allows connections to the database.
+    :return: SQLAlchemy database engine
+    """
     config = get_config(True)
-    engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
-    return engine.connect()
+    return create_engine(config.SQLALCHEMY_DATABASE_URI)
+
+
+def get_connection():
+    """
+    Obtain a SQLAlchemy connection to the database
+    :return: SQLAlchemy database connection
+    """
+    return get_engine().connect()
 
 
 def lock_table(connection, target_table):

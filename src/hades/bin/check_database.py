@@ -10,6 +10,7 @@ from sqlalchemy.exc import DBAPIError
 from hades import constants
 from hades.common import db
 from hades.common.cli import ArgumentParser, parser as common_parser
+from hades.config.loader import load_config
 
 logger = logging.getLogger(__package__)
 
@@ -50,16 +51,18 @@ def check_table(conn, table):
 
 def main():
     parser = ArgumentParser(parents=[common_parser])
-    parser.parse_args()
+    args = parser.parse_args()
+    load_config(args.config, True)
     try:
-        db.engine.dispose()
+        engine = db.get_engine()
+        engine.dispose()
         with as_user(constants.AGENT_USER) as user_name:
             check_database(user_name, db.metadata.tables.values())
-        db.engine.dispose()
+        engine.dispose()
         with as_user(constants.PORTAL_USER) as user_name:
             check_database(user_name, (db.radacct, db.radpostauth,
                                        db.radusergroup))
-        db.engine.dispose()
+        engine.dispose()
         with as_user(constants.RADIUS_USER) as user_name:
             check_database(user_name, (db.nas, db.radacct, db.radgroupcheck,
                                        db.radgroupreply, db.radpostauth,
