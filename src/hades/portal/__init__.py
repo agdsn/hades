@@ -6,7 +6,7 @@ from hades.portal.session import NullSessionInterface
 
 app = Flask(
     __name__,
-    static_url_path='assets',
+    static_url_path='/assets',
     template_folder=resource_filename(__package__, 'templates'),
     static_folder=resource_filename(__package__, 'assets'),
 )
