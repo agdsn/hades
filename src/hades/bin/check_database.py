@@ -57,7 +57,9 @@ def main():
         engine = db.get_engine()
         engine.dispose()
         with as_user(constants.AGENT_USER) as user_name:
-            check_database(user_name, db.metadata.tables.values())
+            check_database(user_name,
+                           filter(lambda t: not t.info.get('temporary'),
+                                  db.metadata.tables.values()))
         engine.dispose()
         with as_user(constants.PORTAL_USER) as user_name:
             check_database(user_name, (db.radacct, db.radpostauth,

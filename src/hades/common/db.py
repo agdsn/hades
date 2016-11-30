@@ -18,7 +18,8 @@ metadata = MetaData()
 def as_copy(original_table, new_name):
     return Table(new_name, original_table.metadata,
                  *(Column(col.name, col.type)
-                   for col in original_table.columns))
+                   for col in original_table.columns),
+                 info={'temporary': True})
 
 
 dhcphost = Table(
