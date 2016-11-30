@@ -32,7 +32,7 @@ add_address() {
 }
 
 netaddr_ip() {
-	@venvdir@/bin/python -c "import netaddr; print(netaddr.IPNetwork('$1').ip)"
+	@venvdir@/bin/python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).ip)" "$1"
 }
 
 create_bridge_if_not_exists() {
