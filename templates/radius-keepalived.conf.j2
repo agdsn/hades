@@ -11,7 +11,7 @@ static_ipaddress {
 }
 
 vrrp_script check_database {
-    script "python3 -m hades.bin.check_database"
+    script "{{ constants.venvdir }}/bin/hades-check-database"
     interval 5
 }
 
