@@ -202,10 +202,13 @@ def create_temp_copy(connection, source, destination):
     if not connection.in_transaction():
         raise RuntimeError("must be executed in a transaction to have any "
                            "effect")
+    preparer = connection.dialect.identifier_preparer
     connection.execute(
-        'CREATE TEMPORARY TABLE "{destination}" ON COMMIT DROP AS '
-        'SELECT * FROM "{source}"'.format(source=source.name,
-                                          destination=destination.name)
+        'CREATE TEMPORARY TABLE {destination} ON COMMIT DROP AS '
+        'SELECT * FROM {source}'.format(
+            source=preparer.format_table(source),
+            destination=preparer.format_table(destination),
+        )
     )
 
 
@@ -267,8 +270,9 @@ def diff_tables(connection, master, copy, result_columns):
 
 
 def refresh_materialized_view(transaction, view):
-    transaction.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY "{view}"'
-                        .format(view=view.name))
+    preparer = transaction.dialect.identifier_preparer
+    transaction.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY {view}'
+                        .format(view=preparer.format_table(view)))
 
 
 def refresh_and_diff_materialized_view(connection, view, copy, result_columns):
