@@ -19,12 +19,6 @@ HADES_RADIUS_LOCALHOST_SECRET = 'testing123'
 HADES_CONTACT_ADDRESSES = OrderedDict([
     ("Support", "support@example.com"),
 ])
-HADES_POSTGRESQL_SOCKET = '/var/run/postgresql'
-HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING = True
-HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING = True
-HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING = True
-HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING = True
-HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING = True
 HADES_USER_NETWORKS = {
     'Wu9': netaddr.IPNetwork('141.30.202.1/24'),
     'Wu3': netaddr.IPNetwork('141.30.223.1/24'),
@@ -35,13 +29,6 @@ HADES_USER_NETWORKS = {
     'Wu5': netaddr.IPNetwork('141.30.228.1/24'),
     'UNEP': netaddr.IPNetwork('141.30.242.129/28'),
     'Bor34': netaddr.IPNetwork('141.76.121.1/24'),
-}
-HADES_POSTGRESQL_FOREIGN_SERVER_FDW = 'postgres_fdw'
-HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS = {
-    'host': HADES_POSTGRESQL_SOCKET,
-    'dbname': 'radius',
-}
-HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS = {
 }
 HADES_POSTGRESQL_USER_MAPPINGS = {
     'hades-agent': {
@@ -61,11 +48,3 @@ HADES_POSTGRESQL_USER_MAPPINGS = {
         'password': 'correcthorsebatterystaple',
     },
 }
-
-# Set some timeout values for the mysql foreign data wrapper. This
-# SQL statement will be run after connecting to the foreign database.
-if HADES_POSTGRESQL_FOREIGN_SERVER_FDW == 'mysql_fdw':
-    HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS['init_command'] = (
-        'SET SESSION lock_wait_timeout = 5, '
-        'SESSION innodb_lock_wait_timeout = 5;'
-    )
