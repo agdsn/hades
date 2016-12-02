@@ -12,3 +12,5 @@
 /hades-unauth-http.service
 /hades-unauth-portal.service
 /hades-unauth-vrrp.service
+/hades.busconfig
+/hades.tmpfile

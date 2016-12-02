@@ -1,10 +1,11 @@
-configs/config.py etc/hades
-init/units/*.service usr/lib/systemd/system
-init/units/*.target usr/lib/systemd/system
-init/units/*.timer usr/lib/systemd/system
-init/env/hades etc/default
-init/dbus/de.agdsn.hades.conf etc/dbus-1/system.d
-init/tmpfiles.d/hades.conf etc/tmpfiles.d
+#!/usr/bin/dh-exec
+conf/*.service usr/lib/systemd/system/
+conf/*.target usr/lib/systemd/system/
+conf/*.timer usr/lib/systemd/system/
+conf/config.py etc/hades
+conf/hades.busconfig => etc/dbus-1/system.d/de.agdsn.hades.conf
+conf/hades.default => etc/default/hades
+conf/hades.tmpfile => etc/tmpfiles.d/hades.conf
 templates/* usr/share/hades/templates
 locales/de/LC_MESSAGES/hades.mo usr/share/locales/de/LC_MESSAGES
 scripts/*.sh usr/lib/hades

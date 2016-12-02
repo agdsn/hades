@@ -173,22 +173,22 @@ NULL :=
 
 CONFIGURE_FILES = \
     bower.json \
-    init/dbus/de.agdsn.hades.conf \
-    init/tmpfiles.d/hades.conf \
-    init/units/hades-agent.service \
-    init/units/hades-auth-dhcp.service \
-    init/units/hades-auth-dns.service \
-    init/units/hades-auth-vrrp.service \
-    init/units/hades-cleanup.service \
-    init/units/hades-database.service \
-    init/units/hades-network.service \
-    init/units/hades-radius.service \
-    init/units/hades-radius-vrrp.service \
-    init/units/hades-refresh.service \
-    init/units/hades-unauth-dns.service \
-    init/units/hades-unauth-http.service \
-    init/units/hades-unauth-portal.service \
-    init/units/hades-unauth-vrrp.service \
+    conf/hades-agent.service \
+    conf/hades-auth-dhcp.service \
+    conf/hades-auth-dns.service \
+    conf/hades-auth-vrrp.service \
+    conf/hades-cleanup.service \
+    conf/hades-database.service \
+    conf/hades-network.service \
+    conf/hades-radius-vrrp.service \
+    conf/hades-radius.service \
+    conf/hades-refresh.service \
+    conf/hades-unauth-dns.service \
+    conf/hades-unauth-http.service \
+    conf/hades-unauth-portal.service \
+    conf/hades-unauth-vrrp.service \
+    conf/hades.busconfig \
+    conf/hades.tmpfile \
     scripts/control-database.sh \
     scripts/control-network.sh \
     scripts/functions.sh \
