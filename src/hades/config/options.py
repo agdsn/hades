@@ -541,6 +541,7 @@ class HADES_GRATUITOUS_ARP_INTERVAL(Option):
     """
     type = timedelta
     default = timedelta(seconds=1)
+    static_check = check.greater_than(timedelta(seconds=0))
 
 
 ################
