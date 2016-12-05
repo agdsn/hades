@@ -21,14 +21,14 @@ for source_package in "${!PACKAGES[@]}"; do
 	if [[ ! -e ${source_package} ]]; then
 		git clone "${REPOSITORIES[$source_package]}" ${source_package}
 	fi
-	mk-build-deps --install --remove -t 'apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends -t jessie-backports' "${source_package}/debian/control"
+	sudo mk-build-deps --install --remove -t 'apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends -t jessie-backports' "${source_package}/debian/control"
 	pushd "$source_package"
 	version="$(dpkg-parsechangelog -S Version)"
 	dpkg-buildpackage -uc -us -b
 	popd
 	for package in ${PACKAGES[$source_package]}; do
-		dpkg -i ${package}_${version}_*.deb
+		sudo dpkg -i ${package}_${version}_*.deb
 	done
-	apt-get purge "${source_package}-build-deps"
-	apt-get autoremove --purge
+	sudo apt-get purge "${source_package}-build-deps"
+	sudo apt-get autoremove --purge
 done

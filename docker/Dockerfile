@@ -1,8 +1,9 @@
 FROM debian:jessie
 MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
-
+ARG BUILDER_UID=1000
+ARG BUILDER_GID=1000
 ENV LANG=C.UTF-8 container=docker
-COPY etc/apt/ /etc/apt/
+COPY etc/ /etc/
 
 RUN apt-get update && apt-get install -y -t jessie-backports \
     bats \
@@ -38,6 +39,7 @@ RUN apt-get update && apt-get install -y -t jessie-backports \
     python3-pip \
     python3-setuptools \
     python3-venv \
+    sudo \
     tcpdump \
     unbound \
     unzip \
@@ -49,6 +51,7 @@ RUN apt-get update && apt-get install -y -t jessie-backports \
     && ln -s /usr/bin/nodejs /usr/bin/node \
     && find /etc/systemd/system /lib/systemd/system -path '*.wants/*' ! -name '*journal*' ! -name '*tmpfiles*' ! -name '*dbus*' -delete \
     && find /etc/rc*.d -type l -delete \
+    && adduser --system --home /build --shell /bin/bash --uid $BUILDER_UID --gid $BUILDER_GID builder \
     && sed -i -re 's/^#?(ForwardTo[^=]+)=.*$/\1=no/' /etc/systemd/journald.conf
 
 COPY ["build.sh", "/usr/local/bin"]
