@@ -4,7 +4,7 @@ log-facility=-
 keep-in-foreground
 user={{ constants.UNAUTH_DNS_USER }}
 group={{ constants.UNAUTH_DNS_GROUP }}
-pid-file={{ constants.pkgrunstatedir }}/unauth-dns/dnsmasq.pid
+pid-file={{ constants.UNAUTH_DNS_PID_FILE }}
 
 interface=eth2
 listen-address={{ HADES_UNAUTH_LISTEN.ip }}

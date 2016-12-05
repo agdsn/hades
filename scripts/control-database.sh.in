@@ -68,20 +68,20 @@ do_init() {
 		@CREATEUSER@ "$user"
 	done
 
-	if [[ -n "$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE" ]]; then
-		msg "Creating local foreign database '$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE' for testing."
-		@CREATEDB@ "$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE"
+	if [[ "$HADES_LOCAL_MASTER_DATABASE" = True ]]; then
+		msg "Creating local master database @LOCAL_MASTER_DATABASE_NAME@ for testing."
+		@CREATEDB@ @LOCAL_MASTER_DATABASE_NAME@
 		@PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction postgres <<-COMMAND
-			CREATE ROLE "$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE" WITH LOGIN INHERIT UNENCRYPTED PASSWORD '$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE';
+			CREATE ROLE "@LOCAL_MASTER_DATABASE_USER@" WITH LOGIN INHERIT UNENCRYPTED PASSWORD '@LOCAL_MASTER_DATABASE_PASSWORD@';
 			COMMAND
-		msg "Loading local foreign database schema"
-		@venvdir@/bin/hades-generate-config schema_fdw.sql.j2 | @PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "$HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE"
+		msg "Loading local master database schema"
+		@venvdir@/bin/hades-generate-config schema_fdw.sql.j2 | @PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- @LOCAL_MASTER_DATABASE_NAME@
 	fi
 
-	msg "Creating database '$HADES_POSTGRESQL_DATABASE'"
-	@CREATEDB@ "$HADES_POSTGRESQL_DATABASE"
+	msg "Creating database @DATABASE_NAME@"
+	@CREATEDB@ @DATABASE_NAME@
 	msg "Loading database schema"
-	@venvdir@/bin/hades-generate-config schema.sql.j2 | @PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- "$HADES_POSTGRESQL_DATABASE"
+	@venvdir@/bin/hades-generate-config schema.sql.j2 | @PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- @DATABASE_NAME@
 	@PG_CTL@ stop -s
 	msg "PostgreSQL cluster at $PGDATA successfully initialised."
 	trap - EXIT HUP INT QUIT ABRT

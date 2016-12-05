@@ -7,10 +7,10 @@ Wants=hades-network.service hades-database.service
 
 [Service]
 Type=forking
-PIDFile=@pkgrunstatedir@/radius/radiusd.pid
+PIDFile=@RADIUS_PID_FILE@
 SyslogIdentifier=hades-radius
 Environment=PGAPPNAME=hades-radius
-EnvironmentFile=@systemdenvdir@/hades
+EnvironmentFile=@systemdenvfile@
 ExecStartPre=@venvdir@/bin/hades-generate-config freeradius @pkgrunstatedir@/radius
 ExecStartPre=@RADIUSD@ -d @pkgrunstatedir@/radius -Cx -lstdout
 ExecStart=@RADIUSD@ -d @pkgrunstatedir@/radius

@@ -104,19 +104,6 @@ class HADES_NETNS_UNAUTH_LISTEN(Option):
 ######################
 
 
-class HADES_POSTGRESQL_DATABASE(Option):
-    """Name of the PostgreSQL database on the site node"""
-    default = 'hades'
-    type = str
-
-
-class HADES_POSTGRESQL_SOCKET_DIRECTORY(Option):
-    """Path to the PostgreSQL socket directory"""
-    default = constants.pkgrunstatedir + '/database'
-    type = str
-    runtime_check = check.directory_exists
-
-
 class HADES_POSTGRESQL_PORT(Option):
     """Port and socket name of the PostgresSQL database"""
     default = 5432
@@ -124,20 +111,11 @@ class HADES_POSTGRESQL_PORT(Option):
     static_check = check.between(1, 65535)
 
 
-class HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE(Option):
-    """
-    If set to a string, create and use a local “foreign” database with that
-    name.
-    """
-    type = (str, type(None))
-    default = None
-
-
 class HADES_POSTGRESQL_FOREIGN_SERVER_FDW(Option):
     """
     Name of the foreign data wrapper extensions that should be used.
 
-    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     default = 'postgres_fdw'
     type = str
@@ -147,7 +125,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS(Option):
     """
     Foreign data wrapper specific server options
 
-    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     type = collections.Mapping
     default = {}
@@ -157,7 +135,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_TYPE(Option):
     """
     Foreign data wrapper specific server type
 
-    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     type = (str, type(None))
     default = None
@@ -167,7 +145,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_VERSION(Option):
     """
     Foreign data wrapper specific server version
 
-    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     type = (str, type(None))
     default = None
@@ -178,7 +156,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
     Foreign data wrapper options that are set on each foreign table.
     The options can be overridden with table specific options.
 
-    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     default = {
         'dbname': 'hades',
@@ -204,7 +182,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS(Option):
     """
     Foreign data wrapper options for the dhcphost table
 
-    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     default = {
         'table_name': 'dhcphost',
@@ -216,7 +194,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS(Option):
     """
     Foreign data wrapper options for the nas table
 
-    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     default = {
         'table_name': 'nas',
@@ -237,7 +215,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS(Option):
     """
     Foreign data wrapper options for the radcheck table
 
-    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     default = {
         'table_name': 'radcheck',
@@ -249,7 +227,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS(Option):
     """
     Foreign data wrapper options for the radgroupcheck table
 
-    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     default = {
         'table_name': 'radgroupcheck',
@@ -261,7 +239,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS(Option):
     """
     Foreign data wrapper options for the radgroupreply table
 
-    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     default = {
         'table_name': 'radgroupreply',
@@ -282,7 +260,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS(Option):
     """
     Foreign data wrapper options for the radreply table
 
-    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     default = {
         'table_name': 'radreply',
@@ -303,7 +281,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS(Option):
     """
     Foreign data wrapper options for the radusergroup table
 
-    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     default = {
         'table_name': 'radusergroup',
@@ -316,7 +294,7 @@ class HADES_POSTGRESQL_USER_MAPPINGS(Option):
     User mappings from local database users to users on the foreign database
     server
 
-    If HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is set, this option is ignored.
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     type = collections.Mapping
     static_check = check.satisfy_all(
@@ -499,14 +477,6 @@ class HADES_UNAUTH_WHITELIST_IPSET(Option):
 ##################
 
 
-class HADES_RADIUS_PID_FILE(Option):
-    """PID file of the freeRADIUS server"""
-    default = constants.pkgrunstatedir + '/radius/radiusd.pid'
-    type = str
-    static_check = check.not_empty
-    runtime_check = check.file_creatable
-
-
 class HADES_RADIUS_LISTEN(Option):
     """IP and network the RADIUS server is listening on"""
     type = netaddr.IPNetwork
@@ -685,6 +655,14 @@ class HADES_CREATE_DUMMY_INTERFACES(Option):
     default = False
 
 
+class HADES_LOCAL_MASTER_DATABASE(Option):
+    """
+    Create and use a local “foreign” database.
+    """
+    type = bool
+    default = False
+
+
 #################
 # Flask options #
 #################
@@ -733,7 +711,7 @@ class SQLALCHEMY_DATABASE_URI(Option):
             'connect_timeout': 5,
         })
         return urllib.parse.urlunsplit(('postgresql', '',
-                                        config.HADES_POSTGRESQL_DATABASE,
+                                        constants.DATABASE_NAME,
                                         query, ''))
     type = str
 

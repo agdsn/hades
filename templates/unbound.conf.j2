@@ -2,14 +2,14 @@ server:
     directory: "{{ constants.AUTH_DNS_HOME }}"
     username: {{ constants.AUTH_DNS_USER }}
     do-daemonize: no
-    pidfile: "{{ constants.pkgrunstatedir }}/auth-dns/unbound.pid"
+    pidfile: "{{ constants.AUTH_DNS_PID_FILE }}"
     interface: 127.0.0.1
     interface: {{ HADES_AUTH_LISTEN.ip }}
     {%- for name, network in HADES_USER_NETWORKS.items() %}
     access-control: {{ network }} allow
     {%- endfor %}
-    auto-trust-anchor-file: "{{ constants.pkglocalstatedir }}/auth-dns/root.key"
-    root-hints: "/usr/share/dns/root.hints"
+    auto-trust-anchor-file: "{{ constants.AUTH_DNS_TRUST_ANCHOR_FILE }}"
+    root-hints: "{{ constants.AUTH_DNS_ROOT_HINTS }}"
     # Log to stderr
     logfile: ""
     log-time-ascii: yes

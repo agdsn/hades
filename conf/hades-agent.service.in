@@ -13,7 +13,7 @@ User=@AGENT_USER@
 Group=@AGENT_GROUP@
 SyslogIdentifier=hades-agent
 Environment=PGAPPNAME=hades-agent
-EnvironmentFile=@systemdenvdir@/hades
+EnvironmentFile=@systemdenvfile@
 ExecStart=@venvdir@/bin/hades-agent --pidfile=@pkgrunstatedir@/agent/worker.pid
 Restart=always
 RestartSec=5

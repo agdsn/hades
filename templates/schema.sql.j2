@@ -1,9 +1,9 @@
 --
 -- PostgreSQL database dump
 --
-{%- if HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE is defined %}
+{%- if HADES_LOCAL_MASTER_DATABASE %}
 {%- set foreign_server_fdw = 'postgres_fdw' %}
-{%- set foreign_server_options = {'host': '127.0.0.1', 'dbname': HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE} %}
+{%- set foreign_server_options = {'host': '127.0.0.1', 'dbname': constants.LOCAL_MASTER_DATABASE_NAME} %}
 {%- set foreign_server_type = None %}
 {%- set foreign_server_version = None %}
 {%- set foreign_table_global_options = {} %}
@@ -14,7 +14,7 @@
 {%- set foreign_table_radgroupreply_options = {'table_name': 'radgroupreply'} %}
 {%- set foreign_table_radreply_options = {'table_name': 'radreply'} %}
 {%- set foreign_table_radusergroup_options = {'table_name': 'radusergroup'} %}
-{%- set user_mappings = {'PUBLIC': {'user': HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE, 'password': HADES_POSTGRESQL_LOCAL_FOREIGN_DATABASE}} %}
+{%- set user_mappings = {'PUBLIC': {'user': constants.LOCAL_MASTER_DATABASE_USER, 'password': constants.LOCAL_MASTER_DATABASE_PASSWORD}} %}
 {%- else %}
 {%- set foreign_server_fdw = HADES_POSTGRESQL_FOREIGN_SERVER_FDW %}
 {%- set foreign_server_options = HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS %}

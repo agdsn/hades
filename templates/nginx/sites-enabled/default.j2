@@ -28,6 +28,6 @@ server {
 
 	location / {
 		include uwsgi_params;
-		uwsgi_pass unix:{{ HADES_PORTAL_UWSGI_SOCKET }};
+		uwsgi_pass unix:{{ constants.PORTAL_UWSGI_SOCKET }};
 	}
 }

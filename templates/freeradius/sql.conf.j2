@@ -33,13 +33,13 @@ sql {
 	driver = "rlm_sql_${database}"
 
 	# Connection info:
-	server = "{{ constants.pkgrunstatedir }}/database"
+	server = "{{ constants.DATABASE_SOCKET_DIRECTORY }}"
 	port = {{ HADES_POSTGRESQL_PORT }}
 	login = "{{ constants.RADIUS_USER }}"
 	#password = "radpass"
 
 	# Database table configuration for everything except Oracle
-	radius_db = "{{ HADES_POSTGRESQL_DATABASE }}"
+	radius_db = "{{ constants.DATABASE_NAME }}"
 	# If you are using Oracle then use this instead
         # radius_db = "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=your_sid)))"
 

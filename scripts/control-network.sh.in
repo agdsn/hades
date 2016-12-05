@@ -112,7 +112,7 @@ setup_namespace_auth() {
 
 setup_namespace_unauth() {
 	msg "Creating ipset"
-	@IP@ netns exec unauth @IPSET@ create "$HADES_UNAUTH_WHITELIST_IPSET" hash:ip
+	@IP@ netns exec @UNAUTH_NAMESPACE@ @IPSET@ create "$HADES_UNAUTH_WHITELIST_IPSET" hash:ip
 }
 
 setup_namespace_common_post() {
@@ -137,18 +137,19 @@ setup_host_network() {
 		done
 	fi
 	create_bridge_if_not_exists "$HADES_VRRP_BRIDGE" "$HADES_VRRP_LISTEN_RADIUS"
+	attach_bridge_port "$HADES_VRRP_BRIDGE" "$HADES_VRRP_INTERFACE"
 
 	@venvdir@/bin/hades-generate-config iptables-main.j2 | @IPTABLES_RESTORE@
 }
 
 do_start() {
 	setup_host_network
-	setup_namespace_common_pre auth   "$HADES_AUTH_INTERFACE"   "$HADES_NETNS_MAIN_AUTH_LISTEN"   "$HADES_NETNS_AUTH_LISTEN"
-	setup_namespace_common_pre unauth "$HADES_UNAUTH_INTERFACE" "$HADES_NETNS_MAIN_UNAUTH_LISTEN" "$HADES_NETNS_UNAUTH_LISTEN"
+	setup_namespace_common_pre @AUTH_NAMESPACE@   "$HADES_AUTH_INTERFACE"   "$HADES_NETNS_MAIN_AUTH_LISTEN"   "$HADES_NETNS_AUTH_LISTEN"
+	setup_namespace_common_pre @UNAUTH_NAMESPACE@ "$HADES_UNAUTH_INTERFACE" "$HADES_NETNS_MAIN_UNAUTH_LISTEN" "$HADES_NETNS_UNAUTH_LISTEN"
 	setup_namespace_auth
 	setup_namespace_unauth
-	setup_namespace_common_post auth   "$HADES_AUTH_INTERFACE"
-	setup_namespace_common_post unauth "$HADES_UNAUTH_INTERFACE"
+	setup_namespace_common_post @AUTH_NAMESPACE@   "$HADES_AUTH_INTERFACE"
+	setup_namespace_common_post @UNAUTH_NAMESPACE@ "$HADES_UNAUTH_INTERFACE"
 }
 
 teardown_namespace() {

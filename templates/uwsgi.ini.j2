@@ -1,9 +1,9 @@
 [uwsgi]
 immediate-gid = {{ constants.PORTAL_GROUP }}
 immediate-uid = {{ constants.PORTAL_USER }}
-safe-pidfile2 = {{ constants.pkgrunstatedir }}/unauth-portal/uwsgi.pid
+safe-pidfile2 = {{ constants.PORTAL_UWSGI_PID_FILE }}
 need-plugin = python3
-uwsgi-socket = {{ constants.pkgrunstatedir }}/unauth-portal/uwsgi.sock
+uwsgi-socket = {{ constants.PORTAL_UWSGI_SOCKET }}
 need-app = true
 reaper = true
 chdir = {{ constants.PORTAL_HOME }}

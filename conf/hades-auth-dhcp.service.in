@@ -7,11 +7,11 @@ Wants=hades-network.service
 
 [Service]
 Type=dbus
-BusName=de.agdsn.hades.auth_dnsmasq
+BusName=@AUTH_DHCP_DBUS_NAME@
 SyslogIdentifier=hades-auth-dhcp
-EnvironmentFile=@systemdenvdir@/hades
+EnvironmentFile=@systemdenvfile@
 ExecStartPre=@venvdir@/bin/hades-generate-config auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
-ExecStart=@IP@ netns exec auth @DNSMASQ@ -k --enable-dbus=de.agdsn.hades.auth_dnsmasq --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf
+ExecStart=@IP@ netns exec @AUTH_NAMESPACE@ @DNSMASQ@ -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf
 ExecReload=@venvdir@/bin/hades-generate-config auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always

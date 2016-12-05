@@ -3,23 +3,23 @@
  "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
 <busconfig>
         <policy user="root">
-                <allow own="de.agdsn.hades.auth_dnsmasq"/>
-                <allow own="de.agdsn.hades.unauth_dnsmasq"/>
-                <allow send_destination="de.agdsn.hades.auth_dnsmasq"/>
-                <allow send_destination="de.agdsn.hades.unauth_dnsmasq"/>
+                <allow own="@AUTH_DHCP_DBUS_NAME@"/>
+                <allow own="@UNAUTH_DNS_DBUS_NAME@"/>
+                <allow send_destination="@AUTH_DHCP_DBUS_NAME@"/>
+                <allow send_destination="@UNAUTH_DNS_DBUS_NAME@"/>
         </policy>
         <policy user="@AGENT_USER@">
-                <allow own="de.agdsn.hades.auth_dnsmasq"/>
-                <allow send_destination="de.agdsn.hades.auth_dnsmasq"/>
+                <allow own="@AUTH_DHCP_DBUS_NAME@"/>
+                <allow send_destination="@AUTH_DHCP_DBUS_NAME@"/>
         </policy>
         <policy user="@UNAUTH_DNS_USER@">
-                <allow own="de.agdsn.hades.unauth_dnsmasq"/>
-                <allow send_destination="de.agdsn.hades.unauth_dnsmasq"/>
+                <allow own="@UNAUTH_DNS_DBUS_NAME@"/>
+                <allow send_destination="@UNAUTH_DNS_DBUS_NAME@"/>
         </policy>
         <policy context="default">
-                <deny own="de.agdsn.hades.auth_dnsmasq"/>
-                <deny own="de.agdsn.hades.unauth_dnsmasq"/>
-                <deny send_destination="de.agdsn.hades.auth_dnsmasq"/>
-                <deny send_destination="de.agdsn.hades.unauth_dnsmasq"/>
+                <deny own="@AUTH_DHCP_DBUS_NAME@"/>
+                <deny own="@UNAUTH_DNS_DBUS_NAME@"/>
+                <deny send_destination="@AUTH_DHCP_DBUS_NAME@"/>
+                <deny send_destination="@UNAUTH_DNS_DBUS_NAME@"/>
         </policy>
 </busconfig>

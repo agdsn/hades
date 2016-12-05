@@ -10,9 +10,9 @@ Type=forking
 PIDFile=@pkgrunstatedir@/unauth-vrrp/keepalived.pid
 KillMode=process
 SyslogIdentifier=hades-unauth-vrrp
-EnvironmentFile=@systemdenvdir@/hades
+EnvironmentFile=@systemdenvfile@
 ExecStartPre=@venvdir@/bin/hades-generate-config unauth-keepalived.conf.j2 @pkgrunstatedir@/unauth-vrrp/keepalived.conf
-ExecStart=@IP@ netns exec unauth @KEEPALIVED@ --log-console --vrrp --use-file=@pkgrunstatedir@/unauth-vrrp/keepalived.conf --pid=@pkgrunstatedir@/unauth-vrrp/keepalived.pid --vrrp_pid=@pkgrunstatedir@/unauth-vrrp/keepalived-vrrp.pid
+ExecStart=@IP@ netns exec @UNAUTH_NAMESPACE@ @KEEPALIVED@ --log-console --vrrp --use-file=@pkgrunstatedir@/unauth-vrrp/keepalived.conf --pid=@pkgrunstatedir@/unauth-vrrp/keepalived.pid --vrrp_pid=@pkgrunstatedir@/unauth-vrrp/keepalived-vrrp.pid
 ExecReload=@venvdir@/bin/hades-generate-config unauth-keepalived.conf.j2 @pkgrunstatedir@/unauth-vrrp/keepalived.conf
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always

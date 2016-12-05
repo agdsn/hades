@@ -7,7 +7,7 @@ Documentation=https://agdsn.github.io/hades/
 Type=oneshot
 RemainAfterExit=yes
 SyslogIdentifier=hades-network
-EnvironmentFile=@systemdenvdir@/hades
+EnvironmentFile=@systemdenvfile@
 ExecStart=@pkglibexecdir@/control-network.sh start
 ExecStop=@pkglibexecdir@/control-network.sh stop
 
