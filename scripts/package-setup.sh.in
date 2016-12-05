@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly -a users=(
+	'@AGENT_USER@'
+	'@AUTH_DHCP_USER@'
+	'@AUTH_DNS_USER@'
+	'@DATABASE_USER@'
+	'@PORTAL_USER@'
+	'@RADIUS_USER@'
+	'@UNAUTH_DNS_USER@'
+)
+readonly -A groups=(
+	['@AGENT_USER@']='@AGENT_GROUP@'
+	['@AUTH_DHCP_USER@']='@AUTH_DHCP_GROUP@'
+	['@AUTH_DNS_USER@']='@AUTH_DNS_GROUP@'
+	['@DATABASE_USER@']='@DATABASE_GROUP@'
+	['@PORTAL_USER@']='@PORTAL_GROUP@'
+	['@RADIUS_USER@']='@RADIUS_GROUP@'
+	['@UNAUTH_DNS_USER@']='@UNAUTH_DNS_GROUP@'
+)
+readonly -A homes=(
+	['@AGENT_USER@']='@AGENT_HOME@'
+	['@AUTH_DHCP_USER@']='@AUTH_DHCP_HOME@'
+	['@AUTH_DNS_USER@']='@AUTH_DNS_HOME@'
+	['@DATABASE_USER@']='@DATABASE_HOME@'
+	['@PORTAL_USER@']='@PORTAL_HOME@'
+	['@RADIUS_USER@']='@RADIUS_HOME@'
+	['@UNAUTH_DNS_USER@']='@UNAUTH_DNS_HOME@'
+)
+readonly -A services=(
+	['agent']='@AGENT_USER@'
+	['auth-dhcp']='@AUTH_DHCP_USER@'
+	['auth-dns']='@AUTH_DNS_USER@'
+	['auth-vrrp']=
+	['database']='@DATABASE_USER@'
+	['radius']='@RADIUS_USER@'
+	['radius-vrrp']=
+	['unauth-dns']='@UNAUTH_DNS_USER@'
+	['unauth-http']='@PORTAL_USER@'
+	['unauth-portal']='@PORTAL_USER@'
+	['unauth-vrrp']=
+)
+
+if ! getent group '@SYSTEM_GROUP@' &>/dev/null; then
+	echo "Creating @SYSTEM_GROUP@ group ..."
+	addgroup --quiet --system '@SYSTEM_GROUP@'
+fi
+
+for user in "${users[@]}"; do
+	group="${groups[$user]}"
+	home="${homes[$user]}"
+	if ! getent group "$group" &>/dev/null; then
+		echo "Creating $group group ..."
+		addgroup --quiet --system "$group"
+	fi
+	if [[ ! -d "$home" ]]; then
+		echo "Creating $home directory ..."
+		mkdir -p "$home"
+	fi
+	if ! getent passwd "$user" &>/dev/null; then
+		echo "Creating $user user ..."
+		adduser --quiet --system --home "$home" --no-create-home --ingroup "$group" --disabled-password "$user"
+		adduser --quiet "$user" '@SYSTEM_GROUP@'
+		chown "$user":"$group" "$home"
+	fi
+done
+
+for service in "${!services[@]}"; do
+	user="${services[$service]}"
+	directory="@pkglocalstatedir@/$service"
+	if [[ ! -d "$directory" ]]; then
+		echo "Creating $directory directory ..."
+		mkdir -p "$directory"
+		if [[ -n "$user" ]]; then
+			group="${groups[$user]}"
+			chown "$user":"$group" "$directory"
+		fi
+	fi
+done

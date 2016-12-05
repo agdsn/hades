@@ -247,6 +247,7 @@ CONFIGURE_FILES = \
     scripts/control-database.sh \
     scripts/control-network.sh \
     scripts/functions.sh \
+    scripts/package-setup.sh \
     scripts/update-trust-anchor.sh \
     setup.py \
     $(NULL)
