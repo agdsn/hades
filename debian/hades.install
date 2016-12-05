@@ -11,3 +11,4 @@ assets/bower/respond/dest/* usr/share/hades/assets/respond
 assets/hades/* usr/share/hades/assets/hades
 templates/* usr/share/hades/templates
 locales/de/LC_MESSAGES/hades.mo usr/share/locales/de/LC_MESSAGES
+scripts/*.sh usr/lib/hades
