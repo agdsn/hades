@@ -468,7 +468,7 @@ class HADES_UNAUTH_WHITELIST_DNS(Option):
 class HADES_UNAUTH_WHITELIST_IPSET(Option):
     """Name of ipset for whitelisted IPs.
     """
-    default = "unauth_whitelist"
+    default = "hades_unauth_whitelist"
     type = str
 
 
