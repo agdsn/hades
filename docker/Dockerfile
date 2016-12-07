@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y -t jessie-backports \
     devscripts \
     dh-exec \
     dh-virtualenv \
+    dig \
     dns-root-data \
     dnsmasq \
     dnsutils \
