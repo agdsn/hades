@@ -50,7 +50,7 @@ RUN apt-get update && apt-get install -y -t jessie-backports \
     && apt-get clean \
     && pg_lsclusters -h | cut -d ' ' -f 1-2 | xargs -rn 2 pg_dropcluster \
     && ln -s /usr/bin/nodejs /usr/bin/node \
-    && find /etc/systemd/system /lib/systemd/system -path '*.wants/*' ! -name '*journal*' ! -name '*tmpfiles*' ! -name '*dbus*' -delete \
+    && find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' ! -name '*journal*' ! -name '*tmpfiles*' ! -name '*dbus*' -printf '%f\0' | sort --unique --zero-terminated | xargs --null --no-run-if-empty systemctl mask \
     && find /etc/rc*.d -type l -delete \
     && adduser --system --home /build --shell /bin/bash --uid $BUILDER_UID --gid $BUILDER_GID builder \
     && sed -i -re 's/^#?(ForwardTo[^=]+)=.*$/\1=no/' /etc/systemd/journald.conf
