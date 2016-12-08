@@ -19,6 +19,7 @@ add_address() {
 	local -r namespace="$1"
 	local -r interface="$2"
 	local -r address="$3"
+	local -r peer_address="${4-}"
 
 	local -a netns=()
 	if [[ -z "$namespace" ]]; then
@@ -27,7 +28,7 @@ add_address() {
 		msg "Adding $address to $interface in namespace $namespace"
 		netns=(@IP@ netns exec "$namespace")
 	fi
-	${netns+"${netns[@]-}"} @IP@ address add "$address" dev "$interface"
+	${netns+"${netns[@]-}"} @IP@ address add "$address" ${peer_address:+peer "$peer_address"} dev "$interface"
 }
 
 netaddr_ip() {
@@ -73,11 +74,11 @@ link_namespace() {
 
 	msg "Linking network namespace $namespace via veth pair $parent_interface <-> $namespace_interface"
 	@IP@ link add name "$parent_interface" type veth peer netns "$namespace" name "$namespace_interface"
-	if [[ -n "$parent_address" ]]; then
-		add_address "" "$parent_interface" "$parent_address"
+	if [[ -n "$parent_address" && -n "$namespace_address" ]]; then
+		add_address "" "$parent_interface" "$parent_address" "$namespace_address"
 	fi
-	if [[ -n "$namespace_address" ]]; then
-		add_address "$namespace" "$namespace_interface" "$namespace_address"
+	if [[ -n "$parent_address" && -n "$namespace_address" ]]; then
+		add_address "$namespace" "$namespace_interface" "$namespace_address" "$parent_address"
 	fi
 	@IP@ link set dev "$parent_interface" up
 	@IP@ netns exec "$namespace" @IP@ link set dev "$namespace_interface" up
