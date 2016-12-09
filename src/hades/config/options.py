@@ -692,6 +692,18 @@ class HADES_LOCAL_MASTER_DATABASE(Option):
     default = False
 
 
+class HADES_BRIDGE_SERVICE_INTERFACES(Option):
+    """
+    Link the service interface of the auth and unauth network namespaces through
+    bridges and veth interfaces rather than moving the interface directly into
+    the network namespace.
+
+    This allows to attach other interfaces to the bridge to e.g. test DHCP.
+    """
+    type = bool
+    default = False
+
+
 #################
 # Flask options #
 #################

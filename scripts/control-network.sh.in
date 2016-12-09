@@ -101,9 +101,16 @@ setup_namespace_common_pre() {
 	link_namespace "$namespace" "${namespace}-veth1" eth1
 	attach_bridge_port "$HADES_VRRP_BRIDGE" "${namespace}-veth1"
 
-	msg "Moving interface $interface to network namespace $namespace as eth2"
-	@IP@ link set dev "$interface" netns "$namespace" name eth2
-	@IP@ netns exec "$namespace" @IP@ link set dev eth2 up
+	if [[ "$HADES_BRIDGE_SERVICE_INTERFACES" = True ]]; then
+		create_bridge_if_not_exists "br-${namespace}"
+		attach_bridge_port "br-${namespace}" "$interface"
+		link_namespace "$namespace" "${namespace}-veth2" eth2
+		attach_bridge_port "br-${namespace}" "${namespace}-veth2"
+	else
+		msg "Moving interface $interface to network namespace $namespace as eth2"
+		@IP@ link set dev "$interface" netns "$namespace" name eth2
+		@IP@ netns exec "$namespace" @IP@ link set dev eth2 up
+	fi
 }
 
 setup_namespace_auth() {
@@ -170,6 +177,10 @@ teardown_namespace() {
 	msg "Deleting network namespace $namespace"
 	@IP@ link delete dev "${namespace}-veth0"
 	@IP@ link delete dev "${namespace}-veth1"
+	if [[ "$HADES_BRIDGE_SERVICE_INTERFACES" = True ]]; then
+		@IP@ link delete dev "${namespace}-veth2"
+		@IP@ link delete dev "br-${namespace}"
+	fi
 	@IP@ netns delete "$namespace"
 }
 
