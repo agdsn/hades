@@ -46,6 +46,20 @@ def between(low, high):
     return checker
 
 
+def sequence(element_check):
+    # noinspection PyDecorator
+    @classmethod
+    def f(cls, config, value):
+        for i, v in enumerate(value):
+            try:
+                element_check.__get__(None, cls)(config, v)
+            except ConfigError as e:
+                raise OptionCheckError("Error at index {:d}: {}"
+                                       .format(i, e.args[0]),
+                                       option=cls.__name__)
+    return f
+
+
 def mapping(key_check=None, value_check=None):
     # noinspection PyDecorator
     @classmethod
@@ -158,18 +172,22 @@ def address_exists(cls, config, value):
                                option=cls.__name__)
 
 
-def ip_range_in_network(other_option):
+def ip_range_in_networks(other_option):
     other_option = coerce(other_option)
 
     # noinspection PyDecorator
     @classmethod
     def checker(cls, config, value):
-        network = config[other_option]
+        networks = config[other_option]
         first = netaddr.IPAddress(value.first)
         last = netaddr.IPAddress(value.last)
-        if first not in network or last not in network:
-            raise OptionCheckError("Range not contained in network {}"
-                                   .format(network), option=cls.__name__)
+        contained = any(first in network and last in network
+                        for network in networks)
+        if not contained:
+            raise OptionCheckError("Range not contained in any of the "
+                                   "networks {}"
+                                   .format(', '.join(networks)),
+                                   option=cls.__name__)
     return checker
 
 

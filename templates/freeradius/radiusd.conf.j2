@@ -270,7 +270,7 @@ max_requests = 8192
 #  The server ignore all "listen" section if you are using '-i' and '-p'
 #  on the command line.
 #
-listen {
+#listen {
 	#  Type of packets to listen for.
 	#  Allowed values are:
 	#	auth	listen for authentication packets
@@ -284,7 +284,7 @@ listen {
 	#		packets.  For examples, see the file
 	#		raddb/sites-available/coa
 	#
-	type = auth
+#	type = auth
 
 	#  Note: "type = proxy" lets you control the source IP used for
 	#        proxying packets, with some limitations:
@@ -303,7 +303,7 @@ listen {
 	#	dotted quad (1.2.3.4)
 	#       hostname    (radius.example.com)
 	#       wildcard    (*)
-	ipaddr = {{ HADES_RADIUS_LISTEN.ip }}
+#	ipaddr = *
 
 	#  OR, you can use an IPv6 address, but not both
 	#  at the same time.
@@ -313,7 +313,7 @@ listen {
 	#  Allowed values are:
 	#	integer port number (1812)
 	#	0 means "use /etc/services for the proper port"
-	port = {{ HADES_RADIUS_AUTHENTICATION_PORT }}
+#	port = 1812
 
 	#  Some systems support binding to an interface, in addition
 	#  to the IP address.  This feature isn't strictly necessary,
@@ -323,7 +323,7 @@ listen {
 	#  If your system does not support this feature, you will
 	#  get an error if you try to use it.
 	#
-	interface = {{ HADES_RADIUS_INTERFACE }}
+#	interface =
 
 	#  Per-socket lists of clients.  This is a very useful feature.
 	#
@@ -340,19 +340,19 @@ listen {
 	#  See clients.conf for the configuration of "per_socket_clients".
 	#
 #	clients = per_socket_clients
-}
+#}
 
 #  This second "listen" section is for listening on the accounting
 #  port, too.
 #
-listen {
-	ipaddr = {{ HADES_RADIUS_LISTEN.ip }}
+#listen {
+#	ipaddr = *
 #	ipv6addr = ::
-	port = {{ HADES_RADIUS_ACCOUNTING_PORT }}
-	type = acct
-	interface = {{ HADES_RADIUS_INTERFACE }}
+#	port = 1813
+#	type = acct
+#	interface =
 #	clients = per_socket_clients
-}
+#}
 
 # Don't listen on the proxy port (default is acct + 2 = 1814)
 listen {
@@ -378,6 +378,32 @@ listen {
 	type = acct
 	interface = lo
 }
+
+{%- for network in HADES_RADIUS_LISTEN %}
+listen {
+	{%- if network.version == 4 %}
+	ipaddr = {{ network.ip }}
+	{%- else %}
+	ipv6addr = {{ network.ip }}
+	{%- endif %}
+	port = {{ HADES_RADIUS_AUTHENTICATION_PORT }}
+	type = auth
+	interface = {{ HADES_RADIUS_INTERFACE }}
+#	clients = per_socket_clients
+}
+
+listen {
+	{%- if network.version == 4 %}
+	ipaddr = {{ network.ip }}
+	{%- else %}
+	ipv6addr = {{ network.ip }}
+	{%- endif %}
+	port = {{ HADES_RADIUS_ACCOUNTING_PORT }}
+	type = acct
+	interface = {{ HADES_RADIUS_INTERFACE }}
+#	clients = per_socket_clients
+}
+{%- endfor %}
 
 #  hostname_lookups: Log the names of clients or just their IP addresses
 #  e.g., www.freeradius.org (on) or 206.47.27.232 (off).

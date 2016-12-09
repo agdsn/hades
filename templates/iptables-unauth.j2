@@ -4,10 +4,10 @@
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
 {%- for port in HADES_UNAUTH_CAPTURED_TCP_PORTS %}
--A PREROUTING -i eth2 -m set ! --match-set {{ HADES_UNAUTH_WHITELIST_IPSET }} dst -p tcp -m tcp --dport {{ port }} -j DNAT --to-destination {{ HADES_UNAUTH_LISTEN.ip }}
+-A PREROUTING -i eth2 -m set ! --match-set {{ HADES_UNAUTH_WHITELIST_IPSET }} dst -p tcp -m tcp --dport {{ port }} -j DNAT --to-destination {{ HADES_UNAUTH_LISTEN[0].ip }}
 {%- endfor %}
 {%- for port in HADES_UNAUTH_CAPTURED_UDP_PORTS %}
--A PREROUTING -i eth2 -m set ! --match-set {{ HADES_UNAUTH_WHITELIST_IPSET }} dst -p udp -m udp --dport {{ port }} -j DNAT --to-destination {{ HADES_UNAUTH_LISTEN.ip }}
+-A PREROUTING -i eth2 -m set ! --match-set {{ HADES_UNAUTH_WHITELIST_IPSET }} dst -p udp -m udp --dport {{ port }} -j DNAT --to-destination {{ HADES_UNAUTH_LISTEN[0].ip }}
 {%- endfor %}
 -A POSTROUTING -o eth0 -j SNAT --to {{ HADES_NETNS_UNAUTH_LISTEN.ip }}
 COMMIT

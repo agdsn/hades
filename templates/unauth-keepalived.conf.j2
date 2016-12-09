@@ -36,7 +36,9 @@ vrrp_instance hades-unauth {
     }
 
     virtual_ipaddress {
-        {{ HADES_UNAUTH_LISTEN }} dev eth2
+        {%- for network in HADES_UNAUTH_LISTEN %}
+        {{ network }} dev eth2
+        {%- endfor %}
         {%- for network in HADES_USER_NETWORKS.values() %}
         {{ network }} dev eth2
         {%- endfor %}

@@ -11,8 +11,9 @@ pid-file={{ constants.AUTH_DHCP_PID_FILE }}
 
 interface=eth2
 except-interface=lo
-
-listen-address={{ HADES_AUTH_LISTEN.ip }}
+{%- for network in HADES_AUTH_LISTEN %}
+listen-address={{ network.ip }}
+{%- endfor %}
 
 # Bind to listed interfaces only
 bind-interfaces
@@ -25,7 +26,7 @@ dhcp-authoritative
 dhcp-range=set:{{ name }},{{ network.network }},static,{{ network.netmask }},{{ network.broadcast }},{{ HADES_AUTH_DHCP_LEASE_TIME.total_seconds()|int }}s
 dhcp-option=tag:{{ name }},option:router,{{ network.ip }}
 {% endfor %}
-dhcp-option=option:dns-server,{{ HADES_AUTH_LISTEN.ip }}
+dhcp-option=option:dns-server,{{ HADES_AUTH_LISTEN[0].ip }}
 dhcp-option=option:domain-name,{{ HADES_AUTH_DHCP_DOMAIN }}
 
 # Ensure lease max is high enough (default is 1000)

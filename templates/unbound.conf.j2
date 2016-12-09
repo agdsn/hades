@@ -4,7 +4,9 @@ server:
     do-daemonize: no
     pidfile: "{{ constants.AUTH_DNS_PID_FILE }}"
     interface: 127.0.0.1
-    interface: {{ HADES_AUTH_LISTEN.ip }}
+    {%- for network in HADES_AUTH_LISTEN %}
+    interface: {{ network.ip }}
+    {%- endfor %}
     {%- for name, network in HADES_USER_NETWORKS.items() %}
     access-control: {{ network }} allow
     {%- endfor %}

@@ -1,6 +1,8 @@
 server {
-	listen {{ HADES_UNAUTH_LISTEN.ip }}:80 default_server;
-	listen {{ HADES_UNAUTH_LISTEN.ip }}:443 ssl default_server;
+	{%- for network in HADES_UNAUTH_LISTEN %}
+	listen {{ network.ip }}:80 default_server;
+	listen {{ network.ip }}:443 ssl default_server;
+	{%- endfor %}
 
 	ssl_certificate {{ HADES_PORTAL_SSL_CERTIFICATE }};
 	ssl_certificate_key {{ HADES_PORTAL_SSL_CERTIFICATE_KEY }};
@@ -12,10 +14,10 @@ server {
 }
 
 server {
-	listen {{ HADES_UNAUTH_LISTEN.ip }}:80;
-
-	# SSL configuration
-	listen {{ HADES_UNAUTH_LISTEN.ip }}:443 ssl;
+	{%- for network in HADES_UNAUTH_LISTEN %}
+	listen {{ network.ip }}:80;
+	listen {{ network.ip }}:443 ssl;
+	{%- endfor %}
 
 	ssl_certificate {{ HADES_PORTAL_SSL_CERTIFICATE }};
 	ssl_certificate_key {{ HADES_PORTAL_SSL_CERTIFICATE_KEY }};

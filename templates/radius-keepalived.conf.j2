@@ -47,6 +47,8 @@ vrrp_instance hades-radius {
     }
 
     virtual_ipaddress {
-        {{ HADES_RADIUS_LISTEN }} dev {{ HADES_RADIUS_INTERFACE }}
+        {%- for network in HADES_RADIUS_LISTEN %}
+        {{ network }} dev {{ HADES_RADIUS_INTERFACE }}
+        {%- endfor %}
     }
 }

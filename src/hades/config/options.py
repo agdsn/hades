@@ -367,10 +367,22 @@ class HADES_AUTH_DHCP_LEASE_TIME(Option):
 
 
 class HADES_AUTH_LISTEN(Option):
-    """IP and network to listen on for requests from authenticated users"""
-    default = netaddr.IPNetwork('10.66.67.10/24')
-    static_check = check.network_ip
-    runtime_check = check.address_exists
+    """
+    Sequence of IPs and networks to listen on for requests from authenticated
+    users.
+
+    The first IP in the sequence will be the main IP, e.g. it will be advertised
+    as IP of DNS server in DHCP responses.
+    """
+    default = (
+        netaddr.IPNetwork('10.66.67.10/24'),
+    )
+    type = collections.Sequence
+    static_check = check.satisfy_all(
+        check.not_empty,
+        check.sequence(check.network_ip),
+    )
+    runtime_check = check.sequence(check.address_exists)
 
 
 class HADES_AUTH_INTERFACE(Option):
@@ -413,11 +425,21 @@ class HADES_UNAUTH_INTERFACE(Option):
 
 
 class HADES_UNAUTH_LISTEN(Option):
-    """IP and network to listen for unauthenticated users"""
-    default = netaddr.IPNetwork('10.66.0.1/19')
-    type = netaddr.IPNetwork
-    static_check = check.network_ip
-    runtime_check = check.address_exists
+    """
+    Sequence of IPs and networks to listen for unauthenticated users.
+
+    The first IP in the sequence will be the main IP, e.g. it will be advertised
+    as IP of DNS server in DHCP responses.
+    """
+    default = (
+        netaddr.IPNetwork('10.66.0.1/19'),
+    )
+    type = collections.Sequence
+    static_check = check.satisfy_all(
+        check.not_empty,
+        check.sequence(check.network_ip)
+    )
+    runtime_check = check.sequence(check.address_exists)
 
 
 class HADES_UNAUTH_ALLOWED_TCP_PORTS(Option):
@@ -455,7 +477,7 @@ class HADES_UNAUTH_DHCP_RANGE(Option):
     HADES_UNAUTH_LISTEN network."""
     default = netaddr.IPRange('10.66.0.10', '10.66.31.254')
     type = netaddr.IPRange
-    static_check = check.ip_range_in_network(HADES_UNAUTH_LISTEN)
+    static_check = check.ip_range_in_networks(HADES_UNAUTH_LISTEN)
 
 
 class HADES_UNAUTH_WHITELIST_DNS(Option):
@@ -478,10 +500,16 @@ class HADES_UNAUTH_WHITELIST_IPSET(Option):
 
 
 class HADES_RADIUS_LISTEN(Option):
-    """IP and network the RADIUS server is listening on"""
-    type = netaddr.IPNetwork
-    static_check = check.network_ip
-    runtime_check = check.address_exists
+    """
+    Sequence of IPs and networks the RADIUS server is listening on.
+    """
+    type = collections.Sequence
+    required = True
+    static_check = check.satisfy_all(
+        check.not_empty,
+        check.sequence(check.network_ip)
+    )
+    runtime_check = check.sequence(check.address_exists)
 
 
 class HADES_RADIUS_INTERFACE(Option):
