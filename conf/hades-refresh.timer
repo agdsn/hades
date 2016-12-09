@@ -1,7 +1,6 @@
 [Unit]
 Description=Hades refresh task (Timer)
 Documentation=https://agdsn.github.io/hades/
-PartOf=hades.target
 
 [Timer]
 OnActiveSec=10
