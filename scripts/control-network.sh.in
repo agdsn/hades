@@ -96,7 +96,7 @@ setup_namespace_common_pre() {
 	@IP@ netns exec "$namespace" @SYSCTL@ --quiet net.ipv4.ip_nonlocal_bind=1
 
 	link_namespace "$namespace" "${namespace}-veth0" eth0 "$parent_address" "$namespace_address"
-	@IP@ netns exec "$namespace" @IP@ route add default via $(netaddr_ip "$namespace_address")
+	@IP@ netns exec "$namespace" @IP@ route add default via "$(netaddr_ip "$namespace_address")"
 
 	link_namespace "$namespace" "${namespace}-veth1" eth1
 	attach_bridge_port "$HADES_VRRP_BRIDGE" "${namespace}-veth1"
