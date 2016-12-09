@@ -34,7 +34,7 @@ address=/dns.msftncsi.com/131.107.255.255
 # Wildcard A-Record to redirect all domains to the captive portal
 address=/#/{{ HADES_UNAUTH_LISTEN[0].ip }}
 
-{% if HADES_UNAUTH_WHITELIST_DNS -%}
+{%- if HADES_UNAUTH_WHITELIST_DNS %}
 # Resolve the whitelisted domains by using the default resolver.
 # Note that this also applies to all subdomains.
 server=/{{ HADES_UNAUTH_WHITELIST_DNS|join('/') }}/#

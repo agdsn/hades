@@ -269,7 +269,7 @@ policy {
 			Calling-Station-Id = "%{DHCP-Client-Hardware-Address}"
 			{%- raw %}
 			NAS-IP-Address = "%{%{DHCP-Gateway-IP-Address}:-127.0.0.1}"
-			{% endraw %}
+			{%- endraw %}
 			Acct-Status-Type = Start
 		}
 
