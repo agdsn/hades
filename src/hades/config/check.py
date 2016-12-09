@@ -73,7 +73,7 @@ def mapping(key_check=None, value_check=None):
             except ConfigError as e:
                 raise OptionCheckError("Error in key {}: {}"
                                        .format(k, e.args[0]),
-                                       option=option.__name__)
+                                       option=cls.__name__)
     return f
 
 
