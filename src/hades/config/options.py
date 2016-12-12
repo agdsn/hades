@@ -111,6 +111,18 @@ class HADES_POSTGRESQL_PORT(Option):
     static_check = check.between(1, 65535)
 
 
+class HADES_POSTGRESQL_LISTEN(Option):
+    """
+    A list of addresses PostgreSQL should listen on.
+    """
+    default = (
+        netaddr.IPNetwork('127.0.0.1/8'),
+    )
+    type = collections.Sequence
+    static_check = check.sequence(check.network_ip)
+    runtime_check = check.sequence(check.address_exists)
+
+
 class HADES_POSTGRESQL_FOREIGN_SERVER_FDW(Option):
     """
     Name of the foreign data wrapper extensions that should be used.
@@ -386,8 +398,16 @@ class HADES_AUTH_LISTEN(Option):
 
 
 class HADES_AUTH_INTERFACE(Option):
-    """Interface where requests from the authenticated users arrive. Interface
-    must not be attached directly to the users networks."""
+    """
+    Interface where requests of authenticated users arrive.
+
+    This interface will be moved into the auth namespace and IP addresses on
+    this interface are managed by the keepalived hades-auth VRRP instance.
+
+    This interface should therefore be managed completely by Hades. Aside from
+    its creation other tools, e.g. ifupdown, systemd-network, should not
+    interfere. No other daemons should listen on or bind to this interface.
+    """
     type = str
     required = True
     runtime_check = check.interface_exists
