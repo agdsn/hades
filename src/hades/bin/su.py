@@ -28,14 +28,14 @@ def main():
         passwd = pwd.getpwnam(args.user)
         group = grp.getgrgid(passwd.pw_gid)
     except KeyError:
-        print("No such user or group")
+        logger.critical("No such user or group")
         return os.EX_NOUSER
     filename = args.command
     try:
         drop_privileges(passwd, group)
         os.execvp(filename, [filename] + args.arguments)
     except (FileNotFoundError, PermissionError):
-        print("Could not execute {}".format(filename), file=sys.stderr)
+        logger.critical("Could not execute {}".format(filename), file=sys.stderr)
         return os.EX_NOINPUT
     except OSError:
         logger.exception("An OSError occurred")
