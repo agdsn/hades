@@ -157,6 +157,7 @@ $(call require_program,UNBOUND,unbound)
 $(call require_program,UNBOUND_ANCHOR,unbound-anchor)
 $(call require_program,UNBOUND_CHECKCONF,unbound-checkconf)
 $(call require_program,UNBOUND_CONTROL,unbound-control)
+$(call require_program,UWSGI,uwsgi)
 
 pgbindir := $(shell $(PG_CONFIG) --bindir)
 
