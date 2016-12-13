@@ -4,6 +4,8 @@ import os
 import pwd
 import sys
 
+from hades.common.cli import ArgumentParser, parser as common_parser
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,20 +19,21 @@ def drop_privileges(passwd, group):
 
 
 def main():
-    args = sys.argv
-    if len(args) < 3:
-        print("Usage: {} USER COMMANDS [ARGS...]".format(args[0]))
-        return os.EX_USAGE
+    parser = ArgumentParser(parents=[common_parser])
+    parser.add_argument('user')
+    parser.add_argument('command')
+    parser.add_argument('arguments', nargs='*')
+    args = parser.parse_args()
     try:
-        passwd = pwd.getpwnam(args[1])
+        passwd = pwd.getpwnam(args.user)
         group = grp.getgrgid(passwd.pw_gid)
     except KeyError:
         print("No such user or group")
         return os.EX_NOUSER
-    filename = args[2]
+    filename = args.command
     try:
         drop_privileges(passwd, group)
-        os.execvp(filename, args[2:])
+        os.execvp(filename, [filename] + args.arguments)
     except (FileNotFoundError, PermissionError):
         print("Could not execute {}".format(filename), file=sys.stderr)
         return os.EX_NOINPUT
