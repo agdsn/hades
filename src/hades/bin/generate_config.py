@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -5,6 +6,8 @@ from hades import constants
 from hades.common.cli import ArgumentParser, parser as common_parser
 from hades.config.generate import ConfigGenerator
 from hades.config.loader import load_config
+
+logger = logging.getLogger()
 
 
 def main():
@@ -28,9 +31,8 @@ def main():
             with open(args.destination, 'w', encoding='utf-8') as f:
                 generator.from_file(args.source, f)
     else:
-        print("No such file or directory {} in {}".format(args.source,
-                                                          template_dir),
-              file=sys.stderr)
+        logger.critical("No such file or directory {} in {}"
+                        .format(args.source, template_dir))
         return os.EX_NOINPUT
 
 
