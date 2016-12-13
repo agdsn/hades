@@ -7,6 +7,7 @@ server:
     {%- for network in HADES_AUTH_LISTEN %}
     interface: {{ network.ip }}
     {%- endfor %}
+    outgoing-interface: {{ HADES_NETNS_AUTH_LISTEN.ip }}
     {%- for name, network in HADES_USER_NETWORKS.items() %}
     access-control: {{ network }} allow
     {%- endfor %}
