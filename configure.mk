@@ -91,6 +91,7 @@ $(call add_substitution, libdir,         $(exec_prefix)/lib)
 $(call add_substitution, lispdir,        $(datarootdir)/emacs/site-lisp)
 $(call add_substitution, localedir,      $(datarootdir)/locale)
 $(call add_substitution, mandir,         $(datarootdir)/man)
+$(call add_substitution, logdir,         $(localstatedir)/log)
 
 # Automake-style package directories
 $(call add_substitution, pkglibexecdir,    $(libexecdir)/$(PACKAGE_NAME))
@@ -99,6 +100,7 @@ $(call add_substitution, pkglocalstatedir, $(localstatedir)/$(PACKAGE_NAME))
 $(call add_substitution, pkgrunstatedir,   $(runstatedir)/$(PACKAGE_NAME))
 $(call add_substitution, pkglibdir,        $(libdir)/$(PACKAGE_NAME))
 $(call add_substitution, pkgdatadir,       $(datadir)/$(PACKAGE_NAME))
+$(call add_substitution, pkglogdir,        $(logdir)/$(PACKAGE_NAME))
 
 # Additional directories
 $(call add_substitution, assetdir,       $(pkgdatadir)/assests)

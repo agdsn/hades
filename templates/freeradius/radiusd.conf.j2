@@ -56,7 +56,7 @@ exec_prefix = /usr
 sysconfdir = /etc
 localstatedir = /var
 sbindir = ${exec_prefix}/sbin
-logdir = /var/log/freeradius
+logdir = {{ constants.pkglogdir }}/radius
 raddbdir = {{ constants.pkgrunstatedir }}/radius
 radacctdir = ${logdir}/radacct
 
