@@ -1,8 +1,8 @@
+import grp
 import logging
 import os
-import sys
 import pwd
-import grp
+import sys
 
 logger = logging.getLogger(__name__)
 
