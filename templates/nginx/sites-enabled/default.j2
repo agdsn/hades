@@ -22,7 +22,7 @@ server {
 	ssl_certificate {{ HADES_PORTAL_SSL_CERTIFICATE }};
 	ssl_certificate_key {{ HADES_PORTAL_SSL_CERTIFICATE_KEY }};
 
-	root {{ HADES_PORTAL_HOME }};
+	root {{ constants.PORTAL_HOME }};
 
 	index index.html index.htm;
 
