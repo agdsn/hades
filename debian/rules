@@ -19,6 +19,11 @@ override_dh_auto_configure:
 	make -rf configure.mk prefix=/usr libexecdir=/usr/lib sysconfdir=/etc localstatedir=/var runstatedir=/run
 	dh_auto_configure
 
+override_dh_auto_build:
+	dh_auto_build
+	# FIXME: How can we call the venv interpreter correctly?
+	build/usr/lib/hades/bin/python3 setup.py compile_catalog
+
 override_dh_auto_install:
 	npm install bower
 	node_modules/.bin/bower install --allow-root
