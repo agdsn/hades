@@ -233,8 +233,8 @@ src/hades/constants.py: configure.mk .FORCE
 	@printf '%s = "%s"\n' $(foreach var,$(SUBSTITUTIONS),'$(var)' '$($(var))') > $@
 
 clean:
-	$(RM) $(CONFIGURE_FILES)
-	$(RM) src/hades/constants.py
+	$(RM) -f $(CONFIGURE_FILES)
+	$(RM) -f src/hades/constants.py
 
 .FORCE:
 
