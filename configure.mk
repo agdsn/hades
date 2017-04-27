@@ -114,7 +114,8 @@ $(call add_substitution, AUTH_DHCP_DBUS_NAME, de.agdsn.hades.auth_dnsmasq)
 $(call add_substitution, AUTH_DHCP_PID_FILE, $(pkgrunstatedir)/auth-dhcp/dnsmasq.pid)
 $(call add_substitution, AUTH_DHCP_LEASE_FILE, $(pkglocalstatedir)/auth-dhcp/dnsmasq-dhcp.leases)
 $(call add_substitution, AUTH_DHCP_HOSTS_FILE, $(pkglocalstatedir)/auth-dhcp/dnsmasq-dhcp.hosts)
-$(call add_substitution, AUTH_DNS_PID_FILE, $(pkgrunstatedir)/auth-dns/unbound.pid)
+$(call add_substitution, AUTH_DNS_PRISTINE_PID_FILE, $(pkgrunstatedir)/auth-dns/unbound-pristine.pid)
+$(call add_substitution, AUTH_DNS_ALTERNATIVE_PID_FILE, $(pkgrunstatedir)/auth-dns/unbound-alternative.pid)
 $(call add_substitution, AUTH_DNS_ROOT_HINTS, /usr/share/dns/root.hints)
 $(call add_substitution, AUTH_DNS_TRUST_ANCHOR_FILE, $(pkglocalstatedir)/auth-dns/root.key)
 $(call add_substitution, AUTH_NAMESPACE, auth)
@@ -198,8 +199,9 @@ NULL :=
 CONFIGURE_FILES = \
     bower.json \
     conf/hades-agent.service \
+    conf/hades-auth-alternative-dns.service \
     conf/hades-auth-dhcp.service \
-    conf/hades-auth-dns.service \
+    conf/hades-auth-pristine-dns.service \
     conf/hades-auth-vrrp.service \
     conf/hades-cleanup.service \
     conf/hades-database.service \

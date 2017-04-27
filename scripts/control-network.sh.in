@@ -101,7 +101,8 @@ setup_namespace_common_pre() {
 }
 
 setup_namespace_auth() {
-	:
+	msg "Creating ipset"
+    @IP@ netns exec @AUTH_NAMESPACE@ @IPSET@ create "$HADES_AUTH_DNS_ALTERNATIVE_IPSET" hash:ip
 }
 
 setup_namespace_unauth() {

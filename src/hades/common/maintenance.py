@@ -4,6 +4,7 @@ Common maintenance functionality
 import logging
 import os
 import signal
+import subprocess
 
 import netaddr
 from sqlalchemy import null
@@ -70,6 +71,22 @@ def generate_dhcp_hosts_file():
         logger.error("Error writing %s: %s", file_name, e.strerror)
 
 
+def update_alternative_dns_ipset():
+    conf = get_config()
+    ipset_name = conf['HADES_AUTH_DNS_ALTERNATIVE_IPSET']
+    tmp_ipset_name = 'tmp_' + ipset_name
+    logger.info("Updating alternative_dns ipset (%s)", ipset_name)
+    tmp = []
+    tmp.append('create {} hash:ip -exist'.format(tmp_ipset_name))
+    tmp.append('flush {}'.format(tmp_ipset_name))
+    for ip in db.get_all_alternative_dns_ips():
+        tmp.append('add {} {}'.format(tmp_ipset_name, ip))
+    tmp.append('swap {} {}'.format(ipset_name, tmp_ipset_name))
+    tmp.append('destroy {}'.format(tmp_ipset_name))
+    subprocess.run([constants.IP, 'netns', 'exec', 'auth', constants.IPSET, 'restore'],
+                   input='\n'.join(tmp).encode('ascii'))
+
+
 def refresh():
     logger.info("Refreshing materialized views")
     connection = db.get_connection()
@@ -82,6 +99,10 @@ def refresh():
                                                    db.temp_nas, [null()])
     if result != ([], [], []):
         reload_freeradius()
+    result = db.refresh_and_diff_materialized_view(connection, db.alternative_dns,
+                                                   db.temp_alternative_dns, [null()])
+    if result != ([], [], []):
+        update_alternative_dns_ipset()
     db.refresh_materialized_view(connection, db.radcheck)
     db.refresh_materialized_view(connection, db.radgroupcheck)
     db.refresh_materialized_view(connection, db.radgroupreply)

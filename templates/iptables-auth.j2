@@ -3,6 +3,12 @@
 :INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
+{%- if HADES_AUTH_DNS_ALTERNATIVE_ZONES %}
+{%- for listen_address in HADES_AUTH_LISTEN %}
+-A PREROUTING -m set -d {{ listen_address.ip }} --match-set {{ HADES_AUTH_DNS_ALTERNATIVE_IPSET }} src -p tcp -m tcp --dport 53 -j REDIRECT --to-port 9053
+-A PREROUTING -m set -d {{ listen_address.ip }} --match-set {{ HADES_AUTH_DNS_ALTERNATIVE_IPSET }} src -p udp -m udp --dport 53 -j REDIRECT --to-port 9053
+{%- endfor %}
+{%- endif %}
 COMMIT
 *filter
 :INPUT DROP [0:0]

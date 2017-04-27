@@ -30,6 +30,21 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: alternative_dns; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+--
+
+CREATE TABLE alternative_dns (
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING %}
+    ipaddress character varying(39) NOT NULL
+    {%- else %}
+    ipaddress inet NOT NULL
+    {%- endif %}
+);
+
+
+ALTER TABLE alternative_dns OWNER TO "{{ constants.DATABASE_USER }}";
+
+--
 -- Name: dhcphost; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
 --
 
@@ -158,6 +173,17 @@ CREATE TABLE radusergroup (
 
 
 ALTER TABLE radusergroup OWNER TO "{{ constants.DATABASE_USER }}";
+
+
+--
+-- Name: alternative_dns; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+REVOKE ALL ON TABLE alternative_dns FROM PUBLIC;
+REVOKE ALL ON TABLE alternative_dns FROM "{{ constants.DATABASE_USER }}";
+GRANT ALL ON TABLE alternative_dns TO "{{ constants.DATABASE_USER }}";
+GRANT ALL ON TABLE alternative_dns TO "{{ constants.LOCAL_MASTER_DATABASE_USER }}";
+
 
 --
 -- Name: dhcphost; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
