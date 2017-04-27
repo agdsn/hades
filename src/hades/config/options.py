@@ -176,6 +176,26 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
     type = collections.Mapping
 
 
+class HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING(Option):
+    """
+    Whether the ipaddress column of the foreign alternative_dns table has a string type
+    """
+    type = bool
+    default = False
+
+
+class HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_OPTIONS(Option):
+    """
+    Foreign data wrapper options for the alternative_dns table
+
+    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    """
+    default = {
+        'table_name': 'alternative_dns',
+    }
+    type = collections.Mapping
+
+
 class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING(Option):
     """
     Whether the ipaddress column of the foreign dhcphost table has a string type
@@ -416,13 +436,26 @@ class HADES_AUTH_INTERFACE(Option):
 class HADES_AUTH_ALLOWED_TCP_PORTS(Option):
     """Allowed TCP destination ports for unauthenticated users"""
     type = collections.Iterable
-    default = (53, 80, 443)
+    default = (53, 80, 443, 9053)
 
 
 class HADES_AUTH_ALLOWED_UDP_PORTS(Option):
     """Allowed UDP destination ports for unauthenticated users"""
     type = collections.Iterable
-    default = (53, 67)
+    default = (53, 67, 9053)
+
+
+class HADES_AUTH_DNS_ALTERNATIVE_IPSET(Option):
+    """Name of ipset for alternative DNS resolving."""
+    type = str
+    default = "hades_alternative_dns"
+
+
+class HADES_AUTH_DNS_ALTERNATIVE_ZONES(Option):
+    """DNS zones that are transparently spoofed if alternative DNS is
+    enabled."""
+    type = collections.Mapping
+    default = {}
 
 
 #################################

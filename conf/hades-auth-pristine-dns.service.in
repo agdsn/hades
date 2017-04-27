@@ -1,0 +1,23 @@
+[Unit]
+Description=Hades DNS service for authenticated users (unbound)
+Documentation=https://agdsn.github.io/hades/
+After=hades-network.service
+Wants=hades-network.service
+
+[Service]
+Group=@AUTH_DNS_GROUP@
+Type=simple
+PIDFile=@AUTH_DNS_PRISTINE_PID_FILE@
+SyslogIdentifier=hades-auth-dns
+EnvironmentFile=@systemdenvfile@
+ExecStartPre=@venvdir@/bin/hades-generate-config unbound-pristine.conf.j2 @pkgrunstatedir@/auth-dns/unbound-pristine.conf
+ExecStartPre=@pkglibexecdir@/update-trust-anchor.sh
+ExecStartPre=@UNBOUND_CHECKCONF@ @pkgrunstatedir@/auth-dns/unbound-pristine.conf
+ExecStart=@IP@ netns exec @AUTH_NAMESPACE@ @UNBOUND@ -c @pkgrunstatedir@/auth-dns/unbound-pristine.conf
+ExecReload=@venvdir@/bin/hades-generate-config unbound-pristine.conf.j2 @pkgrunstatedir@/auth-dns/unbound-pristine.conf
+ExecReload=@UNBOUND@ -c @pkgrunstatedir@/auth-dns/unbound-pristine.conf reload
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=hades.target

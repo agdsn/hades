@@ -22,6 +22,13 @@ def as_copy(original_table, new_name):
                  info={'temporary': True})
 
 
+alternative_dns = Table(
+    'alternative_dns', metadata,
+    Column('ipaddress', INET, nullable=False),
+    UniqueConstraint('ipaddress'),
+)
+temp_alternative_dns = as_copy(alternative_dns, 'temp_alternative_dns')
+
 dhcphost = Table(
     'dhcphost', metadata,
     Column('mac', MACADDR, nullable=False),
@@ -388,3 +395,15 @@ def get_auth_attempts(mac):
         .where(and_(radpostauth.c.username == mac))
         .order_by(radpostauth.c.authdate.desc()))
     return iter(result)
+
+
+def get_all_alternative_dns_ips():
+    """
+    Return all IPs for alternative DNS configuration.
+
+    :return: An iterable that yields ip addresses
+    :rtype: iterable[str]
+    """
+    connection = get_connection()
+    result = connection.execute(select([alternative_dns.c.ipaddress]))
+    return map(operator.itemgetter(0), result)

@@ -1,8 +1,10 @@
+remote-control:
+    control-enable: no
+
 server:
     directory: "{{ constants.AUTH_DNS_HOME }}"
     username: {{ constants.AUTH_DNS_USER }}
     do-daemonize: no
-    pidfile: "{{ constants.AUTH_DNS_PID_FILE }}"
     interface: 127.0.0.1
     {%- for network in HADES_AUTH_LISTEN %}
     interface: {{ network.ip }}
@@ -18,4 +20,3 @@ server:
     log-time-ascii: yes
     outgoing-num-tcp: 100
     incoming-num-tcp: 100
-

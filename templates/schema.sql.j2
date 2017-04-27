@@ -7,6 +7,7 @@
 {%- set foreign_server_type = None %}
 {%- set foreign_server_version = None %}
 {%- set foreign_table_global_options = {} %}
+{%- set foreign_table_alternative_dns_options = {'table_name': 'alternative_dns'} %}
 {%- set foreign_table_dhcphost_options = {'table_name': 'dhcphost'} %}
 {%- set foreign_table_nas_options = {'table_name': 'nas'} %}
 {%- set foreign_table_radcheck_options = {'table_name': 'radcheck'} %}
@@ -21,6 +22,7 @@
 {%- set foreign_server_type = HADES_POSTGRESQL_FOREIGN_SERVER_TYPE if HADES_POSTGRESQL_FOREIGN_SERVER_TYPE is defined else None %}
 {%- set foreign_server_version = HADES_POSTGRESQL_FOREIGN_SERVER_VERSION if HADES_POSTGRESQL_FOREIGN_SERVER_VERSION is defined else None %}
 {%- set foreign_table_global_options = HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS %}
+{%- set foreign_table_alternative_dns_options = HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_OPTIONS %}
 {%- set foreign_table_dhcphost_options = HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS %}
 {%- set foreign_table_nas_options = HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS %}
 {%- set foreign_table_radcheck_options = HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS %}
@@ -145,6 +147,40 @@ SERVER {{ server_name }} OPTIONS (
 
 
 SET default_tablespace = '';
+
+--
+-- Name: foreign_alternative_dns; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+--
+
+CREATE FOREIGN TABLE foreign_alternative_dns (
+    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING %}
+    ipaddress character varying(39) /* NOT NULL */
+    {%- else %}
+    ipaddress inet /* NOT NULL */
+    {%- endif %}
+)
+SERVER {{ server_name }}
+OPTIONS (
+    {{ table_options(foreign_table_alternative_dns_options) }}
+);
+
+
+ALTER FOREIGN TABLE foreign_alternative_dns OWNER TO "{{ constants.DATABASE_USER }}";
+
+--
+-- Name: alternative_dns; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
+--
+{%- if HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING %}
+{%- set foreign_alternative_dns_ipaddress = "safe_inet_cast(foreign_alternative_dns.ipaddress::text)" %}
+{%- else %}
+{%- set foreign_alternative_dns_ipaddress = "foreign_alternative_dns.ipaddress" %}
+{%- endif %}
+
+CREATE MATERIALIZED VIEW alternative_dns AS
+ SELECT ipaddress FROM foreign_alternative_dns GROUP BY ipaddress WITH NO DATA;
+
+
+ALTER TABLE alternative_dns OWNER TO "{{ constants.AGENT_USER }}";
 
 --
 -- Name: foreign_dhcphost; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
@@ -625,6 +661,13 @@ ALTER TABLE ONLY radpostauth
 
 
 --
+-- Name: alternative_dns_ipaddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
+--
+
+CREATE UNIQUE INDEX alternative_dns_ipaddress_idx ON alternative_dns USING btree (ipaddress);
+
+
+--
 -- Name: dhcphost_ipaddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
 --
 
@@ -723,6 +766,26 @@ REVOKE ALL ON SCHEMA public FROM PUBLIC;
 REVOKE ALL ON SCHEMA public FROM "{{ constants.DATABASE_USER }}";
 GRANT ALL ON SCHEMA public TO "{{ constants.DATABASE_USER }}";
 GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- Name: foreign_alternative_dns; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+REVOKE ALL ON TABLE foreign_alternative_dns FROM PUBLIC;
+REVOKE ALL ON TABLE foreign_alternative_dns FROM "{{ constants.DATABASE_USER }}";
+GRANT ALL ON TABLE foreign_alternative_dns TO "{{ constants.DATABASE_USER }}";
+GRANT SELECT ON TABLE foreign_alternative_dns TO "{{ constants.AGENT_USER }}";
+
+
+--
+-- Name: alternative_dns; Type: ACL; Schema: public; Owner: {{ constants.AGENT_USER }}
+--
+
+REVOKE ALL ON TABLE alternative_dns FROM PUBLIC;
+REVOKE ALL ON TABLE alternative_dns FROM "{{ constants.AGENT_USER }}";
+GRANT ALL ON TABLE alternative_dns TO "{{ constants.AGENT_USER }}";
+GRANT ALL ON TABLE alternative_dns TO "{{ constants.DATABASE_USER }}";
 
 
 --
@@ -915,6 +978,13 @@ GRANT ALL ON TABLE radusergroup TO "{{ constants.AGENT_USER }}";
 GRANT ALL ON TABLE radusergroup TO "{{ constants.DATABASE_USER }}";
 GRANT SELECT ON TABLE radusergroup TO "{{ constants.RADIUS_USER }}";
 GRANT SELECT ON TABLE radusergroup TO "{{ constants.PORTAL_USER }}";
+
+
+--
+-- Name: dhcphost; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ constants.AGENT_USER }}
+--
+
+REFRESH MATERIALIZED VIEW alternative_dns;
 
 
 --
