@@ -15,3 +15,6 @@ ExecReload=@venvdir@/bin/hades-generate-config auth-dnsmasq.conf.j2 @pkgrunstate
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
+
+[Install]
+WantedBy=hades.target

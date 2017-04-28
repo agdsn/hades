@@ -16,3 +16,6 @@ ExecReload=@venvdir@/bin/hades-generate-config auth-keepalived.conf.j2 @pkgrunst
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
+
+[Install]
+WantedBy=hades.target

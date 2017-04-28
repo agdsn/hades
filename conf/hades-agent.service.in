@@ -16,3 +16,6 @@ EnvironmentFile=@systemdenvfile@
 ExecStart=@venvdir@/bin/hades-agent --pidfile=@pkgrunstatedir@/agent/worker.pid
 Restart=always
 RestartSec=5
+
+[Install]
+WantedBy=hades.target

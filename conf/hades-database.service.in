@@ -16,3 +16,6 @@ ExecStart=@pkglibexecdir@/control-database.sh start
 ExecReload=@pkglibexecdir@/control-database.sh reload
 ExecStop=@pkglibexecdir@/control-database.sh stop
 Restart=always
+
+[Install]
+WantedBy=hades.target

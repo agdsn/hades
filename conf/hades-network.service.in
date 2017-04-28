@@ -11,4 +11,4 @@ ExecStart=@pkglibexecdir@/control-network.sh start
 ExecStop=@pkglibexecdir@/control-network.sh stop
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=hades.target

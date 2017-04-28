@@ -18,3 +18,6 @@ ExecReload=@venvdir@/bin/hades-generate-config unbound.conf.j2 @pkgrunstatedir@/
 ExecReload=@UNBOUND@ -c @pkgrunstatedir@/auth-dns/unbound.conf reload
 Restart=always
 RestartSec=5
+
+[Install]
+WantedBy=hades.target
