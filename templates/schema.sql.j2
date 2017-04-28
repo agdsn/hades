@@ -179,7 +179,7 @@ ALTER FOREIGN TABLE foreign_dhcphost OWNER TO "{{ constants.DATABASE_USER }}";
 {%- set foreign_dhcphost_mac = "foreign_dhcphost.mac" %}
 {%- endif %}
 {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
-{%- set foreign_dhcphost_ipaddress = "safe_macaddr_cast(foreign_dhcphost.ipaddress::text)" %}
+{%- set foreign_dhcphost_ipaddress = "safe_inet_cast(foreign_dhcphost.ipaddress::text)" %}
 {%- else %}
 {%- set foreign_dhcphost_ipaddress = "foreign_dhcphost.ipaddress" %}
 {%- endif %}
