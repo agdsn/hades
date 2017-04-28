@@ -1,0 +1,16 @@
+# A very simple EAP config, that enables only the MD5 method
+# See mods-available/eap for a detailed description.
+eap {
+	default_eap_type = md5
+
+	timer_expire     = 60
+
+	ignore_unknown_eap_types = no
+
+	cisco_accounting_username_bug = no
+
+	max_sessions = ${max_requests}
+
+	md5 {
+	}
+}
