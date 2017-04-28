@@ -4,7 +4,7 @@
 #	Sample configuration file for dynamically updating the list
 #	of RADIUS clients at run time.
 #
-#	Everything is keyed off of a client "network".  (e.g. 192.168/16)
+#	Everything is keyed off of a client "network".  (e.g. 192.0.2/24)
 #	This configuration lets the server know that clients within
 #	that network are defined dynamically.
 #
@@ -27,19 +27,17 @@
 #	the server will add only one new client per second.  This CANNOT
 #	be changed, and is NOT configurable.
 #
-#	$Id: f8c3cc4ddd4a8e6434911fbcc444715f4ac95912 $
+#	$Id: 0459a7f4b1dc824b1684e9d220a0410c69b3248a $
 #
 ######################################################################
 
 #
 #  Define a network where clients may be dynamically defined.
 client dynamic {
-	ipaddr = 192.168.0.0
-
 	#
 	#  You MUST specify a netmask!
 	#  IPv4 /32 or IPv6 /128 are NOT allowed!
-	netmask = 16
+	ipaddr = 192.0.2.0/24
 
 	#
 	#  Any other configuration normally found in a "client"
@@ -51,7 +49,7 @@ client dynamic {
 
 	#
 	#  Define the virtual server used to discover dynamic clients.
-	dynamic_clients = dynamic_client_server
+	dynamic_clients = dynamic_clients
 
 	#
 	#  The directory where client definitions are stored.  This
@@ -76,7 +74,7 @@ client dynamic {
 
 #
 #  This is the virtual server referenced above by "dynamic_clients".
-server dynamic_client_server {
+server dynamic_clients {
 
 	#
 	#  The only contents of the virtual server is the "authorize" section.
@@ -110,19 +108,19 @@ server dynamic_client_server {
 
 			#
 			#  Echo the IP address of the client.
-			FreeRADIUS-Client-IP-Address = "%{Packet-Src-IP-Address}"
+			&FreeRADIUS-Client-IP-Address = "%{Packet-Src-IP-Address}"
 
 			# require_message_authenticator
-			FreeRADIUS-Client-Require-MA = no
+			&FreeRADIUS-Client-Require-MA = no
 
 			# secret
-			FreeRADIUS-Client-Secret = "testing123"
+			&FreeRADIUS-Client-Secret = "testing123"
 
 			# shortname
-			FreeRADIUS-Client-Shortname = "%{Packet-Src-IP-Address}"
+			&FreeRADIUS-Client-Shortname = "%{Packet-Src-IP-Address}"
 
-			# nastype
-			FreeRADIUS-Client-NAS-Type = "other"
+			# nas_type
+			&FreeRADIUS-Client-NAS-Type = "other"
 
 			# virtual_server
 			#
@@ -133,8 +131,8 @@ server dynamic_client_server {
 			#  If the network client definition does have a
 			#  virtual_server defined, then that is used,
 			#  and there is no need to define this attribute.
-			#  
-			FreeRADIUS-Client-Virtual-Server = "something"
+			#
+			&FreeRADIUS-Client-Virtual-Server = "something"
 
 		}
 
@@ -159,18 +157,18 @@ server dynamic_client_server {
 			update control {
 				#
 				#  Echo the IP.
-				FreeRADIUS-Client-IP-Address = "%{Packet-Src-IP-Address}"
+				&FreeRADIUS-Client-IP-Address = "%{Packet-Src-IP-Address}"
 
 				#
 				#  Do multiple SELECT statements to grab
 				#  the various definitions.
-				FreeRADIUS-Client-Shortname = "%{sql: SELECT shortname FROM nas WHERE nasname = '%{Packet-Src-IP-Address}'}"
+				&FreeRADIUS-Client-Shortname = "%{sql: SELECT shortname FROM nas WHERE nasname = '%{Packet-Src-IP-Address}'}"
 
-				FreeRADIUS-Client-Secret = "%{sql: SELECT secret FROM nas WHERE nasname = '%{Packet-Src-IP-Address}'}"
+				&FreeRADIUS-Client-Secret = "%{sql: SELECT secret FROM nas WHERE nasname = '%{Packet-Src-IP-Address}'}"
 
-				FreeRADIUS-Client-NAS-Type = "%{sql: SELECT type FROM nas WHERE nasname = '%{Packet-Src-IP-Address}'}"
+				&FreeRADIUS-Client-NAS-Type = "%{sql: SELECT type FROM nas WHERE nasname = '%{Packet-Src-IP-Address}'}"
 
-				FreeRADIUS-Client-Virtual-Server = "%{sql: SELECT server FROM nas WHERE nasname = '%{Packet-Src-IP-Address}'}"
+				&FreeRADIUS-Client-Virtual-Server = "%{sql: SELECT server FROM nas WHERE nasname = '%{Packet-Src-IP-Address}'}"
 			}
 
 		}
@@ -200,17 +198,17 @@ server dynamic_client_server {
 		# for the NAS element. ie "password"
 		if ("%{ldap:ldap:///OU=Elements,OU=Radius,DC=ACME,DC=COM?ou?sub?cn=%{Packet-Src-IP-Address}}") {
 			update control {
-			       FreeRADIUS-Client-IP-Address = "%{Packet-Src-IP-Address}"
+				&FreeRADIUS-Client-IP-Address = "%{Packet-Src-IP-Address}"
 
 				# Set the Client-Shortname to be the Location
 				# "l" just like in the Huntgroups, but this
 				# time to the shortname.
 
-				FreeRADIUS-Client-Shortname = "%{ldap:ldap:///OU=Elements,OU=Radius,DC=ACME,DC=COM?l?sub?cn=%{Packet-Src-IP-Address}}"
+				&FreeRADIUS-Client-Shortname = "%{ldap:ldap:///OU=Elements,OU=Radius,DC=ACME,DC=COM?l?sub?cn=%{Packet-Src-IP-Address}}"
 
 				# Lookup and set the Shared Secret based on
 				# the "ou" attribute.
-				FreeRADIUS-Client-Secret = "%{ldap:ldap:///OU=Elements,OU=Radius,DC=ACME,DC=COM?ou?sub?cn=%{Packet-Src-IP-Address}}"
+				&FreeRADIUS-Client-Secret = "%{ldap:ldap:///OU=Elements,OU=Radius,DC=ACME,DC=COM?ou?sub?cn=%{Packet-Src-IP-Address}}"
 			}
 		}
 

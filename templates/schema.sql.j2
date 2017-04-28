@@ -378,33 +378,31 @@ SET default_with_oids = false;
 --
 
 CREATE TABLE radacct (
-    radacctid bigint NOT NULL,
-    acctsessionid character varying(64) NOT NULL,
-    acctuniqueid character varying(32) NOT NULL,
-    username character varying(253),
-    groupname character varying(253),
-    realm character varying(64),
-    nasipaddress inet NOT NULL,
-    nasportid character varying(15),
-    nasporttype character varying(32),
-    acctstarttime timestamp with time zone,
-    acctstoptime timestamp with time zone,
-    acctsessiontime bigint,
-    acctauthentic character varying(32),
-    connectinfo_start character varying(50),
-    connectinfo_stop character varying(50),
-    acctinputoctets bigint,
-    acctoutputoctets bigint,
-    calledstationid character varying(50),
-    callingstationid character varying(50),
-    acctterminatecause character varying(32),
-    servicetype character varying(32),
-    xascendsessionsvrkey character varying(10),
-    framedprotocol character varying(32),
-    framedipaddress inet,
-    acctstartdelay integer,
-    acctstopdelay integer,
-    lastupdatetime timestamp with time zone NOT NULL
+    RadAcctId bigserial PRIMARY KEY,
+    AcctSessionId text NOT NULL,
+    AcctUniqueId text NOT NULL UNIQUE,
+    UserName text,
+    GroupName text,
+    Realm text,
+    NASIPAddress inet NOT NULL,
+    NASPortId text,
+    NASPortType text,
+    AcctStartTime timestamp with time zone,
+    AcctUpdateTime timestamp with time zone,
+    AcctStopTime timestamp with time zone,
+    AcctInterval bigint,
+    AcctSessionTime bigint,
+    AcctAuthentic text,
+    ConnectInfo_start text,
+    ConnectInfo_stop text,
+    AcctInputOctets bigint,
+    AcctOutputOctets bigint,
+    CalledStationId text,
+    CallingStationId text,
+    AcctTerminateCause text,
+    ServiceType text,
+    FramedProtocol text,
+    FramedIPAddress inet
 );
 
 
@@ -505,13 +503,13 @@ ALTER TABLE radgroupreply OWNER TO "{{ constants.AGENT_USER }}";
 --
 
 CREATE TABLE radpostauth (
-    id bigint NOT NULL,
-    username character varying(253) NOT NULL,
-    nasipaddress inet NOT NULL,
-    nasportid character varying(15) NOT NULL,
-    packettype character varying(32),
-    replymessage character varying(253),
-    authdate timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+    id bigserial PRIMARY KEY,
+    UserName text NOT NULL,
+    NASIPAddress inet NOT NULL,
+    NASPortId text,
+    PacketType character varying(32),
+    ReplyMessage character varying(253),
+    AuthDate timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
 
@@ -648,10 +646,17 @@ CREATE UNIQUE INDEX nas_nasname_idx ON nas USING btree (nasname);
 
 
 --
--- Name: radacct_active_user_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radacct_active_session_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
 --
 
-CREATE INDEX radacct_active_user_idx ON radacct USING btree (username, nasipaddress, acctsessionid) WHERE (acctstoptime IS NULL);
+CREATE INDEX radacct_active_session_idx ON radacct (AcctUniqueId) WHERE AcctStopTime IS NULL;
+
+
+--
+-- Name: radacct_bulk_close; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+--
+
+CREATE INDEX radacct_bulk_close ON radacct (NASIPAddress, AcctStartTime) WHERE AcctStopTime IS NULL;
 
 
 --

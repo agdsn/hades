@@ -1,0 +1,111 @@
+server hades {
+	# Listen directives for listening locally
+	listen {
+		ipaddr = 127.0.0.1
+		ipv6addr = ::1
+		port = {{ HADES_RADIUS_AUTHENTICATION_PORT }}
+		type = auth
+		interface = lo
+	}
+
+	listen {
+		ipaddr = 127.0.0.1
+		ipv6addr = ::1
+		port = {{ HADES_RADIUS_ACCOUNTING_PORT }}
+		type = acct
+		interface = lo
+	}
+
+	{%- for network in HADES_RADIUS_LISTEN %}
+	listen {
+		{%- if network.version == 4 %}
+		ipaddr = {{ network.ip }}
+		{%- else %}
+		ipv6addr = {{ network.ip }}
+		{%- endif %}
+		port = {{ HADES_RADIUS_AUTHENTICATION_PORT }}
+		type = auth
+		interface = {{ HADES_RADIUS_INTERFACE }}
+	#	clients = per_socket_clients
+	}
+
+	listen {
+		{%- if network.version == 4 %}
+		ipaddr = {{ network.ip }}
+		{%- else %}
+		ipv6addr = {{ network.ip }}
+		{%- endif %}
+		port = {{ HADES_RADIUS_ACCOUNTING_PORT }}
+		type = acct
+		interface = {{ HADES_RADIUS_INTERFACE }}
+	#	clients = per_socket_clients
+	}
+	{%- endfor %}
+
+
+	authorize {
+		# Normalize MAC addresses in various attributes
+		rewrite_user_name
+		rewrite_called_station_id
+		rewrite_calling_station_id
+		handle_mac_auth
+
+		chap
+		eap {
+			ok = return
+			updated = return
+		}
+		{%- if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
+		redundant {
+			sql
+			accept
+		}
+		{%- else %}
+		sql
+		{%- endif %}
+		pap
+	}
+
+	authenticate {
+		Auth-Type PAP {
+			pap
+		}
+
+		Auth-Type CHAP {
+			chap
+		}
+
+		eap
+	}
+
+	preacct {
+		acct_counters64
+		acct_unique
+	}
+
+	accounting {
+		sql
+	}
+
+	post-auth {
+		{%- if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
+		redundant {
+			sql
+			ok
+		}
+		{%- else %}
+		sql
+		{%- endif %}
+		Post-Auth-Type REJECT {
+			{%- if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
+			redundant {
+				sql
+				ok
+			}
+			{%- else %}
+			sql
+			{%- endif %}
+			attr_filter.access_reject
+		}
+	}
+}
