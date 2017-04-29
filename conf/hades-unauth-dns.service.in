@@ -17,4 +17,5 @@ Restart=always
 RestartSec=5
 
 [Install]
+WantedBy=hades.target
 Alias=hades-unauth-dhcp.service
