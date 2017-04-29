@@ -35,27 +35,20 @@ netaddr_ip() {
 	@venvdir@/bin/python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).ip)" "$1"
 }
 
-create_bridge_if_not_exists() {
+create_bridge() {
 	local -r interface="$1"
 	local -r address="${2-}"
 	local -r sysfs_path="/sys/class/net/$interface"
 	msg "Creating bridge $interface"
-	if [[ -d "$sysfs_path" ]]; then
-		if [[ ! -d "$sysfs_path/bridge" ]]; then
-			error "Error: $interface must be a bridge."
-			return 2
-		fi
-	else
-		@IP@ link add "$interface" type bridge
-		# Like brctl setfd
-		echo 0 > "$sysfs_path/bridge/forward_delay"
-		# Like brctl stp
-		echo 0 > "$sysfs_path/bridge/stp_state"
-		if [[ -n "$address" ]]; then
-			add_address "" "$interface" "$address"
-		fi
-		@IP@ link set up dev "$interface"
+	@IP@ link add "$interface" type bridge
+	# Like brctl setfd
+	echo 0 > "$sysfs_path/bridge/forward_delay"
+	# Like brctl stp
+	echo 0 > "$sysfs_path/bridge/stp_state"
+	if [[ -n "$address" ]]; then
+		add_address "" "$interface" "$address"
 	fi
+	@IP@ link set up dev "$interface"
 }
 
 attach_bridge_port() {
@@ -101,16 +94,10 @@ setup_namespace_common_pre() {
 	link_namespace "$namespace" "${namespace}-veth1" eth1
 	attach_bridge_port "$HADES_VRRP_BRIDGE" "${namespace}-veth1"
 
-	if [[ "$HADES_BRIDGE_SERVICE_INTERFACES" = True ]]; then
-		create_bridge_if_not_exists "br-${namespace}"
-		attach_bridge_port "br-${namespace}" "$interface"
-		link_namespace "$namespace" "${namespace}-veth2" eth2
-		attach_bridge_port "br-${namespace}" "${namespace}-veth2"
-	else
-		msg "Moving interface $interface to network namespace $namespace as eth2"
-		@IP@ link set dev "$interface" netns "$namespace" name eth2
-		@IP@ netns exec "$namespace" @IP@ link set dev eth2 up
-	fi
+	create_bridge "br-${namespace}"
+	attach_bridge_port "br-${namespace}" "$interface"
+	link_namespace "$namespace" "${namespace}-veth2" eth2
+	attach_bridge_port "br-${namespace}" "${namespace}-veth2"
 }
 
 setup_namespace_auth() {
@@ -143,7 +130,7 @@ setup_host_network() {
 			@IP@ link set up dev "$interface"
 		done
 	fi
-	create_bridge_if_not_exists "$HADES_VRRP_BRIDGE" "$HADES_VRRP_LISTEN_RADIUS"
+	create_bridge "$HADES_VRRP_BRIDGE" "$HADES_VRRP_LISTEN_RADIUS"
 	attach_bridge_port "$HADES_VRRP_BRIDGE" "$HADES_VRRP_INTERFACE"
 
 	@venvdir@/bin/hades-generate-config iptables-main.j2 | @IPTABLES_RESTORE@
@@ -171,22 +158,18 @@ teardown_namespace() {
 		return 2
 	fi
 
-	msg "Moving interface $interface back from network namespace $namespace to parent"
-	@IP@ netns exec "$namespace" @IP@ link set eth2 netns $$ name "$interface"
-
 	msg "Deleting network namespace $namespace"
 	@IP@ link delete dev "${namespace}-veth0"
 	@IP@ link delete dev "${namespace}-veth1"
-	if [[ "$HADES_BRIDGE_SERVICE_INTERFACES" = True ]]; then
-		@IP@ link delete dev "${namespace}-veth2"
-		@IP@ link delete dev "br-${namespace}"
-	fi
+	@IP@ link delete dev "${namespace}-veth2"
+	@IP@ link delete dev "br-${namespace}"
 	@IP@ netns delete "$namespace"
 }
 
 do_stop() {
 	teardown_namespace auth   "$HADES_AUTH_INTERFACE"
 	teardown_namespace unauth "$HADES_UNAUTH_INTERFACE"
+	@IP@ link delete dev "$HADES_VRRP_BRIDGE"
 
 	msg "Resetting iptables"
 	local -a tables=()
