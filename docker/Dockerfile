@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     dbus \
     devscripts \
+    dhcpcd5 \
     dh-exec \
     dh-virtualenv \
     dns-root-data \

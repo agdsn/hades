@@ -51,6 +51,7 @@ HADES_POSTGRESQL_USER_MAPPINGS = {
         'password': 'correcthorsebatterystaple',
     },
 }
+HADES_UNAUTH_WHITELIST_DNS = ('agdsn.de',)
 HADES_AUTH_DNS_ALTERNATIVE_ZONES = {
     'news.com': [
         {
