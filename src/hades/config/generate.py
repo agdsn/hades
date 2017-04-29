@@ -121,6 +121,7 @@ class ConfigGenerator(object):
                                    os.listdir(source)))
                 if not os.path.exists(target):
                     os.mkdir(target)
+                    shutil.copystat(source, target)
             else:
                 if source.endswith(self.TEMPLATE_SUFFIX):
                     template_name = os.path.relpath(source, self.template_dir)
@@ -136,7 +137,7 @@ class ConfigGenerator(object):
                             os.remove(target)
                         except FileNotFoundError:
                             pass
-                    shutil.copy(source, target, follow_symlinks=False)
+                    shutil.copy2(source, target, follow_symlinks=False)
 
     def from_file(self, name, output):
         target = os.path.join(self.template_dir, name)
