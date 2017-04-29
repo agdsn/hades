@@ -131,7 +131,12 @@ class ConfigGenerator(object):
                                                  TARGET=target, **self.config)
                         f.writelines(stream)
                 else:
-                    shutil.copy(source, target)
+                    if os.path.lexists(target):
+                        try:
+                            os.remove(target)
+                        except FileNotFoundError:
+                            pass
+                    shutil.copy(source, target, follow_symlinks=False)
 
     def from_file(self, name, output):
         target = os.path.join(self.template_dir, name)
