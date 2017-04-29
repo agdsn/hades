@@ -112,6 +112,12 @@ class ConfigGenerator(object):
         source_base = os.path.join(self.template_dir, name)
         sources = collections.deque()
         sources.append(source_base)
+        for name in os.listdir(target_dir):
+            path = os.path.join(target_dir, name)
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            else:
+                os.remove(path)
         while sources:
             source = sources.pop()
             relpath = os.path.relpath(source, source_base)
@@ -132,11 +138,6 @@ class ConfigGenerator(object):
                                                  TARGET=target, **self.config)
                         f.writelines(stream)
                 else:
-                    if os.path.lexists(target):
-                        try:
-                            os.remove(target)
-                        except FileNotFoundError:
-                            pass
                     shutil.copy2(source, target, follow_symlinks=False)
 
     def from_file(self, name, output):
