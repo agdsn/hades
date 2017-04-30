@@ -121,12 +121,14 @@ $(call add_substitution, AUTH_DNS_TRUST_ANCHOR_FILE, $(pkglocalstatedir)/auth-dn
 $(call add_substitution, AUTH_NAMESPACE, auth)
 $(call add_substitution, DATABASE_NAME, hades)
 $(call add_substitution, DATABASE_SOCKET_DIRECTORY, $(pkgrunstatedir)/database)
+$(call add_substitution, DEPUTY_DBUS_NAME, de.agdsn.hades.deputy)
 $(call add_substitution, LOCAL_MASTER_DATABASE_NAME, foreign)
 $(call add_substitution, LOCAL_MASTER_DATABASE_PASSWORD, foreign)
 $(call add_substitution, LOCAL_MASTER_DATABASE_USER, foreign)
 $(call add_substitution, PORTAL_NGINX_PID_FILE, $(pkgrunstatedir)/unauth-http/nginx.pid)
 $(call add_substitution, PORTAL_UWSGI_PID_FILE, $(pkgrunstatedir)/unauth-portal/uwsgi.pid)
 $(call add_substitution, PORTAL_UWSGI_SOCKET, $(pkgrunstatedir)/unauth-portal/uwsgi.sock)
+$(call add_substitution, RADIUS_CLIENTS_FILE, $(pkgrunstatedir)/radius/clients.conf)
 $(call add_substitution, RADIUS_PID_FILE, $(pkgrunstatedir)/radius/radiusd.pid)
 $(call add_substitution, UNAUTH_DHCP_LEASE_FILE, $(pkgrunstatedir)/unauth-dns/dnsmasq-dhcp.leases)
 $(call add_substitution, UNAUTH_DNS_DBUS_NAME, de.agdsn.hades.unauth_dnsmasq)
@@ -205,6 +207,8 @@ CONFIGURE_FILES = \
     conf/hades-auth-vrrp.service \
     conf/hades-cleanup.service \
     conf/hades-database.service \
+    conf/hades-deputy.service \
+    conf/hades-deputy.dbus-service \
     conf/hades-network.service \
     conf/hades-radius-vrrp.service \
     conf/hades-radius.service \
@@ -221,6 +225,7 @@ CONFIGURE_FILES = \
     scripts/package-setup.sh \
     scripts/update-trust-anchor.sh \
     setup.py \
+    src/hades/deputy-interface.xml \
     $(NULL)
 
 all: $(CONFIGURE_FILES) src/hades/constants.py

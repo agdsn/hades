@@ -4,13 +4,18 @@
 <busconfig>
         <policy user="root">
                 <allow own="@AUTH_DHCP_DBUS_NAME@"/>
+                <allow own="@DEPUTY_DBUS_NAME@"/>
                 <allow own="@UNAUTH_DNS_DBUS_NAME@"/>
                 <allow send_destination="@AUTH_DHCP_DBUS_NAME@"/>
+                <allow send_destination="@DEPUTY_DBUS_NAME@"/>
                 <allow send_destination="@UNAUTH_DNS_DBUS_NAME@"/>
         </policy>
         <policy user="@AGENT_USER@">
-                <allow own="@AUTH_DHCP_DBUS_NAME@"/>
-                <allow send_destination="@AUTH_DHCP_DBUS_NAME@"/>
+                <allow send_destination="@DEPUTY_DBUS_NAME@"/>
+        </policy>
+        <policy user="@AUTH_DNS_USER@">
+                <allow own="@AUTH_DNS_DBUS_NAME@"/>
+                <allow send_destination="@AUTH_DNS_DBUS_NAME@"/>
         </policy>
         <policy user="@UNAUTH_DNS_USER@">
                 <allow own="@UNAUTH_DNS_DBUS_NAME@"/>
@@ -18,8 +23,10 @@
         </policy>
         <policy context="default">
                 <deny own="@AUTH_DHCP_DBUS_NAME@"/>
+                <deny own="@DEPUTY_DBUS_NAME@"/>
                 <deny own="@UNAUTH_DNS_DBUS_NAME@"/>
                 <deny send_destination="@AUTH_DHCP_DBUS_NAME@"/>
+                <deny send_destination="@DEPUTY_DBUS_NAME@"/>
                 <deny send_destination="@UNAUTH_DNS_DBUS_NAME@"/>
         </policy>
 </busconfig>

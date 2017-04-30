@@ -1,0 +1,17 @@
+[Unit]
+Description=Hades deputy service for privileged operations
+Documentation=https://agdsn.github.io/hades/
+After=hades-auth-dns.service hades-radius.service
+Wants=hades-network.service
+
+[Service]
+Type=dbus
+BusName=@DEPUTY_DBUS_NAME@
+SyslogIdentifier=hades-deputy
+EnvironmentFile=@systemdenvfile@
+ExecStart=@venvdir@/bin/hades-deputy
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=hades.target

@@ -9,6 +9,7 @@ Also=hades-auth-alternative-dns.service
 Also=hades-auth-dhcp.service
 Also=hades-auth-pristine-dns.service
 Also=hades-auth-vrrp.service
+Also=hades-deputy.service
 Also=hades-database.service
 Also=hades-network.service
 Also=hades-radius.service

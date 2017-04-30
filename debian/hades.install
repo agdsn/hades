@@ -6,6 +6,7 @@ conf/config.py etc/hades
 conf/hades.busconfig => etc/dbus-1/system.d/de.agdsn.hades.conf
 conf/hades.default => etc/default/hades
 conf/hades.tmpfile => usr/lib/tmpfiles.d/hades.conf
+conf/hades-deputy.dbus-service => usr/share/dbus-1/system-services/de.agdsn.hades.deputy.service
 templates/* usr/share/hades/templates
 locales/de/LC_MESSAGES/hades.mo usr/share/locales/de/LC_MESSAGES
 scripts/*.sh usr/lib/hades

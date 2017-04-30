@@ -36,6 +36,7 @@ RUN apt-get update && apt-get install -y \
     postgresql-contrib-9.6 \
     postgresql-server-dev-9.6 \
     python3-dev \
+    python3-gi \
     python3-pip \
     python3-setuptools \
     python3-venv \

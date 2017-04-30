@@ -4,6 +4,8 @@
 /hades-auth-vrrp.service
 /hades-cleanup.service
 /hades-database.service
+/hades-deputy.service
+/hades-deputy.dbus-service
 /hades-network.service
 /hades-radius-vrrp.service
 /hades-radius.service
