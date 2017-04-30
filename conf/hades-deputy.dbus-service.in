@@ -1,0 +1,7 @@
+# This is not a systemd service unit file!
+# This file is DBus system service file.
+[D-BUS Service]
+Name=@DEPUTY_DBUS_NAME@
+Exec=/bin/false
+User=root
+SystemdService=hades-deputy-service.service
