@@ -74,6 +74,12 @@ class CheckWrapper(collections.Mapping):
         if option:
             check_option(self._config, option, value, self._runtime_checks)
 
+    def __dir__(self):
+        attributes = super().__dir__().copy()
+        attributes.extend(attribute for attribute in dir(self._config)
+                          if attribute not in dir)
+        return attributes
+
     def __bool__(self):
         return bool(self._config)
 
