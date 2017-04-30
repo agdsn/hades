@@ -70,6 +70,17 @@ class HADES_USER_NETWORKS(Option):
     )
 
 
+class HADES_CUSTOM_IPTABLES_INPUT_RULES(Option):
+    """
+    Additional iptables rules for INPUT chain.
+
+    A list of valid iptables-restore rules with leading -A INPUT.
+    """
+    type = collections.Iterable
+    required = False
+    default = []
+
+
 #############################
 # Network namespace options #
 #############################
