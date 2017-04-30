@@ -1,6 +1,7 @@
 /hades-agent.service
+/hades-auth-alternative-dns.service
 /hades-auth-dhcp.service
-/hades-auth-dns.service
+/hades-auth-pristine-dns.service
 /hades-auth-vrrp.service
 /hades-cleanup.service
 /hades-database.service
