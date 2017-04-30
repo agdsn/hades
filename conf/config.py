@@ -51,3 +51,14 @@ HADES_POSTGRESQL_USER_MAPPINGS = {
         'password': 'correcthorsebatterystaple',
     },
 }
+HADES_AUTH_DNS_ALTERNATIVE_ZONES = {
+    'news.com': [
+        {
+            'name': 'fake.news.com',
+            'ttl': 60*60,
+            'class': 'IN',
+            'type': 'A',
+            'data': '127.0.0.1'
+        },
+    ]
+}
