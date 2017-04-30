@@ -8,9 +8,16 @@ server {
 	ssl_certificate_key {{ HADES_PORTAL_SSL_CERTIFICATE_KEY }};
 
 	# Return a 511 error
-	root html;
+	root {{ constants.pkgrunstatedir }}/unauth-http/html;
 	error_page 511 /511.html;
-	return 511;
+
+	location /511.html {
+		internal;
+	}
+
+	location / {
+		return 511;
+	}
 }
 
 server {
