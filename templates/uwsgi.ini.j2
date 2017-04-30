@@ -1,6 +1,4 @@
 [uwsgi]
-immediate-gid = {{ constants.PORTAL_GROUP }}
-immediate-uid = {{ constants.PORTAL_USER }}
 safe-pidfile2 = {{ constants.PORTAL_UWSGI_PID_FILE }}
 need-plugin = python3
 uwsgi-socket = {{ constants.PORTAL_UWSGI_SOCKET }}
