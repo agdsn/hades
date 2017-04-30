@@ -1,5 +1,5 @@
 d @pkgrunstatedir@/agent            2755    @AGENT_USER@ @AGENT_GROUP@
-d @pkgrunstatedir@/auth-dhcp        2755    @AGENT_USER@ @AGENT_GROUP@
+d @pkgrunstatedir@/auth-dhcp        2755    @AUTH_DHCP_USER@ @AUTH_DHCP_GROUP@
 d @pkgrunstatedir@/auth-dns         2755    @AUTH_DNS_USER@ @AUTH_DNS_GROUP@
 d @pkgrunstatedir@/auth-vrrp        0755    root root
 d @pkgrunstatedir@/database         2755    @DATABASE_USER@ @DATABASE_GROUP@
