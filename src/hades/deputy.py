@@ -1,9 +1,6 @@
-import contextlib
-import getpass
 import grp
 import io
 import logging
-import os
 import pwd
 import string
 import subprocess
@@ -16,31 +13,12 @@ from pydbus import SystemBus
 
 from hades import constants
 from hades.common import db
+from hades.common.privileges import dropped_privileges
 from hades.config.loader import get_config
 
 logger = logging.getLogger(__name__)
 database_pwd = pwd.getpwnam(constants.DATABASE_USER)
 database_grp = grp.getgrnam(constants.DATABASE_GROUP)
-
-
-@contextlib.contextmanager
-def dropped_privileges(passwd, group):
-    logger.debug("Dropping privileges temporary to user %s and group",
-                 passwd.pw_name, group.gr_name)
-    # To handle multiple users with the same UID correctly, we obtain the
-    # current user name with getpass
-    saved_user = getpass.getuser()
-    saved_uid = os.geteuid()
-    saved_gid = os.getegid()
-    os.setresgid(group.gr_gid, group.gr_gid, saved_gid)
-    os.initgroups(passwd.pw_name, group.gr_gid)
-    os.setresuid(passwd.pw_uid, passwd.pw_uid, saved_uid)
-    yield
-    os.seteuid(saved_uid)
-    os.setreuid(saved_uid, saved_uid)
-    os.setregid(saved_gid, saved_gid)
-    os.initgroups(saved_user, saved_gid)
-    logger.debug("Restoring previous privileges as user %s", saved_user)
 
 
 def reload_systemd_unit(bus, unit):

@@ -1,4 +1,4 @@
-import contextlib
+import grp
 import logging
 import os
 import pwd
@@ -10,22 +10,10 @@ from sqlalchemy.exc import DBAPIError
 from hades import constants
 from hades.common import db
 from hades.common.cli import ArgumentParser, parser as common_parser
+from hades.common.privileges import dropped_privileges
 from hades.config.loader import load_config
 
 logger = logging.getLogger(__package__)
-
-
-@contextlib.contextmanager
-def as_user(user_name):
-    """
-    Context manager for temporarily switching the effective UID
-    :param user_name: Name of the user to switch to
-    """
-    uid = pwd.getpwnam(user_name).pw_uid
-    os.seteuid(uid)
-    yield user_name
-    ruid, euid, suid = os.getresuid()
-    os.seteuid(suid)
 
 
 def check_database(user_name, tables):
@@ -56,19 +44,26 @@ def main():
     try:
         engine = db.get_engine()
         engine.dispose()
-        with as_user(constants.AGENT_USER) as user_name:
-            check_database(user_name,
+        agent_pwd = pwd.getpwnam(constants.AGENT_USER)
+        agent_grp = grp.getgrnam(constants.AGENT_GROUP)
+        with dropped_privileges(agent_pwd, agent_grp):
+            check_database(agent_pwd.pw_name,
                            filter(lambda t: not t.info.get('temporary'),
                                   db.metadata.tables.values()))
         engine.dispose()
-        with as_user(constants.PORTAL_USER) as user_name:
-            check_database(user_name, (db.radacct, db.radpostauth,
-                                       db.radusergroup))
+        portal_pwd = pwd.getpwnam(constants.PORTAL_USER)
+        portal_grp = grp.getgrnam(constants.PORTAL_GROUP)
+        with dropped_privileges(portal_pwd, portal_grp):
+            check_database(portal_pwd.pw_name,
+                           (db.radacct, db.radpostauth, db.radusergroup))
         engine.dispose()
-        with as_user(constants.RADIUS_USER) as user_name:
-            check_database(user_name, (db.nas, db.radacct, db.radgroupcheck,
-                                       db.radgroupreply, db.radpostauth,
-                                       db.radreply, db.radusergroup))
+        radius_pwd = pwd.getpwnam(constants.RADIUS_USER)
+        radius_grp = grp.getgrnam(constants.RADIUS_GROUP)
+        with dropped_privileges(radius_pwd, radius_grp):
+            check_database(radius_pwd.pw_name,
+                           (db.nas, db.radacct, db.radgroupcheck,
+                            db.radgroupreply, db.radpostauth,
+                            db.radreply, db.radusergroup))
     except DBAPIError:
         return os.EX_TEMPFAIL
     return os.EX_OK
