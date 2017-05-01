@@ -32,6 +32,7 @@ RUN apt-get update && apt-get install -y \
     lintian \
     nginx \
     packaging-dev \
+    policykit-1 \
     postgresql-9.6 \
     postgresql-contrib-9.6 \
     postgresql-server-dev-9.6 \
