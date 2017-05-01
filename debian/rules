@@ -25,3 +25,6 @@ override_dh_auto_install:
 	npm install bower
 	node_modules/.bin/bower install --allow-root
 	dh_auto_install
+
+override_dh_builddeb:
+	dh_builddeb -- -Zgzip -z3
