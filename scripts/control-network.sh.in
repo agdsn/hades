@@ -109,6 +109,7 @@ setup_namespace_auth() {
 setup_namespace_unauth() {
 	msg "Creating ipset"
 	@IP@ netns exec @UNAUTH_NAMESPACE@ @IPSET@ create "$HADES_UNAUTH_WHITELIST_IPSET" hash:ip
+	@SYSCTL@ -w net.ipv4.conf.br-unauth.log_martians=0
 }
 
 setup_namespace_common_post() {
