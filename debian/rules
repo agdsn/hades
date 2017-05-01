@@ -2,9 +2,6 @@
 
 export DH_VIRTUALENV_ARGUMENTS=--python python3 --system-site-packages
 export DH_VIRTUALENV_INSTALL_ROOT=/usr/lib
-export DH_UPGRADE_PIP
-export DH_UPGRADE_SETUPTOOLS
-export DH_UPGRADE_WHEEL
 
 DESTDIR = $(CURDIR)/debian/hades
 
