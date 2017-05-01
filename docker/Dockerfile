@@ -59,7 +59,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pg_lsclusters --no-header | cut -d ' ' -f 1-2 | xargs --no-run-if-empty --max-args=2 pg_dropcluster \
-    && find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' ! -name '*journal*' ! -name '*tmpfiles*' ! -name '*dbus*' -printf '%f\0' | sort --unique --zero-terminated | xargs --null --no-run-if-empty systemctl mask \
+    && find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' ! -name systemd-logind.service ! -name '*journal*' ! -name '*tmpfiles*' ! -name '*dbus*' -printf '%f\0' | sort --unique --zero-terminated | xargs --null --no-run-if-empty systemctl mask \
     && find -L /etc/init.d -type f -perm /u+x,g+x,o+x ! -name rc ! -name rcS -printf '%f\0' | xargs --null --no-run-if-empty --max-args=1 sh -c 'update-rc.d -f "$1" remove' sh \
     && adduser --system --home /build --shell /bin/bash --uid $BUILDER_UID builder \
     && sed -i -re 's/^#?(ForwardTo[^=]+)=.*$/\1=no/' /etc/systemd/journald.conf
