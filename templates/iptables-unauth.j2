@@ -18,7 +18,7 @@ COMMIT
 -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED,SNAT,DNAT -j ACCEPT
 -A INPUT -i lo -j ACCEPT
 -A INPUT -p icmp -j ACCEPT
--A INPUT -i vrrp -p vrrp -j ACCEPT
+-A INPUT -i eth1 -p vrrp -j ACCEPT
 {%- for port in HADES_UNAUTH_ALLOWED_TCP_PORTS %}
 -A INPUT -i eth2 -p tcp -m tcp --dport {{ port }} -j ACCEPT
 {%- endfor %}
