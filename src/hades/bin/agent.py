@@ -4,9 +4,10 @@ import sys
 import textwrap
 
 # noinspection PyUnresolvedReferences
-from hades.agent import app, tasks
+from hades import tasks
 from hades.common.cli import ArgumentParser, parser as common_parser
 from hades.config.loader import load_config
+from hades.tasks import app
 
 
 class Formatter(argparse.HelpFormatter):
