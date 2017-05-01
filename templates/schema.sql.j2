@@ -154,9 +154,9 @@ SET default_tablespace = '';
 
 CREATE FOREIGN TABLE foreign_alternative_dns (
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING %}
-    ipaddress character varying(39) /* NOT NULL */
+    "IpAddress" text /* NOT NULL */
     {%- else %}
-    ipaddress inet /* NOT NULL */
+    "IpAddress" inet /* NOT NULL */
     {%- endif %}
 )
 SERVER {{ server_name }}
@@ -171,13 +171,13 @@ ALTER FOREIGN TABLE foreign_alternative_dns OWNER TO "{{ constants.DATABASE_USER
 -- Name: alternative_dns; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
 --
 {%- if HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING %}
-{%- set foreign_alternative_dns_ipaddress = "safe_inet_cast(foreign_alternative_dns.ipaddress::text)" %}
+{%- set foreign_alternative_dns_ipaddress = 'safe_inet_cast(foreign_alternative_dns."IpAddress"::text)' %}
 {%- else %}
-{%- set foreign_alternative_dns_ipaddress = "foreign_alternative_dns.ipaddress" %}
+{%- set foreign_alternative_dns_ipaddress = 'foreign_alternative_dns."IpAddress"' %}
 {%- endif %}
 
 CREATE MATERIALIZED VIEW alternative_dns AS
- SELECT ipaddress FROM foreign_alternative_dns GROUP BY ipaddress WITH NO DATA;
+ SELECT "IpAddress" FROM foreign_alternative_dns GROUP BY "IpAddress" WITH NO DATA;
 
 
 ALTER TABLE alternative_dns OWNER TO "{{ constants.AGENT_USER }}";
@@ -188,14 +188,14 @@ ALTER TABLE alternative_dns OWNER TO "{{ constants.AGENT_USER }}";
 
 CREATE FOREIGN TABLE foreign_dhcphost (
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
-    mac character(17) /* NOT NULL */,
+    "Mac" text /* NOT NULL */,
     {%- else %}
-    mac macaddr /* NOT NULL */,
+    "Mac" macaddr /* NOT NULL */,
     {%- endif %}
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
-    ipaddress character varying(39) /* NOT NULL */
+    "IpAddress" text /* NOT NULL */
     {%- else %}
-    ipaddress inet /* NOT NULL */
+    "IpAddress" inet /* NOT NULL */
     {%- endif %}
 )
 SERVER {{ server_name }}
@@ -210,27 +210,27 @@ ALTER FOREIGN TABLE foreign_dhcphost OWNER TO "{{ constants.DATABASE_USER }}";
 -- Name: dhcphost; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
 --
 {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
-{%- set foreign_dhcphost_mac = "safe_macaddr_cast(foreign_dhcphost.mac::text)" %}
+{%- set foreign_dhcphost_mac = 'safe_macaddr_cast(foreign_dhcphost."Mac"::text)' %}
 {%- else %}
-{%- set foreign_dhcphost_mac = "foreign_dhcphost.mac" %}
+{%- set foreign_dhcphost_mac = 'foreign_dhcphost."Mac"' %}
 {%- endif %}
 {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
-{%- set foreign_dhcphost_ipaddress = "safe_inet_cast(foreign_dhcphost.ipaddress::text)" %}
+{%- set foreign_dhcphost_ipaddress = 'safe_inet_cast(foreign_dhcphost."IpAddress"::text)' %}
 {%- else %}
-{%- set foreign_dhcphost_ipaddress = "foreign_dhcphost.ipaddress" %}
+{%- set foreign_dhcphost_ipaddress = 'foreign_dhcphost."IpAddress"' %}
 {%- endif %}
 
 CREATE MATERIALIZED VIEW dhcphost AS
- SELECT indexed.mac,
-    indexed.ipaddress
-   FROM ( SELECT row_number() OVER mac_window AS mac_index,
-            row_number() OVER ipaddress_window AS ipaddress_index,
-            {{ foreign_dhcphost_mac }} AS mac,
-            {{ foreign_dhcphost_ipaddress }} AS ipaddress
+ SELECT indexed."Mac",
+    indexed."IpAddress"
+   FROM ( SELECT row_number() OVER Mac_window AS Mac_index,
+            row_number() OVER IpAddress_window AS IpAddress_index,
+            {{ foreign_dhcphost_mac }} AS "Mac",
+            {{ foreign_dhcphost_ipaddress }} AS "IpAddress"
            FROM foreign_dhcphost
           WHERE (({{ foreign_dhcphost_mac }} IS NOT NULL) AND ({{ foreign_dhcphost_ipaddress }} IS NOT NULL))
-          WINDOW mac_window AS (PARTITION BY {{ foreign_dhcphost_mac }}), ipaddress_window AS (PARTITION BY {{ foreign_dhcphost_ipaddress }})) indexed
-  WHERE ((indexed.mac_index = 1) AND (indexed.ipaddress_index = 1))
+          WINDOW Mac_window AS (PARTITION BY {{ foreign_dhcphost_mac }}), IpAddress_window AS (PARTITION BY {{ foreign_dhcphost_ipaddress }})) indexed
+  WHERE ((indexed.Mac_index = 1) AND (indexed.IpAddress_index = 1))
   WITH NO DATA;
 
 
@@ -241,15 +241,15 @@ ALTER TABLE dhcphost OWNER TO "{{ constants.AGENT_USER }}";
 --
 
 CREATE FOREIGN TABLE foreign_nas (
-    id integer /* NOT NULL */,
-    nasname character varying(128) /* NOT NULL */,
-    shortname character varying(32) /* NOT NULL */,
-    type character varying(30) DEFAULT 'other'::character varying /* NOT NULL */,
-    ports integer,
-    secret character varying(60) /* NOT NULL */,
-    server character varying(64),
-    community character varying(50),
-    description character varying(200)
+    "Id" integer /* NOT NULL */,
+    "NASName" text /* NOT NULL */,
+    "ShortName" text /* NOT NULL */,
+    "Type" text DEFAULT 'other'::character varying /* NOT NULL */,
+    "Ports" integer,
+    "Secret" text /* NOT NULL */,
+    "Server" text,
+    "Community" text,
+    "Description" text
 )
 SERVER {{ server_name }}
 OPTIONS (
@@ -264,17 +264,17 @@ ALTER FOREIGN TABLE foreign_nas OWNER TO "{{ constants.DATABASE_USER }}";
 --
 
 CREATE FOREIGN TABLE foreign_radcheck (
-    priority integer /* NOT NULL */,
-    username character varying(64)  /* NOT NULL */,
+    "Priority" integer /* NOT NULL */,
+    "UserName" text  /* NOT NULL */,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
-    nasipaddress character varying(15),
+    "NASIpAddress" text,
     {%- else %}
-    nasipaddress inet,
+    "NASIpAddress" inet,
     {%- endif %}
-    nasportid character varying(15),
-    attribute character varying(64) /* NOT NULL */,
-    op character(2) /* NOT NULL */,
-    value character varying(253) /* NOT NULL */
+    "NASPortId" text,
+    "Attribute" text /* NOT NULL */,
+    "Op" character(2) /* NOT NULL */,
+    "Value" text /* NOT NULL */
 )
 SERVER {{ server_name }}
 OPTIONS (
@@ -289,11 +289,11 @@ ALTER FOREIGN TABLE foreign_radcheck OWNER TO "{{ constants.DATABASE_USER }}";
 --
 
 CREATE FOREIGN TABLE foreign_radgroupcheck (
-    priority integer /* NOT NULL */,
-    groupname character varying(64) /* NOT NULL */,
-    attribute character varying(64) /* NOT NULL */,
-    op character(2) /* NOT NULL */,
-    value character varying(253) /* NOT NULL */
+    "Priority" integer /* NOT NULL */,
+    "GroupName" text /* NOT NULL */,
+    "Attribute" text /* NOT NULL */,
+    "Op" character(2) /* NOT NULL */,
+    "Value" text /* NOT NULL */
 )
 SERVER {{ server_name }}
 OPTIONS (
@@ -308,11 +308,11 @@ ALTER FOREIGN TABLE foreign_radgroupcheck OWNER TO "{{ constants.DATABASE_USER }
 --
 
 CREATE FOREIGN TABLE foreign_radgroupreply (
-    priority integer /* NOT NULL */,
-    groupname character varying(64) /* NOT NULL */,
-    attribute character varying(64) /* NOT NULL */,
-    op character(2) /* NOT NULL */,
-    value character varying(253) /* NOT NULL */
+    "Priority" integer /* NOT NULL */,
+    "GroupName" text /* NOT NULL */,
+    "Attribute" text /* NOT NULL */,
+    "Op" character(2) /* NOT NULL */,
+    "Value" text /* NOT NULL */
 )
 SERVER {{ server_name }}
 OPTIONS (
@@ -327,17 +327,17 @@ ALTER FOREIGN TABLE foreign_radgroupreply OWNER TO "{{ constants.DATABASE_USER }
 --
 
 CREATE FOREIGN TABLE foreign_radreply (
-    priority integer /* NOT NULL */,
-    username character varying(64) /* NOT NULL */,
+    "Priority" integer /* NOT NULL */,
+    "UserName" text /* NOT NULL */,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
-    nasipaddress character varying(15),
+    "NASIpAaddress" text,
     {%- else %}
-    nasipaddress inet,
+    "NASIpAddress" inet,
     {%- endif %}
-    nasportid character varying(15),
-    attribute character varying(64) /* NOT NULL */,
-    op character(2) DEFAULT '='::bpchar /* NOT NULL */,
-    value character varying(253) /* NOT NULL */
+    "NASPortId" text,
+    "Attribute" text /* NOT NULL */,
+    "Op" character(2) DEFAULT '='::bpchar /* NOT NULL */,
+    "Value" text /* NOT NULL */
 )
 SERVER {{ server_name }}
 OPTIONS (
@@ -352,15 +352,15 @@ ALTER FOREIGN TABLE foreign_radreply OWNER TO "{{ constants.DATABASE_USER }}";
 --
 
 CREATE FOREIGN TABLE foreign_radusergroup (
-    username character varying(64) /* NOT NULL */,
+    "UserName" text /* NOT NULL */,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
-    nasipaddress character varying(15),
+    "NASIpAddress" text,
     {%- else %}
-    nasipaddress inet,
+    "NASIpAddress" inet,
     {%- endif %}
-    nasportid character varying(15),
-    groupname character varying(64) /* NOT NULL */,
-    priority integer /* NOT NULL */
+    "NASPortId" text,
+    "GroupName" text /* NOT NULL */,
+    "Priority" integer /* NOT NULL */
 )
 SERVER {{ server_name }}
 OPTIONS (
@@ -375,33 +375,33 @@ ALTER FOREIGN TABLE foreign_radusergroup OWNER TO "{{ constants.DATABASE_USER }}
 --
 
 CREATE MATERIALIZED VIEW nas AS
- SELECT row_number() OVER () AS id,
-    indexed.nasname,
-    indexed.shortname,
-    indexed.type,
-    indexed.ports,
-    indexed.secret,
-    indexed.server,
-    indexed.community,
-    indexed.description
-   FROM ( SELECT row_number() OVER nasname_window AS nasname_index,
-            row_number() OVER shortname_window AS shortname_index,
-            foreign_nas.nasname,
-            foreign_nas.shortname,
-            foreign_nas.type,
-            foreign_nas.ports,
-            foreign_nas.secret,
-            foreign_nas.server,
-            foreign_nas.community,
-            foreign_nas.description
+ SELECT row_number() OVER () AS "Id",
+    indexed."NASName",
+    indexed."ShortName",
+    indexed."Type",
+    indexed."Ports",
+    indexed."Secret",
+    indexed."Server",
+    indexed."Community",
+    indexed."Description"
+   FROM ( SELECT row_number() OVER NASName_window AS NASName_index,
+            row_number() OVER ShortName_window AS ShortName_index,
+            foreign_nas."NASName",
+            foreign_nas."ShortName",
+            foreign_nas."Type",
+            foreign_nas."Ports",
+            foreign_nas."Secret",
+            foreign_nas."Server",
+            foreign_nas."Community",
+            foreign_nas."Description"
            FROM foreign_nas
-          WHERE ((foreign_nas.id IS NOT NULL)
-            AND (foreign_nas.nasname IS NOT NULL)
-            AND (foreign_nas.shortname IS NOT NULL)
-            AND (foreign_nas.type IS NOT NULL)
-            AND (foreign_nas.secret IS NOT NULL))
-          WINDOW nasname_window AS (PARTITION BY foreign_nas.nasname), shortname_window AS (PARTITION BY foreign_nas.shortname)) indexed
-  WHERE ((indexed.nasname_index = 1) AND (indexed.shortname_index = 1))
+          WHERE ((foreign_nas."Id" IS NOT NULL)
+            AND (foreign_nas."NASName" IS NOT NULL)
+            AND (foreign_nas."ShortName" IS NOT NULL)
+            AND (foreign_nas."Type" IS NOT NULL)
+            AND (foreign_nas."Secret" IS NOT NULL))
+          WINDOW NASName_window AS (PARTITION BY foreign_nas."NASName"), ShortName_window AS (PARTITION BY foreign_nas."ShortName")) indexed
+  WHERE ((indexed.NASName_index = 1) AND (indexed.ShortName_index = 1))
   WITH NO DATA;
 
 
@@ -414,55 +414,44 @@ SET default_with_oids = false;
 --
 
 CREATE TABLE radacct (
-    RadAcctId bigserial PRIMARY KEY,
-    AcctSessionId text NOT NULL,
-    AcctUniqueId text NOT NULL UNIQUE,
-    UserName text,
-    GroupName text,
-    Realm text,
-    NASIPAddress inet NOT NULL,
-    NASPortId text,
-    NASPortType text,
-    AcctStartTime timestamp with time zone,
-    AcctUpdateTime timestamp with time zone,
-    AcctStopTime timestamp with time zone,
-    AcctInterval bigint,
-    AcctSessionTime bigint,
-    AcctAuthentic text,
-    ConnectInfo_start text,
-    ConnectInfo_stop text,
-    AcctInputOctets bigint,
-    AcctOutputOctets bigint,
-    CalledStationId text,
-    CallingStationId text,
-    AcctTerminateCause text,
-    ServiceType text,
-    FramedProtocol text,
-    FramedIPAddress inet
+    "RadAcctId" bigserial,
+    "AcctSessionId" text NOT NULL,
+    "AcctUniqueId" text NOT NULL,
+    "UserName" text,
+    "GroupName" text,
+    "Realm" text,
+    "NASIpAddress" inet NOT NULL,
+    "NASPortId" text,
+    "NASPortType" text,
+    "AcctStartTime" timestamp with time zone,
+    "AcctUpdateTime" timestamp with time zone,
+    "AcctStopTime" timestamp with time zone,
+    "AcctInterval" bigint,
+    "AcctSessionTime" bigint,
+    "AcctAuthentic" text,
+    "ConnectInfo_start" text,
+    "ConnectInfo_stop" text,
+    "AcctInputOctets" bigint,
+    "AcctOutputOctets" bigint,
+    "CalledStationId" text,
+    "CallingStationId" text,
+    "AcctTerminateCause" text,
+    "ServiceType" text,
+    "FramedProtocol" text,
+    "FramedIPAddress" inet
 );
 
 
 ALTER TABLE radacct OWNER TO "{{ constants.DATABASE_USER }}";
 
---
--- Name: radacct_radacctid_seq; Type: SEQUENCE; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
 
-CREATE SEQUENCE radacct_radacctid_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE radacct_radacctid_seq OWNER TO "{{ constants.DATABASE_USER }}";
+ALTER TABLE "radacct_RadAcctId_seq" OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
 -- Name: radacct_radacctid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-ALTER SEQUENCE radacct_radacctid_seq OWNED BY radacct.radacctid;
+ALTER SEQUENCE "radacct_RadAcctId_seq" OWNED BY radacct."RadAcctId";
 
 
 --
@@ -470,23 +459,23 @@ ALTER SEQUENCE radacct_radacctid_seq OWNED BY radacct.radacctid;
 --
 
 CREATE MATERIALIZED VIEW radcheck AS
- SELECT row_number() OVER w AS priority,
-    foreign_radcheck.username,
+ SELECT row_number() OVER w AS "Priority",
+    foreign_radcheck."UserName",
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
-    safe_inet_cast(foreign_radcheck.nasipaddress) AS nasipaddress,
+    safe_inet_cast(foreign_radcheck.NASIpAddress) AS "NASIpAddress",
     {%- else %}
-    foreign_radcheck.nasipaddress,
+    foreign_radcheck."NASIpAddress",
     {%- endif %}
-    foreign_radcheck.nasportid,
-    foreign_radcheck.attribute,
-    foreign_radcheck.op,
-    foreign_radcheck.value
+    foreign_radcheck."NASPortId",
+    foreign_radcheck."Attribute",
+    foreign_radcheck."Op",
+    foreign_radcheck."Value"
    FROM foreign_radcheck
-  WHERE foreign_radcheck.username IS NOT NULL
-    AND foreign_radcheck.attribute IS NOT NULL
-    AND foreign_radcheck.op IS NOT NULL
-    AND foreign_radcheck.value IS NOT NULL
-  WINDOW w AS (PARTITION BY foreign_radcheck.username, foreign_radcheck.nasipaddress, foreign_radcheck.nasportid ORDER BY foreign_radcheck.priority)
+  WHERE foreign_radcheck."UserName" IS NOT NULL
+    AND foreign_radcheck."Attribute" IS NOT NULL
+    AND foreign_radcheck."Op" IS NOT NULL
+    AND foreign_radcheck."Value" IS NOT NULL
+  WINDOW w AS (PARTITION BY foreign_radcheck."UserName", foreign_radcheck."NASIpAddress", foreign_radcheck."NASPortId" ORDER BY foreign_radcheck."Priority")
   WITH DATA;
 
 
@@ -497,17 +486,17 @@ ALTER TABLE radcheck OWNER TO "{{ constants.AGENT_USER }}";
 --
 
 CREATE MATERIALIZED VIEW radgroupcheck AS
- SELECT row_number() OVER w AS priority,
-    foreign_radgroupcheck.groupname,
-    foreign_radgroupcheck.attribute,
-    foreign_radgroupcheck.op,
-    foreign_radgroupcheck.value
+ SELECT row_number() OVER w AS "Priority",
+    foreign_radgroupcheck."GroupName",
+    foreign_radgroupcheck."Attribute",
+    foreign_radgroupcheck."Op",
+    foreign_radgroupcheck."Value"
    FROM foreign_radgroupcheck
-  WHERE foreign_radgroupcheck.groupname IS NOT NULL
-    AND foreign_radgroupcheck.attribute IS NOT NULL
-    AND foreign_radgroupcheck.op IS NOT NULL
-    AND foreign_radgroupcheck.value IS NOT NULL
-  WINDOW w AS (PARTITION BY foreign_radgroupcheck.groupname ORDER BY foreign_radgroupcheck.priority)
+  WHERE foreign_radgroupcheck."GroupName" IS NOT NULL
+    AND foreign_radgroupcheck."Attribute" IS NOT NULL
+    AND foreign_radgroupcheck."Op" IS NOT NULL
+    AND foreign_radgroupcheck."Value" IS NOT NULL
+  WINDOW w AS (PARTITION BY foreign_radgroupcheck."GroupName" ORDER BY foreign_radgroupcheck."Priority")
   WITH DATA;
 
 
@@ -518,17 +507,17 @@ ALTER TABLE radgroupcheck OWNER TO "{{ constants.AGENT_USER }}";
 --
 
 CREATE MATERIALIZED VIEW radgroupreply AS
- SELECT row_number() OVER w AS priority,
-    foreign_radgroupreply.groupname,
-    foreign_radgroupreply.attribute,
-    foreign_radgroupreply.op,
-    foreign_radgroupreply.value
+ SELECT row_number() OVER w AS "Priority",
+    foreign_radgroupreply."GroupName",
+    foreign_radgroupreply."Attribute",
+    foreign_radgroupreply."Op",
+    foreign_radgroupreply."Value"
    FROM foreign_radgroupreply
-  WHERE foreign_radgroupreply.groupname IS NOT NULL
-   AND foreign_radgroupreply.attribute IS NOT NULL
-   AND foreign_radgroupreply.op IS NOT NULL
-   AND foreign_radgroupreply.value IS NOT NULL
-  WINDOW w AS (PARTITION BY foreign_radgroupreply.groupname ORDER BY foreign_radgroupreply.priority)
+  WHERE foreign_radgroupreply."GroupName" IS NOT NULL
+   AND foreign_radgroupreply."Attribute" IS NOT NULL
+   AND foreign_radgroupreply."Op" IS NOT NULL
+   AND foreign_radgroupreply."Value" IS NOT NULL
+  WINDOW w AS (PARTITION BY foreign_radgroupreply."GroupName" ORDER BY foreign_radgroupreply."Priority")
   WITH DATA;
 
 
@@ -539,37 +528,26 @@ ALTER TABLE radgroupreply OWNER TO "{{ constants.AGENT_USER }}";
 --
 
 CREATE TABLE radpostauth (
-    id bigserial PRIMARY KEY,
-    UserName text NOT NULL,
-    NASIPAddress inet NOT NULL,
-    NASPortId text,
-    PacketType character varying(32),
-    ReplyMessage character varying(253),
-    AuthDate timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now())
+    "Id" bigserial,
+    "UserName" text NOT NULL,
+    "NASIpAddress" inet NOT NULL,
+    "NASPortId" text,
+    "PacketType" text NOT NULL,
+    "ReplyMessage" text,
+    "AuthDate" timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
 
 ALTER TABLE radpostauth OWNER TO "{{ constants.DATABASE_USER }}";
 
---
--- Name: radpostauth_id_seq; Type: SEQUENCE; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
 
-CREATE SEQUENCE radpostauth_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE radpostauth_id_seq OWNER TO "{{ constants.DATABASE_USER }}";
+ALTER TABLE "radpostauth_Id_seq" OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
 -- Name: radpostauth_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-ALTER SEQUENCE radpostauth_id_seq OWNED BY radpostauth.id;
+ALTER SEQUENCE "radpostauth_Id_seq" OWNED BY radpostauth."Id";
 
 
 --
@@ -577,23 +555,23 @@ ALTER SEQUENCE radpostauth_id_seq OWNED BY radpostauth.id;
 --
 
 CREATE MATERIALIZED VIEW radreply AS
- SELECT row_number() OVER w AS priority,
-    foreign_radreply.username,
+ SELECT row_number() OVER w AS "Priority",
+    foreign_radreply."UserName",
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
-    safe_inet_cast(foreign_radreply.nasipaddress) AS nasipaddress,
+    safe_inet_cast(foreign_radreply.NASIpAddress) AS "NASIpAddress",
     {%- else %}
-    foreign_radreply.nasipaddress,
+    foreign_radreply."NASIpAddress",
     {%- endif %}
-    foreign_radreply.nasportid,
-    foreign_radreply.attribute,
-    foreign_radreply.op,
-    foreign_radreply.value
+    foreign_radreply."NASPortId",
+    foreign_radreply."Attribute",
+    foreign_radreply."Op",
+    foreign_radreply."Value"
    FROM foreign_radreply
-  WHERE foreign_radreply.username IS NOT NULL
-   AND foreign_radreply.attribute IS NOT NULL
-   AND foreign_radreply.op IS NOT NULL
-   AND foreign_radreply.value IS NOT NULL
-  WINDOW w AS (PARTITION BY foreign_radreply.username, foreign_radreply.nasipaddress, foreign_radreply.nasportid ORDER BY foreign_radreply.priority)
+  WHERE foreign_radreply."UserName" IS NOT NULL
+   AND foreign_radreply."Attribute" IS NOT NULL
+   AND foreign_radreply."Op" IS NOT NULL
+   AND foreign_radreply."Value" IS NOT NULL
+  WINDOW w AS (PARTITION BY foreign_radreply."UserName", foreign_radreply."NASIpAddress", foreign_radreply."NASPortId" ORDER BY foreign_radreply."Priority")
   WITH DATA;
 
 
@@ -604,19 +582,19 @@ ALTER TABLE radreply OWNER TO "{{ constants.AGENT_USER }}";
 --
 
 CREATE MATERIALIZED VIEW radusergroup AS
- SELECT foreign_radusergroup.username,
+ SELECT foreign_radusergroup."UserName",
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
-    safe_inet_cast(foreign_radusergroup.nasipaddress) AS nasipaddress,
+    safe_inet_cast(foreign_radusergroup.NASIpAddress) AS "NASIpAddress",
     {%- else %}
-    foreign_radusergroup.nasipaddress,
+    foreign_radusergroup."NASIpAddress",
     {%- endif %}
-    foreign_radusergroup.nasportid,
-    foreign_radusergroup.groupname,
-    row_number() OVER w AS priority
+    foreign_radusergroup."NASPortId",
+    foreign_radusergroup."GroupName",
+    row_number() OVER w AS "Priority"
    FROM foreign_radusergroup
-  WHERE foreign_radusergroup.username IS NOT NULL
-   AND foreign_radusergroup.groupname IS NOT NULL
-  WINDOW w AS (PARTITION BY foreign_radusergroup.username, foreign_radusergroup.nasipaddress, foreign_radusergroup.nasportid ORDER BY foreign_radusergroup.priority)
+  WHERE foreign_radusergroup."UserName" IS NOT NULL
+   AND foreign_radusergroup."GroupName" IS NOT NULL
+  WINDOW w AS (PARTITION BY foreign_radusergroup."UserName", foreign_radusergroup."NASIpAddress", foreign_radusergroup."NASPortId" ORDER BY foreign_radusergroup."Priority")
   WITH DATA;
 
 
@@ -626,14 +604,14 @@ ALTER TABLE radusergroup OWNER TO "{{ constants.AGENT_USER }}";
 -- Name: radacctid; Type: DEFAULT; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-ALTER TABLE ONLY radacct ALTER COLUMN radacctid SET DEFAULT nextval('radacct_radacctid_seq'::regclass);
+ALTER TABLE ONLY radacct ALTER COLUMN "RadAcctId" SET DEFAULT nextval('"radacct_RadAcctId_seq"'::regclass);
 
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-ALTER TABLE ONLY radpostauth ALTER COLUMN id SET DEFAULT nextval('radpostauth_id_seq'::regclass);
+ALTER TABLE ONLY radpostauth ALTER COLUMN "Id" SET DEFAULT nextval('"radpostauth_Id_seq"'::regclass);
 
 
 --
@@ -641,7 +619,7 @@ ALTER TABLE ONLY radpostauth ALTER COLUMN id SET DEFAULT nextval('radpostauth_id
 --
 
 ALTER TABLE ONLY radacct
-    ADD CONSTRAINT radacct_acctuniqueid_key UNIQUE (acctuniqueid);
+    ADD CONSTRAINT "radacct_AcctUniqueId_key" UNIQUE ("AcctUniqueId");
 
 
 --
@@ -649,7 +627,7 @@ ALTER TABLE ONLY radacct
 --
 
 ALTER TABLE ONLY radacct
-    ADD CONSTRAINT radacct_pkey PRIMARY KEY (radacctid);
+    ADD CONSTRAINT radacct_pkey PRIMARY KEY ("RadAcctId");
 
 
 --
@@ -657,105 +635,105 @@ ALTER TABLE ONLY radacct
 --
 
 ALTER TABLE ONLY radpostauth
-    ADD CONSTRAINT radpostauth_pkey PRIMARY KEY (id);
+    ADD CONSTRAINT radpostauth_pkey PRIMARY KEY ("Id");
 
 
 --
 -- Name: alternative_dns_ipaddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
 --
 
-CREATE UNIQUE INDEX alternative_dns_ipaddress_idx ON alternative_dns USING btree (ipaddress);
+CREATE UNIQUE INDEX "alternative_dns_IpAddress_idx" ON alternative_dns USING btree ("IpAddress");
 
 
 --
 -- Name: dhcphost_ipaddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
 --
 
-CREATE UNIQUE INDEX dhcphost_ipaddress_idx ON dhcphost USING btree (ipaddress);
+CREATE UNIQUE INDEX "dhcphost_IpAddress_idx" ON dhcphost USING btree ("IpAddress");
 
 
 --
 -- Name: dhcphost_mac_idx; Type: INDEX; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
 --
 
-CREATE UNIQUE INDEX dhcphost_mac_idx ON dhcphost USING btree (mac);
+CREATE UNIQUE INDEX "dhcphost_Mac_idx" ON dhcphost USING btree ("Mac");
 
 
 --
 -- Name: nas_nasname_idx; Type: INDEX; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
 --
 
-CREATE UNIQUE INDEX nas_nasname_idx ON nas USING btree (nasname);
+CREATE UNIQUE INDEX "nas_NASName_idx" ON nas USING btree ("NASName");
 
 
 --
 -- Name: radacct_active_session_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
 --
 
-CREATE INDEX radacct_active_session_idx ON radacct (AcctUniqueId) WHERE AcctStopTime IS NULL;
+CREATE INDEX radacct_active_session_idx ON radacct ("AcctUniqueId") WHERE "AcctStopTime" IS NULL;
 
 
 --
 -- Name: radacct_bulk_close; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
 --
 
-CREATE INDEX radacct_bulk_close ON radacct (NASIPAddress, AcctStartTime) WHERE AcctStopTime IS NULL;
+CREATE INDEX radacct_bulk_close ON radacct ("NASIpAddress", "AcctStartTime") WHERE "AcctStopTime" IS NULL;
 
 
 --
 -- Name: radacct_start_user_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
 --
 
-CREATE INDEX radacct_start_user_idx ON radacct USING btree (acctstarttime, username);
+CREATE INDEX radacct_start_user_idx ON radacct USING btree ("AcctStartTime", "UserName");
 
 
 --
 -- Name: radcheck_user_idx; Type: INDEX; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
 --
 
-CREATE UNIQUE INDEX radcheck_user_idx ON radcheck USING btree (username, nasipaddress, nasportid, priority);
+CREATE UNIQUE INDEX radcheck_user_idx ON radcheck USING btree ("UserName", "NASIpAddress", "NASPortId", "Priority");
 
 
 --
 -- Name: radgroupcheck_group_idx; Type: INDEX; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
 --
 
-CREATE UNIQUE INDEX radgroupcheck_group_idx ON radgroupcheck USING btree (groupname, priority);
+CREATE UNIQUE INDEX radgroupcheck_group_idx ON radgroupcheck USING btree ("GroupName", "Priority");
 
 
 --
 -- Name: radgroupreply_group_idx; Type: INDEX; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
 --
 
-CREATE UNIQUE INDEX radgroupreply_group_idx ON radgroupreply USING btree (groupname, priority);
+CREATE UNIQUE INDEX radgroupreply_group_idx ON radgroupreply USING btree ("GroupName", "Priority");
 
 
 --
 -- Name: radpostauth_port_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
 --
 
-CREATE INDEX radpostauth_port_idx ON radpostauth USING btree (nasipaddress, nasportid);
+CREATE INDEX radpostauth_port_idx ON radpostauth USING btree ("NASIpAddress", "NASPortId");
 
 
 --
 -- Name: radpostauth_username_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
 --
 
-CREATE INDEX radpostauth_username_idx ON radpostauth USING btree (username);
+CREATE INDEX "radpostauth_UserName_idx" ON radpostauth USING btree ("UserName");
 
 
 --
 -- Name: radreply_user_idx; Type: INDEX; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
 --
 
-CREATE UNIQUE INDEX radreply_user_idx ON radreply USING btree (username, nasipaddress, nasportid, priority);
+CREATE UNIQUE INDEX radreply_user_idx ON radreply USING btree ("UserName", "NASIpAddress", "NASPortId", "Priority");
 
 
 --
 -- Name: radusergroup_membership_idx; Type: INDEX; Schema: public; Owner: {{ constants.AGENT_USER }}; Tablespace:
 --
 
-CREATE UNIQUE INDEX radusergroup_membership_idx ON radusergroup USING btree (username, nasipaddress, nasportid, groupname, priority);
+CREATE UNIQUE INDEX radusergroup_membership_idx ON radusergroup USING btree ("UserName", "NASIpAddress", "NASPortId", "GroupName", "Priority");
 
 
 --
@@ -895,10 +873,10 @@ GRANT SELECT ON TABLE radacct TO "{{ constants.PORTAL_USER }}";
 -- Name: radacct_radacctid_seq; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-REVOKE ALL ON SEQUENCE radacct_radacctid_seq FROM PUBLIC;
-REVOKE ALL ON SEQUENCE radacct_radacctid_seq FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON SEQUENCE radacct_radacctid_seq TO "{{ constants.DATABASE_USER }}";
-GRANT SELECT,USAGE ON SEQUENCE radacct_radacctid_seq TO "{{ constants.RADIUS_USER }}";
+REVOKE ALL ON SEQUENCE "radacct_RadAcctId_seq" FROM PUBLIC;
+REVOKE ALL ON SEQUENCE "radacct_RadAcctId_seq" FROM "{{ constants.DATABASE_USER }}";
+GRANT ALL ON SEQUENCE "radacct_RadAcctId_seq" TO "{{ constants.DATABASE_USER }}";
+GRANT SELECT,USAGE ON SEQUENCE "radacct_RadAcctId_seq" TO "{{ constants.RADIUS_USER }}";
 
 
 --
@@ -950,10 +928,10 @@ GRANT SELECT ON TABLE radpostauth TO "{{ constants.PORTAL_USER }}";
 -- Name: radpostauth_id_seq; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-REVOKE ALL ON SEQUENCE radpostauth_id_seq FROM PUBLIC;
-REVOKE ALL ON SEQUENCE radpostauth_id_seq FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON SEQUENCE radpostauth_id_seq TO "{{ constants.DATABASE_USER }}";
-GRANT SELECT,USAGE ON SEQUENCE radpostauth_id_seq TO "{{ constants.RADIUS_USER }}";
+REVOKE ALL ON SEQUENCE "radpostauth_Id_seq" FROM PUBLIC;
+REVOKE ALL ON SEQUENCE "radpostauth_Id_seq" FROM "{{ constants.DATABASE_USER }}";
+GRANT ALL ON SEQUENCE "radpostauth_Id_seq" TO "{{ constants.DATABASE_USER }}";
+GRANT SELECT,USAGE ON SEQUENCE "radpostauth_Id_seq" TO "{{ constants.RADIUS_USER }}";
 
 
 --

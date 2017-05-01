@@ -3,13 +3,13 @@ import operator
 
 from sqlalchemy import (
     BigInteger, Column, DateTime, Integer, MetaData, PrimaryKeyConstraint,
-    String, Table, UniqueConstraint, and_, cast, column, create_engine, func,
-    null, or_, select, table)
-from sqlalchemy.dialects.postgresql import INET, INTERVAL, MACADDR
+    String, Table, Text, UniqueConstraint, and_, column, create_engine,
+    func, null, or_, select, table)
+from sqlalchemy.dialects.postgresql import INET, MACADDR
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
-from hades.config.loader import get_config
 
+from hades.config.loader import get_config
 
 logger = logging.getLogger(__name__)
 metadata = MetaData()
@@ -24,135 +24,133 @@ def as_copy(original_table, new_name):
 
 alternative_dns = Table(
     'alternative_dns', metadata,
-    Column('ipaddress', INET, nullable=False),
-    UniqueConstraint('ipaddress'),
+    Column('IpAddress', INET, nullable=False),
+    UniqueConstraint('IpAddress'),
 )
 temp_alternative_dns = as_copy(alternative_dns, 'temp_alternative_dns')
 
 dhcphost = Table(
     'dhcphost', metadata,
-    Column('mac', MACADDR, nullable=False),
-    Column('ipaddress', INET, nullable=False),
-    UniqueConstraint('mac'),
-    UniqueConstraint('ipaddress'),
+    Column('Mac', MACADDR, nullable=False),
+    Column('IpAddress', INET, nullable=False),
+    UniqueConstraint('Mac'),
+    UniqueConstraint('IpAddress'),
 )
 temp_dhcphost = as_copy(dhcphost, 'temp_dhcphost')
 
 nas = Table(
     'nas', metadata,
-    Column('id', Integer, unique=True, nullable=False),
-    Column('nasname', String(128), unique=True, nullable=False),
-    Column('shortname', String(32), unique=True, nullable=False),
-    Column('type', String(30), default='other', nullable=False),
-    Column('ports', Integer),
-    Column('secret', String(60), nullable=False),
-    Column('server', String(64)),
-    Column('community', String(50)),
-    Column('description', String(200)),
-    UniqueConstraint('id'),
-    UniqueConstraint('nasname'),
-    UniqueConstraint('shortname'),
+    Column('Id', Integer, unique=True, nullable=False),
+    Column('NASName', Text, unique=True, nullable=False),
+    Column('ShortName', Text, unique=True, nullable=False),
+    Column('Type', Text, default='other', nullable=False),
+    Column('Ports', Integer),
+    Column('Secret', Text, nullable=False),
+    Column('Server', Text),
+    Column('Community', Text),
+    Column('Description', Text),
+    UniqueConstraint('Id'),
+    UniqueConstraint('NASName'),
+    UniqueConstraint('ShortName'),
 )
 temp_nas = as_copy(nas, 'temp_nas')
 
 radacct = Table(
     'radacct', metadata,
-    Column('radacctid', Integer, nullable=False),
-    Column('acctsessionid', String(64), nullable=False),
-    Column('acctuniqueid', String(32), nullable=False),
-    Column('username', String(253)),
-    Column('groupname', String(253)),
-    Column('realm', String(64)),
-    Column('nasipaddress', INET, nullable=False),
-    Column('nasportid', String(15)),
-    Column('nasporttype', String(32)),
-    Column('acctstarttime', DateTime),
-    Column('acctstoptime', DateTime),
-    Column('acctsessiontime', BigInteger),
-    Column('acctauthentic', String(32)),
-    Column('connectinfo_start', String(50)),
-    Column('connectinfo_stop', String(50)),
-    Column('acctinputoctets', BigInteger),
-    Column('acctoutputoctets', BigInteger),
-    Column('calledstationid', String(50)),
-    Column('callingstationid', String(50)),
-    Column('acctterminatecause', String(32)),
-    Column('servicetype', String(32)),
-    Column('xascendsessionsvrkey', String(10)),
-    Column('framedprotocol', String(32)),
-    Column('framedipaddress', INET),
-    Column('acctstartdelay', Integer),
-    Column('acctstopdelay', Integer),
-    Column('lastupdatetime', DateTime, nullable=False),
+    Column('RadAcctId', BigInteger, primary_key=True, nullable=False),
+    Column('AcctSessionId', Text, nullable=False),
+    Column('AcctUniqueId', Text, unique=True, nullable=False),
+    Column('UserName', Text),
+    Column('GroupName', Text),
+    Column('Realm', Text),
+    Column('NASIpAddress', INET, nullable=False),
+    Column('NASPortId', Text),
+    Column('NASPortType', Text),
+    Column('AcctStartTime', DateTime),
+    Column('AcctUpdateTime', DateTime),
+    Column('AcctStopTime', DateTime),
+    Column('AcctInterval', BigInteger),
+    Column('AcctSessionTime', BigInteger),
+    Column('AcctAuthentic', Text),
+    Column('ConnectInfo_start', Text),
+    Column('ConnectInfo_stop', Text),
+    Column('AcctInputOctets', BigInteger),
+    Column('AcctOutputOctets', BigInteger),
+    Column('CalledStationId', Text),
+    Column('CallingStationId', Text),
+    Column('AcctTerminateCause', Text),
+    Column('ServiceType', Text),
+    Column('FramedProtocol', Text),
+    Column('FramedIPAddress', INET),
 )
 
 radcheck = Table(
     'radcheck', metadata,
-    Column('priority', Integer, nullable=False),
-    Column('username', String(64), nullable=False),
-    Column('nasipaddress', INET, nullable=False),
-    Column('nasportid', String(15), nullable=False),
-    Column('attribute', String(64), nullable=False),
-    Column('op', String(2), nullable=False),
-    Column('value', String(253), nullable=False),
-    UniqueConstraint('username', 'nasipaddress', 'nasportid', 'priority'),
+    Column('Priority', Integer, nullable=False),
+    Column('UserName', Text, nullable=False),
+    Column('NASIpAddress', INET, nullable=False),
+    Column('NASPortId', Text, nullable=False),
+    Column('Attribute', Text, nullable=False),
+    Column('Op', String(2), nullable=False),
+    Column('Value', Text, nullable=False),
+    UniqueConstraint('UserName', 'NASIpAddress', 'NASPortId', 'Priority'),
 )
 temp_radcheck = as_copy(radcheck, 'temp_radcheck')
 
 radgroupcheck = Table(
     'radgroupcheck', metadata,
-    Column('priority', Integer, nullable=False),
-    Column('groupname', String(64), nullable=False),
-    Column('attribute', String(64), nullable=False),
-    Column('op', String(2), nullable=False),
-    Column('value', String(253), nullable=False),
-    UniqueConstraint('groupname', 'priority'),
+    Column('Priority', Integer, nullable=False),
+    Column('GroupName', Text, nullable=False),
+    Column('Attribute', Text, nullable=False),
+    Column('Op', String(2), nullable=False),
+    Column('Value', Text, nullable=False),
+    UniqueConstraint('GroupName', 'Priority'),
 )
 temp_radgroupcheck = as_copy(radgroupcheck, 'temp_radgroupcheck')
 
 radgroupreply = Table(
     'radgroupreply', metadata,
-    Column('priority', Integer, nullable=False),
-    Column('groupname', String(64), nullable=False),
-    Column('attribute', String(64), nullable=False),
-    Column('op', String(2), nullable=False),
-    Column('value', String(253), nullable=False),
-    UniqueConstraint('groupname', 'priority'),
+    Column('Priority', Integer, nullable=False),
+    Column('GroupName', Text, nullable=False),
+    Column('Attribute', Text, nullable=False),
+    Column('Op', String(2), nullable=False),
+    Column('Value', Text, nullable=False),
+    UniqueConstraint('GroupName', 'Priority'),
 )
 temp_radgroupreply = as_copy(radgroupreply, 'temp_radgroupreply')
 
 radpostauth = Table(
     'radpostauth', metadata,
-    Column('id', Integer, primary_key=True, nullable=False),
-    Column('username', String(64), nullable=False),
-    Column('nasipaddres', INET, nullable=False),
-    Column('nasportid', String(15), nullable=False),
-    Column('packettype', String(64), nullable=False),
-    Column('replymessage', String(253), nullable=False),
-    Column('authdate', String(64), nullable=False),
+    Column('Id', BigInteger, primary_key=True, nullable=False),
+    Column('UserName', Text, nullable=False),
+    Column('NASIpAddress', INET, nullable=False),
+    Column('NASPortId', Text),
+    Column('PacketType', Text, nullable=False),
+    Column('ReplyMessage', Text),
+    Column('AuthDate', Text, nullable=False),
 )
 
 radreply = Table(
     'radreply', metadata,
-    Column('priority', Integer, nullable=False),
-    Column('username', String(64), nullable=False),
-    Column('nasipaddress', INET, nullable=False),
-    Column('nasportid', String(15), nullable=False),
-    Column('attribute', String(64), nullable=False),
-    Column('op', String(2), default='=', nullable=False),
-    Column('value', String(253), nullable=False),
-    UniqueConstraint('username', 'nasipaddress', 'nasportid', 'priority'),
+    Column('Priority', Integer, nullable=False),
+    Column('UserName', Text, nullable=False),
+    Column('NASIpAddress', INET, nullable=False),
+    Column('NASPortId', Text, nullable=False),
+    Column('Attribute', Text, nullable=False),
+    Column('Op', String(2), default='=', nullable=False),
+    Column('Value', Text, nullable=False),
+    UniqueConstraint('UserName', 'NASIpAddress', 'NASPortId', 'Priority'),
 )
 temp_radreply = as_copy(radreply, 'temp_radreply')
 
 radusergroup = Table(
     'radusergroup', metadata,
-    Column('priority', Integer, nullable=False),
-    Column('username', String(64), nullable=False),
-    Column('nasipaddres', INET, nullable=False),
-    Column('nasportid', String(15), nullable=False),
-    Column('groupname', String(64), nullable=False),
-    UniqueConstraint('username', 'groupname', 'priority'),
+    Column('Priority', Integer, nullable=False),
+    Column('UserName', Text, nullable=False),
+    Column('NASIpAddress', INET, nullable=False),
+    Column('NASPortId', Text, nullable=False),
+    Column('GroupName', Text, nullable=False),
+    UniqueConstraint('UserName', 'GroupName', 'Priority'),
 )
 temp_radusergroup = as_copy(radusergroup, 'temp_radusergroup')
 
@@ -302,7 +300,7 @@ def delete_old_sessions(transaction, interval):
     logger.debug('Deleting sessions in table "%s" older than "%s"',
                  radacct.name, interval)
     transaction.execute(radacct.delete().where(and_(
-        radacct.c.lastupdatetime < utcnow() - interval
+        radacct.c.AcctUpdateTime < utcnow() - interval
     )))
 
 
@@ -310,7 +308,7 @@ def delete_old_auth_attempts(transaction, interval):
     logger.debug('Deleting auth attempts in table "%s" older than "%s"',
                  radpostauth.name, interval)
     transaction.execute(radpostauth.delete().where(and_(
-        radpostauth.c.authdate < utcnow() - interval
+        radpostauth.c.AuthDate < utcnow() - interval
     )))
 
 
@@ -324,8 +322,8 @@ def get_groups(mac):
     """
     logger.debug('Getting groups of MAC "%s"', mac)
     connection = get_connection()
-    results = connection.execute(select([radusergroup.c.groupname])
-                                 .where(radusergroup.c.username == mac))
+    results = connection.execute(select([radusergroup.c.GroupName])
+                                 .where(radusergroup.c.UserName == mac))
     return list(map(operator.itemgetter(0), results))
 
 
@@ -344,13 +342,13 @@ def get_latest_auth_attempt(mac):
     config = get_config(True)
     interval = config.HADES_REAUTHENTICATION_INTERVAL
     result = connection.execute(
-        select([radpostauth.c.replymessage, radpostauth.c.authdate])
+        select([radpostauth.c.ReplyMessage, radpostauth.c.AuthDate])
         .where(and_(
-            radpostauth.c.username == mac,
-            radpostauth.c.authdate >= (utcnow() - interval),
-            radpostauth.c.packettype == 'Access-Accept',
+            radpostauth.c.UserName == mac,
+            radpostauth.c.AuthDate >= (utcnow() - interval),
+            radpostauth.c.PacketType == 'Access-Accept',
         ))
-        .order_by(radpostauth.c.authdate.desc()).limit(1)
+        .order_by(radpostauth.c.AuthDate.desc()).limit(1)
     ).first()
     if result:
         message, date = result
@@ -367,7 +365,23 @@ def get_all_dhcp_hosts():
     """
     logger.debug("Getting all DHCP hosts")
     connection = get_connection()
-    result = connection.execute(select([dhcphost.c.mac, dhcphost.c.ipaddress]))
+    result = connection.execute(select([dhcphost.c.Mac, dhcphost.c.IpAddress]))
+    return iter(result)
+
+
+def get_all_nas_clients():
+    """
+    Return all NAS clients.
+
+    :return: An iterable that yields (shortname, nasname, type, ports, secret,
+    server, community, description)-tuples
+    :rtype: iterable[(str, str, str, int, str, str, str, str)]
+    """
+    connection = get_connection()
+    result = connection.execute(
+        select([nas.c.ShortName, nas.c.NASName, nas.c.Type, nas.c.Ports,
+                nas.c.Secret, nas.c.Server, nas.c.Community, nas.c.Description])
+    )
     return iter(result)
 
 
@@ -384,13 +398,11 @@ def get_sessions(mac):
     logger.debug('Getting all sessions for MAC "%s"', mac)
     connection = get_connection()
     result = connection.execute(
-        select([radacct.c.nasipaddress, radacct.c.nasportid,
-                radacct.c.acctstarttime + cast(radacct.c.acctstartdelay,
-                                               INTERVAL),
-                radacct.c.acctstoptime + cast(radacct.c.acctstopdelay,
-                                              INTERVAL)])
-        .where(and_(radacct.c.username == mac))
-        .order_by(radacct.c.acctstarttime.desc()))
+        select([radacct.c.NASIpAddress, radacct.c.NASPortId,
+                radacct.c.AcctStartTime,
+                radacct.c.AcctStopTime])
+        .where(and_(radacct.c.UserName == mac))
+        .order_by(radacct.c.AcctStartTime.desc()))
     return iter(result)
 
 
@@ -406,11 +418,11 @@ def get_auth_attempts(mac):
     logger.debug('Getting all auth attempts for MAC "%s"', mac)
     connection = get_connection()
     result = connection.execute(
-        select([radpostauth.c.nasipaddress, radpostauth.c.nasportid,
-                radpostauth.c.packettype, radpostauth.c.replymessage,
-                radpostauth.c.authdate])
-        .where(and_(radpostauth.c.username == mac))
-        .order_by(radpostauth.c.authdate.desc()))
+        select([radpostauth.c.NASIpAddress, radpostauth.c.NASPortId,
+                radpostauth.c.PacketType, radpostauth.c.ReplyMessage,
+                radpostauth.c.AuthDate])
+        .where(and_(radpostauth.c.UserName == mac))
+        .order_by(radpostauth.c.AuthDate.desc()))
     return iter(result)
 
 
@@ -423,5 +435,5 @@ def get_all_alternative_dns_ips():
     """
     logger.debug("Getting all alternative DNS clients")
     connection = get_connection()
-    result = connection.execute(select([alternative_dns.c.ipaddress]))
+    result = connection.execute(select([alternative_dns.c.IpAddress]))
     return map(operator.itemgetter(0), result)
