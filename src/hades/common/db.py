@@ -191,6 +191,7 @@ def lock_table(connection, target_table):
     :param connection: DB connection
     :param target_table: Table object
     """
+    logger.debug('Locking table "%s"', target_table.name)
     oid = connection.execute(select([column("oid")])
                              .select_from(table("pg_class"))
                              .where((column("relname") == target_table.name))
@@ -206,6 +207,8 @@ def create_temp_copy(connection, source, destination):
     :param source: Source table
     :param destination: Destination table
     """
+    logger.debug('Creating temporary table "%s" as copy of "%s"',
+                 destination.name, source.name)
     if not connection.in_transaction():
         raise RuntimeError("must be executed in a transaction to have any "
                            "effect")
@@ -235,6 +238,8 @@ def diff_tables(connection, master, copy, result_columns):
     :param result_columns: columns to return
     :return: True, if the contents differ, otherwise False
     """
+    logger.debug('Calculating diff between "%s" and "%s"',
+                 master.name, copy.name)
     result_columns = tuple(result_columns)
     unique_columns = min(
         (constraint.columns
@@ -273,10 +278,13 @@ def diff_tables(connection, master, copy, result_columns):
                      getattr(copy.c, column_name)
                      for column_name in other_column_names)))
     ).fetchall()
+    logger.debug('Diff found %d added, %d deleted, and %d modified records',
+                 len(added), len(deleted), len(modified))
     return added, deleted, modified
 
 
 def refresh_materialized_view(transaction, view):
+    logger.debug('Refreshing materialized view "%s"', view.name)
     preparer = transaction.dialect.identifier_preparer
     transaction.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY {view}'
                         .format(view=preparer.format_table(view)))
@@ -291,12 +299,16 @@ def refresh_and_diff_materialized_view(connection, view, copy, result_columns):
 
 
 def delete_old_sessions(transaction, interval):
+    logger.debug('Deleting sessions in table "%s" older than "%s"',
+                 radacct.name, interval)
     transaction.execute(radacct.delete().where(and_(
         radacct.c.lastupdatetime < utcnow() - interval
     )))
 
 
 def delete_old_auth_attempts(transaction, interval):
+    logger.debug('Deleting auth attempts in table "%s" older than "%s"',
+                 radpostauth.name, interval)
     transaction.execute(radpostauth.delete().where(and_(
         radpostauth.c.authdate < utcnow() - interval
     )))
@@ -310,6 +322,7 @@ def get_groups(mac):
     :return: A list of group names
     :rtype: [str]
     """
+    logger.debug('Getting groups of MAC "%s"', mac)
     connection = get_connection()
     results = connection.execute(select([radusergroup.c.groupname])
                                  .where(radusergroup.c.username == mac))
@@ -326,6 +339,7 @@ def get_latest_auth_attempt(mac):
     found..
     :rtype: ([str], datetime)|None
     """
+    logger.debug('Getting latest auth attempt for MAC "%s"', mac)
     connection = get_connection()
     config = get_config(True)
     interval = config.HADES_REAUTHENTICATION_INTERVAL
@@ -351,6 +365,7 @@ def get_all_dhcp_hosts():
     :return: An iterable that yields (mac, ip)-tuples
     :rtype: iterable[(str, str)]
     """
+    logger.debug("Getting all DHCP hosts")
     connection = get_connection()
     result = connection.execute(select([dhcphost.c.mac, dhcphost.c.ipaddress]))
     return iter(result)
@@ -366,6 +381,7 @@ def get_sessions(mac):
     descending
     :rtype: iterable[(str, str, datetime, datetime)]
     """
+    logger.debug('Getting all sessions for MAC "%s"', mac)
     connection = get_connection()
     result = connection.execute(
         select([radacct.c.nasipaddress, radacct.c.nasportid,
@@ -387,6 +403,7 @@ def get_auth_attempts(mac):
     Reply-Message, Auth-Date)-tuples ordered by Auth-Date descending
     :rtype: iterable[(str, str, str, str, datetime)]
     """
+    logger.debug('Getting all auth attempts for MAC "%s"', mac)
     connection = get_connection()
     result = connection.execute(
         select([radpostauth.c.nasipaddress, radpostauth.c.nasportid,
@@ -404,6 +421,7 @@ def get_all_alternative_dns_ips():
     :return: An iterable that yields ip addresses
     :rtype: iterable[str]
     """
+    logger.debug("Getting all alternative DNS clients")
     connection = get_connection()
     result = connection.execute(select([alternative_dns.c.ipaddress]))
     return map(operator.itemgetter(0), result)

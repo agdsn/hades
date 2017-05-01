@@ -25,6 +25,8 @@ database_grp = grp.getgrnam(constants.DATABASE_GROUP)
 
 @contextlib.contextmanager
 def dropped_privileges(passwd, group):
+    logger.debug("Dropping privileges temporary to user %s and group",
+                 passwd.pw_name, group.gr_name)
     user = getpass.getuser()
     saved_uid = os.geteuid()
     saved_gid = os.getegid()
@@ -36,9 +38,11 @@ def dropped_privileges(passwd, group):
     os.setreuid(saved_uid, saved_uid)
     os.setregid(saved_gid, saved_gid)
     os.initgroups(user, saved_gid)
+    logger.debug("Restoring previous privileges as user %s", saved_user)
 
 
 def reload_systemd_unit(bus, unit):
+    logger.debug("Instructing systemd to reload unit %s", unit)
     systemd = bus.get('org.freedesktop.systemd1')
     systemd.ReloadUnit(unit, 'fail')
 
@@ -159,6 +163,7 @@ class HadesDeputyService(object):
 
 def run_event_loop():
     bus = SystemBus()
+    logger.debug('Publishing interface %s on DBus', constants.DEPUTY_DBUS_NAME)
     bus.publish(constants.DEPUTY_DBUS_NAME, HadesDeputyService(bus))
     loop = GLib.MainLoop()
     loop.run()

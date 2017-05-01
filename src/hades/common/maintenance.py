@@ -14,18 +14,24 @@ logger = logging.getLogger(__name__)
 
 
 def signal_auth_dhcp_hosts_reload():
+    logger.debug("Signaling DHCP host reload on DBus: %s.%s",
+                 constants.DEPUTY_DBUS_NAME, 'ReloadAuthDhcpHosts')
     bus = SystemBus()
     deputy = bus.get(constants.DEPUTY_DBUS_NAME)
     deputy.ReloadAuthDhcpHosts()
 
 
 def signal_radius_clients_reload():
+    logger.debug("Signaling RADIUS clients reload on DBus: %s.%s",
+                 constants.DEPUTY_DBUS_NAME, 'ReloadRadiusClients')
     bus = SystemBus()
     deputy = bus.get(constants.DEPUTY_DBUS_NAME)
     deputy.ReloadRadiusClients()
 
 
 def signal_alternative_auth_dns_clients_reload():
+    logger.debug("Signaling alternative auth DNS clients reload on DBus: %s.%s",
+                 constants.DEPUTY_DBUS_NAME, 'ReloadAlternativeAuthDnsClients')
     bus = SystemBus()
     deputy = bus.get(constants.DEPUTY_DBUS_NAME)
     deputy.ReloadAlternativeAuthDnsClients()
