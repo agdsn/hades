@@ -109,23 +109,24 @@ rewrite_user_name {
 
 handle_mac_auth {
 
-	if ((&Service-Type == Call-Check) || &User-Name =~ /^${policy.mac-addr-regexp}$/i) {
+	if ((&Service-Type == Call-Check) && &User-Name =~ /^${policy.mac-addr-regexp}$/i) {
+		# Check that the Calling-Station-Id reported by the NAS equals the
+		# User-Name to ensure that the request originated from the correct
+		# device, otherwise a user could enter the MAC address if Web-Auth is
+		# used
+		if (&Calling-Station-Id != "%{toupper:%{1}-%{2}-%{3}-%{4}-%{5}-%{6}}") {
+			reject
+		}
+		else {
+			updated
+		}
+
 		update control {
 			# Set the Cleartext-Password before normalizing the MAC address,
 			# otherwise the password verification can fail
 			&Cleartext-Password := "%{User-Name}"
 		}
 
-		# Check that the Calling-Station-Id reported by the NAS equals the
-		# User-Name to ensure that the request originated from the correct
-		# device, otherwise a user could enter the MAC address if Web-Auth is
-		# used
-		if (&Calling-Station-Id != &User-Name) {
-			reject
-		}
-		else {
-			updated
-		}
 	}
 	else {
 		noop

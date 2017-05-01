@@ -44,11 +44,16 @@ server hades {
 
 
 	authorize {
-		# Normalize MAC addresses in various attributes
-		rewrite_user_name
+		# Normalize the Called-Station-Id and Calling-Station-Id attributes
 		rewrite_called_station_id
 		rewrite_calling_station_id
+		# Verify that a MAC auth request is legitimate and set the
+		# Cleartext-Password to the value of User-Name, if we're doing MAC auth
 		handle_mac_auth
+		# Normalize the user name, if it looks like a MAC address.
+		# Note: This must be done after handle_mac_auth or otherwise
+		# handle_mac_auth may set a wrong Cleartext-Password
+		rewrite_user_name
 
 		chap
 		eap {
