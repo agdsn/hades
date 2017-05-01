@@ -27,7 +27,9 @@ database_grp = grp.getgrnam(constants.DATABASE_GROUP)
 def dropped_privileges(passwd, group):
     logger.debug("Dropping privileges temporary to user %s and group",
                  passwd.pw_name, group.gr_name)
-    user = getpass.getuser()
+    # To handle multiple users with the same UID correctly, we obtain the
+    # current user name with getpass
+    saved_user = getpass.getuser()
     saved_uid = os.geteuid()
     saved_gid = os.getegid()
     os.setresgid(group.gr_gid, group.gr_gid, saved_gid)
@@ -37,7 +39,7 @@ def dropped_privileges(passwd, group):
     os.seteuid(saved_uid)
     os.setreuid(saved_uid, saved_uid)
     os.setregid(saved_gid, saved_gid)
-    os.initgroups(user, saved_gid)
+    os.initgroups(saved_user, saved_gid)
     logger.debug("Restoring previous privileges as user %s", saved_user)
 
 
