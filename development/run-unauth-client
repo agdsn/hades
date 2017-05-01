@@ -1,0 +1,67 @@
+#!/bin/bash
+set -e pipefail
+
+#
+# Shuts everything down.
+#
+cleanup() {
+	set +e
+	docker stop hades-client
+	docker rm hades-client
+	ip link set dev br-hades down
+	brctl delbr br-hades
+}
+
+#
+# Check if container is already running.
+#
+if docker inspect --type=container hades-client &>/dev/null; then
+	read -p "Container already exists. Stop and remove container? [y/N] " answer
+	if [[ "$answer" != y ]]; then
+		exit 1
+	fi
+
+	docker stop hades-client; docker rm hades-client
+fi
+
+#
+# Create a new docker container based on hades image. The container is started
+# detached. If the docker container is stopped, it will remove itself
+# automatically. (Docker containers should have no state, so we can always
+# recreate one from scratch.
+#
+# Hint: User `docker attach' to get access to the running bash shell.
+#
+docker run --privileged --name hades-client -d -i -t hades-client
+pid=$(docker inspect --type=container -f '{{.State.Pid}}' hades-client)
+
+#
+# In case of signal/error: Stop the docker container.
+#
+trap 'trap '' EXIT; cleanup; exit 1' INT TERM HUP ERR
+trap 'cleanup' EXIT
+
+#
+# We now configure the network. We create a new veth-pair and move one end into
+# the container's namespace.
+#
+ip link add dev veth-client0 type veth peer name veth-client1
+ip link set dev veth-client0 up
+ip link set dev veth-client1 netns "$pid"
+docker exec hades-client ip link set dev veth-client1 up
+
+if [[ ! -d /sys/class/net/br-hades ]]; then
+	brctl addbr br-hades
+	brctl addif br-hades veth-hades
+	ip link set dev br-hades up
+fi
+brctl addif br-hades veth-client0
+
+docker exec hades-client ip link set dev eth0 down
+docker exec hades-client ip link set dev veth-client1 up
+docker exec hades-client dhcpcd veth-client1
+
+#
+# Attach do runnig container
+#
+docker attach hades-client

@@ -1,0 +1,65 @@
+#!/bin/bash
+set -e pipefail
+
+#
+# Check if container is already running.
+#
+if docker inspect --type=container hades &>/dev/null; then
+	read -p "Container already exists. Stop and remove container? [y/N] " answer
+	if [[ "$answer" != y ]]; then
+		exit 1
+	fi
+
+	docker stop hades; docker rm hades
+fi
+
+#
+# Create a new docker container based on hades image. The container is started
+# detached. If the docker container is stopped, it will remove itself
+# automatically. (Docker containers should have no state, so we can always
+# recreate one from scratch.
+#
+# Hint: User `docker attach' to get access to the running bash shell.
+#
+docker run --privileged --name hades -d -i -t \
+	-v "$(pwd)/src":/src:ro \
+	-v "$(pwd)/configs/example.py":/tmp/config.py:ro \
+	--env HADES_CONFIG=/tmp/config.py \
+	hades-dev
+pid=$(docker inspect --type=container -f '{{.State.Pid}}' hades)
+
+#
+# In case of signal/error: Stop the docker container.
+#
+trap 'docker stop hades; docker rm hades' INT TERM HUP ERR
+
+#
+# We now configure the network. We create a new veth-pair and move one end into
+# the container's namespace.
+#
+# veth-hades is directly attached to the unauth network interface. To test
+# hades on your local machine, just run `dhcpcd veth-hades' and can now access
+# the locked-down network.
+#
+ip link add dev veth-hades type veth peer name unauth
+ip link set dev veth-hades up
+ip link set dev unauth netns "$pid"
+docker exec hades ip link set dev unauth up
+docker exec hades scripts/hades networking
+
+#
+# Run all the essential services (detached!).
+#
+for i in database vrrp unauth-dhcp unauth-dns auth-dhcp auth-dns portal http; do
+	docker exec -d hades scripts/hades "$i"
+done
+
+cat <<'EOF'
+Hades is now ready. To test hades, fire up an DHCP client, e.g.
+
+  dhcpcd veth-hades
+
+The shell can be accessed by running
+
+  docker attach hades
+EOF
