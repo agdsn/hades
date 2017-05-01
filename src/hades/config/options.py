@@ -464,7 +464,12 @@ class HADES_AUTH_DNS_ALTERNATIVE_ZONES(Option):
 
 
 class HADES_UNAUTH_DHCP_LEASE_TIME(Option):
-    """DHCP lease time in the unauth VLAN"""
+    """
+    DHCP lease time for unauth users
+
+    This lease time should be set rather short, so that unauthenticated will
+    quickly obtain a new address if they become authenticated.
+    """
     default = timedelta(minutes=2)
     type = timedelta
     static_check = check.greater_than(timedelta(0))
