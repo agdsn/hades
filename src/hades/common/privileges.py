@@ -22,9 +22,11 @@ def dropped_privileges(passwd, group):
     os.setresgid(group.gr_gid, group.gr_gid, saved_gid)
     os.initgroups(passwd.pw_name, group.gr_gid)
     os.setresuid(passwd.pw_uid, passwd.pw_uid, saved_uid)
-    yield
-    os.seteuid(saved_uid)
-    os.setreuid(saved_uid, saved_uid)
-    os.setregid(saved_gid, saved_gid)
-    os.initgroups(saved_user, saved_gid)
-    logger.debug("Restoring previous privileges as user %s", saved_user)
+    try:
+        yield
+    finally:
+        os.seteuid(saved_uid)
+        os.setreuid(saved_uid, saved_uid)
+        os.setregid(saved_gid, saved_gid)
+        os.initgroups(saved_user, saved_gid)
+        logger.debug("Restoring previous privileges as user %s", saved_user)
