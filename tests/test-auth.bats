@@ -9,7 +9,7 @@ dhcpcd() {
 }
 
 postgresql() {
-	runuser -u hades-database -- psql -h /run/hades/database "$@"
+	runuser -u hades-database -- psql --host /run/hades/database --echo-errors --no-readline --single-transaction --set=ON_ERROR_STOP=1 "$@"
 }
 
 refresh() {
