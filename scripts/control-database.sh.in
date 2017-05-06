@@ -48,7 +48,7 @@ check_cluster_version() {
 }
 
 generate_config() {
-	@venvdir@/bin/hades-generate-config postgresql "@pkgrunstatedir@/database"
+	@venvdir@/bin/hades-generate-config postgresql "@pkgrunstatedir@/database/conf"
 }
 
 do_init() {
@@ -63,7 +63,7 @@ do_init() {
 	@PG_CTL@ initdb -s -o "--auth-host=password --auth-local=peer --encoding=UTF-8 --locale=C"
 	@RM@ "$PGDATA"/postgresql.conf "$PGDATA"/pg_hba.conf "$PGDATA"/pg_ident.conf
 	generate_config
-	@PG_CTL@ start -w -s -o '-c config_file=@pkgrunstatedir@/database/postgresql.conf'
+	@PG_CTL@ start -w -s -o '-c config_file=@pkgrunstatedir@/database/conf/postgresql.conf'
 	for user in '@AGENT_USER@' '@PORTAL_USER@' '@RADIUS_USER@'; do
 		@CREATEUSER@ "$user"
 	done
@@ -100,7 +100,7 @@ do_start() {
 		return 2
 	fi
 	generate_config
-	@PG_CTL@ start -s -w -t 30 -o '-c config_file=@pkgrunstatedir@/database/postgresql.conf'
+	@PG_CTL@ start -s -w -t 30 -o '-c config_file=@pkgrunstatedir@/database/conf/postgresql.conf'
 }
 
 do_stop() {

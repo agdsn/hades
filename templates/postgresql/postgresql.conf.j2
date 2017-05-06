@@ -40,9 +40,9 @@
 
 #data_directory = 'ConfigDir'		# use data in another directory
 					# (change requires restart)
-hba_file = '{{ constants.pkgrunstatedir }}/database/pg_hba.conf'	# host-based authentication file
+hba_file = '{{ constants.pkgrunstatedir }}/database/conf/pg_hba.conf'	# host-based authentication file
 					# (change requires restart)
-ident_file = '{{ constants.pkgrunstatedir }}/database/pg_ident.conf'	# ident configuration file
+ident_file = '{{ constants.pkgrunstatedir }}/database/conf/pg_ident.conf'	# ident configuration file
 					# (change requires restart)
 
 # If external_pid_file is not explicitly set, no extra PID file is written.
