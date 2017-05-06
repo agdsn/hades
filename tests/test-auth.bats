@@ -28,12 +28,7 @@ fakedns() {
 }
 
 setup() {
-	mkdir -p /etc/netns/test-auth
-	truncate -s0 /etc/netns/test-auth/resolv.conf
-	ip netns add test-auth
-	ip link add dev test-auth type veth peer netns test-auth name eth0 address de:ad:be:ef:00:00
-	ip link set test-auth up master br-auth
-	ns_exec test-auth ip link set dev eth0 up
+	setup_namespace test-auth br-auth de:ad:be:ef:00:00
 	ns_exec auth ip addr add dev eth2 141.30.226.1/23
 	data 0
 	psql foreign <<<'TRUNCATE alternative_dns;'
@@ -41,9 +36,7 @@ setup() {
 
 teardown() {
 	ns_exec auth ip addr del dev eth2 141.30.226.1/23
-	ns_exec test-auth ip link del dev eth0
-	ip netns delete test-auth
-	rm -rf /etc/netns/test-auth
+	teardown_namespace test-auth
 	psql foreign <<-EOF
 		TRUNCATE dhcphost;
 		TRUNCATE alternative_dns;
