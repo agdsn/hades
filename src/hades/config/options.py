@@ -340,12 +340,7 @@ class HADES_POSTGRESQL_USER_MAPPINGS(Option):
     If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     type = collections.Mapping
-    static_check = check.satisfy_all(
-        check.user_mapping_for_user_exists(constants.AGENT_USER),
-        check.user_mapping_for_user_exists(constants.DATABASE_USER),
-        check.user_mapping_for_user_exists(constants.PORTAL_USER),
-        check.user_mapping_for_user_exists(constants.RADIUS_USER),
-    )
+    static_check = check.user_mapping_for_user_exists(constants.DATABASE_USER)
 
 
 ########################
