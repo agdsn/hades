@@ -16,14 +16,18 @@ refresh() {
 
 data() {
 	last_byte=$(printf '%02x' "$1")
-	echo "DELETE FROM dhcphost;" | postgresql foreign
-	echo "INSERT INTO dhcphost VALUES ('de:ad:be:ef:00:${last_byte}', '141.30.227.13');" | postgresql foreign
+	postgresql foreign <<-EOF
+		TRUNCATE dhcphost;
+		INSERT INTO dhcphost VALUES ('de:ad:be:ef:00:${last_byte}', '141.30.227.13')
+	EOF
 	refresh
 }
 
 fakedns() {
-	echo "DELETE FROM alternative_dns;" | postgresql foreign
-	echo "INSERT INTO alternative_dns VALUES ('141.30.227.13');" | postgresql foreign
+	postgresql <<-EOF
+		TRUNCATE alternative_dns;
+		INSERT INTO alternative_dns VALUES ('141.30.227.13');
+	EOF
 	refresh
 }
 
@@ -36,7 +40,7 @@ setup() {
 	ns_exec test-auth ip link set dev eth0 up
 	ns_exec auth ip addr add dev eth2 141.30.226.1/23
 	data 0
-	echo "DELETE FROM alternative_dns;" | postgresql foreign
+	postgresql foreign <<<'TRUNCATE alternative_dns;'
 }
 
 teardown() {
@@ -44,14 +48,16 @@ teardown() {
 	ns_exec test-auth ip link del dev eth0
 	ip netns delete test-auth
 	rm -rf /etc/netns/test-auth
-	echo "DELETE FROM dhcphost;" | postgresql foreign
-	echo "DELETE FROM alternative_dns;" | postgresql foreign
+	postgresql foreign <<-EOF
+		TRUNCATE dhcphost;
+		TRUNCATE alternative_dns;
+	EOF
 	refresh
 }
 
 @test "check that fdw contains data" {
 	helper() {
-		echo "SELECT * FROM foreign_dhcphost;" | postgresql -at hades
+		postgresql -at hades <<<'SELECT * FROM foreign_dhcphost;'
 	}
 	run helper
 	grep 'de:ad:be:ef:00:00 | 141.30.227.13' <<<"$output"
@@ -63,7 +69,7 @@ teardown() {
 
 @test "check that refresh syncs the data" {
 	helper() {
-		echo "SELECT * FROM dhcphost;" | postgresql -at hades
+		postgresql hades <<<'SELECT * FROM dhcphost;'
 	}
 	run helper
 	grep 'de:ad:be:ef:00:00 | 141.30.227.13' <<<"$output"
