@@ -15,7 +15,7 @@ ExecStartPre=@pkglibexecdir@/update-trust-anchor.sh
 ExecStartPre=@UNBOUND_CHECKCONF@ @pkgrunstatedir@/auth-dns/unbound-pristine.conf
 ExecStart=@IP@ netns exec @AUTH_NAMESPACE@ @UNBOUND@ -c @pkgrunstatedir@/auth-dns/unbound-pristine.conf
 ExecReload=@venvdir@/bin/hades-generate-config unbound-pristine.conf.j2 @pkgrunstatedir@/auth-dns/unbound-pristine.conf
-ExecReload=@UNBOUND@ -c @pkgrunstatedir@/auth-dns/unbound-pristine.conf reload
+ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
 
