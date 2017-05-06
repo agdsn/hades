@@ -148,7 +148,7 @@ def generate_radius_clients_file():
         with open(file_name, mode='w', encoding='ascii') as f:
             f.writelines(generate_radius_clients(clients))
     except OSError as e:
-        logger.error("Error writing %s: %s", file_name, e.strerror)
+        logger.exception("Error writing %s: %s", file_name, e.strerror)
 
 
 class HadesDeputyService(object):
