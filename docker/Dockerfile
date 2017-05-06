@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install -y \
     git-buildpackage \
     ipset \
     iptables \
+    isc-dhcp-relay \
     keepalived \
     less \
     lintian \
