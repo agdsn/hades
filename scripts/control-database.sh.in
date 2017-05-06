@@ -100,7 +100,7 @@ do_start() {
 		return 2
 	fi
 	generate_config
-	@PG_CTL@ start -s -w -t 30 -o '-c config_file=@pkgrunstatedir@/database/conf/postgresql.conf'
+	@PG_CTL@ start -s -w -t 30 -o '-c config_file=@pkgrunstatedir@/database/conf/postgresql.conf' ${POSTGRESQL_OPTS:+"-o ${POSTGRESQL_OPTS}"}
 }
 
 do_stop() {
