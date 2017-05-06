@@ -4,4 +4,4 @@
 Name=@DEPUTY_DBUS_NAME@
 Exec=/bin/false
 User=root
-SystemdService=hades-deputy-service.service
+SystemdService=hades-deputy.service
