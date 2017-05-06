@@ -47,11 +47,11 @@ teardown() {
 		psql --tuples-only hades <<<'SELECT * FROM foreign_dhcphost;'
 	}
 	run helper
-	grep 'de:ad:be:ef:00:00 | ${alternative_dns_client}' <<<"$output"
+	grep "de:ad:be:ef:00:00 | ${alternative_dns_client}" <<<"$output"
 
 	data 1
 	run helper
-	grep 'de:ad:be:ef:00:01 | ${alternative_dns_client}' <<<"$output"
+	grep "de:ad:be:ef:00:01 | ${alternative_dns_client}" <<<"$output"
 }
 
 @test "check that refresh syncs the data" {
@@ -59,11 +59,11 @@ teardown() {
 		psql --tuples-only hades <<<'SELECT * FROM dhcphost;'
 	}
 	run helper
-	grep 'de:ad:be:ef:00:00 | ${alternative_dns_client}' <<<"$output"
+	grep "de:ad:be:ef:00:00 | ${alternative_dns_client}" <<<"$output"
 
 	data 1
 	run helper
-	grep 'de:ad:be:ef:00:01 | ${alternative_dns_client}' <<<"$output"
+	grep "de:ad:be:ef:00:01 | ${alternative_dns_client}" <<<"$output"
 }
 
 @test "check that dnsmasq host reservations are generated" {
@@ -102,7 +102,7 @@ teardown() {
 
 	fakedns
 	[[ "$(ipset_count)" = 1 ]]
-	ns_exec auth ipset list hades_alternative_dns -output xml | xmllint --nonet --nocdata --xpath '/ipsets/ipset[@name="hades_alternative_dns"]/members/member/elem[text()="${alternative_dns_client}"]' -
+	ns_exec auth ipset list hades_alternative_dns -output xml | xmllint --nonet --nocdata --xpath '/ipsets/ipset[@name="hades_alternative_dns"]/members/member/elem[text()="'"${alternative_dns_client}"'"]' -
 }
 
 @test "check that alternative DNS is working" {
