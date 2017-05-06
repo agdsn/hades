@@ -4,8 +4,7 @@
 
 <node xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
   <interface name="@DEPUTY_DBUS_NAME@">
-    <method name="ReloadAuthDhcpHosts"/>
-    <method name="ReloadRadiusClients"/>
-    <method name="ReloadAlternativeAuthDnsClients"/>
+    <method name="Refresh"/>
+    <method name="Cleanup"/>
   </interface>
 </node>

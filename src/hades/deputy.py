@@ -1,3 +1,12 @@
+"""
+Deputy daemon that provides a service via DBus for performing privileged
+operations.
+
+Some operations, such as generating configuration files, sending signals to
+other processes etc. needs certain privileges. The Deputy service runs as root
+and provides a very simple service over DBus.
+"""
+import contextlib
 import grp
 import io
 import logging
@@ -10,6 +19,7 @@ import netaddr
 import pkg_resources
 from gi.repository import GLib
 from pydbus import SystemBus
+from sqlalchemy import null
 
 from hades import constants
 from hades.common import db
@@ -19,6 +29,33 @@ from hades.config.loader import get_config
 logger = logging.getLogger(__name__)
 database_pwd = pwd.getpwnam(constants.DATABASE_USER)
 database_grp = grp.getgrnam(constants.DATABASE_GROUP)
+
+
+def signal_refresh():
+    """
+    Signal the deputy to perform a refresh.
+    """
+    logger.debug("Signaling refresh on DBus: %s.%s",
+                 constants.DEPUTY_DBUS_NAME, 'Refresh')
+    bus = SystemBus()
+    deputy = bus.get(constants.DEPUTY_DBUS_NAME)
+    deputy.Refresh()
+
+
+def signal_cleanup():
+    logger.debug("Signaling cleanup on DBus: %s.%s",
+                 constants.DEPUTY_DBUS_NAME, 'Cleanup')
+    bus = SystemBus()
+    deputy = bus.get(constants.DEPUTY_DBUS_NAME)
+    deputy.Cleanup()
+
+
+@contextlib.contextmanager
+def database_user():
+    with dropped_privileges(database_pwd, database_grp):
+        engine = db.get_engine()
+        yield engine.connect()
+        engine.dispose()
 
 
 def reload_systemd_unit(bus, unit):
@@ -119,26 +156,59 @@ class HadesDeputyService(object):
     def __init__(self, bus):
         self.bus = bus
 
-    def ReloadAuthDhcpHosts(self):
+    def Refresh(self):
         """
-        Generate a new DHCP hosts file and reload the service.
+        Refresh the materialized views.
+        If necessary depended config files are regenerate and the corresponding
+        services are reloaded.
         """
-        generate_dhcp_hosts_file()
-        reload_systemd_unit(self.bus, 'hades-auth-dhcp.service')
+        logger.info("Refreshing materialized views")
+        with database_user() as connection:
+            dhcphost_diff = db.refresh_and_diff_materialized_view(
+                connection, db.dhcphost, db.temp_dhcphost, [null()])
+            nas_diff = db.refresh_and_diff_materialized_view(
+                connection, db.nas, db.temp_nas, [null()])
+            alternative_dns_diff = db.refresh_and_diff_materialized_view(
+                connection, db.alternative_dns, db.temp_alternative_dns,
+                [null()])
+            db.refresh_materialized_view(connection, db.radcheck)
+            db.refresh_materialized_view(connection, db.radgroupcheck)
+            db.refresh_materialized_view(connection, db.radgroupreply)
+            db.refresh_materialized_view(connection, db.radusergroup)
 
-    def ReloadRadiusClients(self):
-        """
-        Generate a new RADIUS clients file and reload the service.
-        """
-        generate_radius_clients_file()
-        reload_systemd_unit(self.bus, 'hades-radius.service')
+        if dhcphost_diff != ([], [], []):
+            logger.info('DHCP host reservations changed '
+                        '(%d added, %d deleted, %d modified).',
+                        *map(len, dhcphost_diff))
+            generate_dhcp_hosts_file()
+            reload_systemd_unit(self.bus, 'hades-auth-dhcp.service')
 
-    def ReloadAlternativeAuthDnsClients(self):
+        if nas_diff != ([], [], []):
+            logger.info('RADIUS clients changed '
+                        '(%d added, %d deleted, %d modified).',
+                        *map(len, nas_diff))
+            generate_radius_clients_file()
+            reload_systemd_unit(self.bus, 'hades-radius.service')
+
+        if alternative_dns_diff != ([], [], []):
+            logger.info('Alternative auth DNS clients changed '
+                        '(%d added, %d deleted, %d modified).',
+                        *map(len, alternative_dns_diff))
+            update_alternative_dns_ipset()
+        return "OK"
+
+    def Cleanup(self):
         """
-        Reload the ipset for IP addresses, that which to use alternative DNS
-        information. 
+        Clean up old records in the radacct and radpostauth tables.
+        :return: 
         """
-        update_alternative_dns_ipset()
+        logger.info("Cleaning up old records")
+        conf = get_config()
+        interval = conf["HADES_RETENTION_INTERVAL"]
+        with database_user() as connection:
+            db.delete_old_sessions(connection, interval)
+            db.delete_old_auth_attempts(connection, interval)
+        return "OK"
 
 
 def run_event_loop():

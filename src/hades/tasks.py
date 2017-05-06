@@ -3,9 +3,9 @@ import logging
 from celery import Celery
 
 from hades.common.db import (
-    get_auth_attempts as do_get_auth_attempts, get_sessions as do_get_sessions)
-from hades.common.maintenance import (
-    cleanup as do_cleanup, refresh as do_refresh)
+    get_auth_attempts as do_get_auth_attempts, get_sessions as do_get_sessions,
+)
+from hades.deputy import signal_cleanup, signal_refresh
 
 logger = logging.getLogger(__name__)
 app = Celery(__name__)
@@ -13,12 +13,12 @@ app = Celery(__name__)
 
 @app.task(acks_late=True)
 def refresh():
-    do_refresh()
+    signal_refresh()
 
 
 @app.task(acks_late=True)
 def cleanup():
-    do_cleanup()
+    signal_cleanup()
 
 
 @app.task(acks_late=True)

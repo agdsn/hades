@@ -6,8 +6,7 @@ Wants=hades-database.service
 
 [Service]
 Type=oneshot
-User=@RADIUS_USER@
-Group=@RADIUS_GROUP@
+User=@AGENT_USER@
+Group=@AGENT_GROUP@
 SyslogIdentifier=hades-cleanup
-Environment=PGAPPNAME=hades-cleanup
-ExecStart=@venvdir@/bin/hades-cleanup
+ExecStart=@DBUS_SEND@ --system --type=method_call --print-reply --reply-timeout=30000 --dest=de.agdsn.hades.deputy /de/agdsn/hades/deputy de.agdsn.hades.deputy.Cleanup

@@ -50,9 +50,7 @@ def main():
         agent_pwd = pwd.getpwnam(constants.AGENT_USER)
         agent_grp = grp.getgrnam(constants.AGENT_GROUP)
         with dropped_privileges(agent_pwd, agent_grp):
-            check_database(agent_pwd.pw_name,
-                           filter(lambda t: not t.info.get('temporary'),
-                                  db.metadata.tables.values()))
+            check_database(agent_pwd.pw_name, (db.radacct, db.radpostauth))
         engine.dispose()
         portal_pwd = pwd.getpwnam(constants.PORTAL_USER)
         portal_grp = grp.getgrnam(constants.PORTAL_GROUP)

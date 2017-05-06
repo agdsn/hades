@@ -142,6 +142,7 @@ $(call add_substitution, UNAUTH_NAMESPACE, unauth)
 $(call require_program,SHELL,bash)
 
 # Runtime programs
+$(call require_program,DBUS_SEND,dbus-send)
 $(call require_program,DNSMASQ,dnsmasq)
 $(call require_program,IP,ip)
 $(call require_program,IPSET,ipset)
