@@ -53,6 +53,6 @@ def setup_cli_logging(program, args):
                               len(VERBOSITY_LEVELS) - 1)
     level = VERBOSITY_LEVELS[effective_verbosity]
     logging.basicConfig(level=level, style='%',
-                        format="{}:%(levelname)s:%(asctime)s-8s:"
-                               "%(name)-15s:%(message)s".format(program),
+                        format="{} %(levelname)-8s %(asctime)s "
+                               "%(name)-15s %(message)s".format(program),
                         stream=sys.stderr)
