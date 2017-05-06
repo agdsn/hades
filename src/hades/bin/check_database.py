@@ -9,7 +9,9 @@ from sqlalchemy.exc import DBAPIError
 
 from hades import constants
 from hades.common import db
-from hades.common.cli import ArgumentParser, parser as common_parser
+from hades.common.cli import (
+    ArgumentParser, parser as common_parser, setup_cli_logging,
+)
 from hades.common.privileges import dropped_privileges
 from hades.config.loader import load_config
 
@@ -40,6 +42,7 @@ def check_table(conn, table):
 def main():
     parser = ArgumentParser(parents=[common_parser])
     args = parser.parse_args()
+    setup_cli_logging(parser.prog, args)
     load_config(args.config, True)
     try:
         engine = db.get_engine()

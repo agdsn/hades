@@ -3,7 +3,9 @@ import os
 import sys
 
 from hades import constants
-from hades.common.cli import ArgumentParser, parser as common_parser
+from hades.common.cli import (
+    ArgumentParser, parser as common_parser, setup_cli_logging,
+)
 from hades.config.generate import ConfigGenerator
 from hades.config.loader import load_config
 
@@ -18,6 +20,7 @@ def main():
                         help="Destination file or directory (default is stdout"
                              "for files; required for directories)")
     args = parser.parse_args()
+    setup_cli_logging(parser.prog, args)
     config = load_config(args.config)
     template_dir = constants.templatedir
     generator = ConfigGenerator(template_dir, config)

@@ -2,7 +2,9 @@ import argparse
 import os
 import sys
 
-from hades.common.cli import ArgumentParser, parser as parent_parser
+from hades.common.cli import (
+    ArgumentParser, parser as parent_parser, setup_cli_logging,
+)
 from hades.config.export import export
 from hades.config.loader import load_config
 
@@ -20,6 +22,7 @@ def main():
                         default='-', nargs='?',
                         help='Output destination (default: stdout)')
     args = parser.parse_args()
+    setup_cli_logging(parser.prog, args)
     config = load_config(args.config)
     export(config, args.format, args.file)
     return os.EX_OK

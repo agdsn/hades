@@ -4,7 +4,9 @@ import os
 import pwd
 import sys
 
-from hades.common.cli import ArgumentParser, parser as common_parser
+from hades.common.cli import (
+    ArgumentParser, parser as common_parser, setup_cli_logging,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +26,7 @@ def main():
     parser.add_argument('command')
     parser.add_argument('arguments', nargs='*')
     args = parser.parse_args()
+    setup_cli_logging(parser.prog, args)
     try:
         passwd = pwd.getpwnam(args.user)
         group = grp.getgrgid(passwd.pw_gid)
