@@ -12,7 +12,7 @@ SyslogIdentifier=hades-radius-vrrp
 EnvironmentFile=@systemdenvfile@
 ExecStartPre=@venvdir@/bin/hades-generate-config radius-keepalived.conf.j2 @pkgrunstatedir@/radius-vrrp/keepalived.conf
 ExecStart=/usr/sbin/keepalived --log-console --vrrp --use-file=@pkgrunstatedir@/radius-vrrp/keepalived.conf --pid=@pkgrunstatedir@/radius-vrrp/keepalived.pid --vrrp_pid=@pkgrunstatedir@/radius-vrrp/keepalived-vrrp.pid
-ExecReload=@venvdir@/bin/hades-generate-config radius-keepalived.conf.j2 @pkgrunstatedir@/radius-vrpp/keepalived.conf
+ExecReload=@venvdir@/bin/hades-generate-config radius-keepalived.conf.j2 @pkgrunstatedir@/radius-vrrp/keepalived.conf
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
