@@ -1,11 +1,9 @@
 #!/usr/bin/env bats
 
-ns() {
-	ip netns exec test-auth "$@"
-}
+load common
 
 dhcpcd() {
-	ns dhcpcd --noipv4ll --ipv4only --oneshot eth0
+	ns_exec test-auth dhcpcd --noipv4ll --ipv4only --oneshot eth0
 }
 
 postgresql() {
@@ -35,15 +33,15 @@ setup() {
 	ip netns add test-auth
 	ip link add dev test-auth type veth peer netns test-auth name eth0 address de:ad:be:ef:00:00
 	ip link set test-auth up master br-auth
-	ns ip link set dev eth0 up
-	ip netns exec auth ip addr add dev eth2 141.30.226.1/23
+	ns_exec test-auth ip link set dev eth0 up
+	ns_exec auth ip addr add dev eth2 141.30.226.1/23
 	data 0
 	echo "DELETE FROM alternative_dns;" | postgresql foreign
 }
 
 teardown() {
-	ip netns exec auth ip addr del dev eth2 141.30.226.1/23
-	ns ip link del dev eth0
+	ns_exec auth ip addr del dev eth2 141.30.226.1/23
+	ns_exec test-auth ip link del dev eth0
 	ip netns delete test-auth
 	rm -rf /etc/netns/test-auth
 	echo "DELETE FROM dhcphost;" | postgresql foreign
@@ -95,9 +93,9 @@ teardown() {
 
 @test "check that DNS queries get answered" {
 	dhcpcd
-	ns cat /etc/resolv.conf >&2
+	ns_exec test-auth cat /etc/resolv.conf >&2
 	for i in www.google.de www.msftncsi.com; do
-		run ns dig +short "$i"
+		run ns_exec dig +short "$i"
 		echo "$output" >&2
 		[[ -n "$output" && "$output" != 10.66.0.1 ]]
 	done
@@ -105,29 +103,29 @@ teardown() {
 
 @test "check that alternative DNS configuration is propagated to ipset" {
 	ipset_count () {
-		ip netns exec auth ipset list hades_alternative_dns | sed -rne 's/^Number of entries: (.*)$/\1/p'
+		ns_exec auth ipset list hades_alternative_dns | sed -rne 's/^Number of entries: (.*)$/\1/p'
 	}
 	[[ "$(ipset_count)" = 0 ]]
 
 	fakedns
 	[[ "$(ipset_count)" = 1 ]]
-	ip netns exec auth ipset list hades_alternative_dns | grep '141.30.227.13'
+	ns_exec auth ipset list hades_alternative_dns | grep '141.30.227.13'
 }
 
 @test "check that alternative DNS is working" {
 	dhcpcd
-	ns cat /etc/resolv.conf >&2
+	ns_exec test-auth cat /etc/resolv.conf >&2
 	for i in www.google.de fake.news.com; do
-		run ns dig +short "$i"
+		run ns_exec test-auth dig +short "$i"
 		echo "$output" >&2
 		[[ -n "$output" && "$output" != 127.0.0.1 ]]
 	done
 
 	fakedns
 
-	run ns dig +short www.google.de
+	run ns_exec test-auth dig +short www.google.de
 	[[ -n "$output" && "$output" != 127.0.0.1 ]]
 
-	run ns dig +short fake.news.com
+	run ns_exec test-auth dig +short fake.news.com
 	[[ "$output" = 127.0.0.1 ]]
 }
