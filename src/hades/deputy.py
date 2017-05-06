@@ -134,7 +134,9 @@ def generate_radius_clients(clients):
     }
     """)
     for shortname, nasname, type, ports, secret, server, community, description in clients:
-        yield template.substitute()
+        yield template.substitute(
+            shortname=shortname, nasname=nasname, type=type, ports=ports,
+            secret=secret, community=community, description=description)
 
 
 def generate_radius_clients_file():

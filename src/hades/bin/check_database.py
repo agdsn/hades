@@ -62,9 +62,8 @@ def main():
         radius_grp = grp.getgrnam(constants.RADIUS_GROUP)
         with dropped_privileges(radius_pwd, radius_grp):
             check_database(radius_pwd.pw_name,
-                           (db.nas, db.radacct, db.radgroupcheck,
-                            db.radgroupreply, db.radpostauth,
-                            db.radreply, db.radusergroup))
+                           (db.radacct, db.radgroupcheck, db.radgroupreply,
+                            db.radpostauth, db.radreply, db.radusergroup))
     except DBAPIError:
         return os.EX_TEMPFAIL
     return os.EX_OK

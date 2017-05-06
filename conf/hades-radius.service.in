@@ -11,6 +11,7 @@ SyslogIdentifier=hades-radius
 Environment=PGAPPNAME=hades-radius
 EnvironmentFile=@systemdenvfile@
 ExecStartPre=@venvdir@/bin/hades-generate-config freeradius @pkgrunstatedir@/radius
+ExecStartPre=@TOUCH@ @RADIUS_CLIENTS_FILE@
 ExecStartPre=@RADIUSD@ -d @pkgrunstatedir@/radius -Cx -lstdout
 ExecStart=@RADIUSD@ -d @pkgrunstatedir@/radius
 ExecReload=@venvdir@/bin/hades-generate-config freeradius @pkgrunstatedir@/radius

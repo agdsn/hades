@@ -850,7 +850,6 @@ GRANT ALL ON TABLE foreign_radusergroup TO "{{ constants.DATABASE_USER }}";
 REVOKE ALL ON TABLE nas FROM PUBLIC;
 REVOKE ALL ON TABLE nas FROM "{{ constants.DATABASE_USER }}";
 GRANT ALL ON TABLE nas TO "{{ constants.DATABASE_USER }}";
-GRANT SELECT ON TABLE nas TO "{{ constants.RADIUS_USER }}";
 
 
 --
