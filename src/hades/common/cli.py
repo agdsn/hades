@@ -8,6 +8,10 @@ from hades import constants
 
 
 class ArgumentParser(argparse.ArgumentParser):
+    """
+    ArgumentParser subclass that exists with os.EX_USAGE exit code if parsing
+    fails.
+    """
     def error(self, message):
         self.print_usage(sys.stderr)
         args = {'prog': self.prog, 'message': message}
