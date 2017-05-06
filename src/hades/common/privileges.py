@@ -12,7 +12,7 @@ def dropped_privileges(passwd, group):
     Context manager for temporarily switching real and effective UID and real
     and effective GID.
     """
-    logger.debug("Dropping privileges temporary to user %s and group",
+    logger.debug("Dropping privileges temporary to user %s and group %s",
                  passwd.pw_name, group.gr_name)
     # To handle multiple users with the same UID correctly, we obtain the
     # current user name with getpass
