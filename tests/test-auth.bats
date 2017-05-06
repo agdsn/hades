@@ -103,13 +103,13 @@ teardown() {
 
 @test "check that alternative DNS configuration is propagated to ipset" {
 	ipset_count () {
-		ns_exec auth ipset list hades_alternative_dns | sed -rne 's/^Number of entries: (.*)$/\1/p'
+		ns_exec auth ipset list hades_alternative_dns -output xml | xmllint --xpath 'count(/ipsets/ipset[@name="hades_alternative_dns"]/members/member/elem)' -
 	}
 	[[ "$(ipset_count)" = 0 ]]
 
 	fakedns
 	[[ "$(ipset_count)" = 1 ]]
-	ns_exec auth ipset list hades_alternative_dns | grep '141.30.227.13'
+	ns_exec auth ipset list hades_alternative_dns -output xml | xmllint --nonet --nocdata --xpath '/ipsets/ipset[@name="hades_alternative_dns"]/members/member/elem[text()="141.30.227.13"]' -
 }
 
 @test "check that alternative DNS is working" {

@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y \
     isc-dhcp-relay \
     keepalived \
     less \
+    libxml2-utils \
     lintian \
     nginx \
     packaging-dev \
