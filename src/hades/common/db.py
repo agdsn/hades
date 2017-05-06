@@ -281,10 +281,10 @@ def diff_tables(connection, master, copy, result_columns):
     return added, deleted, modified
 
 
-def refresh_materialized_view(transaction, view):
+def refresh_materialized_view(connection, view):
     logger.debug('Refreshing materialized view "%s"', view.name)
-    preparer = transaction.dialect.identifier_preparer
-    transaction.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY {view}'
+    preparer = connection.dialect.identifier_preparer
+    connection.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY {view}'
                         .format(view=preparer.format_table(view)))
 
 
