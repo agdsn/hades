@@ -2,6 +2,8 @@
 
 load common
 
+readonly alternative_dns_client=141.30.227.13
+
 dhcpcd() {
 	ns_exec test-auth dhcpcd --noipv4ll --ipv4only --oneshot eth0
 }
@@ -10,7 +12,7 @@ data() {
 	last_byte=$(printf '%02x' "$1")
 	psql foreign <<-EOF
 		TRUNCATE dhcphost;
-		INSERT INTO dhcphost VALUES ('de:ad:be:ef:00:${last_byte}', '141.30.227.13')
+		INSERT INTO dhcphost VALUES ('de:ad:be:ef:00:${last_byte}', '${alternative_dns_client}')
 	EOF
 	refresh
 }
@@ -18,7 +20,7 @@ data() {
 fakedns() {
 	psql foreign <<-EOF
 		TRUNCATE alternative_dns;
-		INSERT INTO alternative_dns VALUES ('141.30.227.13');
+		INSERT INTO alternative_dns VALUES ('${alternative_dns_client}');
 	EOF
 	refresh
 }
@@ -45,11 +47,11 @@ teardown() {
 		psql --tuples-only hades <<<'SELECT * FROM foreign_dhcphost;'
 	}
 	run helper
-	grep 'de:ad:be:ef:00:00 | 141.30.227.13' <<<"$output"
+	grep 'de:ad:be:ef:00:00 | ${alternative_dns_client}' <<<"$output"
 
 	data 1
 	run helper
-	grep 'de:ad:be:ef:00:01 | 141.30.227.13' <<<"$output"
+	grep 'de:ad:be:ef:00:01 | ${alternative_dns_client}' <<<"$output"
 }
 
 @test "check that refresh syncs the data" {
@@ -57,22 +59,22 @@ teardown() {
 		psql --tuples-only hades <<<'SELECT * FROM dhcphost;'
 	}
 	run helper
-	grep 'de:ad:be:ef:00:00 | 141.30.227.13' <<<"$output"
+	grep 'de:ad:be:ef:00:00 | ${alternative_dns_client}' <<<"$output"
 
 	data 1
 	run helper
-	grep 'de:ad:be:ef:00:01 | 141.30.227.13' <<<"$output"
+	grep 'de:ad:be:ef:00:01 | ${alternative_dns_client}' <<<"$output"
 }
 
 @test "check that dnsmasq host reservations are generated" {
 	file=/var/hades/auth-dhcp/dnsmasq-dhcp.hosts
 	cat "$file" >&2
 	[[ -f "$file" ]]
-	[[ "$(cat "$file")" = "de:ad:be:ef:00:00,141.30.227.13" ]]
+	[[ "$(cat "$file")" = "de:ad:be:ef:00:00,${alternative_dns_client}" ]]
 
 	data 1
 	[[ -f "$file" ]]
-	[[ "$(cat "$file")" = "de:ad:be:ef:00:01,141.30.227.13" ]]
+	[[ "$(cat "$file")" = "de:ad:be:ef:00:01,${alternative_dns_client}" ]]
 }
 
 @test "check that client can aquire DHCP lease" {
@@ -100,7 +102,7 @@ teardown() {
 
 	fakedns
 	[[ "$(ipset_count)" = 1 ]]
-	ns_exec auth ipset list hades_alternative_dns -output xml | xmllint --nonet --nocdata --xpath '/ipsets/ipset[@name="hades_alternative_dns"]/members/member/elem[text()="141.30.227.13"]' -
+	ns_exec auth ipset list hades_alternative_dns -output xml | xmllint --nonet --nocdata --xpath '/ipsets/ipset[@name="hades_alternative_dns"]/members/member/elem[text()="${alternative_dns_client}"]' -
 }
 
 @test "check that alternative DNS is working" {
