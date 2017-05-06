@@ -87,6 +87,7 @@ setup_namespace_common_pre() {
 	@IP@ netns add "$namespace"
 	@IP@ netns exec "$namespace" @IP@ link set dev lo up
 	@IP@ netns exec "$namespace" @SYSCTL@ --quiet net.ipv4.ip_nonlocal_bind=1
+	@IP@ netns exec "$namespace" @SYSCTL@ --quiet net.ipv4.ip_forward=1
 
 	link_namespace "$namespace" "${namespace}-veth0" eth0 "$parent_address" "$namespace_address"
 	@IP@ netns exec "$namespace" @IP@ route add default via "$(netaddr_ip "$parent_address")"
@@ -120,6 +121,7 @@ setup_namespace_common_post() {
 
 setup_host_network() {
 	@SYSCTL@ --quiet net.ipv4.ip_nonlocal_bind=1
+	@SYSCTL@ --quiet net.ipv4.ip_forward=1
 	if [[ "$HADES_CREATE_DUMMY_INTERFACES" = True ]]; then
 		local interface
 		for interface in "$HADES_RADIUS_INTERFACE" "$HADES_VRRP_INTERFACE" "$HADES_AUTH_INTERFACE" "$HADES_UNAUTH_INTERFACE"; do
