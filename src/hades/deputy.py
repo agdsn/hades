@@ -173,10 +173,11 @@ class HadesDeputyService(object):
             alternative_dns_diff = db.refresh_and_diff_materialized_view(
                 connection, db.alternative_dns, db.temp_alternative_dns,
                 [null()])
-            db.refresh_materialized_view(connection, db.radcheck)
-            db.refresh_materialized_view(connection, db.radgroupcheck)
-            db.refresh_materialized_view(connection, db.radgroupreply)
-            db.refresh_materialized_view(connection, db.radusergroup)
+            with connection.begin():
+                db.refresh_materialized_view(connection, db.radcheck)
+                db.refresh_materialized_view(connection, db.radgroupcheck)
+                db.refresh_materialized_view(connection, db.radgroupreply)
+                db.refresh_materialized_view(connection, db.radusergroup)
 
         if dhcphost_diff != ([], [], []):
             logger.info('DHCP host reservations changed '
