@@ -8,6 +8,10 @@ psql() {
 	runuser -u hades-database -- psql --host /run/hades/database --echo-errors --no-readline --single-transaction --set=ON_ERROR_STOP=1 "$@"
 }
 
+refresh() {
+	systemctl start --wait hades-refresh.service
+}
+
 setup_namespace() {
 	local -r namespace="$1"
 	local -r bridge="$2"

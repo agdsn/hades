@@ -6,10 +6,6 @@ dhcpcd() {
 	ns_exec test-auth dhcpcd --noipv4ll --ipv4only --oneshot eth0
 }
 
-refresh() {
-	systemctl start --wait hades-refresh.service
-}
-
 data() {
 	last_byte=$(printf '%02x' "$1")
 	psql foreign <<-EOF
