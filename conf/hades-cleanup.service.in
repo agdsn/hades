@@ -11,6 +11,3 @@ Group=@RADIUS_GROUP@
 SyslogIdentifier=hades-cleanup
 Environment=PGAPPNAME=hades-cleanup
 ExecStart=@venvdir@/bin/hades-cleanup
-
-[Install]
-WantedBy=hades.target

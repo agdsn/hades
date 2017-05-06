@@ -11,6 +11,3 @@ Group=@AGENT_GROUP@
 SyslogIdentifier=hades-refresh
 Environment=PGAPPNAME=hades-refresh
 ExecStart=@venvdir@/bin/hades-refresh
-
-[Install]
-WantedBy=hades.target

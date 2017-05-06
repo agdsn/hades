@@ -5,3 +5,6 @@ Documentation=https://agdsn.github.io/hades/
 [Timer]
 OnActiveSec=10
 OnUnitActiveSec=60
+
+[Install]
+WantedBy=hades.target
