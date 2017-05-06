@@ -6,17 +6,13 @@ dhcpcd() {
 	ns_exec test-auth dhcpcd --noipv4ll --ipv4only --oneshot eth0
 }
 
-postgresql() {
-	runuser -u hades-database -- psql --host /run/hades/database --echo-errors --no-readline --single-transaction --set=ON_ERROR_STOP=1 "$@"
-}
-
 refresh() {
 	systemctl start --wait hades-refresh.service
 }
 
 data() {
 	last_byte=$(printf '%02x' "$1")
-	postgresql foreign <<-EOF
+	psql foreign <<-EOF
 		TRUNCATE dhcphost;
 		INSERT INTO dhcphost VALUES ('de:ad:be:ef:00:${last_byte}', '141.30.227.13')
 	EOF
@@ -24,7 +20,7 @@ data() {
 }
 
 fakedns() {
-	postgresql <<-EOF
+	psql foreign <<-EOF
 		TRUNCATE alternative_dns;
 		INSERT INTO alternative_dns VALUES ('141.30.227.13');
 	EOF
@@ -40,7 +36,7 @@ setup() {
 	ns_exec test-auth ip link set dev eth0 up
 	ns_exec auth ip addr add dev eth2 141.30.226.1/23
 	data 0
-	postgresql foreign <<<'TRUNCATE alternative_dns;'
+	psql foreign <<<'TRUNCATE alternative_dns;'
 }
 
 teardown() {
@@ -48,7 +44,7 @@ teardown() {
 	ns_exec test-auth ip link del dev eth0
 	ip netns delete test-auth
 	rm -rf /etc/netns/test-auth
-	postgresql foreign <<-EOF
+	psql foreign <<-EOF
 		TRUNCATE dhcphost;
 		TRUNCATE alternative_dns;
 	EOF
@@ -57,7 +53,7 @@ teardown() {
 
 @test "check that fdw contains data" {
 	helper() {
-		postgresql -at hades <<<'SELECT * FROM foreign_dhcphost;'
+		psql --tuples-only hades <<<'SELECT * FROM foreign_dhcphost;'
 	}
 	run helper
 	grep 'de:ad:be:ef:00:00 | 141.30.227.13' <<<"$output"
@@ -69,7 +65,7 @@ teardown() {
 
 @test "check that refresh syncs the data" {
 	helper() {
-		postgresql hades <<<'SELECT * FROM dhcphost;'
+		psql --tuples-only hades <<<'SELECT * FROM dhcphost;'
 	}
 	run helper
 	grep 'de:ad:be:ef:00:00 | 141.30.227.13' <<<"$output"
