@@ -32,6 +32,8 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     isc-dhcp-relay \
     keepalived \
     less \
+    libjs-bootstrap \
+    libjs-jquery \
     libxml2-utils \
     lintian \
     nginx \
@@ -40,9 +42,18 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     postgresql-9.6 \
     postgresql-contrib-9.6 \
     postgresql-server-dev-9.6 \
+    python3-babel \
+    python3-celery \
     python3-dev \
+    python3-flask \
+    python3-flask-babel \
     python3-gi \
+    python3-jinja2 \
+    python3-netaddr \
     python3-pip \
+    python3-psycopg2 \
+    python3-pyroute2 \
+    python3-sqlalchemy \
     python3-setuptools \
     python3-venv \
     rabbitmq-server \
