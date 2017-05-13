@@ -13,7 +13,7 @@ override_dh_auto_clean:
 	make -rf configure.mk clean
 
 override_dh_auto_configure:
-	make -rf configure.mk prefix=/usr libexecdir=/usr/lib sysconfdir=/etc localstatedir=/var runstatedir=/run
+	make -rf configure.mk prefix=/usr libexecdir=/usr/lib sysconfdir=/etc localstatedir=/var pkglocalstatedir=/var/lib/hades runstatedir=/run
 	dh_auto_configure
 
 override_dh_auto_build:
