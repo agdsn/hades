@@ -39,8 +39,7 @@ def main():
     try:
         os.execvp(filename, [filename] + args.arguments)
     except (FileNotFoundError, PermissionError):
-        logger.critical("Could not execute {}".format(filename),
-                        file=sys.stderr)
+        logger.critical("Could not execute %s", filename)
         return os.EX_NOINPUT
     except OSError:
         logger.exception("An OSError occurred")

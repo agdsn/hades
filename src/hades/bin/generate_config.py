@@ -34,8 +34,8 @@ def main():
             with open(args.destination, 'w', encoding='utf-8') as f:
                 generator.from_file(args.source, f)
     else:
-        logger.critical("No such file or directory {} in {}"
-                        .format(args.source, template_dir))
+        logger.critical("No such file or directory %s in %s",
+                        args.source, template_dir)
         return os.EX_NOINPUT
 
 
