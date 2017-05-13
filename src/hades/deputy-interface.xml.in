@@ -4,7 +4,11 @@
 
 <node xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
   <interface name="@DEPUTY_DBUS_NAME@">
-    <method name="Refresh"/>
-    <method name="Cleanup"/>
+    <method name="Refresh">
+      <arg name='response' type='s' direction='out'/>
+    </method>
+    <method name="Cleanup">
+      <arg name='response' type='s' direction='out'/>
+    </method>
   </interface>
 </node>
