@@ -1,40 +1,44 @@
 #!/usr/bin/env bats
 
-ns() {
-	ip netns exec test-unauth "$@"
-}
+load common
 
-dhcpcd() {
-	ns dhcpcd --noipv4ll --ipv4only --oneshot eth0
+readonly client_ip_address=10.66.10.10/19
+readonly nameserver_ip_address=10.66.0.1
+readonly dnsmasq_pidfile=/run/hades/unauth-dns/dnsmasq.pid
+
+ns() {
+	ns_exec test-unauth "$@"
 }
 
 setup() {
-	mkdir -p /etc/netns/test-unauth
-	truncate -s0 /etc/netns/test-unauth/resolv.conf
-	ip netns add test-unauth
-	ip link add dev test-unauth type veth peer netns test-unauth name eth0
-	ip link set test-unauth up master br-unauth
-	ns ip link set dev eth0 up
+	setup_namespace test-unauth br-unauth de:ad:be:ef:00:00
+	ns ip addr add dev eth0 "$client_ip_address"
+	ns ip route add default via "$nameserver_ip_address"
+	echo "nameserver $nameserver_ip_address" | ns tee /etc/resolv.conf >//dev/null
 	ip netns exec unauth ipset flush hades_unauth_whitelist
 	# makes dnsmasq forget that it wrote ips into ipset
-	kill -HUP $(cat /run/hades/unauth-dns/dnsmasq.pid)
+	if [[ -f "$dnsmasq_pidfile" ]]; then
+		kill -HUP $(cat "$dnsmasq_pidfile")
+	fi
 }
 
 teardown() {
-	ns ip link del dev eth0
-	ip netns delete test-unauth
-	rm -rf /etc/netns/test-unauth
+	teardown_namespace test-unauth
 }
 
 @test "check that client can aquire DHCP lease" {
-	run dhcpcd
+	ns ip addr flush dev eth0
+	ns truncate -s0 /etc/resolv.conf
+	run ns dhcpcd --noipv4ll --ipv4only --oneshot eth0
 	echo "$output" >&2
 	[[ $status = 0 ]]
 	egrep 'leased [^ ]+ for [0-9]+ seconds' <<<"$output"
+	ns cat /etc/resolv.conf >&2
+	nameserver=$(ns sed -rne 's/^nameserver (.*)$/\1/p' /etc/resolv.conf)
+	[[ "$nameserver" = "$nameserver_ip_address" ]]
 }
 
 @test "check that DNS queries get redirected" {
-	dhcpcd
 	for i in www.google.de www.msftncsi.com unknown.tld; do
 		run ns dig +short "$i"
 		[[ "$output" = 10.66.0.1 ]]
@@ -45,7 +49,6 @@ teardown() {
 }
 
 @test "check that client gets 511 error from portal" {
-	dhcpcd
 	run ns curl -qi http://www.google.de
 	echo "$output" >&2
 	egrep 'HTTP/[0-9]+\.[0-9]+ 511' <<<"$output"
@@ -53,7 +56,6 @@ teardown() {
 }
 
 @test "check that portal is reachable" {
-	dhcpcd
 	run ns curl -qi http://captive-portal.agdsn.de
 	echo "$output" >&2
 	[[ $status = 0 ]]
@@ -61,18 +63,17 @@ teardown() {
 }
 
 @test "check that ping 8.8.8.8 results in packet filtering" {
-	dhcpcd
-	run ns ping -c5 8.8.8.8
+	run ns ping -n -i0.1 -c10 8.8.8.8
+	echo "$output" >&2
 	egrep 'Packet Filtered' <<<"$output"
 	egrep ' 100% packet loss' <<< "$output"
 }
 
 @test "check that pass-through DNS is working" {
-	dhcpcd
 	for i in agdsn.de ftp.agdsn.de; do
 		run ns dig +short agdsn.de
 		echo "$output" >&2
-		[[ -n "$output" && "$output" != 10.66.0.1 ]]
+		[[ -n $output && $output != 10.66.0.1 && $output =~ [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ ]]
 	done
 }
 
@@ -80,8 +81,6 @@ teardown() {
 	ipset_count () {
 		ip netns exec unauth ipset list hades_unauth_whitelist | sed -rne 's/^Number of entries: (.*)$/\1/p'
 	}
-
-	dhcpcd
 
 	run ipset_count
 	echo "$output" >&2
@@ -94,17 +93,15 @@ teardown() {
 }
 
 @test "check that pass-through host is reachable" {
-	dhcpcd
 	for i in agdsn.de ftp.agdsn.de; do
 		ns dig agdsn.de >&2
-		run ns ping -c5 "$i"
+		run ns ping -n -i0.1 -c10 "$i"
 		echo "$output" >&2
 		egrep ' 0% packet loss' <<<"$output"
 	done
 }
 
 @test "check that pass-through HTTP is working" {
-	dhcpcd
 	run ns curl -qi https://agdsn.de/sipa/news/
 	echo "$output" >&2
 	[[ $status = 0 ]]
