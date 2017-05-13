@@ -73,7 +73,7 @@ teardown() {
 }
 
 @test "check that dnsmasq host reservations are generated" {
-	file=/var/hades/auth-dhcp/dnsmasq-dhcp.hosts
+	file=/var/lib/hades/auth-dhcp/dnsmasq-dhcp.hosts
 	cat "$file" >&2
 	[[ -f "$file" ]]
 	[[ "$(cat "$file")" = "de:ad:be:ef:00:00,${client_ip_address}" ]]
