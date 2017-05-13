@@ -42,9 +42,10 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     postgresql-9.6 \
     postgresql-contrib-9.6 \
     postgresql-server-dev-9.6 \
+    python3-all \
+    python3-all-dev \
     python3-babel \
     python3-celery \
-    python3-dev \
     python3-flask \
     python3-flask-babel \
     python3-gi \
