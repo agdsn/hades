@@ -158,7 +158,7 @@ class HadesDeputyService(object):
     def __init__(self, bus):
         self.bus = bus
 
-    def Refresh(self):
+    def Refresh(self, force):
         """
         Refresh the materialized views.
         If necessary depended config files are regenerate and the corresponding
@@ -166,37 +166,62 @@ class HadesDeputyService(object):
         """
         logger.info("Refreshing materialized views")
         with database_user() as connection:
-            dhcphost_diff = db.refresh_and_diff_materialized_view(
-                connection, db.dhcphost, db.temp_dhcphost, [null()])
-            nas_diff = db.refresh_and_diff_materialized_view(
-                connection, db.nas, db.temp_nas, [null()])
-            alternative_dns_diff = db.refresh_and_diff_materialized_view(
-                connection, db.alternative_dns, db.temp_alternative_dns,
-                [null()])
             with connection.begin():
                 db.refresh_materialized_view(connection, db.radcheck)
                 db.refresh_materialized_view(connection, db.radgroupcheck)
                 db.refresh_materialized_view(connection, db.radgroupreply)
                 db.refresh_materialized_view(connection, db.radusergroup)
+            if force:
+                with connection.begin():
+                    db.refresh_materialized_view(connection, db.dhcphost)
+                    db.refresh_materialized_view(connection, db.nas)
+                    db.refresh_materialized_view(connection, db.alternative_dns)
+                logger.info("Forcing reload of DHCP hosts, NAS clients and "
+                            "alternative DNS clients")
+                reload_dhcp_host = True
+                reload_nas = True
+                reload_alternative_dns = True
+            else:
+                dhcphost_diff = db.refresh_and_diff_materialized_view(
+                    connection, db.dhcphost, db.temp_dhcphost, [null()])
+                if dhcphost_diff != ([], [], []):
+                    logger.info('DHCP host reservations changed '
+                                '(%d added, %d deleted, %d modified).',
+                                *map(len, dhcphost_diff))
+                    reload_dhcp_host = True
+                else:
+                    reload_dhcp_host = False
 
-        if dhcphost_diff != ([], [], []):
-            logger.info('DHCP host reservations changed '
-                        '(%d added, %d deleted, %d modified).',
-                        *map(len, dhcphost_diff))
+                nas_diff = db.refresh_and_diff_materialized_view(
+                    connection, db.nas, db.temp_nas, [null()])
+
+                if nas_diff != ([], [], []):
+                    logger.info('RADIUS clients changed '
+                                '(%d added, %d deleted, %d modified).',
+                                *map(len, nas_diff))
+                    reload_nas = True
+                else:
+                    reload_nas = False
+
+                alternative_dns_diff = db.refresh_and_diff_materialized_view(
+                    connection, db.alternative_dns, db.temp_alternative_dns,
+                    [null()])
+
+                if alternative_dns_diff != ([], [], []):
+                    logger.info('Alternative auth DNS clients changed '
+                                '(%d added, %d deleted, %d modified).',
+                                *map(len, alternative_dns_diff))
+                    reload_alternative_dns = True
+                else:
+                    reload_alternative_dns = False
+
+        if reload_dhcp_host:
             generate_dhcp_hosts_file()
             reload_systemd_unit(self.bus, 'hades-auth-dhcp.service')
-
-        if nas_diff != ([], [], []):
-            logger.info('RADIUS clients changed '
-                        '(%d added, %d deleted, %d modified).',
-                        *map(len, nas_diff))
+        if reload_nas:
             generate_radius_clients_file()
             reload_systemd_unit(self.bus, 'hades-radius.service')
-
-        if alternative_dns_diff != ([], [], []):
-            logger.info('Alternative auth DNS clients changed '
-                        '(%d added, %d deleted, %d modified).',
-                        *map(len, alternative_dns_diff))
+        if reload_alternative_dns:
             update_alternative_dns_ipset()
         return "OK"
 

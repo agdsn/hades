@@ -3,7 +3,7 @@ Description=Hades refresh task (Timer)
 Documentation=https://agdsn.github.io/hades/
 
 [Timer]
-OnActiveSec=10
+OnActiveSec=60
 OnUnitActiveSec=60
 
 [Install]

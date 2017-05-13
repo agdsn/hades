@@ -215,6 +215,7 @@ CONFIGURE_FILES = \
     conf/hades-radius-vrrp.service \
     conf/hades-radius.service \
     conf/hades-refresh.service \
+    conf/hades-forced-refresh.service \
     conf/hades-unauth-dns.service \
     conf/hades-unauth-http.service \
     conf/hades-unauth-portal.service \

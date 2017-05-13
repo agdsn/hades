@@ -1,0 +1,11 @@
+[Unit]
+Description=Hades forced refresh task (Timer)
+Documentation=https://agdsn.github.io/hades/
+
+[Timer]
+OnActiveSec=10
+OnCalendar=00:00:00
+Persistent=true
+
+[Install]
+WantedBy=hades.target

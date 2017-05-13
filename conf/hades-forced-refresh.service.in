@@ -1,5 +1,5 @@
 [Unit]
-Description=Hades refresh task (Service)
+Description=Hades forced refresh task (Service)
 Documentation=https://agdsn.github.io/hades/
 After=hades-network.service hades-database.service
 Wants=hades-network.service hades-database.service
@@ -10,4 +10,4 @@ Type=oneshot
 User=@AGENT_USER@
 Group=@AGENT_GROUP@
 SyslogIdentifier=hades-refresh
-ExecStart=@DBUS_SEND@ --system --type=method_call --print-reply --reply-timeout=30000 --dest=de.agdsn.hades.deputy /de/agdsn/hades/deputy de.agdsn.hades.deputy.Refresh boolean:false
+ExecStart=@DBUS_SEND@ --system --type=method_call --print-reply --reply-timeout=30000 --dest=de.agdsn.hades.deputy /de/agdsn/hades/deputy de.agdsn.hades.deputy.Refresh boolean:true

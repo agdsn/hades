@@ -5,6 +5,7 @@
 <node xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
   <interface name="@DEPUTY_DBUS_NAME@">
     <method name="Refresh">
+      <arg name="force" type="b" direction="in"/>
       <arg name='response' type='s' direction='out'/>
     </method>
     <method name="Cleanup">
