@@ -16,11 +16,12 @@ setup_namespace() {
 	local -r namespace="$1"
 	local -r bridge="$2"
 	local -r mac="$3"
+	local -r ifname=$(printf 'veth-%04x' "$RANDOM")
 	mkdir -p "/etc/netns/$namespace"
 	truncate --size=0 "/etc/netns/${namespace}/resolv.conf"
 	ip netns add "$namespace"
-	ip link add dev "veth-$namespace" type veth peer netns "$namespace" name eth0 address "$mac"
-	ip link set "veth-$namespace" up master "$bridge"
+	ip link add dev "$ifname" type veth peer netns "$namespace" name eth0 address "$mac"
+	ip link set "$ifname" up master "$bridge"
 	ns_exec "$namespace" ip link set dev eth0 up
 }
 
