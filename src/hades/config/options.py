@@ -567,8 +567,10 @@ class HADES_RADIUS_LISTEN(Option):
     """
     Sequence of IPs and networks the RADIUS server is listening on.
     """
+    default = (
+        netaddr.IPNetwork('10.66.68.10/24'),
+    )
     type = collections.Sequence
-    required = True
     static_check = check.satisfy_all(
         check.not_empty,
         check.sequence(check.network_ip)
