@@ -116,18 +116,19 @@ def update_alternative_dns_ipset():
 
 def generate_radius_clients(clients):
     template = string.Template("""
-    client $nasname {
+    client $shortname {
         shortname = $shortname
+        ipaddr = $nasname
         secret = $secret
         require_message_authenticator = no
         nastype = $type
-        coa_server = $nasname
+        coa_server = $shortname
     }
     home_server $shortname {
         type = coa
         ipaddr = $nasname
         port = 3799
-        secret $secret
+        secret = $secret
         coa {
             irt = 2
             mrt = 16
