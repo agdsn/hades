@@ -5,7 +5,8 @@ ARG BUILDER_GID=1000
 ENV LANG=C.UTF-8 container=docker
 COPY etc/ /etc/
 
-RUN apt-get update && apt-get install -y \
+RUN export DEBIAN_FRONTEND="noninteractive" && \
+    apt-get update && apt-get install -y \
     apt-transport-https \
     bats \
     bridge-utils \
