@@ -10,6 +10,8 @@ readonly nas_name=localhost
 readonly secret=testing123
 readonly known_user_mac=40-61-86-1c-df-fd
 readonly unknown_user_mac=1e-a7-de-ad-be-ef
+readonly known_vlan_name=1KnownVLAN
+readonly unknown_vlan_name=1UnknownVLAN
 readonly mac_regex='([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})'
 
 
@@ -45,8 +47,8 @@ setup() {
 		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '$(lowercase $(mac_sextuple ${known_user_mac} :))', 'test'),
 		(1, NULL, NULL, 'unknown', 'unknown');
 		INSERT INTO radgroupreply ("Priority", "GroupName", "Attribute", "Op", "Value")
-		VALUES (1, 'test', 'Egress-VLAN-Name', '+=', '1KnownVlan'),
-		(1, 'unknown', 'Egress-VLAN-Name', ':=', '1UnknownVlan');
+		VALUES (1, 'test', 'Egress-VLAN-Name', '+=', '${known_vlan_name}'),
+		(1, 'unknown', 'Egress-VLAN-Name', ':=', '${unknown_vlan_name}');
 		EOF
 	refresh
 }
@@ -92,9 +94,11 @@ access_request() {
 }
 
 expect_accept() {
+	local -r vlan_name="$1"
+	shift
 	access_request "$@" <<-EOF
 	Packet-Type == Access-Accept
-	Egress-VLAN-Name =* ANY
+	Egress-VLAN-Name == "${vlan_name}"
 	EOF
 }
 
@@ -108,14 +112,14 @@ expect_reject() {
 	local -r calling_station_id="$(lowercase $(mac_sextuple "${known_user_mac}" -))"
 	local -r user_name="$(uppercase $(mac_triple "${known_user_mac}" -))"
 	local -r password="$(uppercase $(mac_triple "${known_user_mac}" -))"
-	expect_accept "$calling_station_id" "$user_name"  "$password"
+	expect_accept "$known_vlan_name" "$calling_station_id" "$user_name"  "$password"
 }
 
 @test "check that a unknown MAC address authenticates correctly" {
 	local -r calling_station_id="$(lowercase $(mac_sextuple "${unknown_user_mac}" -))"
 	local -r user_name="$(uppercase $(mac_triple "${unknown_user_mac}" -))"
 	local -r password="$(uppercase $(mac_triple "${unknown_user_mac}" -))"
-	expect_accept "$calling_station_id" "$user_name"  "$password"
+	expect_accept "$unknown_vlan_name" "$calling_station_id" "$user_name"  "$password"
 }
 
 @test "check that a spoofed MAC address will be rejected" {
