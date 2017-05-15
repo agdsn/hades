@@ -52,27 +52,29 @@
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
+SET row_security = off;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner:
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
 --
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner:
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
 --
 
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
 --
--- Name: {{ foreign_server_fdw }}; Type: EXTENSION; Schema: -; Owner:
+-- Name: {{ foreign_server_fdw }}; Type: EXTENSION; Schema: -; Owner: 
 --
 
 CREATE EXTENSION IF NOT EXISTS {{ foreign_server_fdw }} WITH SCHEMA public;
@@ -149,7 +151,7 @@ SERVER {{ server_name }} OPTIONS (
 SET default_tablespace = '';
 
 --
--- Name: foreign_alternative_dns; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: foreign_alternative_dns; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE FOREIGN TABLE foreign_alternative_dns (
@@ -168,7 +170,7 @@ OPTIONS (
 ALTER FOREIGN TABLE foreign_alternative_dns OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: alternative_dns; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: alternative_dns; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 {%- if HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING %}
 {%- set foreign_alternative_dns_ipaddress = 'safe_inet_cast(foreign_alternative_dns."IpAddress"::text)' %}
@@ -183,7 +185,7 @@ CREATE MATERIALIZED VIEW alternative_dns AS
 ALTER TABLE alternative_dns OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: foreign_dhcphost; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: foreign_dhcphost; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE FOREIGN TABLE foreign_dhcphost (
@@ -207,7 +209,7 @@ OPTIONS (
 ALTER FOREIGN TABLE foreign_dhcphost OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: dhcphost; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: dhcphost; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
 {%- set foreign_dhcphost_mac = 'safe_macaddr_cast(foreign_dhcphost."Mac"::text)' %}
@@ -223,21 +225,21 @@ ALTER FOREIGN TABLE foreign_dhcphost OWNER TO "{{ constants.DATABASE_USER }}";
 CREATE MATERIALIZED VIEW dhcphost AS
  SELECT indexed."Mac",
     indexed."IpAddress"
-   FROM ( SELECT row_number() OVER Mac_window AS Mac_index,
-            row_number() OVER IpAddress_window AS IpAddress_index,
+   FROM ( SELECT row_number() OVER "Mac_window" AS "Mac_index",
+            row_number() OVER "IpAddress_window" AS "IpAddress_index",
             {{ foreign_dhcphost_mac }} AS "Mac",
             {{ foreign_dhcphost_ipaddress }} AS "IpAddress"
            FROM foreign_dhcphost
           WHERE (({{ foreign_dhcphost_mac }} IS NOT NULL) AND ({{ foreign_dhcphost_ipaddress }} IS NOT NULL))
-          WINDOW Mac_window AS (PARTITION BY {{ foreign_dhcphost_mac }}), IpAddress_window AS (PARTITION BY {{ foreign_dhcphost_ipaddress }})) indexed
-  WHERE ((indexed.Mac_index = 1) AND (indexed.IpAddress_index = 1))
+          WINDOW "Mac_window" AS (PARTITION BY {{ foreign_dhcphost_mac }}), "IpAddress_window" AS (PARTITION BY {{ foreign_dhcphost_ipaddress }})) indexed
+  WHERE ((indexed."Mac_index" = 1) AND (indexed."IpAddress_index" = 1))
   WITH NO DATA;
 
 
 ALTER TABLE dhcphost OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: foreign_nas; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: foreign_nas; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE FOREIGN TABLE foreign_nas (
@@ -260,7 +262,7 @@ OPTIONS (
 ALTER FOREIGN TABLE foreign_nas OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: foreign_radcheck; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: foreign_radcheck; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE FOREIGN TABLE foreign_radcheck (
@@ -285,7 +287,7 @@ OPTIONS (
 ALTER FOREIGN TABLE foreign_radcheck OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: foreign_radgroupcheck; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: foreign_radgroupcheck; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE FOREIGN TABLE foreign_radgroupcheck (
@@ -304,7 +306,7 @@ OPTIONS (
 ALTER FOREIGN TABLE foreign_radgroupcheck OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: foreign_radgroupreply; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: foreign_radgroupreply; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE FOREIGN TABLE foreign_radgroupreply (
@@ -323,7 +325,7 @@ OPTIONS (
 ALTER FOREIGN TABLE foreign_radgroupreply OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: foreign_radreply; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: foreign_radreply; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE FOREIGN TABLE foreign_radreply (
@@ -348,7 +350,7 @@ OPTIONS (
 ALTER FOREIGN TABLE foreign_radreply OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: foreign_radusergroup; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: foreign_radusergroup; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE FOREIGN TABLE foreign_radusergroup (
@@ -371,7 +373,7 @@ OPTIONS (
 ALTER FOREIGN TABLE foreign_radusergroup OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: nas; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: nas; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE MATERIALIZED VIEW nas AS
@@ -384,8 +386,8 @@ CREATE MATERIALIZED VIEW nas AS
     indexed."Server",
     indexed."Community",
     indexed."Description"
-   FROM ( SELECT row_number() OVER NASName_window AS NASName_index,
-            row_number() OVER ShortName_window AS ShortName_index,
+   FROM ( SELECT row_number() OVER "NASName_window" AS "NASName_index",
+            row_number() OVER "ShortName_window" AS "ShortName_index",
             foreign_nas."NASName",
             foreign_nas."ShortName",
             foreign_nas."Type",
@@ -400,8 +402,8 @@ CREATE MATERIALIZED VIEW nas AS
             AND (foreign_nas."ShortName" IS NOT NULL)
             AND (foreign_nas."Type" IS NOT NULL)
             AND (foreign_nas."Secret" IS NOT NULL))
-          WINDOW NASName_window AS (PARTITION BY foreign_nas."NASName"), ShortName_window AS (PARTITION BY foreign_nas."ShortName")) indexed
-  WHERE ((indexed.NASName_index = 1) AND (indexed.ShortName_index = 1))
+          WINDOW "NASName_window" AS (PARTITION BY foreign_nas."NASName"), "ShortName_window" AS (PARTITION BY foreign_nas."ShortName")) indexed
+  WHERE ((indexed."NASName_index" = 1) AND (indexed."ShortName_index" = 1))
   WITH NO DATA;
 
 
@@ -410,11 +412,11 @@ ALTER TABLE nas OWNER TO "{{ constants.DATABASE_USER }}";
 SET default_with_oids = false;
 
 --
--- Name: radacct; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radacct; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE TABLE radacct (
-    "RadAcctId" bigserial,
+    "RadAcctId" bigint NOT NULL,
     "AcctSessionId" text NOT NULL,
     "AcctUniqueId" text NOT NULL,
     "UserName" text,
@@ -444,18 +446,29 @@ CREATE TABLE radacct (
 
 ALTER TABLE radacct OWNER TO "{{ constants.DATABASE_USER }}";
 
+--
+-- Name: radacct_RadAcctId_seq; Type: SEQUENCE; Schema: public; Owner: hades-database
+--
+
+CREATE SEQUENCE "radacct_RadAcctId_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
 
 ALTER TABLE "radacct_RadAcctId_seq" OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: radacct_radacctid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: {{ constants.DATABASE_USER }}
+-- Name: radacct_RadAcctId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 ALTER SEQUENCE "radacct_RadAcctId_seq" OWNED BY radacct."RadAcctId";
 
 
 --
--- Name: radcheck; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radcheck; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE MATERIALIZED VIEW radcheck AS
@@ -471,10 +484,10 @@ CREATE MATERIALIZED VIEW radcheck AS
     foreign_radcheck."Op",
     foreign_radcheck."Value"
    FROM foreign_radcheck
-  WHERE foreign_radcheck."UserName" IS NOT NULL
-    AND foreign_radcheck."Attribute" IS NOT NULL
-    AND foreign_radcheck."Op" IS NOT NULL
-    AND foreign_radcheck."Value" IS NOT NULL
+  WHERE ((foreign_radcheck."UserName" IS NOT NULL)
+    AND (foreign_radcheck."Attribute" IS NOT NULL)
+    AND (foreign_radcheck."Op" IS NOT NULL)
+    AND (foreign_radcheck."Value" IS NOT NULL))
   WINDOW w AS (PARTITION BY foreign_radcheck."UserName", foreign_radcheck."NASIpAddress", foreign_radcheck."NASPortId" ORDER BY foreign_radcheck."Priority")
   WITH DATA;
 
@@ -482,7 +495,7 @@ CREATE MATERIALIZED VIEW radcheck AS
 ALTER TABLE radcheck OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: radgroupcheck; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radgroupcheck; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE MATERIALIZED VIEW radgroupcheck AS
@@ -492,10 +505,10 @@ CREATE MATERIALIZED VIEW radgroupcheck AS
     foreign_radgroupcheck."Op",
     foreign_radgroupcheck."Value"
    FROM foreign_radgroupcheck
-  WHERE foreign_radgroupcheck."GroupName" IS NOT NULL
-    AND foreign_radgroupcheck."Attribute" IS NOT NULL
-    AND foreign_radgroupcheck."Op" IS NOT NULL
-    AND foreign_radgroupcheck."Value" IS NOT NULL
+  WHERE ((foreign_radgroupcheck."GroupName" IS NOT NULL)
+    AND (foreign_radgroupcheck."Attribute" IS NOT NULL)
+    AND (foreign_radgroupcheck."Op" IS NOT NULL)
+    AND (foreign_radgroupcheck."Value" IS NOT NULL))
   WINDOW w AS (PARTITION BY foreign_radgroupcheck."GroupName" ORDER BY foreign_radgroupcheck."Priority")
   WITH DATA;
 
@@ -503,7 +516,7 @@ CREATE MATERIALIZED VIEW radgroupcheck AS
 ALTER TABLE radgroupcheck OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: radgroupreply; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radgroupreply; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE MATERIALIZED VIEW radgroupreply AS
@@ -513,10 +526,10 @@ CREATE MATERIALIZED VIEW radgroupreply AS
     foreign_radgroupreply."Op",
     foreign_radgroupreply."Value"
    FROM foreign_radgroupreply
-  WHERE foreign_radgroupreply."GroupName" IS NOT NULL
-   AND foreign_radgroupreply."Attribute" IS NOT NULL
-   AND foreign_radgroupreply."Op" IS NOT NULL
-   AND foreign_radgroupreply."Value" IS NOT NULL
+  WHERE ((foreign_radgroupreply."GroupName" IS NOT NULL)
+   AND (foreign_radgroupreply."Attribute" IS NOT NULL)
+   AND (foreign_radgroupreply."Op" IS NOT NULL)
+   AND (foreign_radgroupreply."Value" IS NOT NULL))
   WINDOW w AS (PARTITION BY foreign_radgroupreply."GroupName" ORDER BY foreign_radgroupreply."Priority")
   WITH DATA;
 
@@ -524,34 +537,45 @@ CREATE MATERIALIZED VIEW radgroupreply AS
 ALTER TABLE radgroupreply OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: radpostauth; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radpostauth; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE TABLE radpostauth (
-    "Id" bigserial,
+    "Id" bigint NOT NULL,
     "UserName" text NOT NULL,
     "NASIpAddress" inet NOT NULL,
     "NASPortId" text,
     "PacketType" text NOT NULL,
     "ReplyMessage" text,
-    "AuthDate" timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now())
+    "AuthDate" timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 
 ALTER TABLE radpostauth OWNER TO "{{ constants.DATABASE_USER }}";
 
+--
+-- Name: radpostauth_Id_seq; Type: SEQUENCE; Schema: public; Owner: hades-database
+--
+
+CREATE SEQUENCE "radpostauth_Id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
 
 ALTER TABLE "radpostauth_Id_seq" OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: radpostauth_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: {{ constants.DATABASE_USER }}
+-- Name: radpostauth_Id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 ALTER SEQUENCE "radpostauth_Id_seq" OWNED BY radpostauth."Id";
 
 
 --
--- Name: radreply; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radreply; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE MATERIALIZED VIEW radreply AS
@@ -567,10 +591,10 @@ CREATE MATERIALIZED VIEW radreply AS
     foreign_radreply."Op",
     foreign_radreply."Value"
    FROM foreign_radreply
-  WHERE foreign_radreply."UserName" IS NOT NULL
-   AND foreign_radreply."Attribute" IS NOT NULL
-   AND foreign_radreply."Op" IS NOT NULL
-   AND foreign_radreply."Value" IS NOT NULL
+  WHERE ((foreign_radreply."UserName" IS NOT NULL)
+   AND (foreign_radreply."Attribute" IS NOT NULL)
+   AND (foreign_radreply."Op" IS NOT NULL)
+   AND (foreign_radreply."Value" IS NOT NULL))
   WINDOW w AS (PARTITION BY foreign_radreply."UserName", foreign_radreply."NASIpAddress", foreign_radreply."NASPortId" ORDER BY foreign_radreply."Priority")
   WITH DATA;
 
@@ -578,7 +602,7 @@ CREATE MATERIALIZED VIEW radreply AS
 ALTER TABLE radreply OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: radusergroup; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radusergroup; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE MATERIALIZED VIEW radusergroup AS
@@ -592,8 +616,8 @@ CREATE MATERIALIZED VIEW radusergroup AS
     foreign_radusergroup."GroupName",
     row_number() OVER w AS "Priority"
    FROM foreign_radusergroup
-  WHERE foreign_radusergroup."UserName" IS NOT NULL
-   AND foreign_radusergroup."GroupName" IS NOT NULL
+  WHERE ((foreign_radusergroup."UserName" IS NOT NULL)
+   AND (foreign_radusergroup."GroupName" IS NOT NULL))
   WINDOW w AS (PARTITION BY foreign_radusergroup."UserName", foreign_radusergroup."NASIpAddress", foreign_radusergroup."NASPortId" ORDER BY foreign_radusergroup."Priority")
   WITH DATA;
 
@@ -601,21 +625,21 @@ CREATE MATERIALIZED VIEW radusergroup AS
 ALTER TABLE radusergroup OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: radacctid; Type: DEFAULT; Schema: public; Owner: {{ constants.DATABASE_USER }}
+-- Name: radacct RadAcctId; Type: DEFAULT; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 ALTER TABLE ONLY radacct ALTER COLUMN "RadAcctId" SET DEFAULT nextval('"radacct_RadAcctId_seq"'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: {{ constants.DATABASE_USER }}
+-- Name: radpostauth Id; Type: DEFAULT; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 ALTER TABLE ONLY radpostauth ALTER COLUMN "Id" SET DEFAULT nextval('"radpostauth_Id_seq"'::regclass);
 
 
 --
--- Name: radacct_acctuniqueid_key; Type: CONSTRAINT; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radacct radacct_AcctUniqueId_key; Type: CONSTRAINT; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 ALTER TABLE ONLY radacct
@@ -623,7 +647,7 @@ ALTER TABLE ONLY radacct
 
 
 --
--- Name: radacct_pkey; Type: CONSTRAINT; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radacct radacct_pkey; Type: CONSTRAINT; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 ALTER TABLE ONLY radacct
@@ -631,7 +655,7 @@ ALTER TABLE ONLY radacct
 
 
 --
--- Name: radpostauth_pkey; Type: CONSTRAINT; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radpostauth radpostauth_pkey; Type: CONSTRAINT; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 ALTER TABLE ONLY radpostauth
@@ -639,317 +663,112 @@ ALTER TABLE ONLY radpostauth
 
 
 --
--- Name: alternative_dns_ipaddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: alternative_dns_IpAddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE UNIQUE INDEX "alternative_dns_IpAddress_idx" ON alternative_dns USING btree ("IpAddress");
 
 
 --
--- Name: dhcphost_ipaddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: dhcphost_IpAddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE UNIQUE INDEX "dhcphost_IpAddress_idx" ON dhcphost USING btree ("IpAddress");
 
 
 --
--- Name: dhcphost_mac_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: dhcphost_Mac_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE UNIQUE INDEX "dhcphost_Mac_idx" ON dhcphost USING btree ("Mac");
 
 
 --
--- Name: nas_nasname_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: nas_NASName_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE UNIQUE INDEX "nas_NASName_idx" ON nas USING btree ("NASName");
 
 
 --
--- Name: radacct_active_session_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radacct_active_session_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE INDEX radacct_active_session_idx ON radacct ("AcctUniqueId") WHERE "AcctStopTime" IS NULL;
-
-
---
--- Name: radacct_bulk_close; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
---
-
-CREATE INDEX radacct_bulk_close ON radacct ("NASIpAddress", "AcctStartTime") WHERE "AcctStopTime" IS NULL;
+CREATE INDEX radacct_active_session_idx ON radacct USING btree ("AcctUniqueId") WHERE ("AcctStopTime" IS NULL);
 
 
 --
--- Name: radacct_start_user_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radacct_bulk_close; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+CREATE INDEX radacct_bulk_close ON radacct USING btree ("NASIpAddress", "AcctStartTime") WHERE ("AcctStopTime" IS NULL);
+
+
+--
+-- Name: radacct_start_user_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE INDEX radacct_start_user_idx ON radacct USING btree ("AcctStartTime", "UserName");
 
 
 --
--- Name: radcheck_user_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radcheck_user_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE UNIQUE INDEX radcheck_user_idx ON radcheck USING btree ("UserName", "NASIpAddress", "NASPortId", "Priority");
 
 
 --
--- Name: radgroupcheck_group_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radgroupcheck_group_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE UNIQUE INDEX radgroupcheck_group_idx ON radgroupcheck USING btree ("GroupName", "Priority");
 
 
 --
--- Name: radgroupreply_group_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radgroupreply_group_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE UNIQUE INDEX radgroupreply_group_idx ON radgroupreply USING btree ("GroupName", "Priority");
 
 
 --
--- Name: radpostauth_authdate_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radpostauth_AuthDate_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE INDEX "radpostauth_AuthDate_idx" ON radpostauth USING BRIN("AuthDate") WITH (pages_per_range = 16);
-
-
---
--- Name: radpostauth_port_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
---
-
-CREATE INDEX radpostauth_port_idx ON radpostauth USING btree ("NASIpAddress", "NASPortId");
+CREATE INDEX "radpostauth_AuthDate_idx" ON radpostauth USING brin ("AuthDate") WITH (pages_per_range='16');
 
 
 --
--- Name: radpostauth_username_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radpostauth_UserName_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE INDEX "radpostauth_UserName_idx" ON radpostauth USING btree ("UserName");
 
 
 --
--- Name: radreply_user_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radpostauth_port_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+CREATE INDEX radpostauth_port_idx ON radpostauth USING btree ("NASIpAddress", "NASPortId");
+
+
+--
+-- Name: radreply_user_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE UNIQUE INDEX radreply_user_idx ON radreply USING btree ("UserName", "NASIpAddress", "NASPortId", "Priority");
 
 
 --
--- Name: radusergroup_membership_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}; Tablespace:
+-- Name: radusergroup_membership_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 CREATE UNIQUE INDEX radusergroup_membership_idx ON radusergroup USING btree ("UserName", "NASIpAddress", "NASPortId", "GroupName", "Priority");
 
 
 --
--- Name: public; Type: ACL; Schema: -; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON SCHEMA public TO "{{ constants.DATABASE_USER }}";
-GRANT ALL ON SCHEMA public TO PUBLIC;
-
-
---
--- Name: foreign_alternative_dns; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE foreign_alternative_dns FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_alternative_dns FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE foreign_alternative_dns TO "{{ constants.DATABASE_USER }}";
-
-
---
--- Name: alternative_dns; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE alternative_dns FROM PUBLIC;
-REVOKE ALL ON TABLE alternative_dns FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE alternative_dns TO "{{ constants.DATABASE_USER }}";
-
-
---
--- Name: foreign_dhcphost; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE foreign_dhcphost FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_dhcphost FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE foreign_dhcphost TO "{{ constants.DATABASE_USER }}";
-
-
---
--- Name: dhcphost; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE dhcphost FROM PUBLIC;
-REVOKE ALL ON TABLE dhcphost FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE dhcphost TO "{{ constants.DATABASE_USER }}";
-
-
---
--- Name: foreign_nas; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE foreign_nas FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_nas FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE foreign_nas TO "{{ constants.DATABASE_USER }}";
-
-
---
--- Name: foreign_radcheck; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE foreign_radcheck FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_radcheck FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE foreign_radcheck TO "{{ constants.DATABASE_USER }}";
-
-
---
--- Name: foreign_radgroupcheck; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE foreign_radgroupcheck FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_radgroupcheck FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE foreign_radgroupcheck TO "{{ constants.DATABASE_USER }}";
-
-
---
--- Name: foreign_radgroupreply; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE foreign_radgroupreply FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_radgroupreply FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE foreign_radgroupreply TO "{{ constants.DATABASE_USER }}";
-
-
---
--- Name: foreign_radreply; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE foreign_radreply FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_radreply FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE foreign_radreply TO "{{ constants.DATABASE_USER }}";
-
-
---
--- Name: foreign_radusergroup; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE foreign_radusergroup FROM PUBLIC;
-REVOKE ALL ON TABLE foreign_radusergroup FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE foreign_radusergroup TO "{{ constants.DATABASE_USER }}";
-
-
---
--- Name: nas; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE nas FROM PUBLIC;
-REVOKE ALL ON TABLE nas FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE nas TO "{{ constants.DATABASE_USER }}";
-
-
---
--- Name: radacct; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE radacct FROM PUBLIC;
-REVOKE ALL ON TABLE radacct FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE radacct TO "{{ constants.DATABASE_USER }}";
-GRANT SELECT,INSERT,UPDATE,DELETE ON TABLE radacct TO "{{ constants.RADIUS_USER }}";
-GRANT SELECT ON TABLE radacct TO "{{ constants.AGENT_USER }}";
-GRANT SELECT ON TABLE radacct TO "{{ constants.PORTAL_USER }}";
-
-
---
--- Name: radacct_radacctid_seq; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON SEQUENCE "radacct_RadAcctId_seq" FROM PUBLIC;
-REVOKE ALL ON SEQUENCE "radacct_RadAcctId_seq" FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON SEQUENCE "radacct_RadAcctId_seq" TO "{{ constants.DATABASE_USER }}";
-GRANT SELECT,USAGE ON SEQUENCE "radacct_RadAcctId_seq" TO "{{ constants.RADIUS_USER }}";
-
-
---
--- Name: radcheck; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE radcheck FROM PUBLIC;
-REVOKE ALL ON TABLE radcheck FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE radcheck TO "{{ constants.DATABASE_USER }}";
-GRANT SELECT ON TABLE radcheck TO "{{ constants.RADIUS_USER }}";
-
-
---
--- Name: radgroupcheck; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE radgroupcheck FROM PUBLIC;
-REVOKE ALL ON TABLE radgroupcheck FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE radgroupcheck TO "{{ constants.DATABASE_USER }}";
-GRANT SELECT ON TABLE radgroupcheck TO "{{ constants.RADIUS_USER }}";
-
-
---
--- Name: radgroupreply; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE radgroupreply FROM PUBLIC;
-REVOKE ALL ON TABLE radgroupreply FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE radgroupreply TO "{{ constants.DATABASE_USER }}";
-GRANT SELECT ON TABLE radgroupreply TO "{{ constants.RADIUS_USER }}";
-
-
---
--- Name: radpostauth; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE radpostauth FROM PUBLIC;
-REVOKE ALL ON TABLE radpostauth FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE radpostauth TO "{{ constants.DATABASE_USER }}";
-GRANT SELECT,INSERT,UPDATE,DELETE ON TABLE radpostauth TO "{{ constants.RADIUS_USER }}";
-GRANT SELECT ON TABLE radpostauth TO "{{ constants.AGENT_USER }}";
-GRANT SELECT ON TABLE radpostauth TO "{{ constants.PORTAL_USER }}";
-
-
---
--- Name: radpostauth_id_seq; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON SEQUENCE "radpostauth_Id_seq" FROM PUBLIC;
-REVOKE ALL ON SEQUENCE "radpostauth_Id_seq" FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON SEQUENCE "radpostauth_Id_seq" TO "{{ constants.DATABASE_USER }}";
-GRANT SELECT,USAGE ON SEQUENCE "radpostauth_Id_seq" TO "{{ constants.RADIUS_USER }}";
-
-
---
--- Name: radreply; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE radreply FROM PUBLIC;
-REVOKE ALL ON TABLE radreply FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE radreply TO "{{ constants.DATABASE_USER }}";
-GRANT SELECT ON TABLE radreply TO "{{ constants.RADIUS_USER }}";
-GRANT SELECT ON TABLE radreply TO "{{ constants.PORTAL_USER }}";
-
-
---
--- Name: radusergroup; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REVOKE ALL ON TABLE radusergroup FROM PUBLIC;
-REVOKE ALL ON TABLE radusergroup FROM "{{ constants.DATABASE_USER }}";
-GRANT ALL ON TABLE radusergroup TO "{{ constants.DATABASE_USER }}";
-GRANT SELECT ON TABLE radusergroup TO "{{ constants.RADIUS_USER }}";
-GRANT SELECT ON TABLE radusergroup TO "{{ constants.PORTAL_USER }}";
-
-
---
--- Name: dhcphost; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ constants.DATABASE_USER }}
+-- Name: alternative_dns; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
 REFRESH MATERIALIZED VIEW alternative_dns;
@@ -1002,6 +821,75 @@ REFRESH MATERIALIZED VIEW radreply;
 --
 
 REFRESH MATERIALIZED VIEW radusergroup;
+
+
+--
+-- Name: radacct; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT ON TABLE radacct TO "{{ constants.AGENT_USER }}";
+GRANT SELECT ON TABLE radacct TO "{{ constants.PORTAL_USER }}";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE radacct TO "{{ constants.RADIUS_USER }}";
+
+
+--
+-- Name: radacct_RadAcctId_seq; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT,USAGE ON SEQUENCE "radacct_RadAcctId_seq" TO "{{ constants.RADIUS_USER }}";
+
+
+--
+-- Name: radcheck; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT ON TABLE radcheck TO "{{ constants.RADIUS_USER }}";
+
+
+--
+-- Name: radgroupcheck; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT ON TABLE radgroupcheck TO "{{ constants.RADIUS_USER }}";
+
+
+--
+-- Name: radgroupreply; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT ON TABLE radgroupreply TO "{{ constants.RADIUS_USER }}";
+
+
+--
+-- Name: radpostauth; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT ON TABLE radpostauth TO "{{ constants.AGENT_USER }}";
+GRANT SELECT ON TABLE radpostauth TO "{{ constants.PORTAL_USER }}";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE radpostauth TO "{{ constants.RADIUS_USER }}";
+
+
+--
+-- Name: radpostauth_Id_seq; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT,USAGE ON SEQUENCE "radpostauth_Id_seq" TO "{{ constants.RADIUS_USER }}";
+
+
+--
+-- Name: radreply; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT ON TABLE radreply TO "{{ constants.PORTAL_USER }}";
+GRANT SELECT ON TABLE radreply TO "{{ constants.RADIUS_USER }}";
+
+
+--
+-- Name: radusergroup; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT ON TABLE radusergroup TO "{{ constants.PORTAL_USER }}";
+GRANT SELECT ON TABLE radusergroup TO "{{ constants.RADIUS_USER }}";
 
 
 --
