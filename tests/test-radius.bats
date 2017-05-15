@@ -40,9 +40,9 @@ mac_sextuple() {
 setup() {
 	psql foreign <<-EOF
 		INSERT INTO radcheck ("Priority", "NASIpAddress", "NASPortId", "UserName", "Attribute", "Op", "Value")
-		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '${known_user_mac}', 'Calling-Station-Id', '==', '$(lowercase $(mac_sextuple "${nas_mac}" -))');
+		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '$(lowercase $(mac_sextuple ${known_user_mac} :))', 'Calling-Station-Id', '==', '$(lowercase $(mac_sextuple "${nas_mac}" -))');
 		INSERT INTO radusergroup ("Priority", "NASIpAddress", "NASPortId", "UserName", "GroupName")
-		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '${known_user_mac}', 'test'),
+		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '$(lowercase $(mac_sextuple ${known_user_mac} :))', 'test'),
 		(1, NULL, NULL, 'unknown', 'unknown');
 		INSERT INTO radgroupreply ("Priority", "GroupName", "Attribute", "Op", "Value")
 		VALUES (1, 'test', 'Egress-VLAN-Name', '+=', '1KnownVlan'),
