@@ -42,3 +42,20 @@ verify_calling_station_id {
 		noop
 	}
 }
+
+lookup_sql {
+		sql
+		# We implement the query_on_not_found setting, that was present in 2.x
+		# in unlang
+		if (notfound) {
+			update request {
+				&Tmp-String-0 := &User-Name
+				&User-Name := "{{ HADES_RADIUS_UNKNOWN_USER }}"
+			}
+			updated
+			sql
+			update request {
+				&User-Name := &Tmp-String-0
+			}
+		}
+}

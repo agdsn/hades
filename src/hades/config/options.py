@@ -622,6 +622,11 @@ class HADES_RADIUS_DATABASE_FAIL_REPLY_ATTRIBUTES(Option):
     }
 
 
+class HADES_RADIUS_UNKNOWN_USER(Option):
+    type = str
+    default = "unknown"
+
+
 ##########################
 # Gratuitous ARP options #
 ##########################

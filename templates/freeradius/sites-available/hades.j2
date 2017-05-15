@@ -60,11 +60,11 @@ server hades {
 		}
 		{%- if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
 		redundant {
-			sql
+			lookup_sql
 			accept
 		}
 		{%- else %}
-		sql
+		lookup_sql
 		{%- endif %}
 		pap
 	}
