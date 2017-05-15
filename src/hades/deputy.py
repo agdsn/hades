@@ -13,6 +13,7 @@ import logging
 import pwd
 import string
 import subprocess
+import textwrap
 from functools import partial
 
 import netaddr
@@ -115,28 +116,28 @@ def update_alternative_dns_ipset():
 
 
 def generate_radius_clients(clients):
-    template = string.Template("""
-    client $shortname {
-        shortname = $shortname
-        ipaddr = $nasname
-        secret = $secret
-        require_message_authenticator = no
-        nastype = $type
-        coa_server = $shortname
-    }
-    home_server $shortname {
-        type = coa
-        ipaddr = $nasname
-        port = 3799
-        secret = $secret
-        coa {
-            irt = 2
-            mrt = 16
-            mrc = 5
-            mrd = 30
+    template = string.Template(textwrap.dedent("""
+        client $shortname {
+            shortname = $shortname
+            ipaddr = $nasname
+            secret = $secret
+            require_message_authenticator = no
+            nastype = $type
+            coa_server = $shortname
         }
-    }
-    """)
+        home_server $shortname {
+            type = coa
+            ipaddr = $nasname
+            port = 3799
+            secret = $secret
+            coa {
+                irt = 2
+                mrt = 16
+                mrc = 5
+                mrd = 30
+            }
+        }
+    """))
     for shortname, nasname, type, ports, secret, server, community, description in clients:
         yield template.substitute(
             shortname=shortname, nasname=nasname, type=type, ports=ports,
