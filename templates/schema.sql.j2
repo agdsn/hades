@@ -83,6 +83,58 @@ CREATE EXTENSION IF NOT EXISTS {{ foreign_server_fdw }} WITH SCHEMA public;
 SET search_path = public, pg_catalog;
 
 --
+-- Name: decode_attribute_value_pairs(text); Type: FUNCTION; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+CREATE FUNCTION decode_attribute_value_pairs(string text) RETURNS text[][2]
+    LANGUAGE plpgsql IMMUTABLE STRICT
+    AS $$
+DECLARE
+    rv text;
+BEGIN
+    SELECT array_agg(keyval) INTO STRICT rv FROM (SELECT regexp_matches(string, '(?:\A|, )([^=]+) = ((?:"(?:\\.|[^"\\])*"|[^",]+))(?:\Z|(?=, ))', 'g') as keyval) AS matches;
+    RETURN rv;
+END;
+$$;
+
+
+ALTER FUNCTION public.decode_attribute_value_pairs(string text) OWNER TO "hades-database";
+
+--
+-- Name: FUNCTION decode_attribute_value_pairs(string text); Type: COMMENT; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+COMMENT ON FUNCTION decode_attribute_value_pairs(string text) IS 'Decode freeRADIUS attribute-values pairs as exportet by the pairs xlat function into an array of arrays of key-value pairs.';
+
+
+--
+-- Name: decode_equals_encoding(text); Type: FUNCTION; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+CREATE FUNCTION decode_equals_encoding(string text) RETURNS text
+    LANGUAGE plpgsql IMMUTABLE STRICT
+    AS $$
+DECLARE
+    rv text;
+BEGIN
+    SELECT string_agg(concat(convert_from(decode(match[1], 'hex'), 'SQL_ASCII'), match[2]), '') INTO STRICT rv FROM (
+            SELECT regexp_matches(string, '(?:=([0-9a-f]{2})|([^=]+))', 'gi') as match
+        ) AS tokens;
+    RETURN rv;
+END;
+$$;
+
+
+ALTER FUNCTION public.decode_equals_encoding(string text) OWNER TO "{{ constants.DATABASE_USER }}";
+
+--
+-- Name: FUNCTION decode_equals_encoding(string text); Type: COMMENT; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+COMMENT ON FUNCTION decode_equals_encoding(string text) IS 'Decode a string, where some bytes have been encoded with a scheme similar to the percent encoding of URIs: an equal sign (=) followed by two hexadecimal characters';
+
+
+--
 -- Name: safe_inet_cast(text); Type: FUNCTION; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
@@ -546,7 +598,8 @@ CREATE TABLE radpostauth (
     "NASIpAddress" inet NOT NULL,
     "NASPortId" text,
     "PacketType" text NOT NULL,
-    "ReplyMessage" text,
+    "Groups" text[],
+    "Reply" text[][2],
     "AuthDate" timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

@@ -7,7 +7,7 @@ from sqlalchemy import (
     PrimaryKeyConstraint, String, Table, Text, TypeDecorator, UniqueConstraint,
     and_, column, create_engine, func, null, or_, select, table,
 )
-from sqlalchemy.dialects.postgresql import INET, MACADDR
+from sqlalchemy.dialects.postgresql import ARRAY, INET, MACADDR
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
 
@@ -162,7 +162,10 @@ radpostauth = Table(
     Column('NASIpAddress', IPAddress, nullable=False),
     Column('NASPortId', Text),
     Column('PacketType', Text, nullable=False),
-    Column('ReplyMessage', Text),
+    Column('Groups', ARRAY(Text, as_tuple=True, zero_indexes=True,
+                           dimensions=1)),
+    Column('Reply', ARRAY(Text, as_tuple=True, zero_indexes=True,
+                          dimensions=2)),
     Column('AuthDate', Text, nullable=False),
 )
 
@@ -377,8 +380,9 @@ def get_latest_auth_attempt(mac):
     connection = get_connection()
     config = get_config(True)
     interval = config.HADES_REAUTHENTICATION_INTERVAL
-    result = connection.execute(
-        select([radpostauth.c.ReplyMessage, radpostauth.c.AuthDate])
+    return connection.execute(
+        select([radpostauth.c.Groups, radpostauth.c.Reply,
+                radpostauth.c.AuthDate])
         .where(and_(
             radpostauth.c.UserName == mac,
             radpostauth.c.AuthDate >= (utcnow() - interval),
@@ -448,15 +452,14 @@ def get_auth_attempts(mac):
 
     :param str mac: MAC address
     :return: An iterable that yields (NAS-IP-Address, NAS-Port-ID, Packet-Type,
-    Reply-Message, Auth-Date)-tuples ordered by Auth-Date descending
-    :rtype: iterable[(str, str, str, str, datetime)]
+    Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts for MAC "%s"', mac)
     connection = get_connection()
     result = connection.execute(
         select([radpostauth.c.NASIpAddress, radpostauth.c.NASPortId,
-                radpostauth.c.PacketType, radpostauth.c.ReplyMessage,
-                radpostauth.c.AuthDate])
+                radpostauth.c.PacketType, radpostauth.c.Groups,
+                radpostauth.c.Reply, radpostauth.c.AuthDate])
         .where(and_(radpostauth.c.UserName == mac))
         .order_by(radpostauth.c.AuthDate.desc()))
     return iter(result)
