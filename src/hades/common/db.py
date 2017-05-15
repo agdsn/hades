@@ -1,10 +1,12 @@
 import logging
 import operator
 
+import netaddr
 from sqlalchemy import (
-    BigInteger, Column, DateTime, Integer, MetaData, PrimaryKeyConstraint,
-    String, Table, Text, UniqueConstraint, and_, column, create_engine,
-    func, null, or_, select, table)
+    BigInteger, Column, DateTime, Integer, MetaData,
+    PrimaryKeyConstraint, String, Table, Text, TypeDecorator, UniqueConstraint,
+    and_, column, create_engine, func, null, or_, select, table,
+)
 from sqlalchemy.dialects.postgresql import INET, MACADDR
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
@@ -22,17 +24,51 @@ def as_copy(original_table, new_name):
                  info={'temporary': True})
 
 
+class MACAddress(TypeDecorator):
+    impl = MACADDR
+    python_type = netaddr.EUI
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        return str(netaddr.EUI(value, dialect=netaddr.mac_pgsql))
+
+    process_literal_param = process_bind_param
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        return netaddr.EUI(value, dialect=netaddr.mac_pgsql)
+
+
+class IPAddress(TypeDecorator):
+    impl = INET
+    python_type = netaddr.IPAddress
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        return str(value)
+
+    process_literal_param = process_bind_param
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        return netaddr.IPAddress(value)
+
+
 alternative_dns = Table(
     'alternative_dns', metadata,
-    Column('IpAddress', INET, nullable=False),
+    Column('IpAddress', IPAddress, nullable=False),
     UniqueConstraint('IpAddress'),
 )
 temp_alternative_dns = as_copy(alternative_dns, 'temp_alternative_dns')
 
 dhcphost = Table(
     'dhcphost', metadata,
-    Column('Mac', MACADDR, nullable=False),
-    Column('IpAddress', INET, nullable=False),
+    Column('Mac', MACAddress, nullable=False),
+    Column('IpAddress', IPAddress, nullable=False),
     UniqueConstraint('Mac'),
     UniqueConstraint('IpAddress'),
 )
@@ -63,7 +99,7 @@ radacct = Table(
     Column('UserName', Text),
     Column('GroupName', Text),
     Column('Realm', Text),
-    Column('NASIpAddress', INET, nullable=False),
+    Column('NASIpAddress', IPAddress, nullable=False),
     Column('NASPortId', Text),
     Column('NASPortType', Text),
     Column('AcctStartTime', DateTime),
@@ -81,14 +117,14 @@ radacct = Table(
     Column('AcctTerminateCause', Text),
     Column('ServiceType', Text),
     Column('FramedProtocol', Text),
-    Column('FramedIPAddress', INET),
+    Column('FramedIPAddress', IPAddress),
 )
 
 radcheck = Table(
     'radcheck', metadata,
     Column('Priority', Integer, nullable=False),
     Column('UserName', Text, nullable=False),
-    Column('NASIpAddress', INET, nullable=False),
+    Column('NASIpAddress', IPAddress, nullable=False),
     Column('NASPortId', Text, nullable=False),
     Column('Attribute', Text, nullable=False),
     Column('Op', String(2), nullable=False),
@@ -123,7 +159,7 @@ radpostauth = Table(
     'radpostauth', metadata,
     Column('Id', BigInteger, primary_key=True, nullable=False),
     Column('UserName', Text, nullable=False),
-    Column('NASIpAddress', INET, nullable=False),
+    Column('NASIpAddress', IPAddress, nullable=False),
     Column('NASPortId', Text),
     Column('PacketType', Text, nullable=False),
     Column('ReplyMessage', Text),
@@ -134,7 +170,7 @@ radreply = Table(
     'radreply', metadata,
     Column('Priority', Integer, nullable=False),
     Column('UserName', Text, nullable=False),
-    Column('NASIpAddress', INET, nullable=False),
+    Column('NASIpAddress', IPAddress, nullable=False),
     Column('NASPortId', Text, nullable=False),
     Column('Attribute', Text, nullable=False),
     Column('Op', String(2), default='=', nullable=False),
@@ -147,7 +183,7 @@ radusergroup = Table(
     'radusergroup', metadata,
     Column('Priority', Integer, nullable=False),
     Column('UserName', Text, nullable=False),
-    Column('NASIpAddress', INET, nullable=False),
+    Column('NASIpAddress', IPAddress, nullable=False),
     Column('NASPortId', Text, nullable=False),
     Column('GroupName', Text, nullable=False),
     UniqueConstraint('UserName', 'GroupName', 'Priority'),
