@@ -1,5 +1,7 @@
 import logging
 import operator
+from datetime import datetime
+from typing import Iterable, List, Optional, Tuple
 
 import netaddr
 from sqlalchemy import (
@@ -351,13 +353,12 @@ def delete_old_auth_attempts(transaction, interval):
     )))
 
 
-def get_groups(mac):
+def get_groups(mac: netaddr.EUI) -> List[str]:
     """
     Get the groups of a user.
 
     :param mac: MAC address
     :return: A list of group names
-    :rtype: [str]
     """
     logger.debug('Getting groups of MAC "%s"', mac)
     connection = get_connection()
@@ -366,7 +367,8 @@ def get_groups(mac):
     return list(map(operator.itemgetter(0), results))
 
 
-def get_latest_auth_attempt(mac):
+def get_latest_auth_attempt(mac: netaddr.EUI) -> Optional[Tuple[
+        Tuple[str], Tuple[Tuple[str]], datetime]]:
     """
     Get the latest auth attempt of a MAC address that occurred within twice the
     reauthentication interval.
@@ -374,7 +376,6 @@ def get_latest_auth_attempt(mac):
     :param str mac: MAC address
     :return: A pair of list of group names and when or None if no attempt was
     found..
-    :rtype: ([str], datetime)|None
     """
     logger.debug('Getting latest auth attempt for MAC "%s"', mac)
     connection = get_connection()
@@ -390,18 +391,13 @@ def get_latest_auth_attempt(mac):
         ))
         .order_by(radpostauth.c.AuthDate.desc()).limit(1)
     ).first()
-    if result:
-        message, date = result
-        return message.strip().split(), date
-    return None
 
 
-def get_all_dhcp_hosts():
+def get_all_dhcp_hosts() -> Iterable[Tuple[netaddr.EUI, netaddr.IPAddress]]:
     """
     Return all DHCP host configurations.
 
     :return: An iterable that yields (mac, ip)-tuples
-    :rtype: iterable[(str, str)]
     """
     logger.debug("Getting all DHCP hosts")
     connection = get_connection()
@@ -409,7 +405,8 @@ def get_all_dhcp_hosts():
     return iter(result)
 
 
-def get_all_nas_clients():
+def get_all_nas_clients() -> Iterable[
+        Tuple[str, str, str, int, str, str, str, str]]:
     """
     Return all NAS clients.
 
@@ -425,7 +422,8 @@ def get_all_nas_clients():
     return iter(result)
 
 
-def get_sessions(mac):
+def get_sessions(mac: netaddr.EUI) -> Iterable[
+        Tuple[netaddr.IPAddress, str, datetime, datetime]]:
     """
     Return all sessions of a particular MAC address.
 
@@ -433,7 +431,6 @@ def get_sessions(mac):
     :return: An iterable that yields (NAS-IP-Address, NAS-Port-ID,
     Session-Start-Time, Session-Stop-Time)-tuples ordered by Session-Start-Time
     descending
-    :rtype: iterable[(str, str, datetime, datetime)]
     """
     logger.debug('Getting all sessions for MAC "%s"', mac)
     connection = get_connection()
@@ -446,7 +443,9 @@ def get_sessions(mac):
     return iter(result)
 
 
-def get_auth_attempts(mac):
+def get_auth_attempts(mac: str) -> Iterable[
+        Tuple[netaddr.IPAddress, str, str, Tuple[str], Tuple[Tuple[str, str]],
+              datetime]]:
     """
     Return all auth attempts of a particular MAC address.
 
@@ -465,12 +464,11 @@ def get_auth_attempts(mac):
     return iter(result)
 
 
-def get_all_alternative_dns_ips():
+def get_all_alternative_dns_ips() -> Iterable[netaddr.IPAddress]:
     """
     Return all IPs for alternative DNS configuration.
 
     :return: An iterable that yields ip addresses
-    :rtype: iterable[str]
     """
     logger.debug("Getting all alternative DNS clients")
     connection = get_connection()
