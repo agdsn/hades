@@ -3,7 +3,9 @@ import logging
 from celery import Celery
 
 from hades.common.db import (
-    get_auth_attempts as do_get_auth_attempts, get_sessions as do_get_sessions,
+    get_auth_attempts_at_port as do_get_auth_attempts_at_port,
+    get_auth_attempts_of_mac as do_get_auth_attempts_of_mac,
+    get_sessions as do_get_sessions,
 )
 from hades.deputy import signal_cleanup, signal_refresh
 
@@ -27,5 +29,10 @@ def get_sessions(mac):
 
 
 @app.task(acks_late=True)
-def get_auth_attempts(mac):
-    return list(do_get_auth_attempts(mac))
+def get_auth_attempts_of_mac(mac):
+    return list(do_get_auth_attempts_of_mac(mac))
+
+
+@app.task(acks_late=True)
+def get_auth_attempts_at_port(nas_ip_address, nas_port_id):
+    return list(do_get_auth_attempts_at_port(nas_ip_address, nas_port_id))

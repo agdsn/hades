@@ -443,7 +443,7 @@ def get_sessions(mac: netaddr.EUI) -> Iterable[
     return iter(result)
 
 
-def get_auth_attempts(mac: str) -> Iterable[
+def get_auth_attempts_of_mac(mac: str) -> Iterable[
         Tuple[netaddr.IPAddress, str, str, Tuple[str], Tuple[Tuple[str, str]],
               datetime]]:
     """
@@ -453,13 +453,36 @@ def get_auth_attempts(mac: str) -> Iterable[
     :return: An iterable that yields (NAS-IP-Address, NAS-Port-ID, Packet-Type,
     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
     """
-    logger.debug('Getting all auth attempts for MAC "%s"', mac)
+    logger.debug('Getting all auth attempts of MAC %s', mac)
     connection = get_connection()
     result = connection.execute(
         select([radpostauth.c.NASIpAddress, radpostauth.c.NASPortId,
                 radpostauth.c.PacketType, radpostauth.c.Groups,
                 radpostauth.c.Reply, radpostauth.c.AuthDate])
         .where(and_(radpostauth.c.UserName == mac))
+        .order_by(radpostauth.c.AuthDate.desc()))
+    return iter(result)
+
+
+def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str)-> Iterable[
+        Tuple[str, Tuple[str], Tuple[Tuple[str, str]], datetime]]:
+    """
+    Return all auth attempts at a particular port of an NAS ordered by AuthDate
+    descending.
+
+    :param nas_ip_address: NAS IP address
+    :param nas_port_id: NAS Port ID
+    :return: An iterable that yields (NAS-IP-Address, NAS-Port-ID, Packet-Type,
+    Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
+    """
+    logger.debug('Getting all auth attempts at port %2$s of %1$s',
+                 nas_ip_address, nas_port_id)
+    connection = get_connection()
+    result = connection.execute(
+        select([radpostauth.c.PacketType, radpostauth.c.Groups,
+                radpostauth.c.Reply, radpostauth.c.AuthDate])
+        .where(and_(radpostauth.c.NASIpAddress == nas_ip_address,
+                    radpostauth.c.NASPortId == nas_port_id))
         .order_by(radpostauth.c.AuthDate.desc()))
     return iter(result)
 
