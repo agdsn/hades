@@ -43,6 +43,15 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     postgresql-9.6 \
     postgresql-contrib-9.6 \
     postgresql-server-dev-9.6 \
+    python-all \
+    python-all-dev \
+    python-ipaddr \
+    python-ipaddress \
+    python-mock \
+    python-netaddr \
+    python-pytest \
+    python-pytest-runner \
+    python-setuptools \
     python3-all \
     python3-all-dev \
     python3-babel \
@@ -55,6 +64,8 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     python3-pip \
     python3-psycopg2 \
     python3-pyroute2 \
+    python3-pytest \
+    python3-pytest-runner \
     python3-sqlalchemy \
     python3-setuptools \
     python3-venv \
