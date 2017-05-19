@@ -67,7 +67,8 @@ def reload_systemd_unit(bus, unit):
 
 def generate_dhcp_host_reservations(hosts):
     for mac, ip in hosts:
-        mac = netaddr.EUI(mac, dialect=netaddr.mac_unix_expanded)
+        mac = netaddr.EUI(mac)
+        mac.dialect=netaddr.mac_unix_expanded
         yield "{0},{1}\n".format(mac, ip)
 
 
