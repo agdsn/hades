@@ -1,7 +1,8 @@
 import logging
 
 import arpreq
-from flask import request, render_template
+
+from flask import render_template, request
 from flask_babel import _, lazy_gettext
 
 from hades.common.db import get_groups, get_latest_auth_attempt
@@ -59,21 +60,29 @@ def index():
                                   error=_("No MAC address could be found for "
                                           "your IP address {}".format(ip)))
         return content, 500
-    mac_groups = get_groups(mac)
-    latest_auth_attempt = get_latest_auth_attempt(mac)
-    if latest_auth_attempt:
-        last_auth_groups, last_auth_date = latest_auth_attempt
-    else:
-        last_auth_groups, last_auth_date = [], None
-    reasons = [messages[group] for group in mac_groups if group in messages]
-    show_mac = False
+    mac_groups = list(get_groups(mac))
+
     if not mac_groups:
-        reasons.append(messages['unknown'])
-        show_mac = True
-    if 'unknown' in last_auth_groups and mac_groups:
-        reasons.append(messages['wrong_port'])
-    return render_template(
-        "status.html", reasons=reasons,
-        mac=mac,
-        show_mac=show_mac,
-    )
+        return render_template("status.html", reasons=[messages['unknown']],
+                               mac=mac, show_mac=True)
+
+    latest_auth_attempt = get_latest_auth_attempt(mac)
+    if not latest_auth_attempt:
+        content = render_template("error.html",
+                                  error=_("No authentication attempt found for "
+                                          "your MAC address."))
+        return content, 500
+
+    nas_ip_address, nas_port_id, groups, reply, auth_date = latest_auth_attempt
+
+    port_groups = [group for nai, npi, group in mac_groups
+                   if nas_ip_address == nai and nas_port_id == npi]
+
+    if not port_groups:
+        return render_template("status.html", reasons=[messages['wrong_port']],
+                               mac=mac, show_mac=False)
+
+    reasons = [messages[group] for group in port_groups if group in messages]
+
+    return render_template("status.html", reasons=reasons,
+                           mac=mac, show_mac=False)

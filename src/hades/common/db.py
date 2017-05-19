@@ -353,36 +353,43 @@ def delete_old_auth_attempts(transaction, interval):
     )))
 
 
-def get_groups(mac: netaddr.EUI) -> List[str]:
+def get_groups(mac: netaddr.EUI) -> Iterable[
+        Tuple[netaddr.IPAddress, str, str]]:
     """
     Get the groups of a user.
 
     :param mac: MAC address
-    :return: A list of group names
+    :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id, Group-Name)-
+    tuples
     """
     logger.debug('Getting groups of MAC "%s"', mac)
     connection = get_connection()
-    results = connection.execute(select([radusergroup.c.GroupName])
+    results = connection.execute(select([radusergroup.c.NASIpAddress,
+                                         radusergroup.c.NASPortId,
+                                         radusergroup.c.GroupName])
                                  .where(radusergroup.c.UserName == mac))
-    return list(map(operator.itemgetter(0), results))
+    return iter(results)
 
 
 def get_latest_auth_attempt(mac: netaddr.EUI) -> Optional[Tuple[
-        Tuple[str], Tuple[Tuple[str]], datetime]]:
+        netaddr.IPAddress, str, Tuple[str], Tuple[Tuple[str]], datetime]]:
     """
     Get the latest auth attempt of a MAC address that occurred within twice the
     reauthentication interval.
 
     :param str mac: MAC address
-    :return: A pair of list of group names and when or None if no attempt was
-    found..
+    :return: A (NAS-Ip-Address, NAS-Port-Id, Groups, Reply, Auth-Date) tuple
+    or None if no attempt was found. Groups is an tuple of group names and Reply
+    is a tuple of (Attribute, Value)-pairs that were sent in the Access-Accept
+    response.
     """
     logger.debug('Getting latest auth attempt for MAC "%s"', mac)
     connection = get_connection()
     config = get_config(True)
     interval = config.HADES_REAUTHENTICATION_INTERVAL
     return connection.execute(
-        select([radpostauth.c.Groups, radpostauth.c.Reply,
+        select([radpostauth.c.NASIpAddress, radpostauth.c.NASPortId,
+                radpostauth.c.Groups, radpostauth.c.Reply,
                 radpostauth.c.AuthDate])
         .where(and_(
             radpostauth.c.UserName == mac,
