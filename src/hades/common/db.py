@@ -1,7 +1,7 @@
 import logging
 import operator
 from datetime import datetime
-from typing import Iterable, List, Optional, Tuple
+from typing import Iterable, Optional, Tuple
 
 import netaddr
 from sqlalchemy import (
