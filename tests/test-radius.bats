@@ -108,6 +108,22 @@ do_request() {
 	do_request "$(declare -p request)" "$(declare -p filter)"
 }
 
+@test "check that a known MAC address authenticates via EAP-MD5 correctly" {
+	declare -Ar request=(
+		[Service-Type]=Call-Check
+		[Framed-Protocol]=PPP
+		[User-Name]="\"$(lowercase $(mac_triple "${known_user_mac}" ''))\""
+		[Calling-Station-Id]="\"$(lowercase $(mac_sextuple "${known_user_mac}" -))\""
+		[EAP-MD5-Password]="\"$(lowercase $(mac_triple "${known_user_mac}" ''))\""
+		[EAP-Type-Identity]="\"$(lowercase $(mac_triple "${known_user_mac}" ''))\""
+	)
+	declare -Ar filter=(
+		[Packet-Type]=Access-Accept
+		[Egress-VLAN-Name]="\"${unknown_vlan_name}\""
+	)
+	do_request "$(declare -p request)" "$(declare -p filter)"
+}
+
 @test "check that a unknown MAC address authenticates via CHAP correctly" {
 	declare -Ar request=(
 		[Service-Type]=Call-Check
