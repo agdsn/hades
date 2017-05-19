@@ -422,69 +422,93 @@ def get_all_nas_clients() -> Iterable[
     return iter(result)
 
 
-def get_sessions(mac: netaddr.EUI) -> Iterable[
+def get_sessions(mac: netaddr.EUI, until: Optional[datetime]=None,
+                 limit: Optional[int]=None) -> Iterable[
         Tuple[netaddr.IPAddress, str, datetime, datetime]]:
     """
-    Return all sessions of a particular MAC address.
+    Return accounting sessions of a particular MAC address ordered by
+    Session-Start-Time descending.
 
     :param str mac: MAC address
+    :param until: Maximum Session-Start-Time of the records
+    :param limit: Maximum number of records
     :return: An iterable that yields (NAS-IP-Address, NAS-Port-ID,
     Session-Start-Time, Session-Stop-Time)-tuples ordered by Session-Start-Time
     descending
     """
     logger.debug('Getting all sessions for MAC "%s"', mac)
     connection = get_connection()
-    result = connection.execute(
+    query = connection.execute(
         select([radacct.c.NASIpAddress, radacct.c.NASPortId,
                 radacct.c.AcctStartTime,
                 radacct.c.AcctStopTime])
         .where(and_(radacct.c.UserName == mac))
         .order_by(radacct.c.AcctStartTime.desc()))
-    return iter(result)
+    if until is not None:
+        query.where(radacct.c.AcctStartTime <= until)
+    if limit is not None:
+        query = query.limit(limit)
+    return iter(query)
 
 
-def get_auth_attempts_of_mac(mac: str) -> Iterable[
+def get_auth_attempts_of_mac(mac: netaddr.EUI, until: Optional[datetime]=None,
+                             limit: Optional[int]=None) -> Iterable[
         Tuple[netaddr.IPAddress, str, str, Tuple[str], Tuple[Tuple[str, str]],
               datetime]]:
     """
-    Return all auth attempts of a particular MAC address.
+    Return auth attempts of a particular MAC address order by Auth-Date
+    descending.
 
-    :param str mac: MAC address
+    :param mac: MAC address
+    :param until: Maximum Auth-Date of the records
+    :param limit: Maximum number of records
     :return: An iterable that yields (NAS-IP-Address, NAS-Port-ID, Packet-Type,
     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts of MAC %s', mac)
     connection = get_connection()
-    result = connection.execute(
+    query = connection.execute(
         select([radpostauth.c.NASIpAddress, radpostauth.c.NASPortId,
                 radpostauth.c.PacketType, radpostauth.c.Groups,
                 radpostauth.c.Reply, radpostauth.c.AuthDate])
         .where(and_(radpostauth.c.UserName == mac))
         .order_by(radpostauth.c.AuthDate.desc()))
-    return iter(result)
+    if until is not None:
+        query.where(radpostauth.c.AuthDate <= until)
+    if limit is not None:
+        query = query.limit(limit)
+    return iter(query)
 
 
-def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str)-> Iterable[
+def get_auth_attempts_at_port(nas_ip_address: netaddr.IPAddress,
+                              nas_port_id: str, until: Optional[datetime]=None,
+                              limit: Optional[int]=None)-> Iterable[
         Tuple[str, Tuple[str], Tuple[Tuple[str, str]], datetime]]:
     """
-    Return all auth attempts at a particular port of an NAS ordered by AuthDate
+    Return auth attempts at a particular port of an NAS ordered by Auth-Date
     descending.
 
     :param nas_ip_address: NAS IP address
     :param nas_port_id: NAS Port ID
+    :param until: Maximum Auth-Date of the records
+    :param limit: Maximum number of records
     :return: An iterable that yields (NAS-IP-Address, NAS-Port-ID, Packet-Type,
     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts at port %2$s of %1$s',
                  nas_ip_address, nas_port_id)
     connection = get_connection()
-    result = connection.execute(
+    query = connection.execute(
         select([radpostauth.c.PacketType, radpostauth.c.Groups,
                 radpostauth.c.Reply, radpostauth.c.AuthDate])
         .where(and_(radpostauth.c.NASIpAddress == nas_ip_address,
                     radpostauth.c.NASPortId == nas_port_id))
         .order_by(radpostauth.c.AuthDate.desc()))
-    return iter(result)
+    if until is not None:
+        query.where(radpostauth.c.AuthDate <= until)
+    if limit is not None:
+        query = query.limit(limit)
+    return iter(query)
 
 
 def get_all_alternative_dns_ips() -> Iterable[netaddr.IPAddress]:

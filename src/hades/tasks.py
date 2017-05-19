@@ -24,15 +24,20 @@ def cleanup():
 
 
 @app.task(acks_late=True)
-def get_sessions(mac):
-    return list(do_get_sessions(mac))
+def get_sessions(mac: str, until: Optional[int, float]=None,
+                 limit: Optional[int]=100):
+    return list(do_get_sessions(mac, until, limit))
 
 
 @app.task(acks_late=True)
-def get_auth_attempts_of_mac(mac):
-    return list(do_get_auth_attempts_of_mac(mac))
+def get_auth_attempts_of_mac(mac: str, until: Optional[int, float]=None,
+                             limit: Optional[int]=100):
+    return list(do_get_auth_attempts_of_mac(mac, until, limit))
 
 
 @app.task(acks_late=True)
-def get_auth_attempts_at_port(nas_ip_address, nas_port_id):
-    return list(do_get_auth_attempts_at_port(nas_ip_address, nas_port_id))
+def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
+                              until: Optional[int, float]=None,
+                              limit: Optional[int]=100):
+    return list(do_get_auth_attempts_at_port(nas_ip_address, nas_port_id, until,
+                                             limit))
