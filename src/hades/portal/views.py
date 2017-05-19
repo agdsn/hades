@@ -49,7 +49,7 @@ def index():
     try:
         mac = arpreq.arpreq(ip)
     except OSError as e:
-        logger.execption("Could not resolve IP {} into MAC: {}".format(ip, e))
+        logger.exception("Could not resolve IP {} into MAC: {}".format(ip, e))
         content = render_template("error.html",
                                   message=_("An unexpected error occurred "
                                             "while resolving your IP address "
