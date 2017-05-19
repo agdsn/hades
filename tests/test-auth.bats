@@ -104,7 +104,7 @@ teardown() {
 
 @test "check that alternative DNS configuration is propagated to ipset" {
 	ipset_count () {
-		ns_exec auth ipset list hades_alternative_dns -output xml | xmllint --xpath 'count(/ipsets/ipset[@name="hades_alternative_dns"]/members/member/elem)' -
+		ns_exec auth ipset list hades_alternative_dns -output xml | xmllint --nonet --nocdata --xpath 'count(/ipsets/ipset[@name="hades_alternative_dns"]/members/member/elem)' -
 	}
 	[[ "$(ipset_count)" = 0 ]]
 
