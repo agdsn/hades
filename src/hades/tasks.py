@@ -67,7 +67,7 @@ def check_positive_int(number: Any) -> int:
 
 
 @app.task(acks_late=True)
-def get_sessions(mac: str, until: Optional[int, float]=None,
+def get_sessions(mac: str, until: Optional[Union[int, float]]=None,
                  limit: Optional[int]=100):
     try:
         mac = check_mac(mac)
@@ -82,7 +82,7 @@ def get_sessions(mac: str, until: Optional[int, float]=None,
 
 
 @app.task(acks_late=True)
-def get_auth_attempts_of_mac(mac: str, until: Optional[int, float]=None,
+def get_auth_attempts_of_mac(mac: str, until: Optional[Union[int, float]]=None,
                              limit: Optional[int]=100):
     try:
         mac = check_mac(mac)
@@ -98,7 +98,7 @@ def get_auth_attempts_of_mac(mac: str, until: Optional[int, float]=None,
 
 @app.task(acks_late=True)
 def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
-                              until: Optional[int, float]=None,
+                              until: Optional[Union[int, float]]=None,
                               limit: Optional[int]=100):
     try:
         nas_ip_address = check_ip_address(nas_ip_address)
