@@ -439,7 +439,7 @@ def get_sessions(mac: netaddr.EUI, until: Optional[datetime]=None,
     :param str mac: MAC address
     :param until: Maximum Session-Start-Time of the records
     :param limit: Maximum number of records
-    :return: An iterable that yields (NAS-IP-Address, NAS-Port-ID,
+    :return: An iterable that yields (NAS-Ip-Address, NAS-Port-Id,
     Session-Start-Time, Session-Stop-Time)-tuples ordered by Session-Start-Time
     descending
     """
@@ -469,7 +469,7 @@ def get_auth_attempts_of_mac(mac: netaddr.EUI, until: Optional[datetime]=None,
     :param mac: MAC address
     :param until: Maximum Auth-Date of the records
     :param limit: Maximum number of records
-    :return: An iterable that yields (NAS-IP-Address, NAS-Port-ID, Packet-Type,
+    :return: An iterable that yields (NAS-Ip-Address, NAS-Port-Id, Packet-Type,
     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts of MAC %s', mac)
@@ -499,7 +499,7 @@ def get_auth_attempts_at_port(nas_ip_address: netaddr.IPAddress,
     :param nas_port_id: NAS Port ID
     :param until: Maximum Auth-Date of the records
     :param limit: Maximum number of records
-    :return: An iterable that yields (NAS-IP-Address, NAS-Port-ID, Packet-Type,
+    :return: An iterable that yields (NAS-Ip-Address, NAS-Port-Id, Packet-Type,
     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts at port %2$s of %1$s',
