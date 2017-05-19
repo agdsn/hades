@@ -7,7 +7,6 @@ COPY etc/ /etc/
 
 RUN export DEBIAN_FRONTEND="noninteractive" && \
     apt-get update && apt-get install -y \
-    apt-transport-https \
     bash-completion \
     bats \
     bridge-utils \
@@ -33,8 +32,6 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     isc-dhcp-relay \
     keepalived \
     less \
-    libjs-bootstrap \
-    libjs-jquery \
     libxml2-utils \
     lintian \
     nginx \
@@ -70,7 +67,6 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     python3-setuptools \
     python3-venv \
     rabbitmq-server \
-    software-properties-common \
     sudo \
     systemd \
     tcpdump \
@@ -79,9 +75,6 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     uwsgi \
     uwsgi-plugin-python3 \
     vim-nox \
-    && apt-key add /etc/apt/nodesource.gpg.key \
-    && printf '%s\n' 'deb https://deb.nodesource.com/node_6.x jessie main' > /etc/apt/sources.list.d/nodesource.list \
-    && apt-get update && apt-get install -y nodejs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

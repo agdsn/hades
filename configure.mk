@@ -201,7 +201,6 @@ NULL :=
 .SUFFIXES:
 
 CONFIGURE_FILES = \
-    bower.json \
     conf/hades-agent.service \
     conf/hades-auth-alternative-dns.service \
     conf/hades-auth-dhcp.service \
