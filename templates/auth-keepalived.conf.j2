@@ -40,4 +40,10 @@ vrrp_instance hades-auth {
         {{ network }} dev eth2
         {%- endfor %}
     }
+
+    virtual_routes {
+        {%- for network in HADES_USER_NETWORKS.values() %}
+        {{ network.cidr }} via {{ HADES_AUTH_NEXT_HOP.ip }} dev eth2
+        {%- endfor %}
+    }
 }

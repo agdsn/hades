@@ -439,6 +439,16 @@ class HADES_AUTH_INTERFACE(Option):
     runtime_check = check.interface_exists
 
 
+class HADES_AUTH_NEXT_HOP(Option):
+    """
+    The next hop, where packets to user networks (e.g. DHCP replies, DNS
+    replies) should be forwarded to.
+    """
+    type = netaddr.IPNetwork
+    default = netaddr.IPNetwork('10.66.67.1/24')
+    static_check = check.network_ip
+
+
 class HADES_AUTH_ALLOWED_TCP_PORTS(Option):
     """Allowed TCP destination ports for unauthenticated users"""
     type = collections.Iterable

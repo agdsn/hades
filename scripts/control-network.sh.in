@@ -35,6 +35,10 @@ netaddr_ip() {
 	@venvdir@/bin/python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).ip)" "$1"
 }
 
+netaddr_cidr() {
+	@venvdir@/bin/python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).cidr)" "$1"
+}
+
 create_bridge() {
 	local -r interface="$1"
 	local -r address="${2-}"
@@ -103,7 +107,7 @@ setup_namespace_common_pre() {
 
 setup_namespace_auth() {
 	msg "Creating ipset"
-    @IP@ netns exec @AUTH_NAMESPACE@ @IPSET@ create "$HADES_AUTH_DNS_ALTERNATIVE_IPSET" hash:ip
+	@IP@ netns exec @AUTH_NAMESPACE@ @IPSET@ create "$HADES_AUTH_DNS_ALTERNATIVE_IPSET" hash:ip
 }
 
 setup_namespace_unauth() {
