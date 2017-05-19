@@ -191,7 +191,7 @@ radusergroup = Table(
     Column('NASIpAddress', IPAddress, nullable=False),
     Column('NASPortId', Text, nullable=False),
     Column('GroupName', Text, nullable=False),
-    UniqueConstraint('UserName', 'GroupName', 'Priority'),
+    UniqueConstraint('UserName', 'NASIpAddress', 'NASPortId', 'Priority'),
 )
 temp_radusergroup = as_copy(radusergroup, 'temp_radusergroup')
 

@@ -817,7 +817,7 @@ CREATE UNIQUE INDEX radreply_user_idx ON radreply USING btree ("UserName", "NASI
 -- Name: radusergroup_membership_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE UNIQUE INDEX radusergroup_membership_idx ON radusergroup USING btree ("UserName", "NASIpAddress", "NASPortId", "GroupName", "Priority");
+CREATE UNIQUE INDEX radusergroup_membership_idx ON radusergroup USING btree ("UserName", "NASIpAddress", "NASPortId", "Priority");
 
 
 --
