@@ -62,69 +62,77 @@ teardown() {
 	refresh
 }
 
-access_request() {
-	local -r calling_station_id="$1"
-	local -r user_name="$2"
-	local -r password="$3"
-	radclient localhost auth "$secret" -f/dev/fd/3:/dev/fd/4 3<<-EOF 4<&0 0</dev/null
-		Framed-MTU = 1466
-		NAS-IP-Address = ${nas_ip}
-		NAS-Identifier = "${nas_name}"
-		User-Name = "${user_name}"
-		Service-Type = Call-Check
-		Framed-Protocol = PPP
-		NAS-Port = ${nas_port}
-		NAS-Port-Type = Ethernet
-		NAS-Port-Id = "${nas_port_id}"
-		Called-Station-Id = "$(lowercase $(mac_sextuple "${nas_mac}" -))"
-		Calling-Station-Id = "${calling_station_id}"
-		Connect-Info = "CONNECT Ethernet 1000Mbps Full duplex"
-		CHAP-Password = "${password}"
-		MS-RAS-Vendor = 11
-		HP-Capability-Advert = 0x011a0000000b28
-		HP-Capability-Advert = 0x011a0000000b2e
-		HP-Capability-Advert = 0x011a0000000b30
-		HP-Capability-Advert = 0x011a0000000b3d
-		HP-Capability-Advert = 0x0138
-		HP-Capability-Advert = 0x013a
-		HP-Capability-Advert = 0x0140
-		HP-Capability-Advert = 0x0141
-		HP-Capability-Advert = 0x0151
-		EOF
+do_request() {
+	eval "local -A request_attributes=${1#*=}"
+	eval "local -A filter_attributes=${2#*=}"
+	local radclient
+	# Set some default attributes if not present
+	: ${request_attributes[NAS-IP-Address]="${nas_ip}"}
+	: ${request_attributes[NAS-Identifier]= "\"${nas_name}\""}
+	: ${request_attributes[NAS-Port-Type]=Ethernet}
+	: ${request_attributes[NAS-Port-Id]="\"${nas_port_id}\""}
+	: ${request_attributes[Called-Station-Id]="\"$(lowercase $(mac_sextuple "${nas_mac}" -))\""}
+
+	local request
+	for attribute in "${!request_attributes[@]}"; do
+		request="${request:+${request}$'\n'}${attribute} = ${request_attributes[$attribute]}"
+	done
+	echo "$request"
+
+	local filter
+	for attribute in "${!filter_attributes[@]}"; do
+		filter="${filter:+${filter}$'\n'}${attribute} == ${filter_attributes[$attribute]}"
+	done
+	echo "$filter"
+
+	if [[ -n ${request_attributes[EAP-Password]+1} ]]; then
+		radeapclient localhost auth "$secret" -f/dev/fd/3 3<<<"$request" 0</dev/null
+		return 1
+	else
+		radclient localhost auth "$secret" -f/dev/fd/3:/dev/fd/4 3<<<"$request" 4<<<"$filter" 0</dev/null
+	fi
 }
 
-expect_accept() {
-	local -r vlan_name="$1"
-	shift
-	access_request "$@" <<-EOF
-	Packet-Type == Access-Accept
-	Egress-VLAN-Name == "${vlan_name}"
-	EOF
+@test "check that a known MAC address authenticates via CHAP correctly" {
+	declare -Ar request=(
+		[Service-Type]=Call-Check
+		[Framed-Protocol]=PPP
+		[User-Name]="$(uppercase $(mac_triple "${known_user_mac}" -))"
+		[Calling-Station-Id]="$(lowercase $(mac_sextuple "${known_user_mac}" -))"
+		[CHAP-Password]="$(uppercase $(mac_triple "${known_user_mac}" -))"
+	)
+	declare -Ar filter=(
+		[Packet-Type]=Access-Accept
+		[Egress-VLAN-Name]="\"${known_vlan_name}\""
+	)
+	do_request "$(declare -p request)" "$(declare -p filter)"
 }
 
-expect_reject() {
-	access_request "$@" <<-EOF
-	Packet-Type == Access-Reject
-	EOF
-}
-
-@test "check that a known MAC address authenticates correctly" {
-	local -r calling_station_id="$(lowercase $(mac_sextuple "${known_user_mac}" -))"
-	local -r user_name="$(uppercase $(mac_triple "${known_user_mac}" -))"
-	local -r password="$(uppercase $(mac_triple "${known_user_mac}" -))"
-	expect_accept "$known_vlan_name" "$calling_station_id" "$user_name"  "$password"
-}
-
-@test "check that a unknown MAC address authenticates correctly" {
-	local -r calling_station_id="$(lowercase $(mac_sextuple "${unknown_user_mac}" -))"
-	local -r user_name="$(uppercase $(mac_triple "${unknown_user_mac}" -))"
-	local -r password="$(uppercase $(mac_triple "${unknown_user_mac}" -))"
-	expect_accept "$unknown_vlan_name" "$calling_station_id" "$user_name"  "$password"
+@test "check that a unknown MAC address authenticates via CHAP correctly" {
+	declare -Ar request=(
+		[Service-Type]=Call-Check
+		[Framed-Protocol]=PPP
+		[User-Name]="$(uppercase $(mac_triple "${unknown_user_mac}" -))"
+		[Calling-Station-Id]="$(lowercase $(mac_sextuple "${unknown_user_mac}" -))"
+		[CHAP-Password]="$(uppercase $(mac_triple "${unknown_user_mac}" -))"
+	)
+	declare -Ar filter=(
+		[Packet-Type]=Access-Accept
+		[Egress-VLAN-Name]="\"${unknown_vlan_name}\""
+	)
+	do_request "$(declare -p request)" "$(declare -p filter)"
 }
 
 @test "check that a spoofed MAC address will be rejected" {
-	local -r calling_station_id="$(lowercase $(mac_sextuple "${unknown_user_mac}" -))"
-	local -r user_name="$(uppercase $(mac_triple "${known_user_mac}" -))"
-	local -r password="$(uppercase $(mac_triple "${known_user_mac}" -))"
-	expect_reject "$calling_station_id" "$user_name"  "$password"
+	declare -Ar request=(
+		[Service-Type]=Call-Check
+		[Framed-Protocol]=PPP
+		[User-Name]="$(uppercase $(mac_triple "${known_user_mac}" -))"
+		[Calling-Station-Id]="$(lowercase $(mac_sextuple "${unknown_user_mac}" -))"
+		[CHAP-Password]="$(uppercase $(mac_triple "${known_user_mac}" -))"
+	)
+	declare -Ar filter=(
+		[Packet-Type]=Access-Reject
+	)
+	do_request "$(declare -p request)" "$(declare -p filter)"
 }
