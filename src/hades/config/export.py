@@ -35,9 +35,9 @@ def export(config, output_format, file):
             print("{}={}".format(name, escape(value)), file=file)
         elif isinstance(value, collections.Mapping) and mappings:
             if output_format == 'bash':
-                print("declare -A {}".format(name), file=file)
+                print("declare -g -A {}".format(name), file=file)
             if output_format in ('ksh', 'zsh'):
-                print("typeset -A {}".format(name), file=file)
+                print("typeset -g -A {}".format(name), file=file)
             value = ' '.join("[{}]={}".format(escape(k), escape(v))
                              for k, v in value.items()
                              if isinstance(k, shell_types) and
