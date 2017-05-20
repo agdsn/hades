@@ -65,6 +65,12 @@ def reload_systemd_unit(bus, unit):
     systemd.ReloadUnit(unit, 'fail')
 
 
+def restart_systemd_unit(bus, unit):
+    logger.debug("Instructing systemd to restart unit %s", unit)
+    systemd = bus.get('org.freedesktop.systemd1')
+    systemd.RestartUnit(unit, 'fail')
+
+
 def generate_dhcp_host_reservations(hosts):
     for mac, ip in hosts:
         mac = netaddr.EUI(mac)
@@ -217,7 +223,7 @@ class HadesDeputyService(object):
             reload_systemd_unit(self.bus, 'hades-auth-dhcp.service')
         if reload_nas:
             generate_radius_clients_file()
-            reload_systemd_unit(self.bus, 'hades-radius.service')
+            restart_systemd_unit(self.bus, 'hades-radius.service')
         if reload_alternative_dns:
             update_alternative_dns_ipset()
         return "OK"
