@@ -11,6 +11,7 @@ import grp
 import io
 import logging
 import pwd
+import re
 import string
 import subprocess
 import textwrap
@@ -114,6 +115,9 @@ def update_alternative_dns_ipset():
 
 
 def generate_radius_clients(clients):
+    escape_pattern = re.compile(r'(["\\])')
+    replacement = r'\\\1'
+
     template = string.Template(textwrap.dedent("""
         client $shortname {
             shortname = "$shortname"
@@ -139,7 +143,8 @@ def generate_radius_clients(clients):
     for shortname, nasname, type, ports, secret, server, community, description in clients:
         yield template.substitute(
             shortname=shortname, nasname=nasname, type=type, ports=ports,
-            secret=secret, community=community, description=description)
+            secret=escape_pattern.sub(replacement, secret), community=community,
+            description=description)
 
 
 def generate_radius_clients_file():
