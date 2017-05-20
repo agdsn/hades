@@ -1,5 +1,5 @@
-hades (0.2.0.dev0-1) UNRELEASED; urgency=low
+hades (0.3.0-1) stretch; urgency=low
 
   * Initial package release
 
- -- Sebastian Schrader <sebastian.schrader@agdsn.de>  Thu, 28 Jul 2016 16:39:55 +0000
+ -- Sebastian Schrader <sebastian.schrader@agdsn.de>  Sat, 20 May 2017 02:56:47 +0200
