@@ -600,7 +600,7 @@ CREATE TABLE radpostauth (
     "PacketType" text NOT NULL,
     "Groups" text[],
     "Reply" text[][2],
-    "AuthDate" timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+    "AuthDate" timestamp with time zone NOT NULL DEFAULT now()
 );
 
 
