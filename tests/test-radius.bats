@@ -97,9 +97,9 @@ do_request() {
 	declare -Ar request=(
 		[Service-Type]=Call-Check
 		[Framed-Protocol]=PPP
-		[User-Name]="$(uppercase $(mac_triple "${known_user_mac}" -))"
-		[Calling-Station-Id]="$(lowercase $(mac_sextuple "${known_user_mac}" -))"
-		[CHAP-Password]="$(uppercase $(mac_triple "${known_user_mac}" -))"
+		[User-Name]="\"$(uppercase $(mac_triple "${known_user_mac}" -))\""
+		[Calling-Station-Id]="\"$(lowercase $(mac_sextuple "${known_user_mac}" -))\""
+		[CHAP-Password]="\"$(uppercase $(mac_triple "${known_user_mac}" -))\""
 	)
 	declare -Ar filter=(
 		[Packet-Type]=Access-Accept
@@ -128,9 +128,9 @@ do_request() {
 	declare -Ar request=(
 		[Service-Type]=Call-Check
 		[Framed-Protocol]=PPP
-		[User-Name]="$(uppercase $(mac_triple "${unknown_user_mac}" -))"
-		[Calling-Station-Id]="$(lowercase $(mac_sextuple "${unknown_user_mac}" -))"
-		[CHAP-Password]="$(uppercase $(mac_triple "${unknown_user_mac}" -))"
+		[User-Name]="\"$(uppercase $(mac_triple "${unknown_user_mac}" -))\""
+		[Calling-Station-Id]="\"$(lowercase $(mac_sextuple "${unknown_user_mac}" -))\""
+		[CHAP-Password]="\"$(uppercase $(mac_triple "${unknown_user_mac}" -))\""
 	)
 	declare -Ar filter=(
 		[Packet-Type]=Access-Accept
@@ -143,9 +143,9 @@ do_request() {
 	declare -Ar request=(
 		[Service-Type]=Call-Check
 		[Framed-Protocol]=PPP
-		[User-Name]="$(uppercase $(mac_triple "${known_user_mac}" -))"
-		[Calling-Station-Id]="$(lowercase $(mac_sextuple "${unknown_user_mac}" -))"
-		[CHAP-Password]="$(uppercase $(mac_triple "${known_user_mac}" -))"
+		[User-Name]="\"$(uppercase $(mac_triple "${known_user_mac}" -))\""
+		[Calling-Station-Id]="\"$(lowercase $(mac_sextuple "${unknown_user_mac}" -))\""
+		[CHAP-Password]="\"$(uppercase $(mac_triple "${known_user_mac}" -))\""
 	)
 	declare -Ar filter=(
 		[Packet-Type]=Access-Reject
