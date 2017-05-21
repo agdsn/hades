@@ -8,6 +8,7 @@ readonly nas_port=1
 readonly nas_port_id=A1
 readonly nas_name=localhost
 readonly secret=testing123
+readonly known_user_ip=141.30.226.100
 readonly known_user_mac=40-61-86-1c-df-fd
 readonly unknown_user_mac=1e-a7-de-ad-be-ef
 readonly known_vlan_name=1KnownVLAN
@@ -38,6 +39,9 @@ mac_sextuple() {
 	printf "%s$2%s$2%s$2%s$2%s$2%s" "${BASH_REMATCH[@]:1}"
 }
 
+strip() {
+	echo "${1#*=}"
+}
 
 setup() {
 	psql foreign <<-EOF
@@ -86,15 +90,16 @@ do_request() {
 	echo "$filter"
 
 	if [[ -n ${request_attributes[EAP-Password]+1} ]]; then
-		radeapclient localhost auth "$secret" -f/dev/fd/3 3<<<"$request" 0</dev/null
+		radeapclient localhost auto "$secret" -f/dev/fd/3 3<<<"$request" 0</dev/null
 		return 1
 	else
-		radclient localhost auth "$secret" -f/dev/fd/3:/dev/fd/4 3<<<"$request" 4<<<"$filter" 0</dev/null
+		radclient localhost auto "$secret" -f/dev/fd/3:/dev/fd/4 3<<<"$request" 4<<<"$filter" 0</dev/null
 	fi
 }
 
 @test "check that a known MAC address authenticates via CHAP correctly" {
 	declare -Ar request=(
+		[Packet-Type]=Access-Request
 		[Service-Type]=Call-Check
 		[Framed-Protocol]=PPP
 		[User-Name]="\"$(uppercase $(mac_triple "${known_user_mac}" -))\""
@@ -110,6 +115,7 @@ do_request() {
 
 @test "check that a known MAC address authenticates via EAP-MD5 correctly" {
 	declare -Ar request=(
+		[Packet-Type]=Access-Request
 		[Service-Type]=Call-Check
 		[Framed-Protocol]=PPP
 		[User-Name]="\"$(lowercase $(mac_triple "${known_user_mac}" ''))\""
@@ -126,6 +132,7 @@ do_request() {
 
 @test "check that a unknown MAC address authenticates via CHAP correctly" {
 	declare -Ar request=(
+		[Packet-Type]=Access-Request
 		[Service-Type]=Call-Check
 		[Framed-Protocol]=PPP
 		[User-Name]="\"$(uppercase $(mac_triple "${unknown_user_mac}" -))\""
@@ -141,6 +148,7 @@ do_request() {
 
 @test "check that a spoofed MAC address will be rejected" {
 	declare -Ar request=(
+		[Packet-Type]=Access-Request
 		[Service-Type]=Call-Check
 		[Framed-Protocol]=PPP
 		[User-Name]="\"$(uppercase $(mac_triple "${known_user_mac}" -))\""
@@ -151,4 +159,53 @@ do_request() {
 		[Packet-Type]=Access-Reject
 	)
 	do_request "$(declare -p request)" "$(declare -p filter)"
+}
+
+@test "check that accounting works" {
+	local -r session_id=$(printf '%4x' ${RANDOM})
+	declare -Ar request_template=(
+		[Packet-Type]=Accounting-Request
+		[User-Name]="\"$(uppercase $(mac_triple "${known_user_mac}" -))\""
+		[Service-Type]=Framed-User
+		[Framed-IP-Address]=${known_user_ip}
+		[Calling-Station-Id]="\"$(lowercase $(mac_sextuple "${known_user_mac}" -))\""
+		[Acct-Authentic]=RADIUS
+		[Acct-Session-Id]="\"${session_id}\""
+	)
+
+	declare -A start_request="$(strip "$(declare -p request_template)")"
+	start_request+=(
+		[Acct-Status-Type]=Start
+		[Acct-Delay-Time]=2
+	)
+
+	declare -A update_request="$(strip "$(declare -p request_template)")"
+	update_request+=(
+		[Acct-Status-Type]=Interim-Update
+		[Acct-Delay-Time]=3
+		[Acct-Input-Packets]=4
+		[Acct-Input-Octets]=256
+		[Acct-Output-Packets]=1024
+		[Acct-Output-Octets]=10
+		[Acct-Session-Time]=10
+	)
+
+	declare -A stop_request="$(strip "$(declare -p request_template)")"
+	stop_request+=(
+		[Acct-Status-Type]=Stop
+		[Acct-Delay-Time]=2
+		[Acct-Input-Packets]=8
+		[Acct-Input-Octets]=512
+		[Acct-Output-Packets]=4096
+		[Acct-Output-Octets]=40
+		[Acct-Session-Time]=60
+	)
+
+	declare -Ar filter=(
+		[Packet-Type]=Accounting-Response
+	)
+
+	do_request "$(declare -p start_request)" "$(declare -p filter)"
+	do_request "$(declare -p update_request)" "$(declare -p filter)"
+	do_request "$(declare -p stop_request)" "$(declare -p filter)"
 }
