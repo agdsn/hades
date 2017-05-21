@@ -53,6 +53,8 @@ server hades {
 		rewrite_user_name
 		verify_calling_station_id
 
+		preprocess
+
 		chap
 		eap {
 			ok = return
@@ -82,6 +84,7 @@ server hades {
 	}
 
 	preacct {
+		preprocess
 		acct_counters64
 		acct_unique
 	}
