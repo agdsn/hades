@@ -108,10 +108,10 @@ COMMENT ON FUNCTION decode_attribute_value_pairs(string text) IS 'Decode freeRAD
 
 
 --
--- Name: decode_equals_encoding(text); Type: FUNCTION; Schema: public; Owner: {{ constants.DATABASE_USER }}
+-- Name: decode_quoted_printable(text); Type: FUNCTION; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE FUNCTION decode_equals_encoding(string text) RETURNS text
+CREATE FUNCTION decode_quoted_printable(string text) RETURNS text
     LANGUAGE plpgsql IMMUTABLE STRICT
     AS $$
 DECLARE
@@ -125,13 +125,13 @@ END;
 $$;
 
 
-ALTER FUNCTION public.decode_equals_encoding(string text) OWNER TO "{{ constants.DATABASE_USER }}";
+ALTER FUNCTION public.decode_quoted_printable(string text) OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: FUNCTION decode_equals_encoding(string text); Type: COMMENT; Schema: public; Owner: {{ constants.DATABASE_USER }}
+-- Name: FUNCTION decode_quoted_printable(string text); Type: COMMENT; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-COMMENT ON FUNCTION decode_equals_encoding(string text) IS 'Decode a string, where some bytes have been encoded with a scheme similar to the percent encoding of URIs: an equal sign (=) followed by two hexadecimal characters';
+COMMENT ON FUNCTION decode_quoted_printable(string text) IS 'Decode quoted-printable encoded string (some bytes may be encoded with an equal sign (=) followed by two hexadecimal characters)';
 
 
 --
