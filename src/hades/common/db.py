@@ -62,17 +62,17 @@ class IPAddress(TypeDecorator):
 
 alternative_dns = Table(
     'alternative_dns', metadata,
-    Column('IpAddress', IPAddress, nullable=False),
-    UniqueConstraint('IpAddress'),
+    Column('IPAddress', IPAddress, nullable=False),
+    UniqueConstraint('IPAddress'),
 )
 temp_alternative_dns = as_copy(alternative_dns, 'temp_alternative_dns')
 
 dhcphost = Table(
     'dhcphost', metadata,
-    Column('Mac', MACAddress, nullable=False),
-    Column('IpAddress', IPAddress, nullable=False),
-    UniqueConstraint('Mac'),
-    UniqueConstraint('IpAddress'),
+    Column('MAC', MACAddress, nullable=False),
+    Column('IPAddress', IPAddress, nullable=False),
+    UniqueConstraint('MAC'),
+    UniqueConstraint('IPAddress'),
 )
 temp_dhcphost = as_copy(dhcphost, 'temp_dhcphost')
 
@@ -101,7 +101,7 @@ radacct = Table(
     Column('UserName', Text),
     Column('GroupName', Text),
     Column('Realm', Text),
-    Column('NASIpAddress', IPAddress, nullable=False),
+    Column('NASIPAddress', IPAddress, nullable=False),
     Column('NASPortId', Text),
     Column('NASPortType', Text),
     Column('AcctStartTime', DateTime),
@@ -126,12 +126,12 @@ radcheck = Table(
     'radcheck', metadata,
     Column('Priority', Integer, nullable=False),
     Column('UserName', Text, nullable=False),
-    Column('NASIpAddress', IPAddress, nullable=False),
+    Column('NASIPAddress', IPAddress, nullable=False),
     Column('NASPortId', Text, nullable=False),
     Column('Attribute', Text, nullable=False),
     Column('Op', String(2), nullable=False),
     Column('Value', Text, nullable=False),
-    UniqueConstraint('UserName', 'NASIpAddress', 'NASPortId', 'Priority'),
+    UniqueConstraint('UserName', 'NASIPAddress', 'NASPortId', 'Priority'),
 )
 temp_radcheck = as_copy(radcheck, 'temp_radcheck')
 
@@ -161,7 +161,7 @@ radpostauth = Table(
     'radpostauth', metadata,
     Column('Id', BigInteger, primary_key=True, nullable=False),
     Column('UserName', Text, nullable=False),
-    Column('NASIpAddress', IPAddress, nullable=False),
+    Column('NASIPAddress', IPAddress, nullable=False),
     Column('NASPortId', Text),
     Column('PacketType', Text, nullable=False),
     Column('Groups', ARRAY(Text, as_tuple=True, zero_indexes=True,
@@ -175,12 +175,12 @@ radreply = Table(
     'radreply', metadata,
     Column('Priority', Integer, nullable=False),
     Column('UserName', Text, nullable=False),
-    Column('NASIpAddress', IPAddress, nullable=False),
+    Column('NASIPAddress', IPAddress, nullable=False),
     Column('NASPortId', Text, nullable=False),
     Column('Attribute', Text, nullable=False),
     Column('Op', String(2), default='=', nullable=False),
     Column('Value', Text, nullable=False),
-    UniqueConstraint('UserName', 'NASIpAddress', 'NASPortId', 'Priority'),
+    UniqueConstraint('UserName', 'NASIPAddress', 'NASPortId', 'Priority'),
 )
 temp_radreply = as_copy(radreply, 'temp_radreply')
 
@@ -188,10 +188,10 @@ radusergroup = Table(
     'radusergroup', metadata,
     Column('Priority', Integer, nullable=False),
     Column('UserName', Text, nullable=False),
-    Column('NASIpAddress', IPAddress, nullable=False),
+    Column('NASIPAddress', IPAddress, nullable=False),
     Column('NASPortId', Text, nullable=False),
     Column('GroupName', Text, nullable=False),
-    UniqueConstraint('UserName', 'NASIpAddress', 'NASPortId', 'Priority'),
+    UniqueConstraint('UserName', 'NASIPAddress', 'NASPortId', 'Priority'),
 )
 temp_radusergroup = as_copy(radusergroup, 'temp_radusergroup')
 
@@ -364,7 +364,7 @@ def get_groups(mac: netaddr.EUI) -> Iterable[
     """
     logger.debug('Getting groups of MAC "%s"', mac)
     connection = get_connection()
-    results = connection.execute(select([radusergroup.c.NASIpAddress,
+    results = connection.execute(select([radusergroup.c.NASIPAddress,
                                          radusergroup.c.NASPortId,
                                          radusergroup.c.GroupName])
                                  .where(radusergroup.c.UserName == mac))
@@ -378,7 +378,7 @@ def get_latest_auth_attempt(mac: netaddr.EUI) -> Optional[Tuple[
     reauthentication interval.
 
     :param str mac: MAC address
-    :return: A (NAS-Ip-Address, NAS-Port-Id, Groups, Reply, Auth-Date) tuple
+    :return: A (NAS-IP-Address, NAS-Port-Id, Groups, Reply, Auth-Date) tuple
     or None if no attempt was found. Groups is an tuple of group names and Reply
     is a tuple of (Attribute, Value)-pairs that were sent in the Access-Accept
     response.
@@ -388,7 +388,7 @@ def get_latest_auth_attempt(mac: netaddr.EUI) -> Optional[Tuple[
     config = get_config(True)
     interval = config.HADES_REAUTHENTICATION_INTERVAL
     return connection.execute(
-        select([radpostauth.c.NASIpAddress, radpostauth.c.NASPortId,
+        select([radpostauth.c.NASIPAddress, radpostauth.c.NASPortId,
                 radpostauth.c.Groups, radpostauth.c.Reply,
                 radpostauth.c.AuthDate])
         .where(and_(
@@ -408,7 +408,7 @@ def get_all_dhcp_hosts() -> Iterable[Tuple[netaddr.EUI, netaddr.IPAddress]]:
     """
     logger.debug("Getting all DHCP hosts")
     connection = get_connection()
-    result = connection.execute(select([dhcphost.c.Mac, dhcphost.c.IpAddress]))
+    result = connection.execute(select([dhcphost.c.MAC, dhcphost.c.IPAddress]))
     return iter(result)
 
 
@@ -439,14 +439,14 @@ def get_sessions(mac: netaddr.EUI, until: Optional[datetime]=None,
     :param str mac: MAC address
     :param until: Maximum Session-Start-Time of the records
     :param limit: Maximum number of records
-    :return: An iterable that yields (NAS-Ip-Address, NAS-Port-Id,
+    :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id,
     Session-Start-Time, Session-Stop-Time)-tuples ordered by Session-Start-Time
     descending
     """
     logger.debug('Getting all sessions for MAC "%s"', mac)
     connection = get_connection()
     query = connection.execute(
-        select([radacct.c.NASIpAddress, radacct.c.NASPortId,
+        select([radacct.c.NASIPAddress, radacct.c.NASPortId,
                 radacct.c.AcctStartTime,
                 radacct.c.AcctStopTime])
         .where(and_(radacct.c.UserName == mac))
@@ -469,13 +469,13 @@ def get_auth_attempts_of_mac(mac: netaddr.EUI, until: Optional[datetime]=None,
     :param mac: MAC address
     :param until: Maximum Auth-Date of the records
     :param limit: Maximum number of records
-    :return: An iterable that yields (NAS-Ip-Address, NAS-Port-Id, Packet-Type,
+    :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id, Packet-Type,
     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts of MAC %s', mac)
     connection = get_connection()
     query = connection.execute(
-        select([radpostauth.c.NASIpAddress, radpostauth.c.NASPortId,
+        select([radpostauth.c.NASIPAddress, radpostauth.c.NASPortId,
                 radpostauth.c.PacketType, radpostauth.c.Groups,
                 radpostauth.c.Reply, radpostauth.c.AuthDate])
         .where(and_(radpostauth.c.UserName == mac))
@@ -499,7 +499,7 @@ def get_auth_attempts_at_port(nas_ip_address: netaddr.IPAddress,
     :param nas_port_id: NAS Port ID
     :param until: Maximum Auth-Date of the records
     :param limit: Maximum number of records
-    :return: An iterable that yields (NAS-Ip-Address, NAS-Port-Id, Packet-Type,
+    :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id, Packet-Type,
     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts at port %2$s of %1$s',
@@ -508,7 +508,7 @@ def get_auth_attempts_at_port(nas_ip_address: netaddr.IPAddress,
     query = connection.execute(
         select([radpostauth.c.PacketType, radpostauth.c.Groups,
                 radpostauth.c.Reply, radpostauth.c.AuthDate])
-        .where(and_(radpostauth.c.NASIpAddress == nas_ip_address,
+        .where(and_(radpostauth.c.NASIPAddress == nas_ip_address,
                     radpostauth.c.NASPortId == nas_port_id))
         .order_by(radpostauth.c.AuthDate.desc()))
     if until is not None:
@@ -526,5 +526,5 @@ def get_all_alternative_dns_ips() -> Iterable[netaddr.IPAddress]:
     """
     logger.debug("Getting all alternative DNS clients")
     connection = get_connection()
-    result = connection.execute(select([alternative_dns.c.IpAddress]))
+    result = connection.execute(select([alternative_dns.c.IPAddress]))
     return map(operator.itemgetter(0), result)

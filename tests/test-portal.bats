@@ -50,7 +50,7 @@ insert_radusergroup() {
 	local -r groups=("$@")
 	for group in "${groups[@]}"; do
 		psql foreign <<-EOF
-			INSERT INTO radusergroup ("Priority", "NASIpAddress", "NASPortId", "UserName", "GroupName")
+			INSERT INTO radusergroup ("Priority", "NASIPAddress", "NASPortId", "UserName", "GroupName")
 			VALUES (1, inet '127.0.0.1', 'A1', '${client_mac_address}', '${group}');
 		EOF
 	done
@@ -70,7 +70,7 @@ insert_radpostauth() {
 	groups_string='{'"${groups_string}"'}'
 
 	psql hades <<-EOF
-		INSERT INTO radpostauth ("UserName", "NASIpAddress", "NASPortId", "PacketType", "Groups", "Reply", "AuthDate")
+		INSERT INTO radpostauth ("UserName", "NASIPAddress", "NASPortId", "PacketType", "Groups", "Reply", "AuthDate")
 		VALUES ('${client_mac_address}', '127.0.0.1', 'A1', 'Access-Accept', '${groups_string}', '{}', now());
 	EOF
 }

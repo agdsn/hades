@@ -45,9 +45,9 @@ strip() {
 
 setup() {
 	psql foreign <<-EOF
-		INSERT INTO radcheck ("Priority", "NASIpAddress", "NASPortId", "UserName", "Attribute", "Op", "Value")
+		INSERT INTO radcheck ("Priority", "NASIPAddress", "NASPortId", "UserName", "Attribute", "Op", "Value")
 		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '$(lowercase $(mac_sextuple ${known_user_mac} :))', 'Calling-Station-Id', '==', '$(lowercase $(mac_sextuple "${nas_mac}" -))');
-		INSERT INTO radusergroup ("Priority", "NASIpAddress", "NASPortId", "UserName", "GroupName")
+		INSERT INTO radusergroup ("Priority", "NASIPAddress", "NASPortId", "UserName", "GroupName")
 		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '$(lowercase $(mac_sextuple ${known_user_mac} :))', 'test'),
 		(1, NULL, NULL, 'unknown', 'unknown');
 		INSERT INTO radgroupreply ("Priority", "GroupName", "Attribute", "Op", "Value")

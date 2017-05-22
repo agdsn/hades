@@ -208,9 +208,9 @@ SET default_tablespace = '';
 
 CREATE FOREIGN TABLE foreign_alternative_dns (
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING %}
-    "IpAddress" text /* NOT NULL */
+    "IPAddress" text /* NOT NULL */
     {%- else %}
-    "IpAddress" inet /* NOT NULL */
+    "IPAddress" inet /* NOT NULL */
     {%- endif %}
 )
 SERVER {{ server_name }}
@@ -225,13 +225,13 @@ ALTER FOREIGN TABLE foreign_alternative_dns OWNER TO "{{ constants.DATABASE_USER
 -- Name: alternative_dns; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 {%- if HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING %}
-{%- set foreign_alternative_dns_ipaddress = 'safe_inet_cast(foreign_alternative_dns."IpAddress"::text)' %}
+{%- set foreign_alternative_dns_ipaddress = 'safe_inet_cast(foreign_alternative_dns."IPAddress"::text)' %}
 {%- else %}
-{%- set foreign_alternative_dns_ipaddress = 'foreign_alternative_dns."IpAddress"' %}
+{%- set foreign_alternative_dns_ipaddress = 'foreign_alternative_dns."IPAddress"' %}
 {%- endif %}
 
 CREATE MATERIALIZED VIEW alternative_dns AS
- SELECT "IpAddress" FROM foreign_alternative_dns GROUP BY "IpAddress" WITH NO DATA;
+ SELECT "IPAddress" FROM foreign_alternative_dns GROUP BY "IPAddress" WITH NO DATA;
 
 
 ALTER TABLE alternative_dns OWNER TO "{{ constants.DATABASE_USER }}";
@@ -242,14 +242,14 @@ ALTER TABLE alternative_dns OWNER TO "{{ constants.DATABASE_USER }}";
 
 CREATE FOREIGN TABLE foreign_dhcphost (
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
-    "Mac" text /* NOT NULL */,
+    "MAC" text /* NOT NULL */,
     {%- else %}
-    "Mac" macaddr /* NOT NULL */,
+    "MAC" macaddr /* NOT NULL */,
     {%- endif %}
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
-    "IpAddress" text /* NOT NULL */
+    "IPAddress" text /* NOT NULL */
     {%- else %}
-    "IpAddress" inet /* NOT NULL */
+    "IPAddress" inet /* NOT NULL */
     {%- endif %}
 )
 SERVER {{ server_name }}
@@ -264,27 +264,27 @@ ALTER FOREIGN TABLE foreign_dhcphost OWNER TO "{{ constants.DATABASE_USER }}";
 -- Name: dhcphost; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
-{%- set foreign_dhcphost_mac = 'safe_macaddr_cast(foreign_dhcphost."Mac"::text)' %}
+{%- set foreign_dhcphost_mac = 'safe_macaddr_cast(foreign_dhcphost."MAC"::text)' %}
 {%- else %}
-{%- set foreign_dhcphost_mac = 'foreign_dhcphost."Mac"' %}
+{%- set foreign_dhcphost_mac = 'foreign_dhcphost."MAC"' %}
 {%- endif %}
 {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
-{%- set foreign_dhcphost_ipaddress = 'safe_inet_cast(foreign_dhcphost."IpAddress"::text)' %}
+{%- set foreign_dhcphost_ipaddress = 'safe_inet_cast(foreign_dhcphost."IPAddress"::text)' %}
 {%- else %}
-{%- set foreign_dhcphost_ipaddress = 'foreign_dhcphost."IpAddress"' %}
+{%- set foreign_dhcphost_ipaddress = 'foreign_dhcphost."IPAddress"' %}
 {%- endif %}
 
 CREATE MATERIALIZED VIEW dhcphost AS
- SELECT indexed."Mac",
-    indexed."IpAddress"
-   FROM ( SELECT row_number() OVER "Mac_window" AS "Mac_index",
-            row_number() OVER "IpAddress_window" AS "IpAddress_index",
-            {{ foreign_dhcphost_mac }} AS "Mac",
-            {{ foreign_dhcphost_ipaddress }} AS "IpAddress"
+ SELECT indexed."MAC",
+    indexed."IPAddress"
+   FROM ( SELECT row_number() OVER "MAC_window" AS "MAC_index",
+            row_number() OVER "IPAddress_window" AS "IPAddress_index",
+            {{ foreign_dhcphost_mac }} AS "MAC",
+            {{ foreign_dhcphost_ipaddress }} AS "IPAddress"
            FROM foreign_dhcphost
           WHERE (({{ foreign_dhcphost_mac }} IS NOT NULL) AND ({{ foreign_dhcphost_ipaddress }} IS NOT NULL))
-          WINDOW "Mac_window" AS (PARTITION BY {{ foreign_dhcphost_mac }}), "IpAddress_window" AS (PARTITION BY {{ foreign_dhcphost_ipaddress }})) indexed
-  WHERE ((indexed."Mac_index" = 1) AND (indexed."IpAddress_index" = 1))
+          WINDOW "MAC_window" AS (PARTITION BY {{ foreign_dhcphost_mac }}), "IPAddress_window" AS (PARTITION BY {{ foreign_dhcphost_ipaddress }})) indexed
+  WHERE ((indexed."MAC_index" = 1) AND (indexed."IPAddress_index" = 1))
   WITH NO DATA;
 
 
@@ -321,9 +321,9 @@ CREATE FOREIGN TABLE foreign_radcheck (
     "Priority" integer /* NOT NULL */,
     "UserName" text  /* NOT NULL */,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
-    "NASIpAddress" text,
+    "NASIPAddress" text,
     {%- else %}
-    "NASIpAddress" inet,
+    "NASIPAddress" inet,
     {%- endif %}
     "NASPortId" text,
     "Attribute" text /* NOT NULL */,
@@ -384,9 +384,9 @@ CREATE FOREIGN TABLE foreign_radreply (
     "Priority" integer /* NOT NULL */,
     "UserName" text /* NOT NULL */,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
-    "NASIpAddress" text,
+    "NASIPAddress" text,
     {%- else %}
-    "NASIpAddress" inet,
+    "NASIPAddress" inet,
     {%- endif %}
     "NASPortId" text,
     "Attribute" text /* NOT NULL */,
@@ -408,9 +408,9 @@ ALTER FOREIGN TABLE foreign_radreply OWNER TO "{{ constants.DATABASE_USER }}";
 CREATE FOREIGN TABLE foreign_radusergroup (
     "UserName" text /* NOT NULL */,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
-    "NASIpAddress" text,
+    "NASIPAddress" text,
     {%- else %}
-    "NASIpAddress" inet,
+    "NASIPAddress" inet,
     {%- endif %}
     "NASPortId" text,
     "GroupName" text /* NOT NULL */,
@@ -474,7 +474,7 @@ CREATE TABLE radacct (
     "UserName" text,
     "GroupName" text,
     "Realm" text,
-    "NASIpAddress" inet NOT NULL,
+    "NASIPAddress" inet NOT NULL,
     "NASPortId" text,
     "NASPortType" text,
     "AcctStartTime" timestamp with time zone,
@@ -527,9 +527,9 @@ CREATE MATERIALIZED VIEW radcheck AS
  SELECT row_number() OVER w AS "Priority",
     foreign_radcheck."UserName",
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
-    safe_inet_cast(foreign_radcheck.NASIpAddress) AS "NASIpAddress",
+    safe_inet_cast(foreign_radcheck.NASIPAddress) AS "NASIPAddress",
     {%- else %}
-    foreign_radcheck."NASIpAddress",
+    foreign_radcheck."NASIPAddress",
     {%- endif %}
     foreign_radcheck."NASPortId",
     foreign_radcheck."Attribute",
@@ -540,7 +540,7 @@ CREATE MATERIALIZED VIEW radcheck AS
     AND (foreign_radcheck."Attribute" IS NOT NULL)
     AND (foreign_radcheck."Op" IS NOT NULL)
     AND (foreign_radcheck."Value" IS NOT NULL))
-  WINDOW w AS (PARTITION BY foreign_radcheck."UserName", foreign_radcheck."NASIpAddress", foreign_radcheck."NASPortId" ORDER BY foreign_radcheck."Priority")
+  WINDOW w AS (PARTITION BY foreign_radcheck."UserName", foreign_radcheck."NASIPAddress", foreign_radcheck."NASPortId" ORDER BY foreign_radcheck."Priority")
   WITH DATA;
 
 
@@ -595,7 +595,7 @@ ALTER TABLE radgroupreply OWNER TO "{{ constants.DATABASE_USER }}";
 CREATE TABLE radpostauth (
     "Id" bigint NOT NULL,
     "UserName" text NOT NULL,
-    "NASIpAddress" inet NOT NULL,
+    "NASIPAddress" inet NOT NULL,
     "NASPortId" text,
     "PacketType" text NOT NULL,
     "Groups" text[],
@@ -635,9 +635,9 @@ CREATE MATERIALIZED VIEW radreply AS
  SELECT row_number() OVER w AS "Priority",
     foreign_radreply."UserName",
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
-    safe_inet_cast(foreign_radreply.NASIpAddress) AS "NASIpAddress",
+    safe_inet_cast(foreign_radreply.NASIPAddress) AS "NASIPAddress",
     {%- else %}
-    foreign_radreply."NASIpAddress",
+    foreign_radreply."NASIPAddress",
     {%- endif %}
     foreign_radreply."NASPortId",
     foreign_radreply."Attribute",
@@ -648,7 +648,7 @@ CREATE MATERIALIZED VIEW radreply AS
    AND (foreign_radreply."Attribute" IS NOT NULL)
    AND (foreign_radreply."Op" IS NOT NULL)
    AND (foreign_radreply."Value" IS NOT NULL))
-  WINDOW w AS (PARTITION BY foreign_radreply."UserName", foreign_radreply."NASIpAddress", foreign_radreply."NASPortId" ORDER BY foreign_radreply."Priority")
+  WINDOW w AS (PARTITION BY foreign_radreply."UserName", foreign_radreply."NASIPAddress", foreign_radreply."NASPortId" ORDER BY foreign_radreply."Priority")
   WITH DATA;
 
 
@@ -661,9 +661,9 @@ ALTER TABLE radreply OWNER TO "{{ constants.DATABASE_USER }}";
 CREATE MATERIALIZED VIEW radusergroup AS
  SELECT foreign_radusergroup."UserName",
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
-    safe_inet_cast(foreign_radusergroup.NASIpAddress) AS "NASIpAddress",
+    safe_inet_cast(foreign_radusergroup.NASIPAddress) AS "NASIPAddress",
     {%- else %}
-    foreign_radusergroup."NASIpAddress",
+    foreign_radusergroup."NASIPAddress",
     {%- endif %}
     foreign_radusergroup."NASPortId",
     foreign_radusergroup."GroupName",
@@ -671,7 +671,7 @@ CREATE MATERIALIZED VIEW radusergroup AS
    FROM foreign_radusergroup
   WHERE ((foreign_radusergroup."UserName" IS NOT NULL)
    AND (foreign_radusergroup."GroupName" IS NOT NULL))
-  WINDOW w AS (PARTITION BY foreign_radusergroup."UserName", foreign_radusergroup."NASIpAddress", foreign_radusergroup."NASPortId" ORDER BY foreign_radusergroup."Priority")
+  WINDOW w AS (PARTITION BY foreign_radusergroup."UserName", foreign_radusergroup."NASIPAddress", foreign_radusergroup."NASPortId" ORDER BY foreign_radusergroup."Priority")
   WITH DATA;
 
 
@@ -716,24 +716,24 @@ ALTER TABLE ONLY radpostauth
 
 
 --
--- Name: alternative_dns_IpAddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
+-- Name: alternative_dns_IPAddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE UNIQUE INDEX "alternative_dns_IpAddress_idx" ON alternative_dns USING btree ("IpAddress");
-
-
---
--- Name: dhcphost_IpAddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-CREATE UNIQUE INDEX "dhcphost_IpAddress_idx" ON dhcphost USING btree ("IpAddress");
+CREATE UNIQUE INDEX "alternative_dns_IPAddress_idx" ON alternative_dns USING btree ("IPAddress");
 
 
 --
--- Name: dhcphost_Mac_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
+-- Name: dhcphost_IPAddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE UNIQUE INDEX "dhcphost_Mac_idx" ON dhcphost USING btree ("Mac");
+CREATE UNIQUE INDEX "dhcphost_IPAddress_idx" ON dhcphost USING btree ("IPAddress");
+
+
+--
+-- Name: dhcphost_MAC_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+CREATE UNIQUE INDEX "dhcphost_MAC_idx" ON dhcphost USING btree ("MAC");
 
 
 --
@@ -754,7 +754,7 @@ CREATE INDEX radacct_active_session_idx ON radacct USING btree ("AcctUniqueId") 
 -- Name: radacct_bulk_close; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE INDEX radacct_bulk_close ON radacct USING btree ("NASIpAddress", "AcctStartTime") WHERE ("AcctStopTime" IS NULL);
+CREATE INDEX radacct_bulk_close ON radacct USING btree ("NASIPAddress", "AcctStartTime") WHERE ("AcctStopTime" IS NULL);
 
 
 --
@@ -768,7 +768,7 @@ CREATE INDEX radacct_start_user_idx ON radacct USING btree ("AcctStartTime", "Us
 -- Name: radcheck_user_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE UNIQUE INDEX radcheck_user_idx ON radcheck USING btree ("UserName", "NASIpAddress", "NASPortId", "Priority");
+CREATE UNIQUE INDEX radcheck_user_idx ON radcheck USING btree ("UserName", "NASIPAddress", "NASPortId", "Priority");
 
 
 --
@@ -803,21 +803,21 @@ CREATE INDEX "radpostauth_UserName_idx" ON radpostauth USING btree ("UserName");
 -- Name: radpostauth_port_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE INDEX radpostauth_port_idx ON radpostauth USING btree ("NASIpAddress", "NASPortId");
+CREATE INDEX radpostauth_port_idx ON radpostauth USING btree ("NASIPAddress", "NASPortId");
 
 
 --
 -- Name: radreply_user_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE UNIQUE INDEX radreply_user_idx ON radreply USING btree ("UserName", "NASIpAddress", "NASPortId", "Priority");
+CREATE UNIQUE INDEX radreply_user_idx ON radreply USING btree ("UserName", "NASIPAddress", "NASPortId", "Priority");
 
 
 --
 -- Name: radusergroup_membership_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE UNIQUE INDEX radusergroup_membership_idx ON radusergroup USING btree ("UserName", "NASIpAddress", "NASPortId", "Priority");
+CREATE UNIQUE INDEX radusergroup_membership_idx ON radusergroup USING btree ("UserName", "NASIPAddress", "NASPortId", "Priority");
 
 
 --
