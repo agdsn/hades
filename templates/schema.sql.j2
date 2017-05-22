@@ -384,7 +384,7 @@ CREATE FOREIGN TABLE foreign_radreply (
     "Priority" integer /* NOT NULL */,
     "UserName" text /* NOT NULL */,
     {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
-    "NASIpAaddress" text,
+    "NASIpAddress" text,
     {%- else %}
     "NASIpAddress" inet,
     {%- endif %}
