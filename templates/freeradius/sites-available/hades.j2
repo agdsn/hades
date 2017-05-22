@@ -84,6 +84,9 @@ server hades {
 	}
 
 	preacct {
+		rewrite_called_station_id
+		rewrite_calling_station_id
+		rewrite_user_name
 		preprocess
 		acct_counters64
 		acct_unique
