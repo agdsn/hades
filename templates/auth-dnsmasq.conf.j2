@@ -35,3 +35,5 @@ dhcp-lease-max={{ HADES_USER_NETWORKS.values()|map('length')|sum }}
 # Set DHCP lease and hosts file
 dhcp-leasefile={{ constants.AUTH_DHCP_LEASE_FILE }}
 dhcp-hostsfile={{ constants.AUTH_DHCP_HOSTS_FILE }}
+
+leasefile-ro
