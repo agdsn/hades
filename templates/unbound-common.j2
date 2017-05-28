@@ -10,7 +10,7 @@ server:
     interface: {{ network.ip }}
     {%- endfor %}
     outgoing-interface: {{ HADES_NETNS_AUTH_LISTEN.ip }}
-    {%- for name, network in HADES_USER_NETWORKS.items() %}
+    {%- for network in HADES_USER_NETWORKS.values() %}
     access-control: {{ network.cidr }} allow
     {%- endfor %}
     auto-trust-anchor-file: "{{ constants.AUTH_DNS_TRUST_ANCHOR_FILE }}"
