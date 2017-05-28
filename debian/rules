@@ -18,8 +18,6 @@ override_dh_auto_configure:
 
 override_dh_auto_build:
 	dh_auto_build
-	# FIXME: How can we call the venv interpreter correctly?
-	build/usr/lib/hades/bin/python3 setup.py compile_catalog
 
 override_dh_builddeb:
 	dh_builddeb -- -Zgzip -z3
