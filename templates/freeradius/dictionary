@@ -49,3 +49,4 @@
 #ATTRIBUTE	My-Local-Integer	3002	integer
 
 ATTRIBUTE	Hades-User-Name		3000	string
+ATTRIBUTE	Hades-SQL-User-Name	3001	string

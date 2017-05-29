@@ -49,8 +49,8 @@ server hades {
 		rewrite_calling_station_id
 		# Set the Cleartext-Password, if User-Name is a MAC address
 		set_cleartext_password
-		# Normalize the User-Name, if it is a MAC address
-		rewrite_user_name
+		# Set the custom internal Hades-User-Name attribute
+		set_hades_user_name
 		verify_calling_station_id
 
 		preprocess
@@ -86,7 +86,7 @@ server hades {
 	preacct {
 		rewrite_called_station_id
 		rewrite_calling_station_id
-		rewrite_user_name
+		set_hades_user_name
 		preprocess
 		acct_counters64
 		acct_unique

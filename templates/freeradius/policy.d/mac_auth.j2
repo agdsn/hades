@@ -1,13 +1,15 @@
-rewrite_user_name {
+set_hades_user_name {
 	if(&User-Name && (&User-Name =~ /^${policy.mac-addr-regexp}$/i)) {
 		update request {
-			&User-Name := "%{tolower:%{1}:%{2}:%{3}:%{4}:%{5}:%{6}}"
+			&Hades-User-Name := "%{tolower:%{1}:%{2}:%{3}:%{4}:%{5}:%{6}}"
 		}
-		updated
 	}
 	else {
-		noop
+		update request {
+			&Hades-User-Name := &User-Name
+		}
 	}
+	updated
 }
 
 # Set the Cleartext-Password to be equal to the User-Name, if the User-Name is
@@ -44,15 +46,12 @@ verify_calling_station_id {
 }
 
 lookup_sql {
-		update request {
-			&Hades-User-Name := &User-Name
-		}
 		sql
 		# We implement the query_on_not_found setting, that was present in 2.x
 		# in unlang
 		if (notfound) {
 			update request {
-				&User-Name := "{{ HADES_RADIUS_UNKNOWN_USER }}"
+				&Hades-SQL-User-Name := "{{ HADES_RADIUS_UNKNOWN_USER }}"
 			}
 			updated
 			sql
