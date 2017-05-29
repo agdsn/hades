@@ -13,35 +13,6 @@ readonly known_user_mac=40-61-86-1c-df-fd
 readonly unknown_user_mac=1e-a7-de-ad-be-ef
 readonly known_vlan_name=1KnownVLAN
 readonly unknown_vlan_name=1UnknownVLAN
-readonly mac_regex='([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})'
-
-
-lowercase() {
-	printf "%s" "${@,,}"
-}
-
-uppercase() {
-	printf "%s" "${@^^}"
-}
-
-mac_duo() {
-	[[ $1 =~ $mac_regex ]]
-	printf "%s%s%s$2%s%s%s" "${BASH_REMATCH[@]:1}"
-}
-
-mac_triple() {
-	[[ $1 =~ $mac_regex ]]
-	printf "%s%s$2%s%s$2%s%s" "${BASH_REMATCH[@]:1}"
-}
-
-mac_sextuple() {
-	[[ $1 =~ $mac_regex ]]
-	printf "%s$2%s$2%s$2%s$2%s$2%s" "${BASH_REMATCH[@]:1}"
-}
-
-strip() {
-	echo "${1#*=}"
-}
 
 setup() {
 	psql foreign <<-EOF

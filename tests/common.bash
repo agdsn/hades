@@ -1,3 +1,37 @@
+readonly mac_regex='([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})'
+
+lowercase() {
+	printf "%s" "${@,,}"
+}
+
+uppercase() {
+	printf "%s" "${@^^}"
+}
+
+mac_plain() {
+	[[ $1 =~ $mac_regex ]]
+	printf "%s%s%s%s%s%s" "${BASH_REMATCH[@]:1}"
+}
+
+mac_duo() {
+	[[ $1 =~ $mac_regex ]]
+	printf "%s%s%s$2%s%s%s" "${BASH_REMATCH[@]:1}"
+}
+
+mac_triple() {
+	[[ $1 =~ $mac_regex ]]
+	printf "%s%s$2%s%s$2%s%s" "${BASH_REMATCH[@]:1}"
+}
+
+mac_sextuple() {
+	[[ $1 =~ $mac_regex ]]
+	printf "%s$2%s$2%s$2%s$2%s$2%s" "${BASH_REMATCH[@]:1}"
+}
+
+strip() {
+	echo "${1#*=}"
+}
+
 ns_exec() {
 	local -r namespace="$1"
 	shift
