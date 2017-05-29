@@ -60,7 +60,7 @@ do_request() {
 	done
 	echo "$filter"
 
-	if [[ -n ${request_attributes[EAP-Password]+1} ]]; then
+	if [[ -n ${request_attributes[EAP-MD5-Password]+1} ]]; then
 		radeapclient localhost auto "$secret" -f/dev/fd/3 3<<<"$request" 0</dev/null
 		return 1
 	else
