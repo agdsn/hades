@@ -11,7 +11,8 @@ ns() {
 }
 
 setup() {
-	setup_namespace test-unauth br-unauth de:ad:be:ef:00:00
+	setup_namespace test-unauth
+	link_namespace test-unauth br-unauth eth0
 	ns ip addr add dev eth0 "$client_ip_address"
 	ns ip route add default via "$nameserver_ip_address"
 	echo "nameserver $nameserver_ip_address" | ns tee /etc/resolv.conf >//dev/null
@@ -23,6 +24,7 @@ setup() {
 }
 
 teardown() {
+	unlink_namespace test-unauth eth0
 	teardown_namespace test-unauth
 }
 

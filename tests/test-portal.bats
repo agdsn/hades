@@ -4,7 +4,7 @@ load common
 
 readonly client_mac_address=de:ad:be:ef:00:00
 readonly client_ip_address=10.66.10.10/19
-readonly nameserver_ip_address=10.66.0.1
+readonly nameserver_ip_address=10.66.0.1/19
 
 readonly -A messages=(
 	[default_in_payment]="late with paying your fees"
@@ -22,10 +22,11 @@ ns() {
 }
 
 setup() {
-	setup_namespace test-portal br-unauth "${client_mac_address}"
+	setup_namespace test-portal
+	link_namespace test-portal br-unauth eth0 "${client_mac_address}"
 	ns ip addr add dev eth0 "${client_ip_address}"
-	ns ip route add default via "${nameserver_ip_address}"
-	echo "nameserver ${nameserver_ip_address}" | ns tee /etc/resolv.conf >//dev/null
+	ns ip route add default via $(netaddr.ip "${nameserver_ip_address}")
+	echo "nameserver $(netaddr.ip "${nameserver_ip_address}")" > /etc/netns/test-portal/resolv.conf
 	psql foreign <<-EOF
 		TRUNCATE radusergroup;
 	EOF
@@ -36,6 +37,7 @@ setup() {
 }
 
 teardown() {
+	unlink_namespace test-portal eth0
 	teardown_namespace test-portal
 	psql foreign <<-EOF
 		TRUNCATE radusergroup;
