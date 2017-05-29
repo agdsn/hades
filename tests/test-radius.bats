@@ -91,8 +91,10 @@ do_request() {
 		[Framed-Protocol]=PPP
 		[User-Name]="\"$(lowercase $(mac_triple "${known_user_mac}" ''))\""
 		[Calling-Station-Id]="\"$(lowercase $(mac_sextuple "${known_user_mac}" -))\""
+		[EAP-Code]=Response
 		[EAP-MD5-Password]="\"$(lowercase $(mac_triple "${known_user_mac}" ''))\""
 		[EAP-Type-Identity]="\"$(lowercase $(mac_triple "${known_user_mac}" ''))\""
+		[Message-Authenticator]=0x00
 	)
 	declare -Ar filter=(
 		[Packet-Type]=Access-Accept
