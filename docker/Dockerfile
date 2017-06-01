@@ -60,6 +60,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     python3-netaddr \
     python3-pip \
     python3-psycopg2 \
+    python3-pydbus \
     python3-pyroute2 \
     python3-pytest \
     python3-pytest-runner \
