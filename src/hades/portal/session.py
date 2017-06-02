@@ -16,7 +16,8 @@ class NullSession(collections.MutableMapping, SessionMixin):
     def __iter__(self):
         return iter(())
 
-    def _fail(self, *args, **kwargs):
+    @staticmethod
+    def _fail(*args, **kwargs):
         raise RuntimeError("Sessions are not supported.")
 
     __delitem__ = __setitem__ = _fail
