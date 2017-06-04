@@ -48,7 +48,7 @@ check_cluster_version() {
 }
 
 generate_config() {
-	@venvdir@/bin/hades-generate-config postgresql "@pkgrunstatedir@/database/conf"
+	@bindir@/hades-generate-config postgresql "@pkgrunstatedir@/database/conf"
 }
 
 do_init() {
@@ -75,13 +75,13 @@ do_init() {
 			CREATE ROLE "@LOCAL_MASTER_DATABASE_USER@" WITH LOGIN INHERIT UNENCRYPTED PASSWORD '@LOCAL_MASTER_DATABASE_PASSWORD@';
 			COMMAND
 		msg "Loading local master database schema"
-		@venvdir@/bin/hades-generate-config schema_fdw.sql.j2 | @PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- @LOCAL_MASTER_DATABASE_NAME@
+		@bindir@/hades-generate-config schema_fdw.sql.j2 | @PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- @LOCAL_MASTER_DATABASE_NAME@
 	fi
 
 	msg "Creating database @DATABASE_NAME@"
 	@CREATEDB@ @DATABASE_NAME@
 	msg "Loading database schema"
-	@venvdir@/bin/hades-generate-config schema.sql.j2 | @PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- @DATABASE_NAME@
+	@bindir@/hades-generate-config schema.sql.j2 | @PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- @DATABASE_NAME@
 	@PG_CTL@ stop -s
 	msg "PostgreSQL cluster at $PGDATA successfully initialised."
 	trap - EXIT HUP INT QUIT ABRT

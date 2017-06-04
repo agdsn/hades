@@ -9,7 +9,7 @@ Type=dbus
 BusName=@DEPUTY_DBUS_NAME@
 SyslogIdentifier=hades-deputy
 EnvironmentFile=@systemdenvfile@
-ExecStart=@venvdir@/bin/hades-deputy $DEPUTY_OPTS
+ExecStart=@bindir@/hades-deputy $DEPUTY_OPTS
 Restart=always
 RestartSec=5
 

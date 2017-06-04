@@ -32,11 +32,11 @@ add_address() {
 }
 
 netaddr_ip() {
-	@venvdir@/bin/python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).ip)" "$1"
+	@bindir@/python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).ip)" "$1"
 }
 
 netaddr_cidr() {
-	@venvdir@/bin/python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).cidr)" "$1"
+	@bindir@/python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).cidr)" "$1"
 }
 
 create_bridge() {
@@ -121,7 +121,7 @@ setup_namespace_common_post() {
 	local -r interface="$2"
 
 	msg "Loading iptables rules for network namespace $namespace"
-	@venvdir@/bin/hades-generate-config "iptables-${namespace}.j2" | @IP@ netns exec "$namespace" @IPTABLES_RESTORE@
+	@bindir@/hades-generate-config "iptables-${namespace}.j2" | @IP@ netns exec "$namespace" @IPTABLES_RESTORE@
 }
 
 setup_host_network() {
@@ -141,7 +141,7 @@ setup_host_network() {
 	create_bridge "$HADES_VRRP_BRIDGE" "$HADES_VRRP_LISTEN_RADIUS"
 	attach_bridge_port "$HADES_VRRP_BRIDGE" "$HADES_VRRP_INTERFACE"
 
-	@venvdir@/bin/hades-generate-config iptables-main.j2 | @IPTABLES_RESTORE@
+	@bindir@/hades-generate-config iptables-main.j2 | @IPTABLES_RESTORE@
 }
 
 do_start() {

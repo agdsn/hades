@@ -10,11 +10,11 @@ PIDFile=@RADIUS_PID_FILE@
 SyslogIdentifier=hades-radius
 Environment=PGAPPNAME=hades-radius
 EnvironmentFile=@systemdenvfile@
-ExecStartPre=@venvdir@/bin/hades-generate-config freeradius @pkgrunstatedir@/radius
+ExecStartPre=@bindir@/hades-generate-config freeradius @pkgrunstatedir@/radius
 ExecStartPre=@TOUCH@ @RADIUS_CLIENTS_FILE@
 ExecStartPre=@RADIUSD@ -d @pkgrunstatedir@/radius -Cx -lstdout
 ExecStart=@RADIUSD@ -d @pkgrunstatedir@/radius $FREERADIUS_OPTS
-ExecReload=@venvdir@/bin/hades-generate-config freeradius @pkgrunstatedir@/radius
+ExecReload=@bindir@/hades-generate-config freeradius @pkgrunstatedir@/radius
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5

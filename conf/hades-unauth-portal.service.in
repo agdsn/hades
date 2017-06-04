@@ -9,9 +9,9 @@ Type=notify
 SyslogIdentifier=hades-unauth-portal
 EnvironmentFile=@systemdenvfile@
 Environment=PGAPPNAME=hades-unauth-portal
-ExecStartPre=@venvdir@/bin/hades-generate-config uwsgi.ini.j2 @pkgrunstatedir@/unauth-portal/uwsgi.ini
-ExecStart=@IP@ netns exec @UNAUTH_NAMESPACE@ @venvdir@/bin/hades-su hades-portal -- @UWSGI@ --ini=@pkgrunstatedir@/unauth-portal/uwsgi.ini $UWSGI_OPTS
-ExecReload=@venvdir@/bin/hades-generate-config uwsgi.ini.j2 @pkgrunstatedir@/unauth-portal/uwsgi.ini
+ExecStartPre=@bindir@/hades-generate-config uwsgi.ini.j2 @pkgrunstatedir@/unauth-portal/uwsgi.ini
+ExecStart=@IP@ netns exec @UNAUTH_NAMESPACE@ @bindir@/hades-su hades-portal -- @UWSGI@ --ini=@pkgrunstatedir@/unauth-portal/uwsgi.ini $UWSGI_OPTS
+ExecReload=@bindir@/hades-generate-config uwsgi.ini.j2 @pkgrunstatedir@/unauth-portal/uwsgi.ini
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
