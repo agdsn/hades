@@ -7,9 +7,10 @@ import netaddr
 from sqlalchemy import (
     BigInteger, Column, DateTime, Integer, MetaData,
     PrimaryKeyConstraint, String, Table, Text, TypeDecorator, UniqueConstraint,
-    and_, column, create_engine, func, null, or_, select, table,
+    and_, column, func, null, or_, select, table,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, INET, MACADDR
+from sqlalchemy.engine import Connection
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
 
@@ -205,23 +206,6 @@ def pg_utcnow(element, compiler, **kw):
     return "CURRENT_TIMESTAMP AT TIME ZONE 'UTC'"
 
 
-def get_engine():
-    """
-    Get a SQLAlchemy database engine that allows connections to the database.
-    :return: SQLAlchemy database engine
-    """
-    config = get_config(True)
-    return create_engine(config.SQLALCHEMY_DATABASE_URI)
-
-
-def get_connection():
-    """
-    Obtain a SQLAlchemy connection to the database
-    :return: SQLAlchemy database connection
-    """
-    return get_engine().connect()
-
-
 def lock_table(connection, target_table):
     """
     Lock a table using a PostgreSQL advisory lock
@@ -353,17 +337,17 @@ def delete_old_auth_attempts(transaction, interval):
     )))
 
 
-def get_groups(mac: netaddr.EUI) -> Iterable[
+def get_groups(connection: Connection, mac: netaddr.EUI) -> Iterable[
         Tuple[netaddr.IPAddress, str, str]]:
     """
     Get the groups of a user.
 
+    :param connection: A SQLAlchemy connection
     :param mac: MAC address
     :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id, Group-Name)-
     tuples
     """
     logger.debug('Getting groups of MAC "%s"', mac)
-    connection = get_connection()
     results = connection.execute(select([radusergroup.c.NASIPAddress,
                                          radusergroup.c.NASPortId,
                                          radusergroup.c.GroupName])
@@ -371,12 +355,14 @@ def get_groups(mac: netaddr.EUI) -> Iterable[
     return iter(results)
 
 
-def get_latest_auth_attempt(mac: netaddr.EUI) -> Optional[Tuple[
+def get_latest_auth_attempt(connection: Connection,
+                            mac: netaddr.EUI) -> Optional[Tuple[
         netaddr.IPAddress, str, Tuple[str], Tuple[Tuple[str]], datetime]]:
     """
     Get the latest auth attempt of a MAC address that occurred within twice the
     reauthentication interval.
 
+    :param connection: A SQLAlchemy connection
     :param str mac: MAC address
     :return: A (NAS-IP-Address, NAS-Port-Id, Groups, Reply, Auth-Date) tuple
     or None if no attempt was found. Groups is an tuple of group names and Reply
@@ -384,7 +370,6 @@ def get_latest_auth_attempt(mac: netaddr.EUI) -> Optional[Tuple[
     response.
     """
     logger.debug('Getting latest auth attempt for MAC "%s"', mac)
-    connection = get_connection()
     config = get_config(True)
     interval = config.HADES_REAUTHENTICATION_INTERVAL
     return connection.execute(
@@ -400,28 +385,29 @@ def get_latest_auth_attempt(mac: netaddr.EUI) -> Optional[Tuple[
     ).first()
 
 
-def get_all_dhcp_hosts() -> Iterable[Tuple[netaddr.EUI, netaddr.IPAddress]]:
+def get_all_dhcp_hosts(connection: Connection) -> Iterable[
+        Tuple[netaddr.EUI, netaddr.IPAddress]]:
     """
     Return all DHCP host configurations.
 
+    :param connection: A SQLAlchemy connection
     :return: An iterable that yields (mac, ip)-tuples
     """
     logger.debug("Getting all DHCP hosts")
-    connection = get_connection()
     result = connection.execute(select([dhcphost.c.MAC, dhcphost.c.IPAddress]))
     return iter(result)
 
 
-def get_all_nas_clients() -> Iterable[
+def get_all_nas_clients(connection: Connection) -> Iterable[
         Tuple[str, str, str, int, str, str, str, str]]:
     """
     Return all NAS clients.
 
+    :param connection: A SQLAlchemy connection
     :return: An iterable that yields (shortname, nasname, type, ports, secret,
     server, community, description)-tuples
     :rtype: iterable[(str, str, str, int, str, str, str, str)]
     """
-    connection = get_connection()
     result = connection.execute(
         select([nas.c.ShortName, nas.c.NASName, nas.c.Type, nas.c.Ports,
                 nas.c.Secret, nas.c.Server, nas.c.Community, nas.c.Description])
@@ -429,13 +415,15 @@ def get_all_nas_clients() -> Iterable[
     return iter(result)
 
 
-def get_sessions(mac: netaddr.EUI, until: Optional[datetime]=None,
+def get_sessions(connection: Connection, mac: netaddr.EUI,
+                 until: Optional[datetime]=None,
                  limit: Optional[int]=None) -> Iterable[
         Tuple[netaddr.IPAddress, str, datetime, datetime]]:
     """
     Return accounting sessions of a particular MAC address ordered by
     Session-Start-Time descending.
 
+    :param connection: A SQLAlchemy connection
     :param str mac: MAC address
     :param until: Maximum Session-Start-Time of the records
     :param limit: Maximum number of records
@@ -444,7 +432,6 @@ def get_sessions(mac: netaddr.EUI, until: Optional[datetime]=None,
     descending
     """
     logger.debug('Getting all sessions for MAC "%s"', mac)
-    connection = get_connection()
     query = connection.execute(
         select([radacct.c.NASIPAddress, radacct.c.NASPortId,
                 radacct.c.AcctStartTime,
@@ -458,7 +445,8 @@ def get_sessions(mac: netaddr.EUI, until: Optional[datetime]=None,
     return iter(query)
 
 
-def get_auth_attempts_of_mac(mac: netaddr.EUI, until: Optional[datetime]=None,
+def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
+                             until: Optional[datetime]=None,
                              limit: Optional[int]=None) -> Iterable[
         Tuple[netaddr.IPAddress, str, str, Tuple[str], Tuple[Tuple[str, str]],
               datetime]]:
@@ -466,6 +454,7 @@ def get_auth_attempts_of_mac(mac: netaddr.EUI, until: Optional[datetime]=None,
     Return auth attempts of a particular MAC address order by Auth-Date
     descending.
 
+    :param connection: A SQLAlchemy connection
     :param mac: MAC address
     :param until: Maximum Auth-Date of the records
     :param limit: Maximum number of records
@@ -473,7 +462,6 @@ def get_auth_attempts_of_mac(mac: netaddr.EUI, until: Optional[datetime]=None,
     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts of MAC %s', mac)
-    connection = get_connection()
     query = connection.execute(
         select([radpostauth.c.NASIPAddress, radpostauth.c.NASPortId,
                 radpostauth.c.PacketType, radpostauth.c.Groups,
@@ -487,7 +475,8 @@ def get_auth_attempts_of_mac(mac: netaddr.EUI, until: Optional[datetime]=None,
     return iter(query)
 
 
-def get_auth_attempts_at_port(nas_ip_address: netaddr.IPAddress,
+def get_auth_attempts_at_port(connection: Connection,
+                              nas_ip_address: netaddr.IPAddress,
                               nas_port_id: str, until: Optional[datetime]=None,
                               limit: Optional[int]=None)-> Iterable[
         Tuple[str, Tuple[str], Tuple[Tuple[str, str]], datetime]]:
@@ -495,6 +484,7 @@ def get_auth_attempts_at_port(nas_ip_address: netaddr.IPAddress,
     Return auth attempts at a particular port of an NAS ordered by Auth-Date
     descending.
 
+    :param connection: A SQLAlchemy connection
     :param nas_ip_address: NAS IP address
     :param nas_port_id: NAS Port ID
     :param until: Maximum Auth-Date of the records
@@ -504,7 +494,6 @@ def get_auth_attempts_at_port(nas_ip_address: netaddr.IPAddress,
     """
     logger.debug('Getting all auth attempts at port %2$s of %1$s',
                  nas_ip_address, nas_port_id)
-    connection = get_connection()
     query = connection.execute(
         select([radpostauth.c.PacketType, radpostauth.c.Groups,
                 radpostauth.c.Reply, radpostauth.c.AuthDate])
@@ -518,13 +507,14 @@ def get_auth_attempts_at_port(nas_ip_address: netaddr.IPAddress,
     return iter(query)
 
 
-def get_all_alternative_dns_ips() -> Iterable[netaddr.IPAddress]:
+def get_all_alternative_dns_ips(connection: Connection) -> Iterable[
+        netaddr.IPAddress]:
     """
     Return all IPs for alternative DNS configuration.
 
+    :param connection: A SQLAlchemy connection
     :return: An iterable that yields ip addresses
     """
     logger.debug("Getting all alternative DNS clients")
-    connection = get_connection()
     result = connection.execute(select([alternative_dns.c.IPAddress]))
     return map(operator.itemgetter(0), result)

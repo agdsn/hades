@@ -1,20 +1,33 @@
 import logging
 
+import contextlib
 from datetime import datetime
 from typing import Optional, Union, Any
 
 import netaddr
 from celery import Celery
+from celery.signals import import_modules
+from sqlalchemy import create_engine
 
 from hades.common.db import (
     get_auth_attempts_at_port as do_get_auth_attempts_at_port,
     get_auth_attempts_of_mac as do_get_auth_attempts_of_mac,
     get_sessions as do_get_sessions,
 )
+from hades.config.loader import get_config
 from hades.deputy import signal_cleanup, signal_refresh
 
 logger = logging.getLogger(__name__)
 app = Celery(__name__)
+engine = None
+
+
+# noinspection PyUnusedLocal
+@import_modules.connect
+def import_modules(sender, *args, **kwargs):
+    global engine
+    config = get_config()
+    engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
 
 
 @app.task(acks_late=True)
@@ -78,7 +91,8 @@ def get_sessions(mac: str, until: Optional[Union[int, float]]=None,
     except ValueError:
         logger.exception("Invalid argument")
         return
-    return list(do_get_sessions(mac, until, limit))
+    with contextlib.closing(engine.connect()) as connection:
+        return list(do_get_sessions(connection, mac, until, limit))
 
 
 @app.task(acks_late=True)
@@ -93,7 +107,8 @@ def get_auth_attempts_of_mac(mac: str, until: Optional[Union[int, float]]=None,
     except ValueError:
         logger.exception("Invalid argument")
         return
-    return list(do_get_auth_attempts_of_mac(mac, until, limit))
+    with contextlib.closing(engine.connect()) as connection:
+        return list(do_get_auth_attempts_of_mac(connection, mac, until, limit))
 
 
 @app.task(acks_late=True)
@@ -110,5 +125,6 @@ def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
     except ValueError:
         logger.exception("Invalid argument")
         return
-    return list(do_get_auth_attempts_at_port(nas_ip_address, nas_port_id, until,
-                                             limit))
+    with contextlib.closing(engine.connect()) as connection:
+        return list(do_get_auth_attempts_at_port(connection, nas_ip_address,
+                                                 nas_port_id, until, limit))

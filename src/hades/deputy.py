@@ -21,7 +21,7 @@ import netaddr
 import pkg_resources
 from gi.repository import GLib
 from pydbus import SystemBus
-from sqlalchemy import null
+from sqlalchemy import create_engine, null
 
 from hades import constants
 from hades.common import db
@@ -52,14 +52,6 @@ def signal_cleanup():
     deputy.Cleanup()
 
 
-@contextlib.contextmanager
-def database_user():
-    with dropped_privileges(database_pwd, database_grp):
-        engine = db.get_engine()
-        yield engine.connect()
-        engine.dispose()
-
-
 def reload_systemd_unit(bus, unit):
     logger.debug("Instructing systemd to reload unit %s", unit)
     systemd = bus.get('org.freedesktop.systemd1')
@@ -79,11 +71,9 @@ def generate_dhcp_host_reservations(hosts):
         yield "{0},{1}\n".format(mac, ip)
 
 
-def generate_dhcp_hosts_file():
+def generate_dhcp_hosts_file(hosts):
     file_name = constants.AUTH_DHCP_HOSTS_FILE
     logger.info("Generating DHCP hosts file %s", file_name)
-    with dropped_privileges(database_pwd, database_grp):
-        hosts = db.get_all_dhcp_hosts()
     try:
         with open(file_name, mode='w', encoding='ascii') as f:
             f.writelines(generate_dhcp_host_reservations(hosts))
@@ -99,12 +89,10 @@ def generate_ipset_swap(ipset_name, tmp_ipset_name, ips):
     yield 'destroy {}\n'.format(tmp_ipset_name)
 
 
-def update_alternative_dns_ipset():
+def update_alternative_dns_ipset(ips):
     conf = get_config()
     ipset_name = conf['HADES_AUTH_DNS_ALTERNATIVE_IPSET']
     tmp_ipset_name = 'tmp_' + ipset_name
-    with dropped_privileges(database_pwd, database_grp):
-        ips = db.get_all_alternative_dns_ips()
     logger.info("Updating alternative_dns ipset (%s)", ipset_name)
     commands = io.TextIOWrapper(io.BytesIO(), 'ascii')
     commands.writelines(generate_ipset_swap(ipset_name, tmp_ipset_name, ips))
@@ -147,10 +135,8 @@ def generate_radius_clients(clients):
             description=description)
 
 
-def generate_radius_clients_file():
+def generate_radius_clients_file(clients):
     logger.info("Generating freeRADIUS clients configuration")
-    with dropped_privileges(database_pwd, database_grp):
-        clients = db.get_all_nas_clients()
     file_name = constants.RADIUS_CLIENTS_FILE
     try:
         with open(file_name, mode='w', encoding='ascii') as f:
@@ -163,8 +149,19 @@ class HadesDeputyService(object):
     dbus = pkg_resources.resource_string(
         __package__, 'deputy-interface.xml').decode('utf-8')
 
-    def __init__(self, bus):
+    def __init__(self, bus, config):
         self.bus = bus
+        self.config = config
+        self.engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
+        original_creator = self.engine.pool._creator
+
+        def creator(connection_record=None):
+            """Create a connection as the database user"""
+            with dropped_privileges(database_pwd, database_grp):
+                connection = original_creator(connection_record)
+            return connection
+
+        self.engine.pool._creator = creator
 
     def Refresh(self, force):
         """
@@ -173,7 +170,7 @@ class HadesDeputyService(object):
         services are reloaded.
         """
         logger.info("Refreshing materialized views")
-        with database_user() as connection:
+        with contextlib.closing(self.engine.connect()) as connection:
             with connection.begin():
                 db.refresh_materialized_view(connection, db.radcheck)
                 db.refresh_materialized_view(connection, db.radgroupcheck)
@@ -189,6 +186,9 @@ class HadesDeputyService(object):
                 reload_dhcp_host = True
                 reload_nas = True
                 reload_alternative_dns = True
+                hosts = db.get_all_dhcp_hosts(connection)
+                clients = db.get_all_nas_clients(connection)
+                ips = db.get_all_alternative_dns_ips(connection)
             else:
                 dhcphost_diff = db.refresh_and_diff_materialized_view(
                     connection, db.dhcphost, db.temp_dhcphost, [null()])
@@ -196,6 +196,7 @@ class HadesDeputyService(object):
                     logger.info('DHCP host reservations changed '
                                 '(%d added, %d deleted, %d modified).',
                                 *map(len, dhcphost_diff))
+                    hosts = db.get_all_dhcp_hosts(connection)
                     reload_dhcp_host = True
                 else:
                     reload_dhcp_host = False
@@ -207,6 +208,7 @@ class HadesDeputyService(object):
                     logger.info('RADIUS clients changed '
                                 '(%d added, %d deleted, %d modified).',
                                 *map(len, nas_diff))
+                    clients = db.get_all_nas_clients(connection)
                     reload_nas = True
                 else:
                     reload_nas = False
@@ -219,18 +221,19 @@ class HadesDeputyService(object):
                     logger.info('Alternative auth DNS clients changed '
                                 '(%d added, %d deleted, %d modified).',
                                 *map(len, alternative_dns_diff))
+                    ips = db.get_all_alternative_dns_ips(connection)
                     reload_alternative_dns = True
                 else:
                     reload_alternative_dns = False
 
         if reload_dhcp_host:
-            generate_dhcp_hosts_file()
+            generate_dhcp_hosts_file(hosts)
             reload_systemd_unit(self.bus, 'hades-auth-dhcp.service')
         if reload_nas:
-            generate_radius_clients_file()
+            generate_radius_clients_file(clients)
             restart_systemd_unit(self.bus, 'hades-radius.service')
         if reload_alternative_dns:
-            update_alternative_dns_ipset()
+            update_alternative_dns_ipset(ips)
         return "OK"
 
     def Cleanup(self):
@@ -239,9 +242,8 @@ class HadesDeputyService(object):
         :return: 
         """
         logger.info("Cleaning up old records")
-        conf = get_config()
-        interval = conf["HADES_RETENTION_INTERVAL"]
-        with database_user() as connection:
+        interval = self.config.HADES_RETENTION_INTERVAL
+        with contextlib.closing(self.engine.connect()) as connection:
             db.delete_old_sessions(connection, interval)
             db.delete_old_auth_attempts(connection, interval)
         return "OK"
@@ -250,6 +252,7 @@ class HadesDeputyService(object):
 def run_event_loop():
     bus = SystemBus()
     logger.debug('Publishing interface %s on DBus', constants.DEPUTY_DBUS_NAME)
-    bus.publish(constants.DEPUTY_DBUS_NAME, HadesDeputyService(bus))
+    config = get_config()
+    bus.publish(constants.DEPUTY_DBUS_NAME, HadesDeputyService(bus, config))
     loop = GLib.MainLoop()
     loop.run()
