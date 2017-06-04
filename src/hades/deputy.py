@@ -7,7 +7,6 @@ other processes etc. needs certain privileges. The Deputy service runs as root
 and provides a very simple service over DBus.
 """
 import contextlib
-import grp
 import io
 import logging
 import pwd
@@ -30,7 +29,6 @@ from hades.config.loader import get_config
 
 logger = logging.getLogger(__name__)
 database_pwd = pwd.getpwnam(constants.DATABASE_USER)
-database_grp = grp.getgrnam(constants.DATABASE_GROUP)
 
 
 def signal_refresh():
@@ -157,7 +155,7 @@ class HadesDeputyService(object):
 
         def creator(connection_record=None):
             """Create a connection as the database user"""
-            with dropped_privileges(database_pwd, database_grp):
+            with dropped_privileges(database_pwd):
                 connection = original_creator(connection_record)
             return connection
 

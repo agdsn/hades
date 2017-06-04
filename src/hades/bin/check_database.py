@@ -1,5 +1,4 @@
 import contextlib
-import grp
 import logging
 import os
 import pwd
@@ -54,18 +53,15 @@ def main():
         engine = create_engine(config.SQLALCHEMY_DATABASE_URI,
                                poolclass=NullPool)
         agent_pwd = pwd.getpwnam(constants.AGENT_USER)
-        agent_grp = grp.getgrnam(constants.AGENT_GROUP)
-        with dropped_privileges(agent_pwd, agent_grp):
+        with dropped_privileges(agent_pwd):
             check_database(engine, agent_pwd.pw_name,
                            (db.radacct, db.radpostauth))
         portal_pwd = pwd.getpwnam(constants.PORTAL_USER)
-        portal_grp = grp.getgrnam(constants.PORTAL_GROUP)
-        with dropped_privileges(portal_pwd, portal_grp):
+        with dropped_privileges(portal_pwd):
             check_database(engine, portal_pwd.pw_name,
                            (db.radacct, db.radpostauth, db.radusergroup))
         radius_pwd = pwd.getpwnam(constants.RADIUS_USER)
-        radius_grp = grp.getgrnam(constants.RADIUS_GROUP)
-        with dropped_privileges(radius_pwd, radius_grp):
+        with dropped_privileges(radius_pwd):
             check_database(engine, radius_pwd.pw_name,
                            (db.radacct, db.radgroupcheck, db.radgroupreply,
                             db.radpostauth, db.radreply, db.radusergroup))
