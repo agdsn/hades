@@ -1,6 +1,7 @@
 import arpreq
 import contextlib
 
+import sqlalchemy.exc
 from flask import render_template, request
 from flask_babel import _, lazy_gettext
 from sqlalchemy import create_engine
@@ -42,6 +43,14 @@ engine = None
 @babel.localeselector
 def get_locale():
     return request.accept_languages.best_match(['de', 'en'])
+
+
+# noinspection PyUnusedLocal
+@app.errorhandler(sqlalchemy.exc.OperationalError)
+def handle_database_error(error):
+    content = render_template("error.html",
+                              message=_("The database is unavailable"))
+    return content, 500
 
 
 @app.before_first_request
