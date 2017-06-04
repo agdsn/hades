@@ -1,5 +1,3 @@
-import logging
-
 import arpreq
 import contextlib
 
@@ -10,7 +8,7 @@ from sqlalchemy import create_engine
 from hades.common.db import get_groups, get_latest_auth_attempt
 from hades.portal import app, babel
 
-logger = logging.getLogger(__name__)
+logger = app.logger
 
 
 messages = {

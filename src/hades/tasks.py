@@ -1,5 +1,3 @@
-import logging
-
 import contextlib
 from datetime import datetime
 from typing import Optional, Union, Any
@@ -7,6 +5,7 @@ from typing import Optional, Union, Any
 import netaddr
 from celery import Celery
 from celery.signals import import_modules
+from celery.utils.log import get_task_logger
 from sqlalchemy import create_engine
 
 from hades.common.db import (
@@ -17,7 +16,7 @@ from hades.common.db import (
 from hades.config.loader import get_config
 from hades.deputy import signal_cleanup, signal_refresh
 
-logger = logging.getLogger(__name__)
+logger = get_task_logger(__name__)
 app = Celery(__name__)
 engine = None
 
