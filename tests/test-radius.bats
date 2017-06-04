@@ -96,10 +96,7 @@ do_request() {
 		[EAP-Type-Identity]="\"$(lowercase $(mac_triple "${known_user_mac}" ''))\""
 		[Message-Authenticator]=0x00
 	)
-	declare -Ar filter=(
-		[Packet-Type]=Access-Accept
-		[Egress-VLAN-Name]="\"${unknown_vlan_name}\""
-	)
+	declare -Ar filter=()
 	do_request "$(declare -p request)" "$(declare -p filter)"
 }
 
