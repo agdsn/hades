@@ -406,7 +406,6 @@ def get_all_nas_clients(connection: Connection) -> Iterable[
     :param connection: A SQLAlchemy connection
     :return: An iterable that yields (shortname, nasname, type, ports, secret,
     server, community, description)-tuples
-    :rtype: iterable[(str, str, str, int, str, str, str, str)]
     """
     result = connection.execute(
         select([nas.c.ShortName, nas.c.NASName, nas.c.Type, nas.c.Ports,
