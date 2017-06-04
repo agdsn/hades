@@ -7,10 +7,13 @@ other processes etc. needs certain privileges. The Deputy service runs as root
 and provides a very simple service over DBus.
 """
 import contextlib
+import grp
 import io
 import logging
+import os
 import pwd
 import re
+import stat
 import string
 import subprocess
 import textwrap
@@ -28,7 +31,9 @@ from hades.common.privileges import dropped_privileges
 from hades.config.loader import get_config
 
 logger = logging.getLogger(__name__)
+auth_dhcp_pwd = pwd.getpwnam(constants.AUTH_DHCP_USER)
 database_pwd = pwd.getpwnam(constants.DATABASE_USER)
+radius_pwd = pwd.getpwnam(constants.RADIUS_USER)
 
 
 def signal_refresh():
@@ -74,6 +79,9 @@ def generate_dhcp_hosts_file(hosts):
     logger.info("Generating DHCP hosts file %s", file_name)
     try:
         with open(file_name, mode='w', encoding='ascii') as f:
+            fd = f.fileno()
+            os.fchown(fd, auth_dhcp_pwd.pw_uid, auth_dhcp_pwd.pw_gid)
+            os.fchmod(fd, stat.S_IRUSR | stat.S_IRGRP)
             f.writelines(generate_dhcp_host_reservations(hosts))
     except OSError as e:
         logger.error("Error writing %s: %s", file_name, e.strerror)
@@ -138,6 +146,9 @@ def generate_radius_clients_file(clients):
     file_name = constants.RADIUS_CLIENTS_FILE
     try:
         with open(file_name, mode='w', encoding='ascii') as f:
+            fd = f.fileno()
+            os.fchown(fd, radius_pwd.pw_uid, radius_pwd.pw_gid)
+            os.fchmod(fd, stat.S_IRUSR | stat.S_IRGRP)
             f.writelines(generate_radius_clients(clients))
     except OSError as e:
         logger.exception("Error writing %s: %s", file_name, e.strerror)
