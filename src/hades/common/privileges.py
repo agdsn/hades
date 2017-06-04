@@ -1,13 +1,15 @@
 import contextlib
 import getpass
+import grp
 import logging
 import os
+import pwd
 
 logger = logging.getLogger(__name__)
 
 
 @contextlib.contextmanager
-def dropped_privileges(passwd, group):
+def dropped_privileges(passwd: pwd.struct_passwd, group: grp.struct_group):
     """
     Context manager for temporarily switching real and effective UID and real
     and effective GID.
