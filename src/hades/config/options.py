@@ -397,8 +397,8 @@ class HADES_AUTH_DHCP_DOMAIN(Option):
     type = str
 
 
-class HADES_AUTH_DHCP_LEASE_TIME(Option):
-    """DHCP Lease time for authenticated users"""
+class HADES_AUTH_DHCP_LEASE_LIFETIME(Option):
+    """DHCP lease lifetime for authenticated users"""
     default = timedelta(hours=24)
     type = timedelta
     static_check = check.greater_than(timedelta(0))

@@ -23,7 +23,7 @@ dhcp-authoritative
 
 # Define DHCP ranges
 {%- for name, network in HADES_USER_NETWORKS.items() %}
-dhcp-range=set:{{ name }},{{ network.network }},static,{{ network.netmask }},{{ network.broadcast }},{{ HADES_AUTH_DHCP_LEASE_TIME.total_seconds()|int }}s
+dhcp-range=set:{{ name }},{{ network.network }},static,{{ network.netmask }},{{ network.broadcast }},{{ HADES_AUTH_DHCP_LEASE_LIFETIME.total_seconds()|int }}s
 dhcp-option=tag:{{ name }},option:router,{{ network.ip }}
 {%- endfor %}
 dhcp-option=option:dns-server,{{ HADES_AUTH_LISTEN[0].ip }}
