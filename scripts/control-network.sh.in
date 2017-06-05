@@ -92,6 +92,8 @@ setup_namespace_common_pre() {
 	@IP@ netns exec "$namespace" @IP@ link set dev lo up
 	@IP@ netns exec "$namespace" @SYSCTL@ --quiet net.ipv4.ip_nonlocal_bind=1
 	@IP@ netns exec "$namespace" @SYSCTL@ --quiet net.ipv4.ip_forward=1
+	@IP@ netns exec "$namespace" @SYSCTL@ --quiet net.ipv6.conf.all.disable_ipv6=1
+	@IP@ netns exec "$namespace" @SYSCTL@ --quiet net.ipv6.conf.default.disable_ipv6=1
 
 	link_namespace "$namespace" "${namespace}-veth0" eth0 "$parent_address" "$namespace_address"
 	@IP@ netns exec "$namespace" @IP@ route add default via "$(netaddr.ip "$parent_address")"
