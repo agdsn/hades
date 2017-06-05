@@ -40,6 +40,11 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     postgresql-9.6 \
     postgresql-contrib-9.6 \
     postgresql-server-dev-9.6 \
+    pypy \
+    pypy-dev \
+    pypy-ipaddress \
+    pypy-pytest \
+    pypy-setuptools \
     python-all \
     python-all-dev \
     python-ipaddr \
