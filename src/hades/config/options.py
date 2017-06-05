@@ -404,6 +404,26 @@ class HADES_AUTH_DHCP_LEASE_LIFETIME(Option):
     static_check = check.greater_than(timedelta(0))
 
 
+class HADES_AUTH_DHCP_LEASE_RENEW_TIMER(Option):
+    """DHCP lease renew timer for authenticated users"""
+    type = timedelta
+    static_check = check.greater_than(timedelta(0))
+
+    @staticmethod
+    def default(config):
+        return 0.5 * config.HADES_AUTH_DHCP_LEASE_LIFETIME
+
+
+class HADES_AUTH_DHCP_LEASE_REBIND_TIMER(Option):
+    """DHCP lease rebind timer for authenticated users"""
+    type = timedelta
+    static_check = check.greater_than(timedelta(0))
+
+    @staticmethod
+    def default(config):
+        return 0.875 * config.HADES_AUTH_DHCP_LEASE_LIFETIME
+
+
 class HADES_AUTH_LISTEN(Option):
     """
     Sequence of IPs and networks to listen on for requests from authenticated

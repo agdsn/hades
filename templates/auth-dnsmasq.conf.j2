@@ -28,6 +28,8 @@ dhcp-option=tag:{{ name }},option:router,{{ network.ip }}
 {%- endfor %}
 dhcp-option=option:dns-server,{{ HADES_AUTH_LISTEN[0].ip }}
 dhcp-option=option:domain-name,{{ HADES_AUTH_DHCP_DOMAIN }}
+dhcp-option=option:T1,{{ HADES_AUTH_DHCP_LEASE_RENEW_TIMER.total_seconds()|int }}
+dhcp-option=option:T2,{{ HADES_AUTH_DHCP_LEASE_REBIND_TIMER.total_seconds()|int }}
 
 # Ensure lease max is high enough (default is 1000)
 dhcp-lease-max={{ HADES_USER_NETWORKS.values()|map('length')|sum }}
