@@ -1,6 +1,6 @@
 import contextlib
 from datetime import datetime
-from typing import Optional, Union, Any
+from typing import Any, List, Optional, Tuple, Union
 
 import netaddr
 from celery import Celery
@@ -80,7 +80,8 @@ def check_positive_int(number: Any) -> int:
 
 @app.task(acks_late=True)
 def get_sessions(mac: str, until: Optional[Union[int, float]]=None,
-                 limit: Optional[int]=100):
+                 limit: Optional[int]=100) -> Optional[
+        List[Tuple[netaddr.IPAddress, str, datetime, datetime]]]:
     try:
         mac = check_mac(mac)
         if until is not None:
@@ -96,7 +97,9 @@ def get_sessions(mac: str, until: Optional[Union[int, float]]=None,
 
 @app.task(acks_late=True)
 def get_auth_attempts_of_mac(mac: str, until: Optional[Union[int, float]]=None,
-                             limit: Optional[int]=100):
+                             limit: Optional[int]=100) -> Optional[List[
+        Tuple[netaddr.IPAddress, str, str, Tuple[str], Tuple[Tuple[str, str]],
+              datetime]]]:
     try:
         mac = check_mac(mac)
         if until is not None:
@@ -113,7 +116,8 @@ def get_auth_attempts_of_mac(mac: str, until: Optional[Union[int, float]]=None,
 @app.task(acks_late=True)
 def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
                               until: Optional[Union[int, float]]=None,
-                              limit: Optional[int]=100):
+                              limit: Optional[int]=100) -> Optional[
+        List[Tuple[str, Tuple[str], Tuple[Tuple[str, str]], datetime]]]:
     try:
         nas_ip_address = check_ip_address(nas_ip_address)
         nas_port_id = check_str(nas_port_id)
