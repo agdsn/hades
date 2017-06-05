@@ -33,7 +33,7 @@ X-Python3-Version: >= 3.5
 Standards-Version: 3.9.8
 
 Package: hades
-Architecture: amd64
+Architecture: any
 Pre-Depends: dpkg (>= 1.16.1), python3, ${misc:Pre-Depends}
 Depends: bash (>= 4),
  dnsmasq,
