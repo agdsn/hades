@@ -303,7 +303,7 @@ def diff_tables(connection: Connection, master: Table, copy: Table,
         .where(or_(*(getattr(master.c, column_name) !=
                      getattr(copy.c, column_name)
                      for column_name in other_column_names)))
-    ).fetchall()
+    ).fetchall() if other_column_names else []
     logger.debug('Diff found %d added, %d deleted, and %d modified records',
                  len(added), len(deleted), len(modified))
     return added, deleted, modified
