@@ -31,11 +31,11 @@ add_address() {
 	${netns+"${netns[@]-}"} @IP@ address add "$address" ${peer_address:+peer "$peer_address"} dev "$interface"
 }
 
-netaddr_ip() {
+netaddr.ip() {
 	@bindir@/python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).ip)" "$1"
 }
 
-netaddr_cidr() {
+netaddr.cidr() {
 	@bindir@/python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).cidr)" "$1"
 }
 
@@ -72,10 +72,10 @@ link_namespace() {
 	msg "Linking network namespace $namespace via veth pair $parent_interface <-> $namespace_interface"
 	@IP@ link add name "$parent_interface" type veth peer netns "$namespace" name "$namespace_interface"
 	if [[ -n "$parent_address" ]]; then
-		add_address "" "$parent_interface" "$(netaddr_ip "$parent_address")" ${namespace_address+"$(netaddr_ip "$namespace_address")"}
+		add_address "" "$parent_interface" "$(netaddr.ip "$parent_address")" ${namespace_address+"$(netaddr.ip "$namespace_address")"}
 	fi
 	if [[ -n "$namespace_address" ]]; then
-		add_address "$namespace" "$namespace_interface" "$(netaddr_ip "$namespace_address")" ${parent_address+"$(netaddr_ip "$parent_address")"}
+		add_address "$namespace" "$namespace_interface" "$(netaddr.ip "$namespace_address")" ${parent_address+"$(netaddr.ip "$parent_address")"}
 	fi
 	@IP@ link set dev "$parent_interface" up
 	@IP@ netns exec "$namespace" @IP@ link set dev "$namespace_interface" up
@@ -94,7 +94,7 @@ setup_namespace_common_pre() {
 	@IP@ netns exec "$namespace" @SYSCTL@ --quiet net.ipv4.ip_forward=1
 
 	link_namespace "$namespace" "${namespace}-veth0" eth0 "$parent_address" "$namespace_address"
-	@IP@ netns exec "$namespace" @IP@ route add default via "$(netaddr_ip "$parent_address")"
+	@IP@ netns exec "$namespace" @IP@ route add default via "$(netaddr.ip "$parent_address")"
 
 	link_namespace "$namespace" "${namespace}-veth1" eth1
 	attach_bridge_port "$HADES_VRRP_BRIDGE" "${namespace}-veth1"
