@@ -2,3 +2,6 @@
 	path = docs/build/html
 	url = git@github.com:agdsn/hades.git
 	branch = gh-pages
+[submodule "vendor/arpreq"]
+	path = vendor/arpreq
+	url = git@github.com:sebschrader/python-arpreq.git
