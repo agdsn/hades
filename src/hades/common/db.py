@@ -201,6 +201,7 @@ class utcnow(expression.FunctionElement):
     type = DateTime()
 
 
+# noinspection PyUnusedLocal
 @compiles(utcnow, 'postgresql')
 def pg_utcnow(element, compiler, **kw):
     return "CURRENT_TIMESTAMP AT TIME ZONE 'UTC'"
