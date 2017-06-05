@@ -18,12 +18,17 @@ setup() {
 	psql foreign <<-EOF
 		INSERT INTO radcheck ("Priority", "NASIPAddress", "NASPortId", "UserName", "Attribute", "Op", "Value")
 		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '$(lowercase $(mac_sextuple ${known_user_mac} :))', 'Calling-Station-Id', '==', '$(lowercase $(mac_sextuple "${nas_mac}" -))');
+		INSERT INTO radreply ("Priority", "NASIPAddress", "NASPortId", "UserName", "Attribute", "Op", "Value")
+		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '$(lowercase $(mac_sextuple ${known_user_mac} :))', 'Reply-Message', '+=', 'radreply test'),
+		(1, NULL, NULL, 'unknown', 'Reply-Message', '+=', 'radreply unknown');
 		INSERT INTO radusergroup ("Priority", "NASIPAddress", "NASPortId", "UserName", "GroupName")
 		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '$(lowercase $(mac_sextuple ${known_user_mac} :))', 'test'),
 		(1, NULL, NULL, 'unknown', 'unknown');
 		INSERT INTO radgroupreply ("Priority", "GroupName", "Attribute", "Op", "Value")
 		VALUES (1, 'test', 'Egress-VLAN-Name', '+=', '${known_vlan_name}'),
-		(1, 'unknown', 'Egress-VLAN-Name', ':=', '${unknown_vlan_name}');
+		(2, 'test', 'Reply-Message', '+=', 'radgroupreply test'),
+		(1, 'unknown', 'Egress-VLAN-Name', ':=', '${unknown_vlan_name}'),
+		(2, 'unknown', 'Reply-Message', '+=', 'radgroupreply unknown');
 		EOF
 	refresh
 }
@@ -80,6 +85,8 @@ do_request() {
 	declare -Ar filter=(
 		[Packet-Type]=Access-Accept
 		[Egress-VLAN-Name]="\"${known_vlan_name}\""
+		[Reply-Message]="\"radreply test\""
+		[Reply-Message]="\"radgroupreply test\""
 	)
 	do_request "$(declare -p request)" "$(declare -p filter)"
 }
@@ -112,6 +119,8 @@ do_request() {
 	declare -Ar filter=(
 		[Packet-Type]=Access-Accept
 		[Egress-VLAN-Name]="\"${unknown_vlan_name}\""
+		[Reply-Message]="\"radreply unknown\""
+		[Reply-Message]="\"radgroupreply unknown\""
 	)
 	do_request "$(declare -p request)" "$(declare -p filter)"
 }
