@@ -58,7 +58,7 @@ Depends: bash (>= 4),
  unbound,
  uwsgi,
  uwsgi-plugin-python3,
- ${python:Depends},
+ ${python3:Depends},
  ${misc:Depends},
 Description: distributed RADIUS MAC authentication
  Hades is a distributed RADIUS MAC authentication system developed for the
