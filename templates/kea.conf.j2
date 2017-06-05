@@ -1,0 +1,84 @@
+{
+    "Logging": {
+        "loggers": [
+            {
+                "name": "kea-dhcp4",
+                "severity": "DEBUG"
+            }
+        ]
+    },
+    "Dhcp4": {
+        "control-socket": {
+            "socket-type": "unix",
+            "socket-name": "{{ constants.pkgrunstatedir }}/auth-dhcp/control.sock"
+        },
+
+        "interfaces-config": {
+            "interfaces": ["eth2"],
+# Don't use raw sockets, we only need to do relaying
+            "dhcp-socket-type": "udp"
+        },
+
+        "lease-database": {
+            "type": "postgresql",
+            "name": "{{ constants.DATABASE_NAME }}",
+            "host": "{{ constants.DATABASE_SOCKET_DIRECTORY }}",
+            "user": "{{ constants.AUTH_DHCP_USER }}",
+            "password": ""
+        },
+
+        "hosts-database": {
+            "type": "postgresql",
+            "name": "{{ constants.DATABASE_NAME }}",
+            "host": "{{ constants.DATABASE_SOCKET_DIRECTORY }}",
+            "user": "{{ constants.AUTH_DHCP_USER }}",
+            "password": "",
+            "readonly": true
+        },
+
+        "valid-lifetime": {{ HADES_AUTH_DHCP_LEASE_LIFETIME.total_seconds()|int }},
+        "renew-timer": {{ HADES_AUTH_DHCP_LEASE_RENEW_TIMER.total_seconds()|int }},
+        "rebind-timer": {{ HADES_AUTH_DHCP_LEASE_REBIND_TIMER.total_seconds()|int }},
+        "decline-probation-period": 300,
+
+# Ignore the client-identifier if present
+        "match-client-id": false,
+
+        "host-reservation-identifiers": ["hw-address", "circuit-id"],
+        "subnet4": [
+            {%- for network in HADES_USER_NETWORKS.values() -%}
+            {
+                "id": {{ network.cidr.value }},
+                "subnet": "{{ network.cidr }}",
+                "reservation-mode": "out-of-pool",
+                "option-data": [
+                    {
+                        "name": "routers",
+                        "code": 3,
+                        "space": "dhcp4",
+                        "csv-format": true,
+                        "data": "{{ network.ip }}"
+                    }
+                ]
+            }{%  if not loop.last %},{% endif %}
+            {%- endfor %}
+        ],
+
+        "option-data": [
+            {
+                "name": "domain-name-servers",
+                "code": 6,
+                "space": "dhcp4",
+                "csv-format": true,
+                "data": "{{ HADES_AUTH_LISTEN[0].ip }}"
+            },
+            {
+                "name": "domain-name",
+                "code": 15,
+                "space": "dhcp4",
+                "csv-format": true,
+                "data": "{{ HADES_AUTH_DHCP_DOMAIN }}"
+            }
+        ]
+    }
+}

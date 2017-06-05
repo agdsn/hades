@@ -27,9 +27,15 @@ setup() {
 	ns_exec test-relay ip address add "$gateway_ip_address" dev eth0
 	ns_exec test-relay ip address add "$relay_ip_address" dev eth1
 	dhcrelay
-	psql foreign <<-EOF
-		TRUNCATE dhcphost;
-		INSERT INTO dhcphost VALUES ('${client_mac_address}', '$(netaddr.ip "${client_ip_address}")');
+	psql hades <<-EOF
+		TRUNCATE "hosts" CASCADE;
+		INSERT INTO "hosts" (dhcp_identifier, dhcp_identifier_type, dhcp4_subnet_id, ipv4_address, hostname) VALUES (
+			DECODE('$(mac_plain ${client_mac_address})', 'hex'),
+			(SELECT type FROM host_identifier_type WHERE name='hw-address'),
+			$(netaddr.value $(netaddr.cidr ${client_ip_address})),
+			$(netaddr.value ${client_ip_address}),
+			'${client_hostname}'
+		)
 	EOF
 	refresh
 }
@@ -42,8 +48,8 @@ teardown() {
 	ip link delete br-relay
 	teardown_namespace test-auth
 	teardown_namespace test-relay
-	psql foreign <<-EOF
-		TRUNCATE dhcphost;
+	psql hades <<-EOF
+		TRUNCATE "hosts" CASCADE;
 	EOF
 	refresh
 }

@@ -1,17 +1,24 @@
 [Unit]
-Description=Hades DHCP service for authenticated users (dnsmasq)
+Description=Hades DHCP service for authenticated users (kea-dhcp4)
 Documentation=https://agdsn.github.io/hades/
-After=hades-network.service
-Wants=hades-network.service
+After=hades-network.service hades-database.service
+Wants=hades-network.service hades-database.service
 
 [Service]
-Type=dbus
-BusName=@AUTH_DHCP_DBUS_NAME@
+Type=simple
+PIDFile=/run/hades/auth-dhcp/kea.kea-dhcp4.pid
+User=hades-auth-dhcp
+Group=hades-auth-dhcp
+AmbientCapabilities=CAP_SYS_ADMIN CAP_NET_BIND_SERVICE
 SyslogIdentifier=hades-auth-dhcp
+Environment=KEA_PIDFILE_DIR=/run/hades/auth-dhcp
+Environment=KEA_LOCKFILE_DIR=/run/hades/auth-dhcp
+Environment=KEA_LOGGER_DESTINATION=stderr
+Environment=PGAPPNAME=hades-auth-dhcp
 EnvironmentFile=@systemdenvfile@
-ExecStartPre=@bindir@/hades-generate-config auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
-ExecStart=@IP@ netns exec @AUTH_NAMESPACE@ @DNSMASQ@ -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf $AUTH_DNSMASQ_OPTS
-ExecReload=@bindir@/hades-generate-config auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
+ExecStartPre=@bindir@/hades-generate-config kea.conf.j2 @pkgrunstatedir@/auth-dhcp/kea.conf
+ExecStart=@IP@ netns exec @AUTH_NAMESPACE@ @KEA_DHCP4@ -c @pkgrunstatedir@/auth-dhcp/kea.conf $KEA_OPTS
+ExecReload=@bindir@/hades-generate-config kea.conf.j2 @pkgrunstatedir@/auth-dhcp/kea.conf
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5

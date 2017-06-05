@@ -30,6 +30,8 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     ipset \
     iptables \
     isc-dhcp-relay \
+    kea-admin \
+    kea-dhcp4-server \
     keepalived \
     less \
     libxml2-utils \
