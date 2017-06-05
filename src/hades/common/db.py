@@ -1,7 +1,7 @@
 import logging
 import operator
-from datetime import datetime
-from typing import Iterable, Optional, Tuple
+from datetime import datetime, timedelta
+from typing import Iterable, List, Optional, Tuple
 
 import netaddr
 from sqlalchemy import (
@@ -206,7 +206,7 @@ def pg_utcnow(element, compiler, **kw):
     return "CURRENT_TIMESTAMP AT TIME ZONE 'UTC'"
 
 
-def lock_table(connection, target_table):
+def lock_table(connection: Connection, target_table: Table):
     """
     Lock a table using a PostgreSQL advisory lock
 
@@ -222,7 +222,7 @@ def lock_table(connection, target_table):
     connection.execute(select([func.pg_advisory_xact_lock(oid)])).scalar()
 
 
-def create_temp_copy(connection, source, destination):
+def create_temp_copy(connection: Connection, source: Table, destination: Table):
     """
     Create a temporary table as a copy of a source table that will be dropped
     at the end of the running transaction.
@@ -245,7 +245,9 @@ def create_temp_copy(connection, source, destination):
     )
 
 
-def diff_tables(connection, master, copy, result_columns):
+def diff_tables(connection: Connection, master: Table, copy: Table,
+                result_columns: Iterable[Column]
+                ) -> Tuple[List[Tuple], List[Tuple], List[Tuple]]:
     """
     Compute the differences in the contents of two tables with identical
     columns.
@@ -306,14 +308,17 @@ def diff_tables(connection, master, copy, result_columns):
     return added, deleted, modified
 
 
-def refresh_materialized_view(connection, view):
+def refresh_materialized_view(connection: Connection, view: Table):
     logger.debug('Refreshing materialized view "%s"', view.name)
     preparer = connection.dialect.identifier_preparer
     connection.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY {view}'
-                        .format(view=preparer.format_table(view)))
+                       .format(view=preparer.format_table(view)))
 
 
-def refresh_and_diff_materialized_view(connection, view, copy, result_columns):
+def refresh_and_diff_materialized_view(
+        connection: Connection, view: Table, copy: Table,
+        result_columns: Iterable[Column]) -> Tuple[
+        List[Tuple], List[Tuple], List[Tuple]]:
     with connection.begin():
         lock_table(connection, view)
         create_temp_copy(connection, view, copy)
@@ -321,18 +326,18 @@ def refresh_and_diff_materialized_view(connection, view, copy, result_columns):
         return diff_tables(connection, view, copy, result_columns)
 
 
-def delete_old_sessions(transaction, interval):
+def delete_old_sessions(connection: Connection, interval: timedelta):
     logger.debug('Deleting sessions in table "%s" older than "%s"',
                  radacct.name, interval)
-    transaction.execute(radacct.delete().where(and_(
+    connection.execute(radacct.delete().where(and_(
         radacct.c.AcctUpdateTime < utcnow() - interval
     )))
 
 
-def delete_old_auth_attempts(transaction, interval):
+def delete_old_auth_attempts(connection: Connection, interval: timedelta):
     logger.debug('Deleting auth attempts in table "%s" older than "%s"',
                  radpostauth.name, interval)
-    transaction.execute(radpostauth.delete().where(and_(
+    connection.execute(radpostauth.delete().where(and_(
         radpostauth.c.AuthDate < utcnow() - interval
     )))
 
