@@ -10,9 +10,8 @@ interface=eth2
 {%- for network in HADES_UNAUTH_LISTEN %}
 listen-address={{ network.ip }}
 {%- endfor %}
-# Explicitly bind to the interfaces specified above, otherwise any other DNS
-# server running on the same machine won't be able to listen on DNS port
-bind-interfaces
+# Explicitly bind to the interfaces
+bind-dynamic
 
 # Don't read /etc/hosts
 no-hosts
