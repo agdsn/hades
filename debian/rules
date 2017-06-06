@@ -10,10 +10,10 @@ export DH_VIRTUALENV_INSTALL_ROOT=/usr/lib
 
 override_dh_auto_clean:
 	dh_auto_clean
-	make -rf configure.mk clean
+	./configure.mk clean
 
 override_dh_auto_configure:
-	make -rf configure.mk prefix=/usr libexecdir=/usr/lib sysconfdir=/etc localstatedir=/var pkglocalstatedir=/var/lib/$(PACKAGE) runstatedir=/run
+	./configure.mk prefix=/usr libexecdir=/usr/lib sysconfdir=/etc localstatedir=/var pkglocalstatedir=/var/lib/$(PACKAGE) runstatedir=/run
 	dh_auto_configure
 
 override_dh_auto_install:
