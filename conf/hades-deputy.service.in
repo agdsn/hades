@@ -8,6 +8,7 @@ Wants=hades-network.service
 Type=dbus
 BusName=@DEPUTY_DBUS_NAME@
 SyslogIdentifier=hades-deputy
+Environment=PGAPPNAME=hades-deputy
 EnvironmentFile=@systemdenvfile@
 ExecStart=@bindir@/hades-deputy $DEPUTY_OPTS
 Restart=always
