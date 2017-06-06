@@ -4,6 +4,8 @@ global_defs {
     }
     notification_email_from {{ HADES_SITE_NODE_ID }}@agdsn
     router_id {{ HADES_SITE_NAME }}
+    enable_script_security
+    script_user root
 }
 
 static_ipaddress {
