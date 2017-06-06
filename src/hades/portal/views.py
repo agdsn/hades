@@ -77,7 +77,7 @@ def index():
                                           "your IP address {}".format(ip)))
         return content, 500
 
-    with contextlib.closing(engine.connect()) as connection:
+    with contextlib.closing(engine.connect()) as connection, connection.begin():
         mac_groups = list(get_groups(connection, mac))
 
         if not mac_groups:
