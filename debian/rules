@@ -2,25 +2,40 @@
 
 PACKAGE=$(shell dh_listpackages)
 
+USE_DH_VIRTUALENV ?= 1
+
+configure_args = prefix=/usr libexecdir=/usr/lib sysconfdir=/etc localstatedir=/var pkglocalstatedir=/var/lib/$(PACKAGE) runstatedir=/run
+
+ifeq ($(USE_DH_VIRTUALENV),1)
+
 export DH_VIRTUALENV_ARGUMENTS=--python python3 --system-site-packages
 export DH_VIRTUALENV_INSTALL_ROOT=/usr/lib
 
+configure_args += venvdir=$(DH_VIRTUALENV_INSTALL_ROOT)/$(PACKAGE)
+
 %:
 	dh $@ --buildsystem=dh_virtualenv
-
-override_dh_auto_clean:
-	dh_auto_clean
-	./configure.mk clean
-
-override_dh_auto_configure:
-	./configure.mk prefix=/usr libexecdir=/usr/lib sysconfdir=/etc localstatedir=/var pkglocalstatedir=/var/lib/$(PACKAGE) runstatedir=/run
-	dh_auto_configure
 
 override_dh_auto_install:
 	dh_auto_install
 	# Move console scripts to /usr/bin
 	mkdir -p debian/$(PACKAGE)/usr/bin
 	mv debian/$(PACKAGE)/usr/lib/$(PACKAGE)/bin/hades-* debian/$(PACKAGE)/usr/bin
+
+else
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+endif
+
+override_dh_auto_clean:
+	dh_auto_clean
+	./configure.mk clean
+
+override_dh_auto_configure:
+	./configure.mk $(configure_args)
+	dh_auto_configure
 
 override_dh_builddeb:
 	dh_builddeb -- -Zgzip -z3

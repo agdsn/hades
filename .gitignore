@@ -32,4 +32,5 @@ var/
 # Compiled gettext catalogs
 *.mo
 
+/.pybuild
 /setup.py

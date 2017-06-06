@@ -106,7 +106,7 @@ $(call add_substitution, pkglogdir,        $(logdir)/$(PACKAGE_NAME))
 $(call add_substitution, assetdir,       $(pkgdatadir)/assests)
 $(call add_substitution, systemdenvfile, /etc/default/hades)
 $(call add_substitution, templatedir,    $(pkgdatadir)/templates)
-$(call add_substitution, venvdir,        $(pkglibdir))
+$(call add_substitution, venvdir,        $(NULL))
 
 # Derived paths
 $(call add_substitution, AGENT_PID_FILE, $(pkgrunstatedir)/agent/worker.pid)
