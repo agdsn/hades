@@ -16,9 +16,6 @@ override_dh_auto_configure:
 	make -rf configure.mk prefix=/usr libexecdir=/usr/lib sysconfdir=/etc localstatedir=/var pkglocalstatedir=/var/lib/$(PACKAGE) runstatedir=/run
 	dh_auto_configure
 
-override_dh_auto_build:
-	dh_auto_build
-
 override_dh_auto_install:
 	dh_auto_install
 	# Move console scripts to /usr/bin
