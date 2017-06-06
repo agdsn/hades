@@ -91,16 +91,17 @@ def index():
                                               "for your MAC address."))
             return content, 500
 
-        nas_ip_address, nas_port_id, groups, reply, auth_date = latest_auth_attempt
+        nas_ip_address, nas_port_id, *ignore = latest_auth_attempt
 
         port_groups = [group for nai, npi, group in mac_groups
                        if nas_ip_address == nai and nas_port_id == npi]
 
         if not port_groups:
-            return render_template("status.html", reasons=[messages['wrong_port']],
-                                   mac=mac, show_mac=False)
+            return render_template("status.html", mac=mac, show_mac=False,
+                                   reasons=[messages['wrong_port']])
 
-        reasons = [messages[group] for group in port_groups if group in messages]
+        reasons = [messages[group] for group in port_groups
+                   if group in messages]
 
         return render_template("status.html", reasons=reasons,
                                mac=mac, show_mac=False)
