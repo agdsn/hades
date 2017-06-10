@@ -1,3 +1,4 @@
+/check-services.sh
 /control-database.sh
 /control-network.sh
 /functions.sh
