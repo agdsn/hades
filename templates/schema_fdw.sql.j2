@@ -34,11 +34,11 @@ SET default_with_oids = false;
 --
 
 CREATE TABLE alternative_dns (
-    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING %}
+    {% if HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING %}
     "IPAddress" text NOT NULL
-    {%- else %}
+    {% else %}
     "IPAddress" inet NOT NULL
-    {%- endif %}
+    {% endif %}
 );
 
 
@@ -49,16 +49,16 @@ ALTER TABLE alternative_dns OWNER TO "{{ constants.DATABASE_USER }}";
 --
 
 CREATE TABLE dhcphost (
-    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
+    {% if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
     "MAC" character(17) NOT NULL,
-    {%- else %}
+    {% else %}
     "MAC" macaddr NOT NULL,
-    {%- endif %}
-    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
+    {% endif %}
+    {% if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
     "IPAddress" text NOT NULL
-    {%- else %}
+    {% else %}
     "IPAddress" inet NOT NULL
-    {%- endif %}
+    {% endif %}
 );
 
 
@@ -90,11 +90,11 @@ ALTER TABLE nas OWNER TO "{{ constants.DATABASE_USER }}";
 CREATE TABLE radcheck (
     "Priority" integer NOT NULL,
     "UserName" text NOT NULL,
-    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
+    {% if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
     "NASIPAddress" text,
-    {%- else %}
+    {% else %}
     "NASIPAddress" inet,
-    {%- endif %}
+    {% endif %}
     "NASPortId" text,
     "Attribute" text NOT NULL,
     "Op" character(2) NOT NULL,
@@ -141,11 +141,11 @@ ALTER TABLE radgroupreply OWNER TO "{{ constants.DATABASE_USER }}";
 CREATE TABLE radreply (
     "Priority" integer NOT NULL,
     "UserName" text NOT NULL,
-    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
+    {% if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
     "NASIPAddress" text,
-    {%- else %}
+    {% else %}
     "NASIPAddress" inet,
-    {%- endif %}
+    {% endif %}
     "NASPortId" text,
     "Attribute" text NOT NULL,
     "Op" character(2) DEFAULT '='::bpchar NOT NULL,
@@ -161,11 +161,11 @@ ALTER TABLE radreply OWNER TO "{{ constants.DATABASE_USER }}";
 
 CREATE TABLE radusergroup (
     "UserName" text NOT NULL,
-    {%- if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
+    {% if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
     "NASIPAddress" text,
-    {%- else %}
+    {% else %}
     "NASIPAddress" inet,
-    {%- endif %}
+    {% endif %}
     "NASPortId" text,
     "GroupName" text NOT NULL,
     "Priority" integer NOT NULL

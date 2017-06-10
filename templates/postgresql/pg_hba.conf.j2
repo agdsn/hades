@@ -82,9 +82,9 @@
 
 # "local" is for Unix domain socket connections only
 local   all             all                                     peer
-{%- for network in HADES_POSTGRESQL_LISTEN %}
+{% for network in HADES_POSTGRESQL_LISTEN %}
 host    all             all             {{ network.cidr }}      md5
-{%- endfor %}
+{% endfor %}
 # Allow replication connections from localhost, by a user with the
 # replication privilege.
 #local   replication     postgres                                trust

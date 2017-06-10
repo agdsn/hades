@@ -1,9 +1,9 @@
 {% include "unbound-common.j2" %}
     pidfile: "{{ constants.AUTH_DNS_ALTERNATIVE_PID_FILE }}"
     port: 9053
-    {%- for name, zone in HADES_AUTH_DNS_ALTERNATIVE_ZONES.items() %}
+    {% for name, zone in HADES_AUTH_DNS_ALTERNATIVE_ZONES.items() %}
     local-zone: "{{ name }}" {{ zone.type }}
-    {%- for rr in zone.records %}
+    {% for rr in zone.records %}
     local-data: "{{ rr.name }} {{ rr.ttl }} {{ rr.class }} {{ rr.type }} {{ rr.data }}"
-    {%- endfor %}
-    {%- endfor %}
+    {% endfor %}
+    {% endfor %}

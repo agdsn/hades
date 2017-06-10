@@ -6,13 +6,13 @@ server:
     username: {{ constants.AUTH_DNS_USER }}
     do-daemonize: no
     interface: 127.0.0.1
-    {%- for network in HADES_AUTH_LISTEN %}
+    {% for network in HADES_AUTH_LISTEN %}
     interface: {{ network.ip }}
-    {%- endfor %}
+    {% endfor %}
     outgoing-interface: {{ HADES_NETNS_AUTH_LISTEN.ip }}
-    {%- for network in HADES_USER_NETWORKS.values() %}
+    {% for network in HADES_USER_NETWORKS.values() %}
     access-control: {{ network.cidr }} allow
-    {%- endfor %}
+    {% endfor %}
     auto-trust-anchor-file: "{{ constants.AUTH_DNS_TRUST_ANCHOR_FILE }}"
     root-hints: "{{ constants.AUTH_DNS_ROOT_HINTS }}"
     # Log to stderr

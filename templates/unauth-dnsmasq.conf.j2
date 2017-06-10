@@ -7,9 +7,9 @@ group={{ constants.UNAUTH_DNS_GROUP }}
 pid-file={{ constants.UNAUTH_DNS_PID_FILE }}
 
 interface=eth2
-{%- for network in HADES_UNAUTH_LISTEN %}
+{% for network in HADES_UNAUTH_LISTEN %}
 listen-address={{ network.ip }}
-{%- endfor %}
+{% endfor %}
 # Explicitly bind to the interfaces
 bind-dynamic
 
@@ -22,9 +22,9 @@ no-hosts
 query-port=0
 
 # DNS-Record for the Captive Portal
-{%- for network in HADES_UNAUTH_LISTEN %}
+{% for network in HADES_UNAUTH_LISTEN %}
 host-record={{ HADES_PORTAL_DOMAIN }},{{ network.ip }}
-{%- endfor %}
+{% endfor %}
 
 # Return the expected Windows NCSI DNS address
 # See https://technet.microsoft.com/en-us/library/cc766017%28v=ws.10%29.aspx
@@ -33,7 +33,7 @@ address=/dns.msftncsi.com/131.107.255.255
 # Wildcard A-Record to redirect all domains to the captive portal
 address=/#/{{ HADES_UNAUTH_LISTEN[0].ip }}
 
-{%- if HADES_UNAUTH_WHITELIST_DNS %}
+{% if HADES_UNAUTH_WHITELIST_DNS %}
 # Resolve the whitelisted domains by using the default resolver.
 # Note that this also applies to all subdomains.
 server=/{{ HADES_UNAUTH_WHITELIST_DNS|join('/') }}/#
@@ -42,7 +42,7 @@ server=/{{ HADES_UNAUTH_WHITELIST_DNS|join('/') }}/#
 # to the ipset. The netfilter rules will allow packets where the destination is
 # a member of this ipset.
 ipset=/{{ HADES_UNAUTH_WHITELIST_DNS|join('/') }}/{{ HADES_UNAUTH_WHITELIST_IPSET }}
-{%- endif %}
+{% endif %}
 
 # Domain of DHCP hosts
 dhcp-range={{ netaddr.IPAddress(HADES_UNAUTH_DHCP_RANGE.first) }},{{ netaddr.IPAddress(HADES_UNAUTH_DHCP_RANGE.last) }},{{ HADES_UNAUTH_DHCP_LEASE_TIME.total_seconds()|int }}

@@ -16,13 +16,13 @@ server hades {
 		interface = lo
 	}
 
-	{%- for network in HADES_RADIUS_LISTEN %}
+	{% for network in HADES_RADIUS_LISTEN %}
 	listen {
-		{%- if network.version == 4 %}
+		{% if network.version == 4 %}
 		ipaddr = {{ network.ip }}
-		{%- else %}
+		{% else %}
 		ipv6addr = {{ network.ip }}
-		{%- endif %}
+		{% endif %}
 		port = {{ HADES_RADIUS_AUTHENTICATION_PORT }}
 		type = auth
 		interface = {{ HADES_RADIUS_INTERFACE }}
@@ -30,17 +30,17 @@ server hades {
 	}
 
 	listen {
-		{%- if network.version == 4 %}
+		{% if network.version == 4 %}
 		ipaddr = {{ network.ip }}
-		{%- else %}
+		{% else %}
 		ipv6addr = {{ network.ip }}
-		{%- endif %}
+		{% endif %}
 		port = {{ HADES_RADIUS_ACCOUNTING_PORT }}
 		type = acct
 		interface = {{ HADES_RADIUS_INTERFACE }}
 	#	clients = per_socket_clients
 	}
-	{%- endfor %}
+	{% endfor %}
 
 
 	authorize {
@@ -60,14 +60,14 @@ server hades {
 			ok = return
 			updated = return
 		}
-		{%- if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
+		{% if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
 		redundant {
 			lookup_sql
 			accept
 		}
-		{%- else %}
+		{% else %}
 		lookup_sql
-		{%- endif %}
+		{% endif %}
 		pap
 	}
 
@@ -97,23 +97,23 @@ server hades {
 	}
 
 	post-auth {
-		{%- if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
+		{% if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
 		redundant {
 			sql
 			ok
 		}
-		{%- else %}
+		{% else %}
 		sql
-		{%- endif %}
+		{% endif %}
 		Post-Auth-Type REJECT {
-			{%- if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
+			{% if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
 			redundant {
 				sql
 				ok
 			}
-			{%- else %}
+			{% else %}
 			sql
-			{%- endif %}
+			{% endif %}
 			attr_filter.access_reject
 		}
 	}

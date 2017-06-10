@@ -18,11 +18,11 @@ vrrp_script check_services {
 }
 
 vrrp_instance hades-unauth {
-    {%- if HADES_INITIAL_MASTER %}
+    {% if HADES_INITIAL_MASTER %}
     state MASTER
-    {%- else %}
+    {% else %}
     state BACKUP
-    {%- endif %}
+    {% endif %}
     preempt_delay {{ HADES_VRRP_PREEMPTION_DELAY.total_seconds()|int }}
 
     interface eth1
@@ -47,11 +47,11 @@ vrrp_instance hades-unauth {
     }
 
     virtual_ipaddress {
-        {%- for network in HADES_UNAUTH_LISTEN %}
+        {% for network in HADES_UNAUTH_LISTEN %}
         {{ network }} dev eth2
-        {%- endfor %}
-        {%- for network in HADES_USER_NETWORKS.values() %}
+        {% endfor %}
+        {% for network in HADES_USER_NETWORKS.values() %}
         {{ network }} dev eth2
-        {%- endfor %}
+        {% endfor %}
     }
 }

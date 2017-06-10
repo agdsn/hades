@@ -5,9 +5,9 @@ uwsgi-socket = {{ constants.PORTAL_UWSGI_SOCKET }}
 need-app = true
 reaper = true
 chdir = {{ constants.PORTAL_HOME }}
-{%- if constants.venvdir %}
+{% if constants.venvdir %}
 venv = {{ constants.venvdir }}
-{%- endif %}
+{% endif %}
 die-on-term = false
 module = hades.bin.portal
 master = true

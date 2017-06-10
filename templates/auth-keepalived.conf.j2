@@ -18,11 +18,11 @@ vrrp_script check_services {
 }
 
 vrrp_instance hades-auth {
-    {%- if HADES_INITIAL_MASTER %}
+    {% if HADES_INITIAL_MASTER %}
     state MASTER
-    {%- else %}
+    {% else %}
     state BACKUP
-    {%- endif %}
+    {% endif %}
     preempt_delay {{ HADES_VRRP_PREEMPTION_DELAY.total_seconds()|int }}
 
     interface eth1
@@ -47,14 +47,14 @@ vrrp_instance hades-auth {
     }
 
     virtual_ipaddress {
-        {%- for network in HADES_AUTH_LISTEN %}
+        {% for network in HADES_AUTH_LISTEN %}
         {{ network }} dev eth2
-        {%- endfor %}
+        {% endfor %}
     }
 
     virtual_routes {
-        {%- for network in HADES_USER_NETWORKS.values() %}
+        {% for network in HADES_USER_NETWORKS.values() %}
         {{ network.cidr }} via {{ HADES_AUTH_NEXT_HOP.ip }} dev eth2
-        {%- endfor %}
+        {% endfor %}
     }
 }

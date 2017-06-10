@@ -98,6 +98,7 @@ class ConfigGenerator(object):
             undefined=jinja2.StrictUndefined,
             extensions=['jinja2.ext.do', 'jinja2.ext.loopcontrols',
                         'jinja2.ext.with_'],
+            trim_blocks=True, lstrip_blocks=True,
         )
         self.env.globals.update({
             'collections': collections,

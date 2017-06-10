@@ -3,12 +3,12 @@
 :INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
-{%- for port in HADES_UNAUTH_CAPTURED_TCP_PORTS %}
+{% for port in HADES_UNAUTH_CAPTURED_TCP_PORTS %}
 -A PREROUTING -i eth2 -m set ! --match-set {{ HADES_UNAUTH_WHITELIST_IPSET }} dst -p tcp -m tcp --dport {{ port }} -j DNAT --to-destination {{ HADES_UNAUTH_LISTEN[0].ip }}
-{%- endfor %}
-{%- for port in HADES_UNAUTH_CAPTURED_UDP_PORTS %}
+{% endfor %}
+{% for port in HADES_UNAUTH_CAPTURED_UDP_PORTS %}
 -A PREROUTING -i eth2 -m set ! --match-set {{ HADES_UNAUTH_WHITELIST_IPSET }} dst -p udp -m udp --dport {{ port }} -j DNAT --to-destination {{ HADES_UNAUTH_LISTEN[0].ip }}
-{%- endfor %}
+{% endfor %}
 -A POSTROUTING -o eth0 -j SNAT --to {{ HADES_NETNS_UNAUTH_LISTEN.ip }}
 COMMIT
 *filter
@@ -19,12 +19,12 @@ COMMIT
 -A INPUT -i lo -j ACCEPT
 -A INPUT -p icmp -j ACCEPT
 -A INPUT -i eth1 -p vrrp -j ACCEPT
-{%- for port in HADES_UNAUTH_ALLOWED_TCP_PORTS %}
+{% for port in HADES_UNAUTH_ALLOWED_TCP_PORTS %}
 -A INPUT -i eth2 -p tcp -m tcp --dport {{ port }} -j ACCEPT
-{%- endfor %}
-{%- for port in HADES_UNAUTH_ALLOWED_UDP_PORTS %}
+{% endfor %}
+{% for port in HADES_UNAUTH_ALLOWED_UDP_PORTS %}
 -A INPUT -i eth2 -p udp -m udp --dport {{ port }} -j ACCEPT
-{%- endfor %}
+{% endfor %}
 -A INPUT -p tcp -m tcp -j REJECT --reject-with tcp-reset
 -A INPUT -j REJECT --reject-with icmp-admin-prohibited
 -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED,SNAT,DNAT -j ACCEPT

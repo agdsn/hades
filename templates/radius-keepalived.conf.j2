@@ -23,11 +23,11 @@ vrrp_script check_services {
 }
 
 vrrp_instance hades-radius {
-    {%- if HADES_INITIAL_MASTER %}
+    {% if HADES_INITIAL_MASTER %}
     state MASTER
-    {%- else %}
+    {% else %}
     state BACKUP
-    {%- endif %}
+    {% endif %}
     preempt_delay {{ HADES_VRRP_PREEMPTION_DELAY.total_seconds()|int }}
 
     interface {{ HADES_VRRP_BRIDGE }}
@@ -55,8 +55,8 @@ vrrp_instance hades-radius {
     }
 
     virtual_ipaddress {
-        {%- for network in HADES_RADIUS_LISTEN %}
+        {% for network in HADES_RADIUS_LISTEN %}
         {{ network }} dev {{ HADES_RADIUS_INTERFACE }}
-        {%- endfor %}
+        {% endfor %}
     }
 }
