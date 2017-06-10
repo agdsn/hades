@@ -35,6 +35,24 @@ class HADES_SITE_NODE_ID(Option):
     required = True
 
 
+class HADES_MAIL_DESTINATION_ADDRESSES(Option):
+    """Automatic notification mails will be send to this address."""
+    type = collections.Sequence
+    default = []
+
+
+class HADES_MAIL_SENDER_ADDRESS(Option):
+    """Automatic notification mails will use this address as sender."""
+    type = str
+    default = ''
+
+
+class HADES_MAIL_SMTP_SERVER(Option):
+    """Name or IP address of SMTP relay server."""
+    type = str
+    default = ''
+
+
 class HADES_REAUTHENTICATION_INTERVAL(Option):
     """RADIUS periodic reauthentication interval"""
     default = timedelta(seconds=300)

@@ -1,11 +1,21 @@
 global_defs {
+    {% if HADES_MAIL_DESTINATION_ADDRESSES %}
     notification_email {
-        root@agdsn
+        {% for address in HADES_MAIL_DESTINATION_ADDRESSES %}
+        {{ address }}
+        {% endfor %}
     }
-    notification_email_from {{ HADES_SITE_NODE_ID }}@agdsn
+    {% endif %}
+    {% if HADES_MAIL_SENDER_ADDRESS %}
+    notification_email_from {{ HADES_MAIL_SENDER_ADDRESS }}
+    {% endif %}
     router_id {{ HADES_SITE_NAME }}
     enable_script_security
     script_user root
+    {% if HADES_MAIL_SMTP_SERVER %}
+    smtp_server {{ HADES_MAIL_SMTP_SERVER }}
+    smtp_connect_timeout 30
+    {% endif %}
 }
 
 static_ipaddress {
@@ -38,6 +48,9 @@ vrrp_instance hades-unauth {
 
     virtual_router_id {{ HADES_VRRP_VIRTUAL_ROUTER_ID_UNAUTH }}
     advert_int {{ HADES_VRRP_ADVERTISEMENT_INTERVAL.total_seconds()|int }}
+    {% if HADES_MAIL_SMTP_SERVER %}
+    smtp_alert
+    {% endif %}
 
     priority {{ HADES_PRIORITY }}
 
