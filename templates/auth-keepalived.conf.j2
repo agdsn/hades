@@ -10,6 +10,11 @@ static_ipaddress {
     {{ HADES_VRRP_LISTEN_AUTH  }} dev eth1
 }
 
+vrrp_script check_services {
+    script "{{ constants.pkglibexecdir }}/check-services.sh auth"
+    interval 2
+}
+
 vrrp_instance hades-auth {
     {%- if HADES_INITIAL_MASTER %}
     state MASTER
@@ -19,6 +24,10 @@ vrrp_instance hades-auth {
     preempt_delay {{ HADES_VRRP_PREEMPTION_DELAY.total_seconds()|int }}
 
     interface eth1
+
+    track_script {
+        check_services
+    }
 
     mcast_src_ip {{ HADES_VRRP_LISTEN_AUTH.ip }}
 

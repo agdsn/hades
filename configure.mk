@@ -157,6 +157,7 @@ $(call require_program,RADIUSD,radiusd freeradius)
 $(call require_program,RM,rm)
 $(call require_program,SED,sed)
 $(call require_program,SYSCTL,sysctl)
+$(call require_program,SYSTEMCTL,systemctl)
 $(call require_program,TOUCH,touch)
 $(call require_program,UNBOUND,unbound)
 $(call require_program,UNBOUND_ANCHOR,unbound-anchor)
@@ -221,6 +222,7 @@ CONFIGURE_FILES = \
     conf/hades-unauth-vrrp.service \
     conf/hades.busconfig \
     conf/hades.tmpfile \
+    scripts/check-services.sh \
     scripts/control-database.sh \
     scripts/control-network.sh \
     scripts/functions.sh \

@@ -15,6 +15,11 @@ vrrp_script check_database {
     interval 5
 }
 
+vrrp_script check_services {
+    script "{{ constants.pkglibexecdir }}/check-services.sh radius"
+    interval 2
+}
+
 vrrp_instance hades-radius {
     {%- if HADES_INITIAL_MASTER %}
     state MASTER
@@ -29,6 +34,7 @@ vrrp_instance hades-radius {
     }
     track_script {
         check_database
+        check_services
     }
 
     mcast_src_ip {{ HADES_VRRP_LISTEN_RADIUS.ip }}

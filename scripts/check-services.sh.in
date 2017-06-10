@@ -1,0 +1,14 @@
+#!/bin/bash
+set -eu -o pipefail
+
+readonly vrrp_instance="$1"
+
+declare -r -A SERVICES=(
+	[auth]='hades-auth-alternative-dns.service hades-auth-dhcp.service hades-auth-pristine-dns.service hades-network.service'
+	[unauth]='hades-unauth-dns.service hades-unauth-http.service hades-unauth-portal.service hades-network.service'
+	[radius]='hades-radius.service hades-network.service'
+)
+
+for service in ${SERVICES["${vrrp_instance}"]}; do
+	@SYSTEMCTL@ is-active -q "${service}"
+done
