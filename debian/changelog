@@ -1,3 +1,9 @@
+hades (0.3.1-1) stretch; urgency=low
+
+  * New minor release
+
+ -- Stefan Haller <stefan.haller@agdsn.de>  Sat, 10 Jun 2017 21:32:38 +0200
+
 hades (0.3.0-1) stretch; urgency=low
 
   * Initial package release
