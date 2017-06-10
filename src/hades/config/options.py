@@ -29,12 +29,6 @@ class HADES_SITE_NAME(Option):
             raise check.OptionCheckError("not a valid site name", option=cls)
 
 
-class HADES_SITE_NODE_ID(Option):
-    """Unique name of the site node instance"""
-    type = str
-    required = True
-
-
 class HADES_MAIL_DESTINATION_ADDRESSES(Option):
     """Automatic notification mails will be send to this address."""
     type = collections.Sequence
