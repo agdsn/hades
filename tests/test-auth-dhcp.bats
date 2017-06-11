@@ -21,6 +21,7 @@ setup() {
 	setup_namespace test-auth
 	setup_namespace test-relay
 	ip link add br-relay up type bridge
+	iptables -I FORWARD 1 -m physdev --physdev-is-bridge -i br-relay -o br-relay -j ACCEPT
 	link_namespace test-auth br-relay eth0 de:ad:be:ef:00:00
 	link_namespace test-relay br-relay eth0
 	link_namespace test-relay br-auth eth1
@@ -39,6 +40,7 @@ teardown() {
 	unlink_namespace test-relay eth1
 	unlink_namespace test-relay eth0
 	unlink_namespace test-auth eth0
+	iptables -D FORWARD -m physdev --physdev-is-bridge -i br-relay -o br-relay -j ACCEPT
 	ip link delete br-relay
 	teardown_namespace test-auth
 	teardown_namespace test-relay
