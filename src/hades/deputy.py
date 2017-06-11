@@ -184,6 +184,7 @@ class HadesDeputyService(object):
         with contextlib.closing(self.engine.connect()) as connection:
             with connection.begin():
                 db.refresh_materialized_view(connection, db.radcheck)
+                db.refresh_materialized_view(connection, db.radreply)
                 db.refresh_materialized_view(connection, db.radgroupcheck)
                 db.refresh_materialized_view(connection, db.radgroupreply)
                 db.refresh_materialized_view(connection, db.radusergroup)
