@@ -23,7 +23,7 @@ static_ipaddress {
 }
 
 vrrp_script check_services {
-    script "{{ constants.pkglibexecdir }}/check-services.sh radius"
+    script "{{ constants.pkglibexecdir }}/check-services.sh unauth"
     interval 2
 }
 
