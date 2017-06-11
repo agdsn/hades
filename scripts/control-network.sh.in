@@ -32,11 +32,11 @@ add_address() {
 }
 
 netaddr.ip() {
-	@bindir@/python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).ip)" "$1"
+	@PYTHON3@ -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).ip)" "$1"
 }
 
 netaddr.cidr() {
-	@bindir@/python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).cidr)" "$1"
+	@PYTHON3@ -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).cidr)" "$1"
 }
 
 create_bridge() {
