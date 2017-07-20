@@ -494,8 +494,8 @@ def get_auth_attempts_at_port(connection: Connection,
     :param nas_port_id: NAS Port ID
     :param until: Maximum Auth-Date of the records
     :param limit: Maximum number of records
-    :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id, Packet-Type,
-    Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
+    :return: An iterable that yields (Packet-Type, Groups, Reply,
+             Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts at port %2$s of %1$s',
                  nas_ip_address, nas_port_id)
