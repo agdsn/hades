@@ -25,6 +25,9 @@ static_ipaddress {
 vrrp_script check_services {
     script "{{ constants.pkglibexecdir }}/check-services.sh unauth"
     interval 2
+    fall 3
+    rise 3
+    timeout 10
 }
 
 vrrp_instance hades-unauth {

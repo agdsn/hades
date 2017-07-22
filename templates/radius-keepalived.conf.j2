@@ -25,11 +25,17 @@ static_ipaddress {
 vrrp_script check_database {
     script "{{ constants.bindir }}/hades-check-database"
     interval 5
+    fall 1
+    rise 3
+    timeout 10
 }
 
 vrrp_script check_services {
     script "{{ constants.pkglibexecdir }}/check-services.sh radius"
     interval 2
+    fall 3
+    rise 3
+    timeout 10
 }
 
 vrrp_instance hades-radius {
