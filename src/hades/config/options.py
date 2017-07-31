@@ -929,3 +929,8 @@ class CELERY_TASK_SERIALIZER(Option):
 class CELERY_RESULT_BACKEND(Option):
     default = 'rpc://'
     type = str
+
+
+class CELERY_TASK_RESULT_EXPIRES(Option):
+    default = timedelta(minutes=5)
+    type = timedelta
