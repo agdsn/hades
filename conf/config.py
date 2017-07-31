@@ -2,8 +2,8 @@ from collections import OrderedDict
 import netaddr
 
 HADES_SITE_NAME = 'dev'
-BROKER_URL = 'amqp://hades:hades@172.17.42.1'
 HADES_SITE_NODE_ID = 'dev-01'
+BROKER_URL = 'amqp://hades:hades@127.0.0.1'
 HADES_CREATE_DUMMY_INTERFACES = True
 HADES_BRIDGE_SERVICE_INTERFACES = True
 HADES_LOCAL_MASTER_DATABASE = True
