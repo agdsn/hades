@@ -5,6 +5,8 @@ import string
 import urllib.parse
 from datetime import timedelta
 
+import kombu
+import kombu.common
 import netaddr
 
 from hades import constants
@@ -913,6 +915,32 @@ class CELERY_DEFAULT_DELIVERY_MODE(Option):
     type = str
 
 
+class CELERY_QUEUES(Option):
+    @staticmethod
+    def default(config):
+        """
+        Declare two queues per site, one to receive unicasts and one to receive
+        broadcasts.
+        Associate the queues with two global exchanges. A direct exchange that
+        routes unicast requests to the correct unicast site queue and a fanout
+        exchange that routes requests to all broadcast queues.
+
+        Actually a single queue would suffice, but the design of Celery does not
+        allow a queue to be bound to multiple exchanges in the CELERY_QUEUES
+        option.
+        """
+        return (
+            kombu.Queue(
+                'hades.{}.{}'.format(config.HADES_SITE_NAME,
+                                     config.HADES_SITE_NODE_ID),
+                [kombu.binding(kombu.Exchange('hades.unicast', 'topic'),
+                               routing_key='{}.#'.format(
+                                   config.HADES_SITE_NAME)),
+                 kombu.binding(kombu.Exchange('hades.broadcast', 'fanout'))]),
+            )
+    type = collections.Sequence
+
+
 class CELERYD_PREFETCH_MULTIPLIER(Option):
     type = int
     default = 1
@@ -924,7 +952,18 @@ class CELERY_TIMEZONE(Option):
 
 
 class CELERY_DEFAULT_QUEUE(Option):
-    default = compute.deferred_format("hades-site-{}", HADES_SITE_NAME)
+    default = compute.deferred_format('hades.{}.{}', HADES_SITE_NAME,
+                                      HADES_SITE_NODE_ID)
+    type = str
+
+
+class CELERY_DEFAULT_ROUTING_KEY(Option):
+    default = compute.equal_to(HADES_SITE_NAME)
+    type = str
+
+
+class CELERY_DEFAULT_EXCHANGE(Option):
+    default = 'hades.unicast'
     type = str
 
 
