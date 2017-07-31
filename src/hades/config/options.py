@@ -29,6 +29,18 @@ class HADES_SITE_NAME(Option):
             raise check.OptionCheckError("not a valid site name", option=cls)
 
 
+class HADES_SITE_NODE_ID(Option):
+    """ID of the site node"""
+    type = str
+    required = True
+
+    # noinspection PyUnusedLocal
+    @classmethod
+    def static_check(cls, config, value):
+        if not re.match(r'\A[a-z][a-z0-9-]*\Z', value, re.ASCII):
+            raise check.OptionCheckError("not a valid node ID", option=cls)
+
+
 class HADES_MAIL_DESTINATION_ADDRESSES(Option):
     """Automatic notification mails will be send to this address."""
     type = collections.Sequence
