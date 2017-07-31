@@ -901,6 +901,11 @@ class CELERY_DEFAULT_DELIVERY_MODE(Option):
     type = str
 
 
+class CELERYD_PREFETCH_MULTIPLIER(Option):
+    type = int
+    default = 1
+
+
 class CELERY_TIMEZONE(Option):
     default = 'UTC'
     type = str
