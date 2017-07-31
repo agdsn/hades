@@ -896,6 +896,11 @@ class CELERY_ENABLE_UTC(Option):
     type = bool
 
 
+class CELERY_DEFAULT_DELIVERY_MODE(Option):
+    default = 'transient'
+    type = str
+
+
 class CELERY_TIMEZONE(Option):
     default = 'UTC'
     type = str
