@@ -917,12 +917,12 @@ class CELERY_DEFAULT_QUEUE(Option):
 
 
 class CELERY_ACCEPT_CONTENT(Option):
-    default = ['json', 'msgpack', 'pickle', 'yaml']
+    default = ['json']
     type = collections.Sequence
 
 
 class CELERY_TASK_SERIALIZER(Option):
-    default = 'pickle'
+    default = 'json'
     type = str
 
 
