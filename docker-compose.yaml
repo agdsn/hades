@@ -1,0 +1,25 @@
+version: "3"
+services:
+  hades:
+    build:
+      context: ./docker
+      args:
+        BUILDER_UID: ${UID:-1000}
+        BUILDER_GID: ${GID:-100}
+    image: hades
+    container_name: hades
+    tmpfs:
+      - /tmp
+      - /run
+    privileged: true
+    stdin_open: true
+    tty: true
+    logging:
+      driver: "json-file"
+    stop_signal: SIGRTMIN+3
+    volumes:
+     - /sys/fs/cgroup:/sys/fs/cgroup:ro
+     - ./.bash_history:/root/.bash_history
+     - ../hades-build:/build
+     - ./:/build/hades
+
