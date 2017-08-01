@@ -46,7 +46,7 @@ teardown() {
 		[[ "$output" = 10.66.0.1 ]]
 	done
 
-	run dig +short dns.msftncsi.com
+	run ns dig +short dns.msftncsi.com
 	[[ "$output" = 131.107.255.255 ]]
 }
 
@@ -95,7 +95,7 @@ teardown() {
 }
 
 @test "check that pass-through host is reachable" {
-	for i in agdsn.de ftp.agdsn.de; do
+	for i in mail.agdsn.de ftp.agdsn.de; do
 		ns dig agdsn.de >&2
 		run ns ping -n -i0.1 -c10 "$i"
 		echo "$output" >&2
@@ -104,7 +104,7 @@ teardown() {
 }
 
 @test "check that pass-through HTTP is working" {
-	run ns curl -qi https://agdsn.de/sipa/news/
+	run ns curl -qi https://ftp.agdsn.de/pub
 	echo "$output" >&2
 	[[ $status = 0 ]]
 	egrep 'HTTP/[0-9]+\.[0-9] 200' <<<"$output"
