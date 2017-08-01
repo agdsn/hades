@@ -17,7 +17,7 @@ from hades.config.loader import get_config
 from hades.deputy import signal_cleanup, signal_refresh
 
 logger = get_task_logger(__name__)
-app = Celery(__name__)
+app = Celery("hades.agent")
 engine = None
 
 
