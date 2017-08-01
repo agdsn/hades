@@ -15,7 +15,7 @@ setup() {
 	link_namespace test-unauth br-unauth eth0
 	ns ip addr add dev eth0 "$client_ip_address"
 	ns ip route add default via "$nameserver_ip_address"
-	echo "nameserver $nameserver_ip_address" | ns tee /etc/resolv.conf >//dev/null
+	echo "nameserver $nameserver_ip_address" | ns tee /etc/resolv.conf >/dev/null
 	ip netns exec unauth ipset flush hades_unauth_whitelist
 	# makes dnsmasq forget that it wrote ips into ipset
 	if [[ -f "$dnsmasq_pidfile" ]]; then
