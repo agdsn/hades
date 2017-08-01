@@ -32,6 +32,16 @@ HADES_USER_NETWORKS = {
     'Wu5': netaddr.IPNetwork('141.30.228.1/24'),
     'UNEP': netaddr.IPNetwork('141.30.242.129/28'),
     'Bor34': netaddr.IPNetwork('141.76.121.1/24'),
+    'Ger38': netaddr.IPNetwork('141.76.124.1/24'),
+    'Bu22': netaddr.IPNetwork('141.30.204.1/24'),
+    'Bu24': netaddr.IPNetwork('141.30.205.1/24'),
+    'HSS46a': netaddr.IPNetwork('141.30.217.1/24'),
+    'HSS46b': netaddr.IPNetwork('141.30.234.0/25'),
+    'HSS48a': netaddr.IPNetwork('141.30.218.0/24'),
+    'HSS48b': netaddr.IPNetwork('141.30.215.128/25'),
+    'HSS50': netaddr.IPNetwork('141.30.219.0/24'),
+    'Zeu1fa': netaddr.IPNetwork('141.30.234.129/26'),
+    'Zeu1fb': netaddr.IPNetwork('141.30.234.193/27 '),
 }
 HADES_POSTGRESQL_USER_MAPPINGS = {
     'hades-agent': {
