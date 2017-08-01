@@ -437,17 +437,18 @@ def get_sessions(connection: Connection, mac: netaddr.EUI,
     descending
     """
     logger.debug('Getting all sessions for MAC "%s"', mac)
-    query = connection.execute(
+    query = (
         select([radacct.c.NASIPAddress, radacct.c.NASPortId,
                 radacct.c.AcctStartTime,
                 radacct.c.AcctStopTime])
         .where(and_(radacct.c.UserName == mac))
-        .order_by(radacct.c.AcctStartTime.desc()))
+        .order_by(radacct.c.AcctStartTime.desc())
+    )
     if until is not None:
         query.where(radacct.c.AcctStartTime <= until)
     if limit is not None:
         query = query.limit(limit)
-    return iter(query)
+    return iter(connection.execute(query))
 
 
 def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
@@ -467,17 +468,18 @@ def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts of MAC %s', mac)
-    query = connection.execute(
+    query = (
         select([radpostauth.c.NASIPAddress, radpostauth.c.NASPortId,
                 radpostauth.c.PacketType, radpostauth.c.Groups,
                 radpostauth.c.Reply, radpostauth.c.AuthDate])
         .where(and_(radpostauth.c.UserName == mac))
-        .order_by(radpostauth.c.AuthDate.desc()))
+        .order_by(radpostauth.c.AuthDate.desc())
+    )
     if until is not None:
         query.where(radpostauth.c.AuthDate <= until)
     if limit is not None:
         query = query.limit(limit)
-    return iter(query)
+    return iter(connection.execute(query))
 
 
 def get_auth_attempts_at_port(connection: Connection,
@@ -499,17 +501,18 @@ def get_auth_attempts_at_port(connection: Connection,
     """
     logger.debug('Getting all auth attempts at port %2$s of %1$s',
                  nas_ip_address, nas_port_id)
-    query = connection.execute(
+    query = (
         select([radpostauth.c.PacketType, radpostauth.c.Groups,
                 radpostauth.c.Reply, radpostauth.c.AuthDate])
         .where(and_(radpostauth.c.NASIPAddress == nas_ip_address,
                     radpostauth.c.NASPortId == nas_port_id))
-        .order_by(radpostauth.c.AuthDate.desc()))
+        .order_by(radpostauth.c.AuthDate.desc())
+    )
     if until is not None:
         query.where(radpostauth.c.AuthDate <= until)
     if limit is not None:
         query = query.limit(limit)
-    return iter(query)
+    return iter(connection.execute(query))
 
 
 def get_all_alternative_dns_ips(connection: Connection) -> Iterable[
