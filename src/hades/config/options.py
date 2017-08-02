@@ -991,6 +991,11 @@ class CELERY_RESULT_BACKEND(Option):
     type = str
 
 
+class CELERY_RESULT_EXCHANGE(Option):
+    default = 'hades.result'
+    type = str
+
+
 class CELERY_TASK_RESULT_EXPIRES(Option):
     default = timedelta(minutes=5)
     type = timedelta
