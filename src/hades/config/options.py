@@ -971,6 +971,16 @@ class CELERY_ACCEPT_CONTENT(Option):
     type = collections.Sequence
 
 
+class CELERY_EVENT_SERIALIZER(Option):
+    default = 'json'
+    type = str
+
+
+class CELERY_RESULT_SERIALIZER(Option):
+    default = 'json'
+    type = str
+
+
 class CELERY_TASK_SERIALIZER(Option):
     default = 'json'
     type = str
