@@ -107,9 +107,9 @@ radacct = Table(
     Column('NASIPAddress', IPAddress, nullable=False),
     Column('NASPortId', Text),
     Column('NASPortType', Text),
-    Column('AcctStartTime', DateTime),
-    Column('AcctUpdateTime', DateTime),
-    Column('AcctStopTime', DateTime),
+    Column('AcctStartTime', DateTime(timezone=True)),
+    Column('AcctUpdateTime', DateTime(timezone=True)),
+    Column('AcctStopTime', DateTime(timezone=True)),
     Column('AcctInterval', BigInteger),
     Column('AcctSessionTime', BigInteger),
     Column('AcctAuthentic', Text),
@@ -171,7 +171,7 @@ radpostauth = Table(
                            dimensions=1)),
     Column('Reply', ARRAY(Text, as_tuple=True, zero_indexes=True,
                           dimensions=2)),
-    Column('AuthDate', Text, nullable=False),
+    Column('AuthDate', DateTime(timezone=True), nullable=False),
 )
 
 radreply = Table(
