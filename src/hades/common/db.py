@@ -1,13 +1,15 @@
 import logging
 import operator
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone, tzinfo
 from typing import Iterable, List, Optional, Tuple
 
 import netaddr
+import psycopg2.extensions
 from sqlalchemy import (
     BigInteger, Column, DateTime, Integer, MetaData,
     PrimaryKeyConstraint, String, Table, Text, TypeDecorator, UniqueConstraint,
-    and_, column, func, null, or_, select, table,
+    and_, column, create_engine as sqa_create_engine, func, null, or_, select,
+    table,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, INET, MACADDR
 from sqlalchemy.engine import Connection
@@ -205,6 +207,44 @@ class utcnow(expression.FunctionElement):
 @compiles(utcnow, 'postgresql')
 def pg_utcnow(element, compiler, **kw):
     return "CURRENT_TIMESTAMP AT TIME ZONE 'UTC'"
+
+
+class UTCTZInfoFactory(tzinfo):
+    """
+    A tzinfo factory compatible with :class:`psycopg2.tz.FixedOffsetTimezone`,
+    that checks if the provided UTC offset is zero and returns
+    :attr:`datetime.timezone.utc`. If the offset is not zero an
+    :exc:`psycopg2.DataError` is raised.
+
+    This class is implemented as a singleton that always returns the same
+    instance.
+    """
+    def __new__(cls, offset):
+        if offset != 0:
+            raise psycopg2.DataError("UTC Offset is not zero: " + offset)
+        return timezone.utc
+
+
+class UTCTZInfoCursorFactory(psycopg2.extensions.cursor):
+    """
+    A Cursor factory that sets the
+    :attr:`psycopg2.extensions.cursor.tzinfo_factory` to
+    :class:`UTCTZInfoFactory`.
+
+    The C implementation of the cursor class does not use the proper Python
+    attribute lookup, therefore we have to set the instance variable rather
+    than use a class attribute.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tzinfo_factory = UTCTZInfoFactory
+
+
+def create_engine(config, **kwargs):
+    kwargs.setdefault('connect_args', {}).update(
+        options="-c TimeZone=UTC", cursor_factory=UTCTZInfoCursorFactory
+    )
+    return sqa_create_engine(config.SQLALCHEMY_DATABASE_URI, **kwargs)
 
 
 def lock_table(connection: Connection, target_table: Table):

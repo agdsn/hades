@@ -5,7 +5,7 @@ import pwd
 import sys
 from typing import Iterable
 
-from sqlalchemy import Table, create_engine, exists, null, select
+from sqlalchemy import Table, exists, null, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.pool import NullPool
@@ -50,8 +50,7 @@ def main():
     setup_cli_logging(parser.prog, args)
     config = load_config(args.config, True)
     try:
-        engine = create_engine(config.SQLALCHEMY_DATABASE_URI,
-                               poolclass=NullPool)
+        engine = db.create_engine(config, poolclass=NullPool)
         agent_pwd = pwd.getpwnam(constants.AGENT_USER)
         with dropped_privileges(agent_pwd):
             check_database(engine, agent_pwd.pw_name,

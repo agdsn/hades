@@ -23,7 +23,7 @@ import netaddr
 import pkg_resources
 from gi.repository import GLib
 from pydbus import SystemBus
-from sqlalchemy import create_engine, null
+from sqlalchemy import null
 from sqlalchemy.pool import StaticPool
 
 from hades import constants
@@ -162,8 +162,7 @@ class HadesDeputyService(object):
     def __init__(self, bus, config):
         self.bus = bus
         self.config = config
-        self.engine = create_engine(config.SQLALCHEMY_DATABASE_URI,
-                                    poolclass=StaticPool)
+        self.engine = db.create_engine(config, poolclass=StaticPool)
         original_creator = self.engine.pool._creator
 
         def creator(connection_record=None):

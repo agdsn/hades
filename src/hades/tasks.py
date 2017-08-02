@@ -6,9 +6,9 @@ import netaddr
 from celery import Celery
 from celery.signals import import_modules
 from celery.utils.log import get_task_logger
-from sqlalchemy import create_engine
 
 from hades.common.db import (
+    create_engine,
     get_auth_attempts_at_port as do_get_auth_attempts_at_port,
     get_auth_attempts_of_mac as do_get_auth_attempts_of_mac,
     get_sessions as do_get_sessions,
@@ -26,7 +26,7 @@ engine = None
 def import_modules(sender, *args, **kwargs):
     global engine
     config = get_config()
-    engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
+    engine = create_engine(config)
 
 
 @app.task(acks_late=True)
