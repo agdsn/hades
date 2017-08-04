@@ -12,7 +12,7 @@ from hades.common.db import (
     create_engine,
     get_auth_attempts_at_port as do_get_auth_attempts_at_port,
     get_auth_attempts_of_mac as do_get_auth_attempts_of_mac,
-    get_sessions as do_get_sessions,
+    get_sessions_of_mac as do_get_sessions_of_mac,
 )
 from hades.config.loader import get_config
 from hades.deputy import signal_cleanup, signal_refresh
@@ -80,8 +80,8 @@ def check_positive_int(number: Any) -> int:
 
 
 @app.task(acks_late=True)
-def get_sessions(mac: str, until: Optional[Union[int, float]]=None,
-                 limit: Optional[int]=100) -> Optional[
+def get_sessions_of_mac(mac: str, until: Optional[Union[int, float]]=None,
+                        limit: Optional[int]=100) -> Optional[
         List[Tuple[str, str, float, float]]]:
     try:
         mac = check_mac(mac)
@@ -96,7 +96,7 @@ def get_sessions(mac: str, until: Optional[Union[int, float]]=None,
         return list(starmap(
             lambda nas_ip, nas_port, start, stop:
                 (str(nas_ip), nas_port, start.timestamp(), stop.timestamp()),
-            do_get_sessions(connection, mac, until, limit)))
+            do_get_sessions_of_mac(connection, mac, until, limit)))
 
 
 @app.task(acks_late=True)

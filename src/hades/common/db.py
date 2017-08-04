@@ -460,9 +460,9 @@ def get_all_nas_clients(connection: Connection) -> Iterable[
     return iter(result)
 
 
-def get_sessions(connection: Connection, mac: netaddr.EUI,
-                 until: Optional[datetime]=None,
-                 limit: Optional[int]=None) -> Iterable[
+def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
+                        until: Optional[datetime]=None,
+                        limit: Optional[int]=None) -> Iterable[
         Tuple[netaddr.IPAddress, str, datetime, datetime]]:
     """
     Return accounting sessions of a particular MAC address ordered by
