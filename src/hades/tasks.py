@@ -1,5 +1,5 @@
 import contextlib
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, List, Optional, Tuple, Union
 
 import netaddr
@@ -59,7 +59,7 @@ def check_ip_address(ip_address: Any) -> netaddr.IPAddress:
 
 def check_timestamp(timestamp: Any) -> datetime:
     try:
-        return datetime.fromtimestamp(timestamp)
+        return datetime.utcfromtimestamp(timestamp).replace(tzinfo=timezone.utc)
     except (ValueError, TypeError) as e:
         raise ValueError("Invalid timestamp: {}".format(timestamp)) from e
 
