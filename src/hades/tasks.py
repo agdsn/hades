@@ -1,5 +1,6 @@
 import contextlib
 from datetime import datetime, timezone
+from itertools import starmap
 from typing import Any, List, Optional, Tuple, Union
 
 import netaddr
@@ -81,7 +82,7 @@ def check_positive_int(number: Any) -> int:
 @app.task(acks_late=True)
 def get_sessions(mac: str, until: Optional[Union[int, float]]=None,
                  limit: Optional[int]=100) -> Optional[
-        List[Tuple[netaddr.IPAddress, str, datetime, datetime]]]:
+        List[Tuple[str, str, float, float]]]:
     try:
         mac = check_mac(mac)
         if until is not None:
@@ -92,14 +93,16 @@ def get_sessions(mac: str, until: Optional[Union[int, float]]=None,
         logger.exception("Invalid argument")
         return
     with contextlib.closing(engine.connect()) as connection:
-        return list(do_get_sessions(connection, mac, until, limit))
+        return list(starmap(
+            lambda nas_ip, nas_port, start, stop:
+                (str(nas_ip), nas_port, start.timestamp(), stop.timestamp()),
+            do_get_sessions(connection, mac, until, limit)))
 
 
 @app.task(acks_late=True)
 def get_auth_attempts_of_mac(mac: str, until: Optional[Union[int, float]]=None,
                              limit: Optional[int]=100) -> Optional[List[
-        Tuple[netaddr.IPAddress, str, str, Tuple[str], Tuple[Tuple[str, str]],
-              datetime]]]:
+        Tuple[str, str, str, Tuple[str], Tuple[Tuple[str, str]], float]]]:
     try:
         mac = check_mac(mac)
         if until is not None:
@@ -110,7 +113,11 @@ def get_auth_attempts_of_mac(mac: str, until: Optional[Union[int, float]]=None,
         logger.exception("Invalid argument")
         return
     with contextlib.closing(engine.connect()) as connection:
-        return list(do_get_auth_attempts_of_mac(connection, mac, until, limit))
+        return list(starmap(
+            lambda nas_ip, nas_port, packet_type, groups, reply, auth_date:
+                (str(nas_ip), nas_port, packet_type, groups, reply,
+                 auth_date.timestamp()),
+            do_get_auth_attempts_of_mac(connection, mac, until, limit)))
 
 
 @app.task(acks_late=True)
@@ -129,5 +136,8 @@ def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
         logger.exception("Invalid argument")
         return
     with contextlib.closing(engine.connect()) as connection:
-        return list(do_get_auth_attempts_at_port(connection, nas_ip_address,
-                                                 nas_port_id, until, limit))
+        return list(starmap(
+            lambda packet_type, groups, reply, auth_date:
+                (packet_type, groups, reply, auth_date.timestamp()),
+            do_get_auth_attempts_at_port(connection, nas_ip_address,
+                                         nas_port_id, until, limit)))
