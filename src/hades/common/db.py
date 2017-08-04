@@ -526,7 +526,7 @@ def get_auth_attempts_at_port(connection: Connection,
                               nas_ip_address: netaddr.IPAddress,
                               nas_port_id: str, until: Optional[datetime]=None,
                               limit: Optional[int]=None)-> Iterable[
-        Tuple[str, Tuple[str], Tuple[Tuple[str, str]], datetime]]:
+        Tuple[str, str, Tuple[str], Tuple[Tuple[str, str]], datetime]]:
     """
     Return auth attempts at a particular port of an NAS ordered by Auth-Date
     descending.
@@ -536,14 +536,15 @@ def get_auth_attempts_at_port(connection: Connection,
     :param nas_port_id: NAS Port ID
     :param until: Maximum Auth-Date of the records
     :param limit: Maximum number of records
-    :return: An iterable that yields (Packet-Type, Groups, Reply,
+    :return: An iterable that yields (User-Name, Packet-Type, Groups, Reply,
              Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts at port %2$s of %1$s',
                  nas_ip_address, nas_port_id)
     query = (
-        select([radpostauth.c.PacketType, radpostauth.c.Groups,
-                radpostauth.c.Reply, radpostauth.c.AuthDate])
+        select([radpostauth.c.UserName, radpostauth.c.PacketType,
+                radpostauth.c.Groups, radpostauth.c.Reply,
+                radpostauth.c.AuthDate])
         .where(and_(radpostauth.c.NASIPAddress == nas_ip_address,
                     radpostauth.c.NASPortId == nas_port_id))
         .order_by(radpostauth.c.AuthDate.desc())

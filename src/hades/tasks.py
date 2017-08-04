@@ -124,7 +124,7 @@ def get_auth_attempts_of_mac(mac: str, until: Optional[Union[int, float]]=None,
 def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
                               until: Optional[Union[int, float]]=None,
                               limit: Optional[int]=100) -> Optional[
-        List[Tuple[str, Tuple[str], Tuple[Tuple[str, str]], datetime]]]:
+        List[Tuple[str, str, Tuple[str], Tuple[Tuple[str, str]], datetime]]]:
     try:
         nas_ip_address = check_ip_address(nas_ip_address)
         nas_port_id = check_str(nas_port_id)
@@ -137,7 +137,7 @@ def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
         return
     with contextlib.closing(engine.connect()) as connection:
         return list(starmap(
-            lambda packet_type, groups, reply, auth_date:
-                (packet_type, groups, reply, auth_date.timestamp()),
+            lambda user_name, packet_type, groups, reply, auth_date:
+                (user_name, packet_type, groups, reply, auth_date.timestamp()),
             do_get_auth_attempts_at_port(connection, nas_ip_address,
                                          nas_port_id, until, limit)))
