@@ -26,6 +26,7 @@ setup(name='@PACKAGE_NAME@',
           'pygobject',
           "pyrad",
           "pyroute2",
+          "pysnmp",
           "SQLAlchemy",
       ],
       entry_points={

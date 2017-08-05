@@ -68,6 +68,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     python3-pydbus \
     python3-pyrad \
     python3-pyroute2 \
+    python3-pysnmp4 \
     python3-pytest \
     python3-pytest-runner \
     python3-sqlalchemy \
