@@ -96,4 +96,6 @@ COPY ["build.sh", "/usr/local/bin"]
 
 VOLUME [ "/sys/fs/cgroup", "/build", "/build/hades"]
 
+STOPSIGNAL SIGRTMIN+3
+
 CMD ["/lib/systemd/systemd", "--system"]
