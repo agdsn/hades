@@ -7,7 +7,6 @@ other processes etc. needs certain privileges. The Deputy service runs as root
 and provides a very simple service over DBus.
 """
 import contextlib
-import grp
 import io
 import logging
 import os
