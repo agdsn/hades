@@ -13,8 +13,8 @@ services:
       - /tmp
       - /run
     privileged: true
-    stdin_open: true
-    tty: true
+    stdin_open: false
+    tty: false
     logging:
       driver: "json-file"
     stop_signal: SIGRTMIN+3
