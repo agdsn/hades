@@ -8,6 +8,7 @@ services:
         BUILDER_GID: ${GID:-100}
     image: hades
     container_name: hades
+    network_mode: bridge
     tmpfs:
       - /tmp
       - /run
