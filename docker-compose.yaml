@@ -22,7 +22,6 @@ services:
     stop_signal: SIGRTMIN+3
     volumes:
      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-     - ./.bash_history:/root/.bash_history
      - ../hades-build:/build
      - ./:/build/hades
 
