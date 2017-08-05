@@ -21,7 +21,7 @@ services:
     tty: false
     stop_signal: SIGRTMIN+3
     volumes:
-     - /sys/fs/cgroup:/sys/fs/cgroup:ro
-     - ../hades-build:/build
-     - ./:/build/hades
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - ../hades-build:/build
+      - ./:/build/hades
 
