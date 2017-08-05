@@ -838,6 +838,7 @@ class DEBUG(Option):
     """Flask debug mode flag"""
     defaults = False
     type = bool
+    category = 'flask'
 
 
 #######################
@@ -849,12 +850,14 @@ class BABEL_DEFAULT_LOCALE(Option):
     """Default locale of the portal application"""
     default = 'de_DE'
     type = str
+    category = 'flask'
 
 
 class BABEL_DEFAULT_TIMEZONE(Option):
     """Default timezone of the portal application"""
     default = 'Europe/Berlin'
     type = str
+    category = 'flask'
 
 
 ############################
@@ -880,6 +883,7 @@ class SQLALCHEMY_DATABASE_URI(Option):
                                         constants.DATABASE_NAME,
                                         query, ''))
     type = str
+    category = 'flask'
 
 
 ##################
@@ -889,6 +893,7 @@ class SQLALCHEMY_DATABASE_URI(Option):
 
 class BROKER_URL(Option):
     type = str
+    category = 'celery'
 
 
 class BROKER_CONNECTION_MAX_RETRIES(Option):
@@ -901,16 +906,19 @@ class BROKER_CONNECTION_MAX_RETRIES(Option):
     """
     default = 0
     type = int
+    category = 'celery'
 
 
 class CELERY_ENABLE_UTC(Option):
     default = True
     type = bool
+    category = 'celery'
 
 
 class CELERY_DEFAULT_DELIVERY_MODE(Option):
     default = 'transient'
     type = str
+    category = 'celery'
 
 
 class CELERY_QUEUES(Option):
@@ -938,64 +946,77 @@ class CELERY_QUEUES(Option):
                 auto_delete=True),
             )
     type = collections.Sequence
+    category = 'celery'
 
 
 class CELERYD_PREFETCH_MULTIPLIER(Option):
     type = int
     default = 1
+    category = 'celery'
 
 
 class CELERY_TIMEZONE(Option):
     default = 'UTC'
     type = str
+    category = 'celery'
 
 
 class CELERY_DEFAULT_QUEUE(Option):
     default = compute.deferred_format('hades.{}.{}', HADES_SITE_NAME,
                                       HADES_SITE_NODE_ID)
     type = str
+    category = 'celery'
 
 
 class CELERY_DEFAULT_ROUTING_KEY(Option):
     default = compute.equal_to(HADES_SITE_NAME)
     type = str
+    category = 'celery'
 
 
 class CELERY_DEFAULT_EXCHANGE(Option):
     default = 'hades.unicast'
     type = str
+    category = 'celery'
 
 
 class CELERY_ACCEPT_CONTENT(Option):
     default = ['json']
     type = collections.Sequence
+    category = 'celery'
 
 
 class CELERY_EVENT_SERIALIZER(Option):
     default = 'json'
     type = str
+    category = 'celery'
 
 
 class CELERY_RESULT_SERIALIZER(Option):
     default = 'json'
     type = str
+    category = 'celery'
 
 
 class CELERY_TASK_SERIALIZER(Option):
     default = 'json'
     type = str
+    category = 'celery'
 
 
 class CELERY_RESULT_BACKEND(Option):
     default = 'rpc://'
     type = str
+    category = 'celery'
 
 
 class CELERY_RESULT_EXCHANGE(Option):
     default = 'hades.result'
     type = str
+    category = 'celery'
 
 
 class CELERY_TASK_RESULT_EXPIRES(Option):
     default = timedelta(minutes=5)
     type = timedelta
+    category = 'celery'
