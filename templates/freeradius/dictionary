@@ -50,3 +50,12 @@
 
 ATTRIBUTE	Hades-User-Name		3000	string
 ATTRIBUTE	Hades-SQL-User-Name	3001	string
+
+# https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers
+VENDOR		AGDSN			45084
+
+BEGIN-VENDOR	AGDSN
+
+ATTRIBUTE	AGDSN-Hades-Message	1	string
+
+END-VENDOR	AGDSN
