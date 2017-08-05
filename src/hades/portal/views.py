@@ -6,6 +6,7 @@ from flask import render_template, request
 from flask_babel import _, lazy_gettext
 
 from hades.common.db import create_engine, get_groups, get_latest_auth_attempt
+from hades.config.loader import get_config
 from hades.portal import app, babel
 
 logger = app.logger
@@ -55,7 +56,8 @@ def handle_database_error(error):
 @app.before_first_request
 def init_engine():
     global engine
-    engine = create_engine(app.config)
+    config = get_config(runtime_checks=True)
+    engine = create_engine(config)
 
 
 @app.route("/")
