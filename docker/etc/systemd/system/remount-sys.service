@@ -1,0 +1,11 @@
+[Unit]
+Description=Remount /sys rw
+DefaultDependencies=no
+Before=sysinit.target
+ConditionPathExists=/sys
+ConditionCapability=CAP_SYS_ADMIN
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/mount -o remount,rw /sys

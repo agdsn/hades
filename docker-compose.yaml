@@ -12,7 +12,11 @@ services:
     tmpfs:
       - /tmp
       - /run
-    privileged: true
+    cap_add:
+      - SYS_ADMIN
+      - NET_ADMIN
+    security_opt:
+        - seccomp:unconfined
     stdin_open: false
     tty: false
     logging:
