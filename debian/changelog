@@ -1,3 +1,11 @@
+hades (0.3.2-1) stretch; urgency=low
+
+  * New minor release
+  * Various bug fixes
+  * Working Celery RPC API
+
+ -- Sebastian Schrader <sebastian.schrader@agdsn.de>  Sat, 05 Aug 2017 05:32:05 +0000
+
 hades (0.3.1-1) stretch; urgency=low
 
   * New minor release
