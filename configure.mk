@@ -229,7 +229,7 @@ CONFIGURE_FILES = \
     scripts/package-setup.sh \
     scripts/update-trust-anchor.sh \
     setup.py \
-    src/hades/deputy-interface.xml \
+    src/hades/deputy/interface.xml \
     $(NULL)
 
 all: $(CONFIGURE_FILES) src/hades/constants.py

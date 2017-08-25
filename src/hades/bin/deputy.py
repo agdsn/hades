@@ -4,7 +4,7 @@ from hades.common.cli import (
     ArgumentParser, parser as common_parser, setup_cli_logging,
 )
 from hades.config.loader import load_config
-from hades.deputy import run_event_loop
+from hades.deputy.server import run_event_loop
 
 
 def main():

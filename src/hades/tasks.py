@@ -15,7 +15,7 @@ from hades.common.db import (
     get_sessions_of_mac as do_get_sessions_of_mac,
 )
 from hades.config.loader import get_config
-from hades.deputy import signal_cleanup, signal_refresh
+from hades.deputy.client import signal_cleanup, signal_refresh
 
 logger = get_task_logger(__name__)
 app = Celery("hades.agent")

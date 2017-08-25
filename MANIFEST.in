@@ -1,5 +1,5 @@
 include babel.cfg LICENSE README.md setup.cfg
 include src/hades/logging.ini
-include src/hades/deputy-interface.xml
+include src/hades/deputy/interface.xml
 recursive-include src/hades/portal/assets *
 recursive-include src/hades/portal/templates *

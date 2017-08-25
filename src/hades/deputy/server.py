@@ -36,25 +36,6 @@ database_pwd = pwd.getpwnam(constants.DATABASE_USER)
 radius_pwd = pwd.getpwnam(constants.RADIUS_USER)
 
 
-def signal_refresh():
-    """
-    Signal the deputy to perform a refresh.
-    """
-    logger.debug("Signaling refresh on DBus: %s.%s",
-                 constants.DEPUTY_DBUS_NAME, 'Refresh')
-    bus = SystemBus()
-    deputy = bus.get(constants.DEPUTY_DBUS_NAME)
-    deputy.Refresh()
-
-
-def signal_cleanup():
-    logger.debug("Signaling cleanup on DBus: %s.%s",
-                 constants.DEPUTY_DBUS_NAME, 'Cleanup')
-    bus = SystemBus()
-    deputy = bus.get(constants.DEPUTY_DBUS_NAME)
-    deputy.Cleanup()
-
-
 def reload_systemd_unit(bus, unit):
     logger.debug("Instructing systemd to reload unit %s", unit)
     systemd = bus.get('org.freedesktop.systemd1')
@@ -156,7 +137,7 @@ def generate_radius_clients_file(clients):
 
 class HadesDeputyService(object):
     dbus = pkg_resources.resource_string(
-        __package__, 'deputy-interface.xml').decode('utf-8')
+        __package__, 'interface.xml').decode('utf-8')
 
     def __init__(self, bus, config):
         self.bus = bus
