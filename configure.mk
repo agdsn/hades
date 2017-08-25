@@ -58,7 +58,7 @@ endef
 # -------- #
 
 $(call add_substitution, PACKAGE_NAME,         hades)
-$(call add_substitution, PACKAGE_VERSION,      0.3.2)
+$(call add_substitution, PACKAGE_VERSION,      0.4.0)
 $(call add_substitution, PACKAGE_AUTHOR,       Sebastian Schrader)
 $(call add_substitution, PACKAGE_AUTHOR_EMAIL, sebastian.schrader@agdsn.de)
 $(call add_substitution, PACKAGE_LICENSE,      MIT)

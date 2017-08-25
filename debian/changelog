@@ -1,3 +1,9 @@
+hades (0.4.0dev) UNRELEASED; urgency=medium
+
+  * Start 0.4.0 branch
+
+ -- Sebastian Schrader <sebastian.schrader@agdsn.de>  Fri, 25 Aug 2017 23:11:12 +0200
+
 hades (0.3.2-1) stretch; urgency=low
 
   * New minor release
