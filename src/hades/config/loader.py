@@ -142,7 +142,7 @@ def load_config(filename=None, runtime_checks=False):
     if filename is None:
         filename = os.environ.get(
             'HADES_CONFIG', os.path.join(constants.pkgsysconfdir, 'config.py'))
-    d = types.ModuleType('hades.config.user')
+    d = types.ModuleType(__package__ + '.config_pseudo_module')
     d.__file__ = filename
     try:
         with open(filename) as f:
