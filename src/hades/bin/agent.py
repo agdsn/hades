@@ -37,7 +37,7 @@ def main():
     app.config_from_object(load_config(args.config))
     if args.app:
         parser.error("You may not provide the -A/--app worker argument")
-    argv.insert(0, sys.argv[0])
+    argv.insert(0, parser.prog)
     argv.extend(['-A', 'hades.bin.agent:app'])
     return app.worker_main(argv)
 
