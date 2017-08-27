@@ -5,6 +5,7 @@ import types
 
 # noinspection PyUnresolvedReferences
 import hades.config.options
+from hades import constants
 from hades.config.base import ConfigError, OptionMeta, is_option_name
 from hades.config.check import check_option
 
@@ -139,7 +140,8 @@ def get_config(runtime_checks=False):
 def load_config(filename=None, runtime_checks=False):
     config = get_defaults()
     if filename is None:
-        filename = os.environ.get('HADES_CONFIG', '/etc/hades/config.py')
+        filename = os.environ.get(
+            'HADES_CONFIG', os.path.join(constants.pkgsysconfdir, 'config.py'))
     d = types.ModuleType('hades.config.user')
     d.__file__ = filename
     try:
