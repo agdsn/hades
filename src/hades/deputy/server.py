@@ -27,6 +27,7 @@ from sqlalchemy.pool import StaticPool
 
 from hades import constants
 from hades.common import db
+from hades.common.dbus import handle_glib_error
 from hades.common.privileges import dropped_privileges
 from hades.config.loader import get_config
 
@@ -44,8 +45,11 @@ def reload_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
     :param timeout: Timeout in milliseconds
     """
     logger.debug("Instructing systemd to reload unit %s", unit)
-    systemd = bus.get('org.freedesktop.systemd1', timeout=timeout)
-    systemd.ReloadUnit(unit, 'fail', timeout=timeout)
+    try:
+        systemd = bus.get('org.freedesktop.systemd1', timeout=timeout)
+        systemd.ReloadUnit(unit, 'fail', timeout=timeout)
+    except GLib.Error as e:
+        handle_glib_error(e)
 
 
 def restart_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
@@ -56,8 +60,11 @@ def restart_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
     :param timeout: Timeout in milliseconds
     """
     logger.debug("Instructing systemd to restart unit %s", unit)
-    systemd = bus.get('org.freedesktop.systemd1', timeout=timeout)
-    systemd.RestartUnit(unit, 'fail', timeout=timeout)
+    try:
+        systemd = bus.get('org.freedesktop.systemd1', timeout=timeout)
+        systemd.RestartUnit(unit, 'fail', timeout=timeout)
+    except GLib.Error as e:
+        handle_glib_error(e)
 
 
 def generate_dhcp_host_reservations(hosts):
