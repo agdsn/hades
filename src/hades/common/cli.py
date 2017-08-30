@@ -19,8 +19,7 @@ class ArgumentParser(argparse.ArgumentParser):
 
 
 parser = ArgumentParser(add_help=False)
-parser.add_argument('-c', '--config', type=argparse.FileType('rb'),
-                    default=None, help="Path to config file")
+parser.add_argument('-c', '--config', default=None, help="Path to config file")
 parser.add_argument('-v', '--verbose', dest='verbosity',
                     default=None, action='count', help='Be more verbose')
 parser.add_argument('-q', '--quiet', dest='verbosity',

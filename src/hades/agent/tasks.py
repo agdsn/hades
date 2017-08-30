@@ -38,6 +38,7 @@ def rpc_task(*args, **kwargs):
     kwargs.setdefault('acks_late', True)
 
     def wrapper(f: types.FunctionType):
+        kwargs.setdefault('name', 'hades.agent.rpc.' + f.__name__)
         return app.task(*args, **kwargs)(f)
     return wrapper
 
