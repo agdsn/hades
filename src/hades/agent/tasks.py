@@ -34,8 +34,16 @@ def import_modules(sender, *args, **kwargs):
     engine = create_engine(config)
 
 
+class ArgumentError(Exception):
+    def __init__(self, argument: str, message: str):
+        super().__init__(argument, message)
+        self.argument = argument
+        self.message = message
+
+
 def rpc_task(*args, **kwargs):
     kwargs.setdefault('acks_late', True)
+    kwargs.setdefault('throws', (ArgumentError,))
 
     def wrapper(f: types.FunctionType):
         kwargs.setdefault('name', 'hades.agent.rpc.' + f.__name__)
@@ -53,42 +61,51 @@ def cleanup():
     signal_cleanup()
 
 
-def check_str(string: Any) -> str:
-    return str(string)
+def check_str(argument: str, string: Any) -> str:
+    try:
+        return str(string)
+    except ValueError as e:
+        raise ArgumentError(argument, "Invalid string: "
+                                      "{!r}".format(string)) from e
 
 
-def check_mac(mac: Any) -> netaddr.EUI:
+def check_mac(argument: str, mac: Any) -> netaddr.EUI:
     try:
         return netaddr.EUI(mac)
-    except netaddr.AddrFormatError as e:
-        raise ValueError("Invalid MAC address: {}".format(mac)) from e
+    except (netaddr.AddrFormatError, TypeError) as e:
+        raise ArgumentError(argument, "Invalid MAC address: "
+                                      "{}".format(mac)) from e
 
 
-def check_ip_address(ip_address: Any) -> netaddr.IPAddress:
+def check_ip_address(argument: str, ip_address: Any) -> netaddr.IPAddress:
     try:
         return netaddr.IPAddress(ip_address)
     except netaddr.AddrFormatError as e:
-        raise ValueError("Invalid IP address: {}".format(ip_address)) from e
+        raise ArgumentError(argument, "Invalid IP address: "
+                                      "{}".format(ip_address)) from e
 
 
-def check_timestamp(timestamp: Any) -> datetime:
+def check_timestamp(argument: str, timestamp: Any) -> datetime:
     try:
         return datetime.utcfromtimestamp(timestamp).replace(tzinfo=timezone.utc)
     except (ValueError, TypeError) as e:
-        raise ValueError("Invalid timestamp: {}".format(timestamp)) from e
+        raise ArgumentError(argument, "Invalid timestamp: "
+                                      "{}".format(timestamp)) from e
 
 
-def check_int(number: Any) -> int:
+def check_int(argument: str, number: Any) -> int:
     try:
         return int(number)
     except (ValueError, TypeError) as e:
-        raise ValueError("Invalid integer: {}".format(number)) from e
+        raise ArgumentError(argument, "Invalid integer: "
+                                      "{}" .format(number)) from e
 
 
-def check_positive_int(number: Any) -> int:
-    number = check_int(number)
+def check_positive_int(argument: str, number: Any) -> int:
+    number = check_int(argument, number)
     if number < 0:
-        raise ValueError("Not a positive number: {:d}".format(number))
+        raise ArgumentError(argument, "Not a positive integer: "
+                                      "{:d}".format(number))
     return number
 
 
@@ -96,15 +113,11 @@ def check_positive_int(number: Any) -> int:
 def get_sessions_of_mac(mac: str, until: Optional[Union[int, float]]=None,
                         limit: Optional[int]=100) -> Optional[
         List[Tuple[str, str, float, float]]]:
-    try:
-        mac = check_mac(mac)
-        if until is not None:
-            until = check_timestamp(until)
-        if limit is not None:
-            limit = check_positive_int(limit)
-    except ValueError:
-        logger.exception("Invalid argument")
-        return
+    mac = check_mac("mac", mac)
+    if until is not None:
+        until = check_timestamp("until", until)
+    if limit is not None:
+        limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
         return list(starmap(
             lambda nas_ip, nas_port, start, stop:
@@ -116,15 +129,11 @@ def get_sessions_of_mac(mac: str, until: Optional[Union[int, float]]=None,
 def get_auth_attempts_of_mac(mac: str, until: Optional[Union[int, float]]=None,
                              limit: Optional[int]=100) -> Optional[List[
         Tuple[str, str, str, Tuple[str], Tuple[Tuple[str, str]], float]]]:
-    try:
-        mac = check_mac(mac)
-        if until is not None:
-            until = check_timestamp(until)
-        if limit is not None:
-            limit = check_positive_int(limit)
-    except ValueError:
-        logger.exception("Invalid argument")
-        return
+    mac = check_mac("mac", mac)
+    if until is not None:
+        until = check_timestamp("until", until)
+    if limit is not None:
+        limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
         return list(starmap(
             lambda nas_ip, nas_port, packet_type, groups, reply, auth_date:
@@ -138,16 +147,12 @@ def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
                               until: Optional[Union[int, float]]=None,
                               limit: Optional[int]=100) -> Optional[
         List[Tuple[str, str, Tuple[str], Tuple[Tuple[str, str]], datetime]]]:
-    try:
-        nas_ip_address = check_ip_address(nas_ip_address)
-        nas_port_id = check_str(nas_port_id)
-        if until is not None:
-            until = check_timestamp(until)
-        if limit is not None:
-            limit = check_positive_int(limit)
-    except ValueError:
-        logger.exception("Invalid argument")
-        return
+    nas_ip_address = check_ip_address("nas_ip_address", nas_ip_address)
+    nas_port_id = check_str("nas_port_id", nas_port_id)
+    if until is not None:
+        until = check_timestamp("until", until)
+    if limit is not None:
+        limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
         return list(starmap(
             lambda user_name, packet_type, groups, reply, auth_date:
