@@ -36,16 +36,28 @@ database_pwd = pwd.getpwnam(constants.DATABASE_USER)
 radius_pwd = pwd.getpwnam(constants.RADIUS_USER)
 
 
-def reload_systemd_unit(bus, unit):
+def reload_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
+    """
+    Instruct systemd to reload a given unit.
+    :param bus: A DBus Bus
+    :param unit: The name of the systemd unit
+    :param timeout: Timeout in milliseconds
+    """
     logger.debug("Instructing systemd to reload unit %s", unit)
-    systemd = bus.get('org.freedesktop.systemd1')
-    systemd.ReloadUnit(unit, 'fail')
+    systemd = bus.get('org.freedesktop.systemd1', timeout=timeout)
+    systemd.ReloadUnit(unit, 'fail', timeout=timeout)
 
 
-def restart_systemd_unit(bus, unit):
+def restart_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
+    """
+    Instruct systemd to restart a given unit.
+    :param bus: A DBus Bus
+    :param unit: The name of the systemd unit
+    :param timeout: Timeout in milliseconds
+    """
     logger.debug("Instructing systemd to restart unit %s", unit)
-    systemd = bus.get('org.freedesktop.systemd1')
-    systemd.RestartUnit(unit, 'fail')
+    systemd = bus.get('org.freedesktop.systemd1', timeout=timeout)
+    systemd.RestartUnit(unit, 'fail', timeout=timeout)
 
 
 def generate_dhcp_host_reservations(hosts):
