@@ -1,5 +1,4 @@
 import argparse
-import os
 import sys
 import textwrap
 
@@ -30,8 +29,6 @@ def main():
                             parents=[common_parser])
     parser.add_argument('-A', '--app', dest='app', help=argparse.SUPPRESS)
     args, argv = parser.parse_known_args()
-    if args.config:
-        os.environ['HADES_CONFIG'] = args.config
     app.config_from_object(load_config(args.config))
     if args.app:
         parser.error("You may not provide the -A/--app worker argument")
@@ -42,5 +39,3 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
-else:
-    app.config_from_object(load_config())

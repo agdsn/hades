@@ -131,6 +131,10 @@ def evaluate_callables(config):
 _config = None
 
 
+def is_config_loaded() -> bool:
+    return _config is not None
+
+
 def get_config(runtime_checks=False):
     if _config is None:
         raise RuntimeError("Config has not been loaded")

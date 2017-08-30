@@ -14,11 +14,15 @@ from hades.common.db import (
     get_auth_attempts_of_mac as do_get_auth_attempts_of_mac,
     get_sessions_of_mac as do_get_sessions_of_mac,
 )
-from hades.config.loader import get_config
+from hades.config.loader import get_config, is_config_loaded
 from hades.deputy.client import signal_cleanup, signal_refresh
 
 logger = get_task_logger(__name__)
 engine = None
+
+
+if not is_config_loaded() and not app.configured:
+    raise RuntimeError("Please load a config before importing this module")
 
 
 # noinspection PyUnusedLocal
