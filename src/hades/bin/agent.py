@@ -3,9 +3,7 @@ import os
 import sys
 import textwrap
 
-# noinspection PyUnresolvedReferences
-from hades.agent import tasks
-from hades.agent.tasks import app
+from hades.agent import app
 from hades.common.cli import ArgumentParser, parser as common_parser
 from hades.config.loader import load_config
 
@@ -21,10 +19,10 @@ class Formatter(argparse.HelpFormatter):
 def main():
     description = textwrap.dedent(
         """
-        Run the hades agent (Celery worker).
+        Run the celery command configured for Hades.
 
         All arguments except -c/--config and -A/--app are passed to the Celery
-        worker as is. You may not provide the -A/--app argument.
+        celery as is. You may not provide the -A/--app argument.
         """
     )
     parser = ArgumentParser(description=description,
@@ -39,7 +37,7 @@ def main():
         parser.error("You may not provide the -A/--app worker argument")
     argv.insert(0, parser.prog)
     argv.extend(['-A', 'hades.bin.agent:app'])
-    return app.worker_main(argv)
+    return app.start(argv)
 
 
 if __name__ == '__main__':

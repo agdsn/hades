@@ -1016,6 +1016,14 @@ class CELERY_RESULT_EXCHANGE(Option):
     category = 'celery'
 
 
+class CELERY_IMPORTS(Option):
+    default = (
+        'hades.agent.tasks',
+    )
+    type = collections.Sequence
+    category = 'celery'
+
+
 class CELERY_TASK_RESULT_EXPIRES(Option):
     default = timedelta(minutes=5)
     type = timedelta

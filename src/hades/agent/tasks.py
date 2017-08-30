@@ -4,10 +4,10 @@ from itertools import starmap
 from typing import Any, List, Optional, Tuple, Union
 
 import netaddr
-from celery import Celery
 from celery.signals import import_modules
 from celery.utils.log import get_task_logger
 
+from hades.agent import app
 from hades.common.db import (
     create_engine,
     get_auth_attempts_at_port as do_get_auth_attempts_at_port,
@@ -18,7 +18,6 @@ from hades.config.loader import get_config
 from hades.deputy.client import signal_cleanup, signal_refresh
 
 logger = get_task_logger(__name__)
-app = Celery("hades.agent")
 engine = None
 
 
