@@ -1,4 +1,5 @@
 import contextlib
+import types
 from datetime import datetime, timezone
 from itertools import starmap
 from typing import Any, List, Optional, Tuple, Union
@@ -33,12 +34,20 @@ def import_modules(sender, *args, **kwargs):
     engine = create_engine(config)
 
 
-@app.task(acks_late=True)
+def rpc_task(*args, **kwargs):
+    kwargs.setdefault('acks_late', True)
+
+    def wrapper(f: types.FunctionType):
+        return app.task(*args, **kwargs)(f)
+    return wrapper
+
+
+@rpc_task()
 def refresh():
     signal_refresh()
 
 
-@app.task(acks_late=True)
+@rpc_task()
 def cleanup():
     signal_cleanup()
 
@@ -82,7 +91,7 @@ def check_positive_int(number: Any) -> int:
     return number
 
 
-@app.task(acks_late=True)
+@rpc_task()
 def get_sessions_of_mac(mac: str, until: Optional[Union[int, float]]=None,
                         limit: Optional[int]=100) -> Optional[
         List[Tuple[str, str, float, float]]]:
@@ -102,7 +111,7 @@ def get_sessions_of_mac(mac: str, until: Optional[Union[int, float]]=None,
             do_get_sessions_of_mac(connection, mac, until, limit)))
 
 
-@app.task(acks_late=True)
+@rpc_task()
 def get_auth_attempts_of_mac(mac: str, until: Optional[Union[int, float]]=None,
                              limit: Optional[int]=100) -> Optional[List[
         Tuple[str, str, str, Tuple[str], Tuple[Tuple[str, str]], float]]]:
@@ -123,7 +132,7 @@ def get_auth_attempts_of_mac(mac: str, until: Optional[Union[int, float]]=None,
             do_get_auth_attempts_of_mac(connection, mac, until, limit)))
 
 
-@app.task(acks_late=True)
+@rpc_task()
 def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
                               until: Optional[Union[int, float]]=None,
                               limit: Optional[int]=100) -> Optional[
