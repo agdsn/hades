@@ -1,3 +1,4 @@
+# noinspection PyPackageRequirements
 from gi.repository import Gio, GLib
 
 

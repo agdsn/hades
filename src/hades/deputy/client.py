@@ -1,5 +1,6 @@
 import logging
 
+# noinspection PyPackageRequirements
 from gi.repository import GLib
 from pydbus import SystemBus
 

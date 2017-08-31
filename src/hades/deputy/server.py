@@ -21,6 +21,7 @@ from typing import Iterable, Tuple
 
 import netaddr
 import pkg_resources
+# noinspection PyPackageRequirements
 from gi.repository import GLib
 from pydbus import SystemBus
 from pydbus.bus import Bus
