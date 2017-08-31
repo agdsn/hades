@@ -1,12 +1,16 @@
 import contextlib
+import operator
+import platform
 import types
 from datetime import datetime, timezone
 from itertools import starmap
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import netaddr
+import pkg_resources
 from celery.signals import import_modules
 from celery.utils.log import get_task_logger
+from pydbus import SystemBus
 
 from hades.agent import app
 from hades.common.db import (
@@ -159,3 +163,133 @@ def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
                 (user_name, packet_type, groups, reply, auth_date.timestamp()),
             do_get_auth_attempts_at_port(connection, nas_ip_address,
                                          nas_port_id, until, limit)))
+
+
+def dict_from_attributes(
+        obj: object, attributes: Sequence[str]
+) -> Dict[str, Any]:
+    """
+    Get a given sequence of attributes from a given object and return the
+    results as dictionary.
+
+    :param obj: An object
+    :param attributes: A sequence of attributes
+    :return:
+    """
+    return dict(zip(attributes, operator.attrgetter(*attributes)(obj)))
+
+
+unit_properties = (
+    'Id', 'UnitFileState', 'ActiveEnterTimestamp',
+    'ActiveExitTimestamp', 'ActiveState', 'AssertResult', 'AssertTimestamp',
+    'ConditionResult', 'ConditionTimestamp', 'InactiveEnterTimestamp',
+    'InactiveExitTimestamp', 'LoadError', 'LoadState', 'Names',
+    'StateChangeTimestamp', 'SubState',
+)
+service_properties = (
+    'ExecMainStartTimestamp', 'ExecMainExitTimestamp', 'ExecMainCode',
+    'ExecMainStatus',
+)
+timer_properties = (
+    'LastTriggerUSec', 'LastTriggerUSecMonotonic', 'NextElapseUSecMonotonic',
+    'NextElapseUSecRealtime', 'Result', 'TimersCalendar', 'TimersMonotonic',
+)
+
+
+def get_unit_status(unit_name: str) -> Dict[str, Any]:
+    bus = SystemBus()
+    systemd = bus.get('org.freedesktop.systemd1')
+    path = systemd.GetUnit(unit_name)
+    unit = bus.get('org.freedesktop.systemd1', path)
+    properties = dict_from_attributes(unit['org.freedesktop.systemd1.Unit'],
+                                      unit_properties)
+    if unit_name.endswith('.service'):
+        properties.update(dict_from_attributes(
+            unit['org.freedesktop.systemd1.Service'], service_properties))
+    elif unit_name.endswith('.timer'):
+        properties.update(dict_from_attributes(
+            unit['org.freedesktop.systemd1.Timer'], timer_properties))
+    return properties
+
+
+units = (
+    'hades-agent.service',
+    'hades-auth-alternative-dns.service',
+    'hades-auth-dhcp.service',
+    'hades-auth-pristine-dns.service',
+    'hades-auth-vrrp.service',
+    'hades-cleanup.timer',
+    'hades-database.service',
+    'hades-deputy.service',
+    'hades-forced-refresh.timer',
+    'hades-network.service',
+    'hades-radius-vrrp.service',
+    'hades-radius.service',
+    'hades-refresh.timer',
+    'hades-unauth-dns.service',
+    'hades-unauth-http.service',
+    'hades-unauth-portal.service',
+    'hades-unauth-vrrp.service',
+    'hades.target',
+)
+
+
+@rpc_task()
+def get_systemd_status() -> Dict[str, Any]:
+    return {
+        'units': {
+            unit_name: get_unit_status(unit_name) for unit_name in units
+        },
+    }
+
+
+def get_distribution_metadata(
+        distribution: pkg_resources.Distribution
+) -> Dict[str, Any]:
+    """
+    Get metadata of a given distribution and all its dependencies.
+    :param distribution: A distribution object
+    :return: A metadata dictionary
+    """
+    return {
+        'name': distribution.project_name,
+        'version': distribution.version,
+        'py_version': distribution.py_version,
+        'requirements': {
+            requirement.project_name: get_distribution_metadata(requirement)
+            for requirement in map(pkg_resources.get_distribution,
+                                   distribution.requires())
+        },
+    }
+
+
+platform_attributes = (
+    'architecture', 'machine', 'node', 'processor', 'python_build',
+    'python_compiler', 'python_branch', 'python_implementation',
+    'python_revision', 'python_version', 'python_version_tuple',
+    'release', 'system', 'version', 'uname',
+)
+task_attributes = (
+    'name', 'max_retries', 'default_retry_delay', 'rate_limit', 'time_limit',
+    'soft_time_limit', 'ignore_result', 'store_errors_even_if_ignored',
+    'serializer', 'acks_late', 'track_started', 'expires',
+
+)
+
+
+@rpc_task()
+def get_system_information() -> Dict[str, Any]:
+    hades = pkg_resources.get_distribution("hades")
+    return {
+        'distribution': get_distribution_metadata(hades),
+        'platform': {
+            attr: getattr(platform, attr)() for attr in platform_attributes
+        },
+        'celery': {
+            'application_name': app.main,
+            'tasks': {
+                name: dict_from_attributes(task, task_attributes)
+                for name, task in app.tasks.items()
+            }
+        }
+    }
