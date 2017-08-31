@@ -17,11 +17,13 @@ import string
 import subprocess
 import textwrap
 from functools import partial
+from typing import Iterable, Tuple
 
 import netaddr
 import pkg_resources
 from gi.repository import GLib
 from pydbus import SystemBus
+from pydbus.bus import Bus
 from sqlalchemy import null
 from sqlalchemy.pool import StaticPool
 
@@ -29,7 +31,7 @@ from hades import constants
 from hades.common import db
 from hades.common.dbus import handle_glib_error
 from hades.common.privileges import dropped_privileges
-from hades.config.loader import get_config
+from hades.config.loader import get_config, CheckWrapper
 
 logger = logging.getLogger(__name__)
 auth_dhcp_pwd = pwd.getpwnam(constants.AUTH_DHCP_USER)
@@ -67,14 +69,18 @@ def restart_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
         handle_glib_error(e)
 
 
-def generate_dhcp_host_reservations(hosts):
+def generate_dhcp_host_reservations(
+        hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress]]
+) -> Iterable[str]:
     for mac, ip in hosts:
         mac = netaddr.EUI(mac)
         mac.dialect=netaddr.mac_unix_expanded
         yield "{0},{1}\n".format(mac, ip)
 
 
-def generate_dhcp_hosts_file(hosts):
+def generate_dhcp_hosts_file(
+        hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress]]
+) -> None:
     file_name = constants.AUTH_DHCP_HOSTS_FILE
     logger.info("Generating DHCP hosts file %s", file_name)
     try:
@@ -87,7 +93,8 @@ def generate_dhcp_hosts_file(hosts):
         logger.error("Error writing %s: %s", file_name, e.strerror)
 
 
-def generate_ipset_swap(ipset_name, tmp_ipset_name, ips):
+def generate_ipset_swap(ipset_name: str, tmp_ipset_name: str,
+                        ips: Iterable[netaddr.IPAddress]) -> Iterable[str]:
     yield 'create {} hash:ip -exist\n'.format(tmp_ipset_name)
     yield 'flush {}\n'.format(tmp_ipset_name)
     yield from map(partial('add {} {}\n'.format, tmp_ipset_name), ips)
@@ -95,7 +102,7 @@ def generate_ipset_swap(ipset_name, tmp_ipset_name, ips):
     yield 'destroy {}\n'.format(tmp_ipset_name)
 
 
-def update_alternative_dns_ipset(ips):
+def update_alternative_dns_ipset(ips: Iterable[netaddr.IPAddress]) -> None:
     conf = get_config()
     ipset_name = conf['HADES_AUTH_DNS_ALTERNATIVE_IPSET']
     tmp_ipset_name = 'tmp_' + ipset_name
@@ -108,7 +115,9 @@ def update_alternative_dns_ipset(ips):
         input=commands.buffer.getvalue())
 
 
-def generate_radius_clients(clients):
+def generate_radius_clients(
+        clients: Iterable[Tuple[str, str, str, int, str, str, str, str]]
+) -> Iterable[str]:
     escape_pattern = re.compile(r'(["\\])')
     replacement = r'\\\1'
 
@@ -141,7 +150,9 @@ def generate_radius_clients(clients):
             description=description)
 
 
-def generate_radius_clients_file(clients):
+def generate_radius_clients_file(
+        clients: Iterable[Tuple[str, str, str, int, str, str, str, str]]
+) -> None:
     logger.info("Generating freeRADIUS clients configuration")
     file_name = constants.RADIUS_CLIENTS_FILE
     try:
@@ -158,7 +169,7 @@ class HadesDeputyService(object):
     dbus = pkg_resources.resource_string(
         __package__, 'interface.xml').decode('utf-8')
 
-    def __init__(self, bus, config):
+    def __init__(self, bus: Bus, config: CheckWrapper):
         self.bus = bus
         self.config = config
         self.engine = db.create_engine(config, poolclass=StaticPool)
@@ -172,7 +183,7 @@ class HadesDeputyService(object):
 
         self.engine.pool._creator = creator
 
-    def Refresh(self, force):
+    def Refresh(self, force: bool):
         """
         Refresh the materialized views.
         If necessary depended config files are regenerate and the corresponding

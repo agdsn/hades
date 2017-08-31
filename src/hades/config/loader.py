@@ -2,6 +2,7 @@ import collections
 import logging
 import os
 import types
+from typing import Optional
 
 # noinspection PyUnresolvedReferences
 import hades.config.options
@@ -135,13 +136,14 @@ def is_config_loaded() -> bool:
     return _config is not None
 
 
-def get_config(runtime_checks=False):
+def get_config(runtime_checks: bool = False) -> CheckWrapper:
     if _config is None:
         raise RuntimeError("Config has not been loaded")
     return CheckWrapper(_config, runtime_checks=runtime_checks)
 
 
-def load_config(filename=None, runtime_checks=False):
+def load_config(filename: Optional[str] = None,
+                runtime_checks: bool = False) -> CheckWrapper:
     config = get_defaults()
     if filename is None:
         filename = os.environ.get(
