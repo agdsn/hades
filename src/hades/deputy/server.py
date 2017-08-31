@@ -49,7 +49,8 @@ def reload_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
     logger.debug("Instructing systemd to reload unit %s", unit)
     try:
         systemd = bus.get('org.freedesktop.systemd1', timeout=timeout)
-        systemd.ReloadUnit(unit, 'fail', timeout=timeout)
+        manager_interface = systemd['org.freedesktop.systemd1.Manager']
+        manager_interface.ReloadUnit(unit, 'fail', timeout=timeout)
     except GLib.Error as e:
         handle_glib_error(e)
 
@@ -64,7 +65,8 @@ def restart_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
     logger.debug("Instructing systemd to restart unit %s", unit)
     try:
         systemd = bus.get('org.freedesktop.systemd1', timeout=timeout)
-        systemd.RestartUnit(unit, 'fail', timeout=timeout)
+        manager_interface = systemd['org.freedesktop.systemd1.Manager']
+        manager_interface.RestartUnit(unit, 'fail', timeout=timeout)
     except GLib.Error as e:
         handle_glib_error(e)
 

@@ -18,7 +18,8 @@ def signal_refresh(timeout: int = 1) -> None:
     try:
         bus = SystemBus()
         deputy = bus.get(constants.DEPUTY_DBUS_NAME, timeout=timeout)
-        deputy.Refresh(timeout=timeout)
+        deputy_interface = deputy[constants.DEPUTY_DBUS_NAME]
+        deputy_interface.Refresh(timeout=timeout)
     except GLib.Error as e:
         handle_glib_error(e)
 
@@ -29,6 +30,7 @@ def signal_cleanup(timeout: int = 1) -> None:
     try:
         bus = SystemBus()
         deputy = bus.get(constants.DEPUTY_DBUS_NAME, timeout=timeout)
-        deputy.Cleanup(timeout=timeout)
+        deputy_interface = deputy[constants.DEPUTY_DBUS_NAME]
+        deputy_interface.Cleanup(timeout=timeout)
     except GLib.Error as e:
         handle_glib_error(e)
