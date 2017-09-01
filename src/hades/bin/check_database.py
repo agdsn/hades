@@ -48,7 +48,7 @@ def main():
     parser = ArgumentParser(parents=[common_parser])
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
-    config = load_config(args.config, True)
+    config = load_config(args.config, runtime_checks=True)
     try:
         engine = db.create_engine(config, poolclass=NullPool)
         agent_pwd = pwd.getpwnam(constants.AGENT_USER)

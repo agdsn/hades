@@ -416,7 +416,7 @@ def get_latest_auth_attempt(connection: Connection,
     response.
     """
     logger.debug('Getting latest auth attempt for MAC "%s"', mac)
-    config = get_config(True)
+    config = get_config(runtime_checks=True)
     interval = config.HADES_REAUTHENTICATION_INTERVAL
     return connection.execute(
         select([radpostauth.c.NASIPAddress, radpostauth.c.NASPortId,

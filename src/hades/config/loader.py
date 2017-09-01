@@ -56,7 +56,7 @@ class CheckWrapper(collections.Mapping):
     """Wrapper around a config object that executes check functions if options
     are accessed."""
 
-    def __init__(self, config, runtime_checks=True):
+    def __init__(self, config, *, runtime_checks=True):
         super().__init__()
         self._config = config
         self._runtime_checks = runtime_checks
@@ -136,13 +136,13 @@ def is_config_loaded() -> bool:
     return _config is not None
 
 
-def get_config(runtime_checks: bool = False) -> CheckWrapper:
+def get_config(*, runtime_checks: bool = False) -> CheckWrapper:
     if _config is None:
         raise RuntimeError("Config has not been loaded")
     return CheckWrapper(_config, runtime_checks=runtime_checks)
 
 
-def load_config(filename: Optional[str] = None,
+def load_config(filename: Optional[str] = None, *,
                 runtime_checks: bool = False) -> CheckWrapper:
     config = get_defaults()
     if filename is None:
