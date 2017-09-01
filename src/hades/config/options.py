@@ -891,6 +891,15 @@ class SQLALCHEMY_DATABASE_URI(Option):
 ##################
 
 
+class HADES_CELERY_WORKER_HOSTNAME(Option):
+    """
+    Hostname of the hades-agent Celery worker.
+    """
+    default = compute.deferred_format('{}.{}', HADES_SITE_NAME,
+                                      HADES_SITE_NODE_ID)
+    type = str
+
+
 class BROKER_URL(Option):
     type = str
     category = 'celery'

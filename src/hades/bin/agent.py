@@ -28,12 +28,17 @@ def main():
                             formatter_class=Formatter,
                             parents=[common_parser])
     parser.add_argument('-A', '--app', dest='app', help=argparse.SUPPRESS)
+    parser.add_argument('command')
     args, argv = parser.parse_known_args()
-    app.config_from_object(load_config(args.config))
+    config = load_config(args.config)
+    app.config_from_object(config)
     if args.app:
         parser.error("You may not provide the -A/--app worker argument")
     argv.insert(0, parser.prog)
+    argv.insert(1, args.command)
     argv.extend(['-A', 'hades.bin.agent:app'])
+    if args.command == 'worker':
+        argv.extend(['-n', config.HADES_CELERY_WORKER_HOSTNAME])
     return app.start(argv)
 
 
