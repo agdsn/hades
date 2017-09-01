@@ -31,7 +31,7 @@ def main():
     parser.add_argument('command')
     args, argv = parser.parse_known_args()
     config = load_config(args.config)
-    app.config_from_object(config)
+    app.config_from_object(config.category_('celery'))
     if args.app:
         parser.error("You may not provide the -A/--app worker argument")
     argv.insert(0, parser.prog)

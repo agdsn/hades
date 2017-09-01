@@ -3,7 +3,7 @@ from hades.config.loader import load_config
 from hades.portal import app, views
 
 
-app.config.update(load_config())
+app.config.from_object(load_config(category='flask'))
 application = app
 
 

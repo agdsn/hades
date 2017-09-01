@@ -51,6 +51,11 @@ class ConfigObject(collections.MutableMapping):
     def items(self):
         return self.__dict__.items()
 
+    def category_(self, category):
+        return type(self)((name, value) for name, value in self.items()
+                          if name in OptionMeta.options
+                          and OptionMeta.options[name].category == category)
+
 
 class CheckWrapper(collections.Mapping):
     """Wrapper around a config object that executes check functions if options
@@ -103,6 +108,10 @@ class CheckWrapper(collections.Mapping):
     def items(self):
         return self._config.items()
 
+    def category_(self, category):
+        return type(self)(self._config.category_(category),
+                          runtime_checks=self._runtime_checks)
+
 
 def get_defaults():
     return ConfigObject((name, option.default)
@@ -136,14 +145,20 @@ def is_config_loaded() -> bool:
     return _config is not None
 
 
-def get_config(*, runtime_checks: bool = False) -> CheckWrapper:
+def get_config(*, runtime_checks: bool = False,
+               category: Optional[str] = None) -> CheckWrapper:
     if _config is None:
         raise RuntimeError("Config has not been loaded")
-    return CheckWrapper(_config, runtime_checks=runtime_checks)
+    if category is None:
+        config = _config
+    else:
+        config = _config.category_(category)
+    return CheckWrapper(config, runtime_checks=runtime_checks)
 
 
 def load_config(filename: Optional[str] = None, *,
-                runtime_checks: bool = False) -> CheckWrapper:
+                runtime_checks: bool = False,
+                category: Optional[str] = None) -> CheckWrapper:
     config = get_defaults()
     if filename is None:
         filename = os.environ.get(
@@ -175,4 +190,4 @@ def load_config(filename: Optional[str] = None, *,
     check_config(config)
     global _config
     _config = config
-    return get_config(runtime_checks=runtime_checks)
+    return get_config(runtime_checks=runtime_checks, category=category)
