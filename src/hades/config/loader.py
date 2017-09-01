@@ -61,7 +61,7 @@ class CheckWrapper(collections.Mapping):
     """Wrapper around a config object that executes check functions if options
     are accessed."""
 
-    def __init__(self, config, *, runtime_checks=True):
+    def __init__(self, config: ConfigObject, *, runtime_checks: bool = True):
         super().__init__()
         self._config = config
         self._runtime_checks = runtime_checks
