@@ -900,6 +900,43 @@ class HADES_CELERY_WORKER_HOSTNAME(Option):
     type = str
 
 
+class HADES_CELERY_RPC_EXCHANGE(Option):
+    default = 'hades.unicast'
+    type = str
+
+
+class HADES_CELERY_RPC_EXCHANGE_TYPE(Option):
+    default = 'topic'
+    type = str
+
+
+class HADES_CELERY_NOTIFY_EXCHANGE(Option):
+    default = 'hades.broadcast'
+    type = str
+
+
+class HADES_CELERY_NOTIFY_EXCHANGE_TYPE(Option):
+    default = 'fanout'
+    type = str
+
+
+class HADES_CELERY_NODE_QUEUE(Option):
+    default = compute.deferred_format('hades.{}.{}', HADES_SITE_NAME,
+                                      HADES_SITE_NODE_ID)
+    type = str
+
+
+class HADES_CELERY_SITE_ROUTING_KEY(Option):
+    default = compute.equal_to(HADES_SITE_NAME)
+    type = str
+
+
+class HADES_CELERY_NODE_ROUTING_KEY(Option):
+    default = compute.deferred_format('{}.{}', HADES_SITE_NAME,
+                                      HADES_SITE_NODE_ID)
+    type = str
+
+
 class BROKER_URL(Option):
     type = str
     category = 'celery'
@@ -944,14 +981,21 @@ class CELERY_QUEUES(Option):
         allow a queue to be bound to multiple exchanges in the CELERY_QUEUES
         option.
         """
+        rpc_exchange = kombu.Exchange(
+            config.HADES_CELERY_RPC_EXCHANGE,
+            config.HADES_CELERY_RPC_EXCHANGE_TYPE
+        )
+        notify_exchange = kombu.Exchange(
+            config.HADES_CELERY_NOTIFY_EXCHANGE,
+            config.HADES_CELERY_NOTIFY_EXCHANGE_TYPE
+        )
+        node_key = config.HADES_CELERY_NODE_ROUTING_KEY
+        site_key = config.HADES_CELERY_SITE_ROUTING_KEY
         return (
-            kombu.Queue(
-                'hades.{}.{}'.format(config.HADES_SITE_NAME,
-                                     config.HADES_SITE_NODE_ID),
-                [kombu.binding(kombu.Exchange('hades.unicast', 'topic'),
-                               routing_key='{}.#'.format(
-                                   config.HADES_SITE_NAME)),
-                 kombu.binding(kombu.Exchange('hades.broadcast', 'fanout'))],
+            kombu.Queue(config.HADES_CELERY_NODE_QUEUE, (
+                    kombu.binding(rpc_exchange, routing_key=node_key),
+                    kombu.binding(notify_exchange, routing_key=site_key),
+                ),
                 auto_delete=True, durable=False),
         )
     type = collections.Sequence
@@ -971,20 +1015,19 @@ class CELERY_TIMEZONE(Option):
 
 
 class CELERY_DEFAULT_QUEUE(Option):
-    default = compute.deferred_format('hades.{}.{}', HADES_SITE_NAME,
-                                      HADES_SITE_NODE_ID)
+    default = compute.equal_to(HADES_CELERY_NODE_QUEUE)
     type = str
     category = 'celery'
 
 
 class CELERY_DEFAULT_ROUTING_KEY(Option):
-    default = compute.equal_to(HADES_SITE_NAME)
+    default = compute.equal_to(HADES_CELERY_SITE_ROUTING_KEY)
     type = str
     category = 'celery'
 
 
 class CELERY_DEFAULT_EXCHANGE(Option):
-    default = 'hades.unicast'
+    default = compute.equal_to(HADES_CELERY_RPC_EXCHANGE)
     type = str
     category = 'celery'
 
