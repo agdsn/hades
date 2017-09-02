@@ -154,12 +154,6 @@ class CallableEvaluator(collections.Mapping):
         return zip(self.keys(), self.values())
 
 
-def get_defaults():
-    return ConfigObject((name, option.default)
-                        for name, option in OptionMeta.options.items()
-                        if option.has_default)
-
-
 _config = None
 
 
@@ -168,19 +162,19 @@ def is_config_loaded() -> bool:
 
 
 def get_config(*, runtime_checks: bool = False,
-               option_cls: Optional[OptionMeta] = None) -> CheckWrapper:
+               option_cls: Optional[OptionMeta] = None) -> Config:
     if _config is None:
         raise RuntimeError("Config has not been loaded")
     if option_cls is None:
         config = _config
     else:
         config = _config.of_type(option_cls)
-    return CheckWrapper(config, runtime_checks=runtime_checks)
+    return Config(config, runtime_checks=runtime_checks)
 
 
 def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
                 option_cls: Optional[OptionMeta] = None) -> CheckWrapper:
-    config = get_defaults()
+    config = ConfigObject(OptionMeta.get_defaults())
     if filename is None:
         filename = os.environ.get(
             'HADES_CONFIG', os.path.join(constants.pkgsysconfdir, 'config.py'))

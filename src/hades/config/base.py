@@ -55,6 +55,12 @@ class OptionMeta(type):
         super().__init__(name, bases, attributes)
 
     @classmethod
+    def get_defaults(mcs):
+        return {name: option.default
+                for name, option in mcs.options.items()
+                if option.has_default}
+
+    @classmethod
     def check_config(mcs, config, runtime_checks=False):
         for name, option in mcs.options.items():
             if option.required and name not in config:
