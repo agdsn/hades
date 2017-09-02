@@ -994,7 +994,9 @@ class CELERY_QUEUES(Option):
         return (
             kombu.Queue(config.HADES_CELERY_NODE_QUEUE, (
                     kombu.binding(rpc_exchange, routing_key=node_key),
+                    kombu.binding(notify_exchange, routing_key=node_key),
                     kombu.binding(notify_exchange, routing_key=site_key),
+                    kombu.binding(notify_exchange, routing_key=''),
                 ),
                 auto_delete=True, durable=False),
         )
