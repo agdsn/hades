@@ -916,7 +916,7 @@ class HADES_CELERY_NOTIFY_EXCHANGE(Option):
 
 
 class HADES_CELERY_NOTIFY_EXCHANGE_TYPE(Option):
-    default = 'fanout'
+    default = 'topic'
     type = str
 
 
