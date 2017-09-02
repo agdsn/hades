@@ -92,7 +92,7 @@ class CheckWrapper(collections.Mapping):
         return bool(self._config)
 
     def __len__(self):
-        len(self._config)
+        return len(self._config)
 
     def __contains__(self, x):
         return x in self._config
