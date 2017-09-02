@@ -971,15 +971,26 @@ class CELERY_QUEUES(Option):
     @staticmethod
     def default(config):
         """
-        Declare two queues per site, one to receive unicasts and one to receive
-        broadcasts.
-        Associate the queues with two global exchanges. A direct exchange that
-        routes unicast requests to the correct unicast site queue and a fanout
-        exchange that routes requests to all broadcast queues.
+        Declare two exchanges, one for RPCs and one for notifications.
 
-        Actually a single queue would suffice, but the design of Celery does not
-        allow a queue to be bound to multiple exchanges in the CELERY_QUEUES
-        option.
+        RPCs return results and should therefore only be answered by a single
+        agent. Notifications have no results and are processed by potentially
+        multiple agents.
+
+        Each agent/site node has a single queue specific to this node. This
+        queue is bound to the RPC exchange with a node-specific routing key and
+        to the notify exchange with the site-specific, node-specific, and empty
+        routing key. The agent on a site node, which has become the RADIUS VRRP
+        MASTER, will also bind its queue to the RPC exchange with the
+        site-specific routing key and remove this binding as soon as the sites
+        leaves the MASTER state.
+
+        This setup ensures that RPC messages can be sent to a specific
+        agent/node, by using the node-specific routing key and to the agent on
+        the master by using the site-specific routing key.
+        Notifications can be sent to all agents/nodes by using the empty routing
+        key, to all agents/nodes of a site by using the site-specific routing
+        key, and to a specific node by using the node-specific routing key.
         """
         rpc_exchange = kombu.Exchange(
             config.HADES_CELERY_RPC_EXCHANGE,
