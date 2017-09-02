@@ -48,10 +48,10 @@ class ConfigObject(collections.MutableMapping):
     def items(self):
         return self.__dict__.items()
 
-    def category_(self, category):
+    def of_type(self, option_cls: OptionMeta):
         return type(self)((name, value) for name, value in self.items()
                           if name in OptionMeta.options
-                          and OptionMeta.options[name].category == category)
+                          and issubclass(OptionMeta.options[name], option_cls))
 
 
 class CheckWrapper(collections.Mapping):
@@ -103,8 +103,8 @@ class CheckWrapper(collections.Mapping):
     def items(self):
         return self._config.items()
 
-    def category_(self, category):
-        return type(self)(self._config.category_(category),
+    def of_type(self, option_cls: OptionMeta):
+        return type(self)(self._config.of_type(option_cls),
                           runtime_checks=self._runtime_checks)
 
 
@@ -168,19 +168,18 @@ def is_config_loaded() -> bool:
 
 
 def get_config(*, runtime_checks: bool = False,
-               category: Optional[str] = None) -> CheckWrapper:
+               option_cls: Optional[OptionMeta] = None) -> CheckWrapper:
     if _config is None:
         raise RuntimeError("Config has not been loaded")
-    if category is None:
+    if option_cls is None:
         config = _config
     else:
-        config = _config.category_(category)
+        config = _config.of_type(option_cls)
     return CheckWrapper(config, runtime_checks=runtime_checks)
 
 
-def load_config(filename: Optional[str] = None, *,
-                runtime_checks: bool = False,
-                category: Optional[str] = None) -> CheckWrapper:
+def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
+                option_cls: Optional[OptionMeta] = None) -> CheckWrapper:
     config = get_defaults()
     if filename is None:
         filename = os.environ.get(
@@ -212,4 +211,4 @@ def load_config(filename: Optional[str] = None, *,
     OptionMeta.check_config(config)
     global _config
     _config = config
-    return get_config(runtime_checks=runtime_checks, category=category)
+    return get_config(runtime_checks=runtime_checks, option_cls=option_cls)

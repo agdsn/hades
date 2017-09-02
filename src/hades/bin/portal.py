@@ -1,9 +1,10 @@
 from hades.config.loader import load_config
+from hades.config.options import FlaskOption
 # noinspection PyUnresolvedReferences
 from hades.portal import app, views
 
 
-app.config.from_object(load_config(category='flask'))
+app.config.from_object(load_config(option_cls=FlaskOption))
 application = app
 
 

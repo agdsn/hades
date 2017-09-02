@@ -82,7 +82,6 @@ class Option(object, metaclass=OptionMeta, abstract=True):
     required = False
     default = None
     type = None
-    category = "hades"
     runtime_check = None
     static_check = None
 

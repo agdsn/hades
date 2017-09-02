@@ -833,12 +833,14 @@ class HADES_BRIDGE_SERVICE_INTERFACES(Option):
 # Flask options #
 #################
 
+class FlaskOption(Option, abstract=True):
+    pass
 
-class DEBUG(Option):
+
+class DEBUG(FlaskOption):
     """Flask debug mode flag"""
     defaults = False
     type = bool
-    category = 'flask'
 
 
 #######################
@@ -846,18 +848,16 @@ class DEBUG(Option):
 #######################
 
 
-class BABEL_DEFAULT_LOCALE(Option):
+class BABEL_DEFAULT_LOCALE(FlaskOption):
     """Default locale of the portal application"""
     default = 'de_DE'
     type = str
-    category = 'flask'
 
 
-class BABEL_DEFAULT_TIMEZONE(Option):
+class BABEL_DEFAULT_TIMEZONE(FlaskOption):
     """Default timezone of the portal application"""
     default = 'Europe/Berlin'
     type = str
-    category = 'flask'
 
 
 ############################
@@ -865,7 +865,7 @@ class BABEL_DEFAULT_TIMEZONE(Option):
 ############################
 
 
-class SQLALCHEMY_DATABASE_URI(Option):
+class SQLALCHEMY_DATABASE_URI(FlaskOption):
     @staticmethod
     def default(config):
         if 'postgresql' not in urllib.parse.uses_netloc:
@@ -883,7 +883,6 @@ class SQLALCHEMY_DATABASE_URI(Option):
                                         constants.DATABASE_NAME,
                                         query, ''))
     type = str
-    category = 'flask'
 
 
 ##################
@@ -937,12 +936,15 @@ class HADES_CELERY_NODE_ROUTING_KEY(Option):
     type = str
 
 
-class BROKER_URL(Option):
+class CeleryOption(Option, abstract=True):
+    pass
+
+
+class BROKER_URL(CeleryOption):
     type = str
-    category = 'celery'
 
 
-class BROKER_CONNECTION_MAX_RETRIES(Option):
+class BROKER_CONNECTION_MAX_RETRIES(CeleryOption):
     """
     Maximum number of retries before giving up re-establishing the
     connection to the broker.
@@ -952,22 +954,19 @@ class BROKER_CONNECTION_MAX_RETRIES(Option):
     """
     default = 0
     type = int
-    category = 'celery'
 
 
-class CELERY_ENABLE_UTC(Option):
+class CELERY_ENABLE_UTC(CeleryOption):
     default = True
     type = bool
-    category = 'celery'
 
 
-class CELERY_DEFAULT_DELIVERY_MODE(Option):
+class CELERY_DEFAULT_DELIVERY_MODE(CeleryOption):
     default = 'transient'
     type = str
-    category = 'celery'
 
 
-class CELERY_QUEUES(Option):
+class CELERY_QUEUES(CeleryOption):
     @staticmethod
     def default(config):
         """
@@ -1012,84 +1011,70 @@ class CELERY_QUEUES(Option):
                 auto_delete=True, durable=False),
         )
     type = collections.Sequence
-    category = 'celery'
 
 
-class CELERYD_PREFETCH_MULTIPLIER(Option):
+class CELERYD_PREFETCH_MULTIPLIER(CeleryOption):
     type = int
     default = 1
-    category = 'celery'
 
 
-class CELERY_TIMEZONE(Option):
+class CELERY_TIMEZONE(CeleryOption):
     default = 'UTC'
     type = str
-    category = 'celery'
 
 
-class CELERY_DEFAULT_QUEUE(Option):
+class CELERY_DEFAULT_QUEUE(CeleryOption):
     default = compute.equal_to(HADES_CELERY_NODE_QUEUE)
     type = str
-    category = 'celery'
 
 
-class CELERY_DEFAULT_ROUTING_KEY(Option):
+class CELERY_DEFAULT_ROUTING_KEY(CeleryOption):
     default = compute.equal_to(HADES_CELERY_SITE_ROUTING_KEY)
     type = str
-    category = 'celery'
 
 
-class CELERY_DEFAULT_EXCHANGE(Option):
+class CELERY_DEFAULT_EXCHANGE(CeleryOption):
     default = compute.equal_to(HADES_CELERY_RPC_EXCHANGE)
     type = str
-    category = 'celery'
 
 
-class CELERY_ACCEPT_CONTENT(Option):
+class CELERY_ACCEPT_CONTENT(CeleryOption):
     default = ['json']
     type = collections.Sequence
-    category = 'celery'
 
 
-class CELERY_EVENT_SERIALIZER(Option):
+class CELERY_EVENT_SERIALIZER(CeleryOption):
     default = 'json'
     type = str
-    category = 'celery'
 
 
-class CELERY_RESULT_SERIALIZER(Option):
+class CELERY_RESULT_SERIALIZER(CeleryOption):
     default = 'json'
     type = str
-    category = 'celery'
 
 
-class CELERY_TASK_SERIALIZER(Option):
+class CELERY_TASK_SERIALIZER(CeleryOption):
     default = 'json'
     type = str
-    category = 'celery'
 
 
-class CELERY_RESULT_BACKEND(Option):
+class CELERY_RESULT_BACKEND(CeleryOption):
     default = 'rpc://'
     type = str
-    category = 'celery'
 
 
-class CELERY_RESULT_EXCHANGE(Option):
+class CELERY_RESULT_EXCHANGE(CeleryOption):
     default = 'hades.result'
     type = str
-    category = 'celery'
 
 
-class CELERY_IMPORTS(Option):
+class CELERY_IMPORTS(CeleryOption):
     default = (
         'hades.agent.tasks',
     )
     type = collections.Sequence
-    category = 'celery'
 
 
-class CELERY_TASK_RESULT_EXPIRES(Option):
+class CELERY_TASK_RESULT_EXPIRES(CeleryOption):
     default = timedelta(minutes=5)
     type = timedelta
-    category = 'celery'

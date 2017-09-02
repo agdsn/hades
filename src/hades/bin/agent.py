@@ -5,6 +5,7 @@ import textwrap
 from hades.agent import app
 from hades.common.cli import ArgumentParser, parser as common_parser
 from hades.config.loader import load_config
+from hades.config.options import CeleryOption
 
 
 class Formatter(argparse.HelpFormatter):
@@ -31,7 +32,7 @@ def main():
     parser.add_argument('command')
     args, argv = parser.parse_known_args()
     config = load_config(args.config)
-    app.config_from_object(config.category_('celery'))
+    app.config_from_object(config.of_type(CeleryOption))
     if args.app:
         parser.error("You may not provide the -A/--app worker argument")
     argv.insert(0, parser.prog)
