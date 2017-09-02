@@ -7,23 +7,7 @@ import socket
 import netaddr
 from pyroute2.iproute import IPRoute
 
-from hades.config.base import ConfigError, coerce, qualified_name
-
-
-class OptionCheckError(ConfigError):
-    pass
-
-
-def check_option(config, option, value, runtime_checks=False):
-    if option.type is not None and not isinstance(value, option.type):
-        expected = qualified_name(option.type)
-        got = qualified_name(type(value))
-        raise OptionCheckError("Must be a subtype of {}, was {}"
-                               .format(expected, got), option=option.__name__)
-    if option.static_check:
-        option.static_check(config, value)
-    if runtime_checks and option.runtime_check:
-        option.runtime_check(config, value)
+from hades.config.base import ConfigError, OptionCheckError, coerce
 
 
 def greater_than(threshold):

@@ -9,7 +9,7 @@ import netaddr
 
 from hades import constants
 from hades.config import check, compute
-from hades.config.base import Option
+from hades.config.base import Option, OptionCheckError
 
 
 ###################
@@ -26,7 +26,7 @@ class HADES_SITE_NAME(Option):
     @classmethod
     def static_check(cls, config, value):
         if not re.match(r'\A[a-z][a-z0-9-]*\Z', value, re.ASCII):
-            raise check.OptionCheckError("not a valid site name", option=cls)
+            raise OptionCheckError("not a valid site name", option=cls)
 
 
 class HADES_SITE_NODE_ID(Option):
@@ -38,7 +38,7 @@ class HADES_SITE_NODE_ID(Option):
     @classmethod
     def static_check(cls, config, value):
         if not re.match(r'\A[a-z][a-z0-9-]*\Z', value, re.ASCII):
-            raise check.OptionCheckError("not a valid node ID", option=cls)
+            raise OptionCheckError("not a valid node ID", option=cls)
 
 
 class HADES_MAIL_DESTINATION_ADDRESSES(Option):

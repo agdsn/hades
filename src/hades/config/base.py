@@ -24,6 +24,7 @@ def qualified_name(type_):
         return type_.__module__ + '.' + type_.__qualname__
 
 
+# noinspection PyUnresolvedReferences
 class OptionMeta(type):
     """
     Metaclass for options.
@@ -52,6 +53,28 @@ class OptionMeta(type):
     # noinspection PyUnusedLocal
     def __init__(cls, name, bases, attributes, abstract=False):
         super().__init__(name, bases, attributes)
+
+    @classmethod
+    def check_config(mcs, config, runtime_checks=False):
+        for name, option in mcs.options.items():
+            if option.required and name not in config:
+                raise ConfigError("required option", option=name)
+        for name, value in config.items():
+            option = mcs.options.get(name)
+            if option:
+                option.check_option(config, value,
+                                    runtime_checks=runtime_checks)
+
+    def check_option(self, config, value, runtime_checks=False):
+        if self.type is not None and not isinstance(value, self.type):
+            expected = qualified_name(self.type)
+            got = qualified_name(type(value))
+            raise OptionCheckError("Must be a subtype of {}, was {}"
+                                   .format(expected, got), option=self.__name__)
+        if self.static_check:
+            self.static_check(config, value)
+        if runtime_checks and self.runtime_check:
+            self.runtime_check(config, value)
 
 
 class Option(object, metaclass=OptionMeta, abstract=True):
@@ -83,3 +106,7 @@ def coerce(value):
         return value.__name__
     else:
         return value
+
+
+class OptionCheckError(ConfigError):
+    pass

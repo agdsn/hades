@@ -8,7 +8,6 @@ from typing import Optional
 import hades.config.options
 from hades import constants
 from hades.config.base import ConfigError, OptionMeta, is_option_name
-from hades.config.check import check_option
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +78,7 @@ class CheckWrapper(collections.Mapping):
     def _verify(self, key, value):
         option = OptionMeta.options.get(key)
         if option:
-            check_option(self._config, option, value, self._runtime_checks)
+            option.check_option(self._config, value, self._runtime_checks)
 
     def __dir__(self):
         attributes = super().__dir__()
@@ -118,16 +117,6 @@ def get_defaults():
     return ConfigObject((name, option.default)
                         for name, option in OptionMeta.options.items()
                         if option.has_default)
-
-
-def check_config(config, runtime_checks=False):
-    for name, option in OptionMeta.options.items():
-        if option.required and name not in config:
-            raise ConfigError("required option", option=name)
-    for name, value in config.items():
-        option = OptionMeta.options.get(name)
-        if option:
-            check_option(config, option, value, runtime_checks=runtime_checks)
 
 
 def evaluate_callables(config):
@@ -188,7 +177,7 @@ def load_config(filename: Optional[str] = None, *,
     config.update((name, getattr(d, name))
                   for name in dir(d) if is_option_name(name))
     evaluate_callables(config)
-    check_config(config)
+    OptionMeta.check_config(config)
     global _config
     _config = config
     return get_config(runtime_checks=runtime_checks, category=category)
