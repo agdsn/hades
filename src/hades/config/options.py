@@ -901,7 +901,7 @@ class HADES_CELERY_WORKER_HOSTNAME(Option):
 
 
 class HADES_CELERY_RPC_EXCHANGE(Option):
-    default = 'hades.unicast'
+    default = 'hades.agent.rpc'
     type = str
 
 
@@ -911,7 +911,7 @@ class HADES_CELERY_RPC_EXCHANGE_TYPE(Option):
 
 
 class HADES_CELERY_NOTIFY_EXCHANGE(Option):
-    default = 'hades.broadcast'
+    default = 'hades.agent.notify'
     type = str
 
 
