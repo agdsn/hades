@@ -1,4 +1,5 @@
 import collections
+import itertools
 import logging
 import os
 import types
@@ -113,19 +114,56 @@ class CheckWrapper(collections.Mapping):
                           runtime_checks=self._runtime_checks)
 
 
+class CallableEvaluator(collections.Mapping):
+    def __init__(self, config: ConfigObject):
+        super().__init__()
+        self._config = config
+        self._stack = []
+
+    def __getattr__(self, item):
+        value = getattr(self._config, item)
+        value = self._evaluate(item, value)
+        return value
+
+    def __getitem__(self, key):
+        value = self._config[key]
+        value = self._evaluate(key, value)
+        return value
+
+    def _evaluate(self, key, value):
+        if key in self._stack:
+            raise ConfigError("Option recursion {} -> {}"
+                              .format('->'.join(self._stack), key),
+                              option=key)
+        self._stack.append(key)
+        if callable(value):
+            self._config[key] = value = value(self)
+        self._stack.pop()
+        return value
+
+    def __len__(self):
+        return len(self._config)
+
+    def __contains__(self, x):
+        return x in self._config
+
+    def __iter__(self):
+        return iter(self._config)
+
+    def keys(self):
+        return self._config.keys()
+
+    def values(self):
+        return itertools.starmap(self._evaluate, self._config.items())
+
+    def items(self):
+        return zip(self.keys(), self.values())
+
+
 def get_defaults():
     return ConfigObject((name, option.default)
                         for name, option in OptionMeta.options.items()
                         if option.has_default)
-
-
-def evaluate_callables(config):
-    """Option values may be callables that are evaluated after the full config
-    has been loaded. They receive the config and the name of the option as
-    arguments"""
-    for name, value in config.items():
-        if callable(value):
-            config[name] = value(config)
 
 
 _config = None
@@ -176,7 +214,7 @@ def load_config(filename: Optional[str] = None, *,
         raise
     config.update((name, getattr(d, name))
                   for name in dir(d) if is_option_name(name))
-    evaluate_callables(config)
+    config = ConfigObject(dict(CallableEvaluator(config)))
     OptionMeta.check_config(config)
     global _config
     _config = config
