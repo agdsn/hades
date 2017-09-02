@@ -952,8 +952,8 @@ class CELERY_QUEUES(Option):
                                routing_key='{}.#'.format(
                                    config.HADES_SITE_NAME)),
                  kombu.binding(kombu.Exchange('hades.broadcast', 'fanout'))],
-                auto_delete=True),
-            )
+                auto_delete=True, durable=False),
+        )
     type = collections.Sequence
     category = 'celery'
 
