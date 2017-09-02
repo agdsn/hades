@@ -27,9 +27,6 @@ class ConfigObject(collections.MutableMapping):
     def __len__(self):
         return len(self.__dict__)
 
-    def __bool__(self):
-        return bool(self.__dict__)
-
     def __contains__(self, x):
         return x in self.__dict__
 
@@ -87,9 +84,6 @@ class CheckWrapper(collections.Mapping):
         attributes.extend(attribute for attribute in dir(self._config)
                           if attribute not in self_attributes)
         return attributes
-
-    def __bool__(self):
-        return bool(self._config)
 
     def __len__(self):
         return len(self._config)
