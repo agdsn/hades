@@ -7,6 +7,8 @@ class NullSession(collections.MutableMapping, SessionMixin):
     A session similar to the Flask's :class:`flask.sessions.NullSession`, but
     with a different error message.
     """
+    __slots__ = ()
+
     def __len__(self):
         return 0
 
