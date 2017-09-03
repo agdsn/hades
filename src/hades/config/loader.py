@@ -92,10 +92,10 @@ class Config(collections.Mapping):
         return self._config.keys()
 
     def values(self):
-        return self._config.values()
+        return itertools.starmap(self._evaluate, self._config.items())
 
     def items(self):
-        return self._config.items()
+        return zip(self._config.keys(), self.values())
 
     def of_type(self, option_cls: OptionMeta):
         config_cls = type(self._config)
