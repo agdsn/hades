@@ -44,9 +44,11 @@ class AttributeAccessibleDict(dict):
         return attributes
 
 
-class CheckWrapper(collections.Mapping):
-    """Wrapper around a config object that executes check functions if options
-    are accessed."""
+class Config(collections.Mapping):
+    """
+    Config object that allows dict-style and attribute-style access to an
+    underlying dictionary and optionally verifies the options that are accessed.
+    """
     __slots__ = ('_config', '_runtime_checks',)
 
     def __init__(self, config: AttributeAccessibleDict, *,
@@ -146,17 +148,17 @@ def is_config_loaded() -> bool:
 
 
 def get_config(*, runtime_checks: bool = False,
-               option_cls: Optional[OptionMeta] = None) -> CheckWrapper:
+               option_cls: Optional[OptionMeta] = None) -> Config:
     if _config is None:
         raise RuntimeError("Config has not been loaded")
-    config = CheckWrapper(_config, runtime_checks=runtime_checks)
+    config = Config(_config, runtime_checks=runtime_checks)
     if option_cls is not None:
         config = config.of_type(option_cls)
     return config
 
 
 def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
-                option_cls: Optional[OptionMeta] = None) -> CheckWrapper:
+                option_cls: Optional[OptionMeta] = None) -> Config:
     config = AttributeAccessibleDict(OptionMeta.get_defaults())
     if filename is None:
         filename = os.environ.get(

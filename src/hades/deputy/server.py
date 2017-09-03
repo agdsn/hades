@@ -32,7 +32,7 @@ from hades import constants
 from hades.common import db
 from hades.common.dbus import handle_glib_error
 from hades.common.privileges import dropped_privileges
-from hades.config.loader import get_config, CheckWrapper
+from hades.config.loader import Config, get_config
 
 logger = logging.getLogger(__name__)
 auth_dhcp_pwd = pwd.getpwnam(constants.AUTH_DHCP_USER)
@@ -172,7 +172,7 @@ class HadesDeputyService(object):
     dbus = pkg_resources.resource_string(
         __package__, 'interface.xml').decode('utf-8')
 
-    def __init__(self, bus: Bus, config: CheckWrapper):
+    def __init__(self, bus: Bus, config: Config):
         self.bus = bus
         self.config = config
         self.engine = db.create_engine(config, poolclass=StaticPool)
