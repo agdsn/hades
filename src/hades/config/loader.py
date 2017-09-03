@@ -57,11 +57,12 @@ class ConfigObject(collections.MutableMapping):
 class CheckWrapper(collections.Mapping):
     """Wrapper around a config object that executes check functions if options
     are accessed."""
+    __slots__ = ('_config', '_runtime_checks',)
 
     def __init__(self, config: ConfigObject, *, runtime_checks: bool = True):
         super().__init__()
-        self._config = config
-        self._runtime_checks = runtime_checks
+        object.__setattr__(self, '_config', config)
+        object.__setattr__(self, '_runtime_checks', runtime_checks)
 
     def __getattr__(self, item):
         value = getattr(self._config, item)
@@ -109,10 +110,13 @@ class CheckWrapper(collections.Mapping):
 
 
 class CallableEvaluator(collections.Mapping):
+    __slots__ = ('_config', '_stack',)
+
     def __init__(self, config: ConfigObject):
         super().__init__()
-        self._config = config
-        self._stack = []
+        super().__init__(config)
+        object.__setattr__(self, '_config', config)
+        object.__setattr__(self, '_stack', [])
 
     def __getattr__(self, item):
         value = getattr(self._config, item)
