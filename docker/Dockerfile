@@ -78,6 +78,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     rabbitmq-server \
     sudo \
     systemd \
+    systemd-coredump \
     tcpdump \
     unbound \
     unzip \
