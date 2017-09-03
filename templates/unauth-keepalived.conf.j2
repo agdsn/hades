@@ -72,4 +72,6 @@ vrrp_instance hades-unauth {
         {{ network }} dev eth2
         {% endfor %}
     }
+
+    notify "{{ constants.bindir }}/hades-vrrp-notify"
 }

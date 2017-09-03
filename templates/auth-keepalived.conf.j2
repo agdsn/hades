@@ -75,4 +75,6 @@ vrrp_instance hades-auth {
         {{ network.cidr }} via {{ HADES_AUTH_NEXT_HOP.ip }} dev eth2
         {% endfor %}
     }
+
+    notify "{{ constants.bindir }}/hades-vrrp-notify"
 }

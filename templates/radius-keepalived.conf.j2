@@ -80,4 +80,6 @@ vrrp_instance hades-radius {
         {{ network }} dev {{ HADES_RADIUS_INTERFACE }}
         {% endfor %}
     }
+
+    notify "{{ constants.bindir }}/hades-vrrp-notify"
 }

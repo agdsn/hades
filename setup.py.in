@@ -38,6 +38,7 @@ setup(name='@PACKAGE_NAME@',
               'hades-generate-config = hades.bin.generate_config:main',
               'hades-portal = hades.bin.portal:main',
               'hades-su = hades.bin.su:main',
+              'hades-vrrp-notify = hades.bin.vrrp_notify:main',
           ],
       },
       classifiers=[
