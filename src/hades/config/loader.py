@@ -109,7 +109,13 @@ class Config(collections.Mapping):
 
 
 class CallableEvaluator(AttributeAccessibleDict):
+    """
+    Intercept attribute and dict item access. If the return value would be a
+    callable value, call the value with self as the only argument.
 
+    Internally a stack of item names, that are looked up, is maintained to
+    detect infinite recursion.
+    """
     __slots__ = ('_stack',)
 
     def __init__(self,
