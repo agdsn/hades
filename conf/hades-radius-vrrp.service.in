@@ -5,7 +5,8 @@ After=hades-root-netns.service
 BindsTo=hades-root-netns.service
 
 [Service]
-Type=forking
+Type=dbus
+BusName=@RADIUS_VRRP_DBUS_NAME@
 PIDFile=@pkgrunstatedir@/radius-vrrp/keepalived.pid
 KillMode=process
 SyslogIdentifier=hades-radius-vrrp

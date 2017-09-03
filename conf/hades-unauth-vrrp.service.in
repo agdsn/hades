@@ -6,7 +6,8 @@ BindsTo=hades-unauth-netns.service
 JoinsNamespaceOf=hades-unauth-netns.service
 
 [Service]
-Type=forking
+Type=dbus
+BusName=@UNAUTH_VRRP_DBUS_NAME@
 PrivateNetwork=yes
 PIDFile=@pkgrunstatedir@/unauth-vrrp/keepalived.pid
 KillMode=process

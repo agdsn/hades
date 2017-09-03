@@ -120,6 +120,7 @@ $(call add_substitution, AUTH_DNS_ALTERNATIVE_PID_FILE, $(pkgrunstatedir)/auth-d
 $(call add_substitution, AUTH_DNS_ROOT_HINTS, /usr/share/dns/root.hints)
 $(call add_substitution, AUTH_DNS_TRUST_ANCHOR_FILE, $(pkglocalstatedir)/auth-dns/root.key)
 $(call add_substitution, AUTH_NAMESPACE, auth)
+$(call add_substitution, AUTH_VRRP_DBUS_NAME, de.agdsn.hades.auth_vrrp)
 $(call add_substitution, DATABASE_NAME, hades)
 $(call add_substitution, DATABASE_SOCKET_DIRECTORY, $(pkgrunstatedir)/database)
 $(call add_substitution, DEPUTY_DBUS_NAME, de.agdsn.hades.deputy)
@@ -130,11 +131,13 @@ $(call add_substitution, PORTAL_NGINX_PID_FILE, $(pkgrunstatedir)/unauth-http/ng
 $(call add_substitution, PORTAL_UWSGI_PID_FILE, $(pkgrunstatedir)/unauth-portal/uwsgi.pid)
 $(call add_substitution, PORTAL_UWSGI_SOCKET, $(pkgrunstatedir)/unauth-portal/uwsgi.sock)
 $(call add_substitution, RADIUS_CLIENTS_FILE, $(pkglocalstatedir)/radius/clients.conf)
+$(call add_substitution, RADIUS_VRRP_DBUS_NAME, de.agdsn.hades.radius_vrrp)
 $(call add_substitution, RADIUS_PID_FILE, $(pkgrunstatedir)/radius/radiusd.pid)
 $(call add_substitution, UNAUTH_DHCP_LEASE_FILE, $(pkgrunstatedir)/unauth-dns/dnsmasq-dhcp.leases)
 $(call add_substitution, UNAUTH_DNS_DBUS_NAME, de.agdsn.hades.unauth_dnsmasq)
 $(call add_substitution, UNAUTH_DNS_PID_FILE, $(pkgrunstatedir)/unauth-dns/dnsmasq.pid)
 $(call add_substitution, UNAUTH_NAMESPACE, unauth)
+$(call add_substitution, UNAUTH_VRRP_DBUS_NAME, de.agdsn.hades.unauth_vrrp)
 
 # -------- #
 # Programs #

@@ -6,7 +6,8 @@ BindsTo=hades-auth-netns.service
 JoinsNamespaceOf=hades-auth-netns.service
 
 [Service]
-Type=forking
+Type=dbus
+BusName=@AUTH_VRRP_DBUS_NAME@
 PrivateNetwork=yes
 PIDFile=@pkgrunstatedir@/auth-vrrp/keepalived.pid
 KillMode=process

@@ -4,11 +4,17 @@
 <busconfig>
         <policy user="root">
                 <allow own="@AUTH_DHCP_DBUS_NAME@"/>
+                <allow own="@AUTH_VRRP_DBUS_NAME@"/>
                 <allow own="@DEPUTY_DBUS_NAME@"/>
+                <allow own="@RADIUS_VRRP_DBUS_NAME@"/>
                 <allow own="@UNAUTH_DNS_DBUS_NAME@"/>
+                <allow own="@UNAUTH_VRRP_DBUS_NAME@"/>
+                <allow send_destination="@AUTH_VRRP_DBUS_NAME@"/>
                 <allow send_destination="@AUTH_DHCP_DBUS_NAME@"/>
                 <allow send_destination="@DEPUTY_DBUS_NAME@"/>
+                <allow send_destination="@RADIUS_VRRP_DBUS_NAME@"/>
                 <allow send_destination="@UNAUTH_DNS_DBUS_NAME@"/>
+                <allow send_destination="@UNAUTH_VRRP_DBUS_NAME@"/>
         </policy>
         <policy user="@AGENT_USER@">
                 <allow send_destination="@DEPUTY_DBUS_NAME@"/>
@@ -23,10 +29,16 @@
         </policy>
         <policy context="default">
                 <deny own="@AUTH_DHCP_DBUS_NAME@"/>
+                <deny own="@AUTH_VRRP_DBUS_NAME@"/>
                 <deny own="@DEPUTY_DBUS_NAME@"/>
+                <deny own="@RADIUS_VRRP_DBUS_NAME@"/>
                 <deny own="@UNAUTH_DNS_DBUS_NAME@"/>
+                <deny own="@UNAUTH_VRRP_DBUS_NAME@"/>
+                <deny send_destination="@AUTH_VRRP_DBUS_NAME@"/>
                 <deny send_destination="@AUTH_DHCP_DBUS_NAME@"/>
                 <deny send_destination="@DEPUTY_DBUS_NAME@"/>
+                <deny send_destination="@RADIUS_VRRP_DBUS_NAME@"/>
                 <deny send_destination="@UNAUTH_DNS_DBUS_NAME@"/>
+                <deny send_destination="@UNAUTH_VRRP_DBUS_NAME@"/>
         </policy>
 </busconfig>
