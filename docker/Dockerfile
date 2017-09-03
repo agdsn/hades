@@ -76,6 +76,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     python3-setuptools \
     python3-venv \
     rabbitmq-server \
+    strace \
     sudo \
     systemd \
     systemd-coredump \
