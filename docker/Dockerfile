@@ -25,6 +25,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     freeradius \
     freeradius-postgresql \
     freeradius-utils \
+    gdb \
     git \
     git-buildpackage \
     ipset \
