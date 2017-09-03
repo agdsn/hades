@@ -18,6 +18,8 @@ global_defs {
     {% endif %}
 }
 
+instance hades_auth
+
 static_ipaddress {
     {{ HADES_VRRP_LISTEN_AUTH  }} dev eth1
 }

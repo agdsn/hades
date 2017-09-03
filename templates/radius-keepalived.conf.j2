@@ -18,6 +18,8 @@ global_defs {
     {% endif %}
 }
 
+instance hades_radius
+
 static_ipaddress {
     {{ HADES_VRRP_LISTEN_RADIUS }} dev {{ HADES_VRRP_BRIDGE }}
 }
