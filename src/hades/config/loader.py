@@ -3,7 +3,7 @@ import itertools
 import logging
 import os
 import types
-from typing import Optional
+from typing import Any, Iterable, Optional, Tuple, Union
 
 # noinspection PyUnresolvedReferences
 import hades.config.options
@@ -13,45 +13,35 @@ from hades.config.base import ConfigError, OptionMeta, is_option_name
 logger = logging.getLogger(__name__)
 
 
-class ConfigObject(collections.MutableMapping):
+class AttributeAccessibleDict(dict):
     """
-    An object suitable to be loaded by Flask or Celery.
+    A dictionary whose contents can also be accessed by attribute lookup.
     """
-    def __init__(self, d):
-        super().__init__()
-        self.__dict__.update(d)
+    __slots__ = ()
 
-    def __iter__(self):
-        return iter(self.__dict__)
+    def __getattr__(self, item):
+        try:
+            return self.__getitem__(item)
+        except KeyError:
+            raise AttributeError("'{}' object has no attribute '{}'"
+                                 .format(type(self).__name__, item)) from None
 
-    def __len__(self):
-        return len(self.__dict__)
+    def __setattr__(self, key, value):
+        self.__setitem__(key, value)
 
-    def __contains__(self, x):
-        return x in self.__dict__
+    def __delattr__(self, item):
+        try:
+            self.__delitem__(item)
+        except KeyError:
+            raise AttributeError("'{}' object has no attribute '{}'"
+                                 .format(type(self).__name__, item)) from None
 
-    def __getitem__(self, item):
-        return self.__dict__[item]
-
-    def __setitem__(self, key, value):
-        self.__dict__[key] = value
-
-    def __delitem__(self, key):
-        del self.__dict__[key]
-
-    def keys(self):
-        return self.__dict__.keys()
-
-    def values(self):
-        return self.__dict__.values()
-
-    def items(self):
-        return self.__dict__.items()
-
-    def of_type(self, option_cls: OptionMeta):
-        return type(self)((name, value) for name, value in self.items()
-                          if name in OptionMeta.options
-                          and issubclass(OptionMeta.options[name], option_cls))
+    def __dir__(self):
+        attributes = super().__dir__()
+        self_attributes = set(attributes)
+        attributes.extend(attribute for attribute in self.keys()
+                          if attribute not in self_attributes)
+        return attributes
 
 
 class CheckWrapper(collections.Mapping):
@@ -59,7 +49,8 @@ class CheckWrapper(collections.Mapping):
     are accessed."""
     __slots__ = ('_config', '_runtime_checks',)
 
-    def __init__(self, config: ConfigObject, *, runtime_checks: bool = True):
+    def __init__(self, config: AttributeAccessibleDict, *,
+                 runtime_checks: bool = True):
         super().__init__()
         object.__setattr__(self, '_config', config)
         object.__setattr__(self, '_runtime_checks', runtime_checks)
@@ -105,26 +96,27 @@ class CheckWrapper(collections.Mapping):
         return self._config.items()
 
     def of_type(self, option_cls: OptionMeta):
-        return type(self)(self._config.of_type(option_cls),
-                          runtime_checks=self._runtime_checks)
+        config_cls = type(self._config)
+        config = config_cls({
+            name: value
+            for name, value in self.items()
+            if name in OptionMeta.options
+            and issubclass(OptionMeta.options[name], option_cls)
+        })
+        return type(self)(config, runtime_checks=self._runtime_checks)
 
 
-class CallableEvaluator(collections.Mapping):
-    __slots__ = ('_config', '_stack',)
+class CallableEvaluator(AttributeAccessibleDict):
 
-    def __init__(self, config: ConfigObject):
-        super().__init__()
+    __slots__ = ('_stack',)
+
+    def __init__(self,
+                 config: Union[collections.Mapping, Iterable[Tuple[Any, Any]]]):
         super().__init__(config)
-        object.__setattr__(self, '_config', config)
         object.__setattr__(self, '_stack', [])
 
-    def __getattr__(self, item):
-        value = getattr(self._config, item)
-        value = self._evaluate(item, value)
-        return value
-
     def __getitem__(self, key):
-        value = self._config[key]
+        value = super().__getitem__(key)
         value = self._evaluate(key, value)
         return value
 
@@ -135,24 +127,12 @@ class CallableEvaluator(collections.Mapping):
                               option=key)
         self._stack.append(key)
         if callable(value):
-            self._config[key] = value = value(self)
+            self[key] = value = value(self)
         self._stack.pop()
         return value
 
-    def __len__(self):
-        return len(self._config)
-
-    def __contains__(self, x):
-        return x in self._config
-
-    def __iter__(self):
-        return iter(self._config)
-
-    def keys(self):
-        return self._config.keys()
-
     def values(self):
-        return itertools.starmap(self._evaluate, self._config.items())
+        return itertools.starmap(self._evaluate, super().items())
 
     def items(self):
         return zip(self.keys(), self.values())
@@ -166,19 +146,18 @@ def is_config_loaded() -> bool:
 
 
 def get_config(*, runtime_checks: bool = False,
-               option_cls: Optional[OptionMeta] = None) -> Config:
+               option_cls: Optional[OptionMeta] = None) -> CheckWrapper:
     if _config is None:
         raise RuntimeError("Config has not been loaded")
-    if option_cls is None:
-        config = _config
-    else:
-        config = _config.of_type(option_cls)
-    return Config(config, runtime_checks=runtime_checks)
+    config = CheckWrapper(_config, runtime_checks=runtime_checks)
+    if option_cls is not None:
+        config = config.of_type(option_cls)
+    return config
 
 
 def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
                 option_cls: Optional[OptionMeta] = None) -> CheckWrapper:
-    config = ConfigObject(OptionMeta.get_defaults())
+    config = AttributeAccessibleDict(OptionMeta.get_defaults())
     if filename is None:
         filename = os.environ.get(
             'HADES_CONFIG', os.path.join(constants.pkgsysconfdir, 'config.py'))
@@ -205,7 +184,7 @@ def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
         raise
     config.update((name, getattr(d, name))
                   for name in dir(d) if is_option_name(name))
-    config = ConfigObject(dict(CallableEvaluator(config)))
+    config = CallableEvaluator(config)
     OptionMeta.check_config(config)
     global _config
     _config = config
