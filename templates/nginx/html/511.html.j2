@@ -3,7 +3,7 @@
 		<title>Network Access Blocked</title>
 		<meta http-equiv="refresh" content="0; url={{ HADES_PORTAL_URL }}">
 	</head>
-	<body>
+	<body onload="window.location.replace('{{ HADES_PORTAL_URL }}');">
 		<p>You have been blocked from accessing the network.</p>
 		<p>If your browser does not automatically redirect you, click <a href="{{ HADES_PORTAL_URL }}">here</a> to find out why you have been blocked.</p>
 	</body>
