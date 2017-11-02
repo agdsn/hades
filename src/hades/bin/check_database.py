@@ -18,7 +18,7 @@ from hades.common.cli import (
 from hades.common.privileges import dropped_privileges
 from hades.config.loader import load_config
 
-logger = logging.getLogger(__package__)
+logger = logging.getLogger('hades.bin.check_database')
 
 
 def check_database(engine: Engine, user_name: pwd.struct_passwd,
