@@ -63,6 +63,12 @@ class IPAddress(TypeDecorator):
         return netaddr.IPAddress(value)
 
 
+class TupleArray(ARRAY):
+    def __init__(self, item_type, dimensions=None):
+        super().__init__(item_type, as_tuple=True, dimensions=dimensions,
+                         zero_indexes=True)
+
+
 alternative_dns = Table(
     'alternative_dns', metadata,
     Column('IPAddress', IPAddress, nullable=False),
@@ -167,10 +173,8 @@ radpostauth = Table(
     Column('NASIPAddress', IPAddress, nullable=False),
     Column('NASPortId', Text),
     Column('PacketType', Text, nullable=False),
-    Column('Groups', ARRAY(Text, as_tuple=True, zero_indexes=True,
-                           dimensions=1)),
-    Column('Reply', ARRAY(Text, as_tuple=True, zero_indexes=True,
-                          dimensions=2)),
+    Column('Groups', TupleArray(Text, dimensions=1)),
+    Column('Reply', TupleArray(Text, dimensions=2)),
     Column('AuthDate', DateTime(timezone=True), nullable=False),
 )
 
