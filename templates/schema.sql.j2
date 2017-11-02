@@ -231,7 +231,10 @@ ALTER FOREIGN TABLE foreign_alternative_dns OWNER TO "{{ constants.DATABASE_USER
 {% endif %}
 
 CREATE MATERIALIZED VIEW alternative_dns AS
- SELECT "IPAddress" FROM foreign_alternative_dns GROUP BY "IPAddress" WITH NO DATA;
+ SELECT foreign_alternative_dns."IPAddress"
+   FROM foreign_alternative_dns
+  GROUP BY foreign_alternative_dns."IPAddress"
+  WITH NO DATA;
 
 
 ALTER TABLE alternative_dns OWNER TO "{{ constants.DATABASE_USER }}";
@@ -948,3 +951,4 @@ GRANT SELECT ON TABLE radusergroup TO "{{ constants.RADIUS_USER }}";
 --
 -- PostgreSQL database dump complete
 --
+
