@@ -55,16 +55,6 @@ def rpc_task(*args, **kwargs):
     return wrapper
 
 
-@rpc_task()
-def refresh():
-    signal_refresh()
-
-
-@rpc_task()
-def cleanup():
-    signal_cleanup()
-
-
 def check_str(argument: str, string: Any) -> str:
     try:
         return str(string)
@@ -111,6 +101,16 @@ def check_positive_int(argument: str, number: Any) -> int:
         raise ArgumentError(argument, "Not a positive integer: "
                                       "{:d}".format(number))
     return number
+
+
+@rpc_task()
+def refresh():
+    signal_refresh()
+
+
+@rpc_task()
+def cleanup():
+    signal_cleanup()
 
 
 @rpc_task()
