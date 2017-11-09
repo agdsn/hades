@@ -7,10 +7,10 @@ from typing import Iterable, Iterator, List, Optional, Tuple
 import netaddr
 import psycopg2.extensions
 from sqlalchemy import (
-    BigInteger, CheckConstraint, Column, DateTime, Integer, MetaData,
-    PrimaryKeyConstraint, String, Table, Text, TypeDecorator, UniqueConstraint,
-    and_, column, create_engine as sqa_create_engine, func, null, or_, select,
-    table,
+    BigInteger, CheckConstraint, Column, DateTime, Integer, LargeBinary,
+    MetaData, PrimaryKeyConstraint, String, Table, Text, TypeDecorator,
+    UniqueConstraint, and_, column, create_engine as sqa_create_engine, func,
+    null, or_, select, table,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, INET, MACADDR
 from sqlalchemy.engine.base import Connection
@@ -102,6 +102,31 @@ dhcphost = Table(
     UniqueConstraint('IPAddress'),
 )
 temp_dhcphost = as_copy(dhcphost, 'temp_dhcphost')
+
+lease = Table(
+    'lease', metadata,
+    Column("MAC", MACAddress, nullable=False, primary_key=True),
+    Column("IPAddress", IPAddress, nullable=False),
+    Column("Hostname", Text),
+    Column("Domain", Text),
+    Column("SuppliedHostname", Text),
+    Column("ExpiresAt", DateTime(timezone=True), nullable=False),
+    Column("CreatedAt", DateTime(timezone=True), nullable=False,
+           server_default=func.now()),
+    Column("RelayIPAddress", IPAddress),
+    Column("Tags", TupleArray(Text, dimensions=1)),
+    Column("Domain", Text),
+    Column("ClientID", LargeBinary),
+    Column("CircuitID", LargeBinary),
+    Column("SubscriberID", LargeBinary),
+    Column("RemoteID", LargeBinary),
+    Column("VendorClass", Text),
+    Column("RequestedOptions", TupleArray(Integer, dimensions=1)),
+    Column("UserClasses", TupleArray(Text, dimensions=1)),
+    CheckConstraint(func.array_ndim("Tags") == 1),
+    CheckConstraint(func.array_ndim("RequestedOptions") == 1),
+    CheckConstraint(func.array_ndim("UserClasses") == 1),
+)
 
 nas = Table(
     'nas', metadata,
@@ -608,3 +633,34 @@ def get_all_alternative_dns_ips(connection: Connection) -> Iterator[
     logger.debug("Getting all alternative DNS clients")
     result = connection.execute(select([alternative_dns.c.IPAddress]))
     return map(operator.itemgetter(0), result)
+
+
+def get_all_leases(connection: Connection) -> Iterable[
+        Tuple[datetime, netaddr.EUI, netaddr.IPAddress, Optional[str],
+              Optional[str]]]:
+    """
+    Return all leases
+
+    :param connection: A SQLAlchemy connection
+    :return: An iterable that yields (Expires-At, MAC, IP-Address, Hostname,
+             Client-ID)-tuples
+    """
+    logger.debug('Getting all DHCP leases')
+    query = select([lease.c.ExpiresAt, lease.c.MAC, lease.c.IPAddress,
+                    lease.c.Hostname, lease.c.ClientID])
+    return iter(connection.execute(query))
+
+
+def get_lease(connection: Connection, ip: netaddr.IPAddress) -> Optional[
+        Tuple[datetime, netaddr.EUI, Optional[str], Optional[str]]]:
+    """
+    Get basic lease information for a given IP.
+
+    :param connection: A SQLAlchemy connection
+    :param ip: IP address
+    :return: An (Expiry-Time, MAC, Hostname, Client-ID)-tuples or None
+    """
+    logger.debug('Getting DHCP lease for %s', ip)
+    query = select([lease.c.ExpiresAt, lease.c.MAC, lease.c.Hostname,
+                    lease.c.ClientID]).where(IPAddress=ip)
+    return connection.execute(query).first()

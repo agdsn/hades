@@ -430,6 +430,34 @@ OPTIONS (
 
 ALTER FOREIGN TABLE foreign_radusergroup OWNER TO "{{ constants.DATABASE_USER }}";
 
+SET default_with_oids = false;
+
+--
+-- Name: lease; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+CREATE TABLE lease (
+    "MAC" macaddr NOT NULL,
+    "IPAddress" inet NOT NULL,
+    "Hostname" text,
+    "Domain" text,
+    "SuppliedHostname" text,
+    "ExpiresAt" timestamp with time zone NOT NULL,
+    "CreatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "RelayIPAddress" inet,
+    "Tags" text[],
+    "ClientID" bytea,
+    "CircuitID" bytea,
+    "SubscriberID" bytea,
+    "RemoteID" bytea,
+    "VendorClass" text,
+    "RequestedOptions" integer[],
+    "UserClasses" text[]
+);
+
+
+ALTER TABLE lease OWNER TO "{{ constants.DATABASE_USER }}";
+
 --
 -- Name: nas; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
@@ -466,8 +494,6 @@ CREATE MATERIALIZED VIEW nas AS
 
 
 ALTER TABLE nas OWNER TO "{{ constants.DATABASE_USER }}";
-
-SET default_with_oids = false;
 
 --
 -- Name: radacct; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
@@ -823,6 +849,14 @@ CREATE UNIQUE INDEX radreply_user_idx ON radreply USING btree ("UserName", "NASI
 --
 
 CREATE UNIQUE INDEX radusergroup_membership_idx ON radusergroup USING btree ("UserName", "NASIPAddress", "NASPortId", "Priority");
+
+
+--
+-- Name: lease; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT ON TABLE lease TO "{{ constants.AGENT_USER }}";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE lease TO "{{ constants.AUTH_DHCP_USER }}";
 
 
 --
