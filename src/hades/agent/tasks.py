@@ -150,7 +150,7 @@ def get_auth_attempts_of_mac(mac: str, until: Optional[Union[int, float]]=None,
 def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
                               until: Optional[Union[int, float]]=None,
                               limit: Optional[int]=100) -> Optional[
-        List[Tuple[str, str, Tuple[str], Tuple[Tuple[str, str]], datetime]]]:
+        List[Tuple[str, str, Tuple[str], Tuple[Tuple[str, str]], float]]]:
     nas_ip_address = check_ip_address("nas_ip_address", nas_ip_address)
     nas_port_id = check_str("nas_port_id", nas_port_id)
     if until is not None:
