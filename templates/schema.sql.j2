@@ -426,6 +426,38 @@ OPTIONS (
 
 ALTER FOREIGN TABLE foreign_radusergroup OWNER TO "{{ constants.DATABASE_USER }}";
 
+SET default_with_oids = false;
+
+--
+-- Name: auth_dhcp_lease; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+CREATE TABLE auth_dhcp_lease (
+    "MAC" macaddr NOT NULL,
+    "IPAddress" inet NOT NULL,
+    "Hostname" text,
+    "Domain" text,
+    "SuppliedHostname" text,
+    "ExpiresAt" timestamp with time zone NOT NULL,
+    "CreatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "UpdatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "RelayIPAddress" inet,
+    "Tags" text[] DEFAULT '{}' NOT NULL,
+    "ClientID" bytea,
+    "CircuitID" bytea,
+    "SubscriberID" bytea,
+    "RemoteID" bytea,
+    "VendorClass" text,
+    "RequestedOptions" integer[] DEFAULT '{}' NOT NULL,
+    "UserClasses" text[] DEFAULT '{}' NOT NULL,
+    CONSTRAINT "auth_dhcp_lease_Tags" CHECK ((COALESCE(array_ndims("Tags"), 1) = 1)),
+    CONSTRAINT "auth_dhcp_lease_RequestedOptions" CHECK ((COALESCE(array_ndims("RequestedOptions"), 1) = 1)),
+    CONSTRAINT "auth_dhcp_lease_UserClasses" CHECK ((COALESCE(array_ndims("UserClasses"), 1) = 1))
+);
+
+
+ALTER TABLE auth_dhcp_lease OWNER TO "{{ constants.DATABASE_USER }}";
+
 --
 -- Name: nas; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
@@ -462,8 +494,6 @@ CREATE MATERIALIZED VIEW nas AS
 
 
 ALTER TABLE nas OWNER TO "{{ constants.DATABASE_USER }}";
-
-SET default_with_oids = false;
 
 --
 -- Name: radacct; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
@@ -701,6 +731,14 @@ ALTER TABLE ONLY radacct
 
 
 --
+-- Name: auth_dhcp_lease auth_dhcp_lease_pkey; Type: CONSTRAINT; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+ALTER TABLE ONLY auth_dhcp_lease
+    ADD CONSTRAINT auth_dhcp_lease_pkey PRIMARY KEY ("IPAddress");
+
+
+--
 -- Name: radacct radacct_pkey; Type: CONSTRAINT; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
@@ -819,6 +857,14 @@ CREATE UNIQUE INDEX radreply_user_idx ON radreply USING btree ("UserName", "NASI
 --
 
 CREATE UNIQUE INDEX radusergroup_membership_idx ON radusergroup USING btree ("UserName", "NASIPAddress", "NASPortId", "Priority");
+
+
+--
+-- Name: auth_dhcp_lease; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT ON TABLE auth_dhcp_lease TO "{{ constants.AGENT_USER }}";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE auth_dhcp_lease TO "{{ constants.AUTH_DHCP_USER }}";
 
 
 --
