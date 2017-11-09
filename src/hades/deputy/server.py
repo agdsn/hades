@@ -30,9 +30,11 @@ from sqlalchemy.pool import StaticPool
 
 from hades import constants
 from hades.common import db
+from hades.common.db import get_auth_dhcp_lease_of_ip
 from hades.common.dbus import handle_glib_error
 from hades.common.privileges import dropped_privileges
 from hades.config.loader import Config, get_config
+from hades.deputy.dhcp import release_dhcp_lease
 
 logger = logging.getLogger(__name__)
 
@@ -312,6 +314,26 @@ class HadesDeputyService(object):
         with contextlib.closing(self.engine.connect()) as connection:
             db.delete_old_sessions(connection, interval)
             db.delete_old_auth_attempts(connection, interval)
+        return "OK"
+
+    def ReleaseAuthDhcpLease(self, client_ip: str) -> str:
+        """
+        Release a DHCP lease
+        :return:
+        """
+        logger.info("Releasing DHCP lease for client %s", client_ip)
+        try:
+            client_ip = netaddr.IPAddress(client_ip)
+        except ValueError:
+            return "ERROR: Illegal IP address %s" % client_ip
+        with contextlib.closing(self.engine.connect()) as connection:
+            lease_info = get_auth_dhcp_lease_of_ip(connection, client_ip)
+            if lease_info is None:
+                logger.warning("No lease for %s found", client_ip)
+                return "OK"
+            expiry_time, mac, hostname, client_id = lease_info
+            server_ip = self.config.HADES_AUTH_LISTEN[0]
+            release_dhcp_lease(server_ip, client_ip, mac, client_id)
         return "OK"
 
 
