@@ -186,7 +186,7 @@ class HadesDeputyService(object):
 
         self.engine.pool._creator = creator
 
-    def Refresh(self, force: bool):
+    def Refresh(self, force: bool) -> str:
         """
         Refresh the materialized views.
         If necessary depended config files are regenerate and the corresponding
@@ -260,7 +260,7 @@ class HadesDeputyService(object):
             update_alternative_dns_ipset(ips)
         return "OK"
 
-    def Cleanup(self):
+    def Cleanup(self) -> str:
         """
         Clean up old records in the radacct and radpostauth tables.
         :return: 
