@@ -21,7 +21,11 @@ from hades.common.db import (
     get_sessions_of_mac as do_get_sessions_of_mac,
 )
 from hades.config.loader import get_config, is_config_loaded
-from hades.deputy.client import signal_cleanup, signal_refresh
+from hades.deputy.client import (
+    signal_cleanup,
+    signal_auth_dhcp_lease_release,
+    signal_refresh,
+)
 
 logger = get_task_logger(__name__)
 engine: Optional[Engine] = None
@@ -168,6 +172,12 @@ def refresh():
 def cleanup():
     """Perform a database cleanup"""
     signal_cleanup()
+
+
+@rpc_task()
+def release_auth_dhcp_lease(ip: str):
+    ip = check_ip_address("ip", ip)
+    signal_auth_dhcp_lease_release(ip)
 
 
 @rpc_task()
