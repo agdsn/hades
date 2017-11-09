@@ -6,7 +6,7 @@ from typing import Iterable, List, Optional, Tuple
 import netaddr
 import psycopg2.extensions
 from sqlalchemy import (
-    BigInteger, Column, DateTime, Integer, MetaData,
+    BigInteger, CheckConstraint, Column, DateTime, Integer, MetaData,
     PrimaryKeyConstraint, String, Table, Text, TypeDecorator, UniqueConstraint,
     and_, column, create_engine as sqa_create_engine, func, null, or_, select,
     table,
@@ -176,6 +176,9 @@ radpostauth = Table(
     Column('Groups', TupleArray(Text, dimensions=1)),
     Column('Reply', TupleArray(Text, dimensions=2)),
     Column('AuthDate', DateTime(timezone=True), nullable=False),
+    CheckConstraint(func.array_ndim("Groups") == 1),
+    CheckConstraint(func.array_ndim("Reply") == 2 and
+                    func.array_length("Reply", 2) == 2),
 )
 
 radreply = Table(

@@ -603,7 +603,9 @@ CREATE TABLE radpostauth (
     "PacketType" text NOT NULL,
     "Groups" text[],
     "Reply" text[][2],
-    "AuthDate" timestamp with time zone NOT NULL DEFAULT now()
+    "AuthDate" timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT "radpostauth_GroupsDimension" CHECK ((array_ndims("Groups") = 1)),
+    CONSTRAINT "radpostauth_ReplyDimension" CHECK (((array_ndims("Reply") = 2) AND (array_length("Reply", 2) = 2)))
 );
 
 
