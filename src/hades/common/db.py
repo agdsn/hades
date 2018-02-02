@@ -410,7 +410,8 @@ def get_groups(connection: Connection, mac: netaddr.EUI) -> Iterable[
 
 def get_latest_auth_attempt(connection: Connection,
                             mac: netaddr.EUI) -> Optional[Tuple[
-        netaddr.IPAddress, str, Tuple[str], Tuple[Tuple[str]], datetime]]:
+        netaddr.IPAddress, str, Tuple[str, ...], Tuple[Tuple[str, str], ...],
+        datetime]]:
     """
     Get the latest auth attempt of a MAC address that occurred within twice the
     reauthentication interval.
@@ -501,8 +502,8 @@ def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
 def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
                              until: Optional[datetime]=None,
                              limit: Optional[int]=None) -> Iterable[
-        Tuple[netaddr.IPAddress, str, str, Tuple[str], Tuple[Tuple[str, str]],
-              datetime]]:
+        Tuple[netaddr.IPAddress, str, str, Tuple[str, ...],
+              Tuple[Tuple[str, str], ...], datetime]]:
     """
     Return auth attempts of a particular MAC address order by Auth-Date
     descending.
@@ -533,7 +534,8 @@ def get_auth_attempts_at_port(connection: Connection,
                               nas_ip_address: netaddr.IPAddress,
                               nas_port_id: str, until: Optional[datetime]=None,
                               limit: Optional[int]=None)-> Iterable[
-        Tuple[str, str, Tuple[str], Tuple[Tuple[str, str]], datetime]]:
+        Tuple[str, str, Tuple[str, ...], Tuple[Tuple[str, str], ...],
+              datetime]]:
     """
     Return auth attempts at a particular port of an NAS ordered by Auth-Date
     descending.
