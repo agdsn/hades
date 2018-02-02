@@ -15,7 +15,7 @@ from sqlalchemy.engine.result import RowProxy
 from hades.common.cli import (
     ArgumentParser, parser as parent_parser, setup_cli_logging,
 )
-from hades.common.db import create_engine, get_all_leases, lease
+from hades.common.db import create_engine, get_all_dhcp_leases, lease
 from hades.config.loader import load_config
 
 logger = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ def print_leases(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
     """Print all leases in dnsmasq leasefile format"""
     connection = load_config_and_connect(args)
     with connection.begin():
-        leases = get_all_leases(connection)
+        leases = get_all_dhcp_leases(connection)
     sys.stdout.writelines(generate_leasefile_lines(leases))
 
 

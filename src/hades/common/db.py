@@ -635,19 +635,28 @@ def get_all_alternative_dns_ips(connection: Connection) -> Iterator[
     return map(operator.itemgetter(0), result)
 
 
-def get_all_leases(connection: Connection) -> Iterable[
+def get_all_dhcp_leases(connection: Connection,
+                        when: Optional[DatetimeRange] = None,
+                        limit: Optional[int] = None) -> Iterable[
         Tuple[datetime, netaddr.EUI, netaddr.IPAddress, Optional[str],
               Optional[str]]]:
     """
     Return all leases
 
     :param connection: A SQLAlchemy connection
+    :param when: Range in which Expires-At must be within
+    :param limit: Maximum number of leases
     :return: An iterable that yields (Expires-At, MAC, IP-Address, Hostname,
              Client-ID)-tuples
     """
     logger.debug('Getting all DHCP leases')
-    query = select([lease.c.ExpiresAt, lease.c.MAC, lease.c.IPAddress,
+    query = (select([lease.c.ExpiresAt, lease.c.MAC, lease.c.IPAddress,
                     lease.c.Hostname, lease.c.ClientID])
+             .order_by(lease.c.ExpiresAt.desc()))
+    if when is not None:
+        query.where(radpostauth.c.AuthDate.op('<@') <= func.tstzrange(*when))
+    if limit is not None:
+        query = query.limit(limit)
     return iter(connection.execute(query))
 
 
