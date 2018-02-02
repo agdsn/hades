@@ -235,7 +235,7 @@ CREATE MATERIALIZED VIEW alternative_dns AS
    FROM foreign_alternative_dns
   WHERE {{ foreign_alternative_dns_ipaddress }} IS NOT NULL
   GROUP BY foreign_alternative_dns."IPAddress"
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE alternative_dns OWNER TO "{{ constants.DATABASE_USER }}";
@@ -289,7 +289,7 @@ CREATE MATERIALIZED VIEW dhcphost AS
           WHERE (({{ foreign_dhcphost_mac }} IS NOT NULL) AND ({{ foreign_dhcphost_ipaddress }} IS NOT NULL))
           WINDOW "MAC_window" AS (PARTITION BY {{ foreign_dhcphost_mac }}), "IPAddress_window" AS (PARTITION BY {{ foreign_dhcphost_ipaddress }})) indexed
   WHERE ((indexed."MAC_index" = 1) AND (indexed."IPAddress_index" = 1))
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE dhcphost OWNER TO "{{ constants.DATABASE_USER }}";
@@ -460,7 +460,7 @@ CREATE MATERIALIZED VIEW nas AS
             AND (foreign_nas."Secret" IS NOT NULL))
           WINDOW "NASName_window" AS (PARTITION BY foreign_nas."NASName"), "ShortName_window" AS (PARTITION BY foreign_nas."ShortName")) indexed
   WHERE ((indexed."NASName_index" = 1) AND (indexed."ShortName_index" = 1))
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE nas OWNER TO "{{ constants.DATABASE_USER }}";
@@ -824,62 +824,6 @@ CREATE UNIQUE INDEX radreply_user_idx ON radreply USING btree ("UserName", "NASI
 --
 
 CREATE UNIQUE INDEX radusergroup_membership_idx ON radusergroup USING btree ("UserName", "NASIPAddress", "NASPortId", "Priority");
-
-
---
--- Name: alternative_dns; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REFRESH MATERIALIZED VIEW alternative_dns;
-
-
---
--- Name: dhcphost; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REFRESH MATERIALIZED VIEW dhcphost;
-
-
---
--- Name: nas; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REFRESH MATERIALIZED VIEW nas;
-
-
---
--- Name: radcheck; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REFRESH MATERIALIZED VIEW radcheck;
-
-
---
--- Name: radgroupcheck; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REFRESH MATERIALIZED VIEW radgroupcheck;
-
-
---
--- Name: radgroupreply; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REFRESH MATERIALIZED VIEW radgroupreply;
-
-
---
--- Name: radreply; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REFRESH MATERIALIZED VIEW radreply;
-
-
---
--- Name: radusergroup; Type: MATERIALIZED VIEW DATA; Schema: public; Owner: {{ constants.DATABASE_USER }}
---
-
-REFRESH MATERIALIZED VIEW radusergroup;
 
 
 --
