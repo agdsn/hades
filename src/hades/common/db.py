@@ -410,30 +410,29 @@ def get_groups(connection: Connection, mac: netaddr.EUI) -> Iterable[
 
 def get_latest_auth_attempt(connection: Connection,
                             mac: netaddr.EUI) -> Optional[Tuple[
-        netaddr.IPAddress, str, Tuple[str, ...], Tuple[Tuple[str, str], ...],
-        datetime]]:
+        netaddr.IPAddress, str, str, Tuple[str, ...],
+        Tuple[Tuple[str, str], ...], datetime]]:
     """
     Get the latest auth attempt of a MAC address that occurred within twice the
     reauthentication interval.
 
     :param connection: A SQLAlchemy connection
     :param str mac: MAC address
-    :return: A (NAS-IP-Address, NAS-Port-Id, Groups, Reply, Auth-Date) tuple
-    or None if no attempt was found. Groups is an tuple of group names and Reply
-    is a tuple of (Attribute, Value)-pairs that were sent in the Access-Accept
-    response.
+    :return: A (NAS-IP-Address, NAS-Port-Id, Packet-Type, Groups, Reply,
+    Auth-Date) tuple or None if no attempt was found. Groups is an tuple of
+    group names and Reply is a tuple of (Attribute, Value)-pairs that were sent
+    in Access-Accept responses.
     """
     logger.debug('Getting latest auth attempt for MAC "%s"', mac)
     config = get_config(runtime_checks=True)
     interval = config.HADES_REAUTHENTICATION_INTERVAL
     return connection.execute(
         select([radpostauth.c.NASIPAddress, radpostauth.c.NASPortId,
-                radpostauth.c.Groups, radpostauth.c.Reply,
-                radpostauth.c.AuthDate])
+                radpostauth.c.PacketType, radpostauth.c.Groups,
+                radpostauth.c.Reply, radpostauth.c.AuthDate])
         .where(and_(
             radpostauth.c.UserName == mac,
             radpostauth.c.AuthDate >= (utcnow() - interval),
-            radpostauth.c.PacketType == 'Access-Accept',
         ))
         .order_by(radpostauth.c.AuthDate.desc()).limit(1)
     ).first()

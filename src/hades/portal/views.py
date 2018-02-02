@@ -35,7 +35,8 @@ messages = {
                             "If you are not a member, please apply."),
     'membership_ended': lazy_gettext("Your current membership status does not "
                                      "allow network access. "
-                                     "Please contact our support.")
+                                     "Please contact our support."),
+    'reject': lazy_gettext("Unknown reason. Please contact our support"),
 }
 engine = None
 
@@ -92,7 +93,7 @@ def index():
                                               "for your MAC address."))
             return content, 500
 
-        nas_ip_address, nas_port_id, *ignore = latest_auth_attempt
+        nas_ip_address, nas_port_id, packet_type, *ignore = latest_auth_attempt
 
         port_groups = [group for nai, npi, group in mac_groups
                        if nas_ip_address == nai and nas_port_id == npi]
@@ -103,6 +104,10 @@ def index():
 
         reasons = [messages[group] for group in port_groups
                    if group in messages]
+
+        if not reasons and packet_type != 'Access-Accept':
+            return render_template("status.html", mac=mac, show_mac=True,
+                                   reasons=[messages['fail']])
 
         return render_template("status.html", reasons=reasons,
                                mac=mac, show_mac=False)
