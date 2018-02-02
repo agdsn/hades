@@ -21,6 +21,10 @@ from hades.config.loader import get_config
 logger = logging.getLogger(__name__)
 metadata = MetaData()
 
+Groups = Tuple[str, ...]
+Attributes = Tuple[Tuple[str, str], ...]
+DatetimeRange = Tuple[Optional[datetime], Optional[datetime]]
+
 
 def as_copy(original_table, new_name):
     return Table(new_name, original_table.metadata,
@@ -410,8 +414,7 @@ def get_groups(connection: Connection, mac: netaddr.EUI) -> Iterable[
 
 def get_latest_auth_attempt(connection: Connection,
                             mac: netaddr.EUI) -> Optional[Tuple[
-        netaddr.IPAddress, str, str, Tuple[str, ...],
-        Tuple[Tuple[str, str], ...], datetime]]:
+        netaddr.IPAddress, str, str, Groups, Attributes, datetime]]:
     """
     Get the latest auth attempt of a MAC address that occurred within twice the
     reauthentication interval.
@@ -426,16 +429,11 @@ def get_latest_auth_attempt(connection: Connection,
     logger.debug('Getting latest auth attempt for MAC "%s"', mac)
     config = get_config(runtime_checks=True)
     interval = config.HADES_REAUTHENTICATION_INTERVAL
-    return connection.execute(
-        select([radpostauth.c.NASIPAddress, radpostauth.c.NASPortId,
-                radpostauth.c.PacketType, radpostauth.c.Groups,
-                radpostauth.c.Reply, radpostauth.c.AuthDate])
-        .where(and_(
-            radpostauth.c.UserName == mac,
-            radpostauth.c.AuthDate >= (utcnow() - interval),
-        ))
-        .order_by(radpostauth.c.AuthDate.desc()).limit(1)
-    ).first()
+    attempts = get_auth_attempts_of_mac(connection, mac, (interval, None), 1)
+    try:
+        return next(attempts)
+    except StopIteration:
+        return None
 
 
 def get_all_dhcp_hosts(connection: Connection) -> Iterable[
@@ -468,7 +466,7 @@ def get_all_nas_clients(connection: Connection) -> Iterable[
 
 
 def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
-                        until: Optional[datetime]=None,
+                        when: Optional[DatetimeRange]=None,
                         limit: Optional[int]=None) -> Iterable[
         Tuple[netaddr.IPAddress, str, datetime, datetime]]:
     """
@@ -477,7 +475,7 @@ def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
 
     :param connection: A SQLAlchemy connection
     :param str mac: MAC address
-    :param until: Maximum Session-Start-Time of the records
+    :param when: Range in which Session-Start-Time must be within
     :param limit: Maximum number of records
     :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id,
     Session-Start-Time, Session-Stop-Time)-tuples ordered by Session-Start-Time
@@ -491,25 +489,24 @@ def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
         .where(and_(radacct.c.UserName == mac))
         .order_by(radacct.c.AcctStartTime.desc())
     )
-    if until is not None:
-        query.where(radacct.c.AcctStartTime <= until)
+    if when is not None:
+        query.where(radacct.c.AcctStartTime.op('<@') <= func.tstzrange(*when))
     if limit is not None:
         query = query.limit(limit)
     return iter(connection.execute(query))
 
 
 def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
-                             until: Optional[datetime]=None,
+                             when: Optional[DatetimeRange]=None,
                              limit: Optional[int]=None) -> Iterable[
-        Tuple[netaddr.IPAddress, str, str, Tuple[str, ...],
-              Tuple[Tuple[str, str], ...], datetime]]:
+        Tuple[netaddr.IPAddress, str, str, Groups, Attributes, datetime]]:
     """
     Return auth attempts of a particular MAC address order by Auth-Date
     descending.
 
     :param connection: A SQLAlchemy connection
     :param mac: MAC address
-    :param until: Maximum Auth-Date of the records
+    :param when: Range in which Auth-Date must be within
     :param limit: Maximum number of records
     :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id, Packet-Type,
     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
@@ -522,8 +519,8 @@ def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
         .where(and_(radpostauth.c.UserName == mac))
         .order_by(radpostauth.c.AuthDate.desc())
     )
-    if until is not None:
-        query.where(radpostauth.c.AuthDate <= until)
+    if when is not None:
+        query.where(radpostauth.c.AuthDate.op('<@') <= func.tstzrange(*when))
     if limit is not None:
         query = query.limit(limit)
     return iter(connection.execute(query))
@@ -531,10 +528,10 @@ def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
 
 def get_auth_attempts_at_port(connection: Connection,
                               nas_ip_address: netaddr.IPAddress,
-                              nas_port_id: str, until: Optional[datetime]=None,
+                              nas_port_id: str,
+                              when: Optional[DatetimeRange]=None,
                               limit: Optional[int]=None)-> Iterable[
-        Tuple[str, str, Tuple[str, ...], Tuple[Tuple[str, str], ...],
-              datetime]]:
+        Tuple[str, str, Groups, Attributes, datetime]]:
     """
     Return auth attempts at a particular port of an NAS ordered by Auth-Date
     descending.
@@ -542,7 +539,7 @@ def get_auth_attempts_at_port(connection: Connection,
     :param connection: A SQLAlchemy connection
     :param nas_ip_address: NAS IP address
     :param nas_port_id: NAS Port ID
-    :param until: Maximum Auth-Date of the records
+    :param when: Range in which Auth-Date must be within
     :param limit: Maximum number of records
     :return: An iterable that yields (User-Name, Packet-Type, Groups, Reply,
              Auth-Date)-tuples ordered by Auth-Date descending
@@ -557,8 +554,8 @@ def get_auth_attempts_at_port(connection: Connection,
                     radpostauth.c.NASPortId == nas_port_id))
         .order_by(radpostauth.c.AuthDate.desc())
     )
-    if until is not None:
-        query.where(radpostauth.c.AuthDate <= until)
+    if when is not None:
+        query.where(radpostauth.c.AuthDate.op('<@') <= func.tstzrange(*when))
     if limit is not None:
         query = query.limit(limit)
     return iter(connection.execute(query))

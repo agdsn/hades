@@ -14,7 +14,7 @@ from pydbus import SystemBus
 
 from hades.agent import app
 from hades.common.db import (
-    create_engine,
+    Attributes, DatetimeRange, Groups, create_engine,
     get_auth_attempts_at_port as do_get_auth_attempts_at_port,
     get_auth_attempts_of_mac as do_get_auth_attempts_of_mac,
     get_sessions_of_mac as do_get_sessions_of_mac,
@@ -24,6 +24,8 @@ from hades.deputy.client import signal_cleanup, signal_refresh
 
 logger = get_task_logger(__name__)
 engine = None
+
+TimestampRange = Tuple[Union[None, int, float], Union[None, int, float]]
 
 
 if not is_config_loaded() and not app.configured:
@@ -79,12 +81,17 @@ def check_ip_address(argument: str, ip_address: Any) -> netaddr.IPAddress:
                                       "{}".format(ip_address)) from e
 
 
-def check_timestamp(argument: str, timestamp: Any) -> datetime:
+def check_timestamp_range(argument: str, timestamp_range: Any) -> DatetimeRange:
     try:
-        return datetime.utcfromtimestamp(timestamp).replace(tzinfo=timezone.utc)
+        low, high = timestamp_range[0:2]
+        if low is not None:
+            low = datetime.utcfromtimestamp(low).replace(tzinfo=timezone.utc)
+        if high is not None:
+            high = datetime.utcfromtimestamp(high).replace(tzinfo=timezone.utc)
+        return low, high
     except (ValueError, TypeError) as e:
         raise ArgumentError(argument, "Invalid timestamp: "
-                                      "{}".format(timestamp)) from e
+                                      "{}".format(timestamp_range)) from e
 
 
 def check_int(argument: str, number: Any) -> int:
@@ -114,29 +121,28 @@ def cleanup():
 
 
 @rpc_task()
-def get_sessions_of_mac(mac: str, until: Optional[Union[int, float]]=None,
-                        limit: Optional[int]=100) -> Optional[
+def get_sessions_of_mac(mac: str, when: Optional[TimestampRange] = None,
+                        limit: Optional[int] = 100) -> Optional[
         List[Tuple[str, str, float, float]]]:
     mac = check_mac("mac", mac)
-    if until is not None:
-        until = check_timestamp("until", until)
+    if when is not None:
+        when = check_timestamp_range("when", when)
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
         return list(starmap(
             lambda nas_ip, nas_port, start, stop:
                 (str(nas_ip), nas_port, start.timestamp(), stop.timestamp()),
-            do_get_sessions_of_mac(connection, mac, until, limit)))
+            do_get_sessions_of_mac(connection, mac, when, limit)))
 
 
 @rpc_task()
-def get_auth_attempts_of_mac(mac: str, until: Optional[Union[int, float]]=None,
-                             limit: Optional[int]=100) -> Optional[List[
-        Tuple[str, str, str, Tuple[str, ...], Tuple[Tuple[str, str], ...],
-              float]]]:
+def get_auth_attempts_of_mac(mac: str, when: Optional[TimestampRange] = None,
+                             limit: Optional[int] = 100) -> Optional[
+        List[Tuple[str, str, str, Groups, Attributes, float]]]:
     mac = check_mac("mac", mac)
-    if until is not None:
-        until = check_timestamp("until", until)
+    if when is not None:
+        when = check_timestamp_range("when", when)
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
@@ -149,14 +155,13 @@ def get_auth_attempts_of_mac(mac: str, until: Optional[Union[int, float]]=None,
 
 @rpc_task()
 def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
-                              until: Optional[Union[int, float]]=None,
-                              limit: Optional[int]=100) -> Optional[
-        List[Tuple[str, str, Tuple[str, ...], Tuple[Tuple[str, str], ...],
-                   float]]]:
+                              when: Optional[TimestampRange] = None,
+                              limit: Optional[int] = 100) -> Optional[
+        List[Tuple[str, str, Groups, Attributes, float]]]:
     nas_ip_address = check_ip_address("nas_ip_address", nas_ip_address)
     nas_port_id = check_str("nas_port_id", nas_port_id)
-    if until is not None:
-        until = check_timestamp("until", until)
+    if when is not None:
+        when = check_timestamp_range("until", when)
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
@@ -164,7 +169,7 @@ def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
             lambda user_name, packet_type, groups, reply, auth_date:
                 (user_name, packet_type, groups, reply, auth_date.timestamp()),
             do_get_auth_attempts_at_port(connection, nas_ip_address,
-                                         nas_port_id, until, limit)))
+                                         nas_port_id, when, limit)))
 
 
 def dict_from_attributes(
