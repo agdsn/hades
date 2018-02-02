@@ -1,5 +1,4 @@
 import arpreq
-import contextlib
 
 import sqlalchemy.exc
 from flask import render_template, request
@@ -79,7 +78,7 @@ def index():
                                           "your IP address {}".format(ip)))
         return content, 500
 
-    with contextlib.closing(engine.connect()) as connection, connection.begin():
+    with engine.begin() as connection:
         mac_groups = list(get_groups(connection, mac))
 
         if not mac_groups:
