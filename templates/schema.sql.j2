@@ -231,8 +231,9 @@ ALTER FOREIGN TABLE foreign_alternative_dns OWNER TO "{{ constants.DATABASE_USER
 {% endif %}
 
 CREATE MATERIALIZED VIEW alternative_dns AS
- SELECT foreign_alternative_dns."IPAddress"
+ SELECT {{ foreign_alternative_dns_ipaddress }} AS "IPAddress"
    FROM foreign_alternative_dns
+  WHERE {{ foreign_alternative_dns_ipaddress }} IS NOT NULL
   GROUP BY foreign_alternative_dns."IPAddress"
   WITH NO DATA;
 
@@ -530,7 +531,7 @@ CREATE MATERIALIZED VIEW radcheck AS
  SELECT row_number() OVER w AS "Priority",
     foreign_radcheck."UserName",
     {% if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
-    safe_inet_cast(foreign_radcheck.NASIPAddress) AS "NASIPAddress",
+    safe_inet_cast(foreign_radcheck."NASIPAddress") AS "NASIPAddress",
     {% else %}
     foreign_radcheck."NASIPAddress",
     {% endif %}
@@ -640,7 +641,7 @@ CREATE MATERIALIZED VIEW radreply AS
  SELECT row_number() OVER w AS "Priority",
     foreign_radreply."UserName",
     {% if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
-    safe_inet_cast(foreign_radreply.NASIPAddress) AS "NASIPAddress",
+    safe_inet_cast(foreign_radreply."NASIPAddress") AS "NASIPAddress",
     {% else %}
     foreign_radreply."NASIPAddress",
     {% endif %}
@@ -666,7 +667,7 @@ ALTER TABLE radreply OWNER TO "{{ constants.DATABASE_USER }}";
 CREATE MATERIALIZED VIEW radusergroup AS
  SELECT foreign_radusergroup."UserName",
     {% if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
-    safe_inet_cast(foreign_radusergroup.NASIPAddress) AS "NASIPAddress",
+    safe_inet_cast(foreign_radusergroup."NASIPAddress") AS "NASIPAddress",
     {% else %}
     foreign_radusergroup."NASIPAddress",
     {% endif %}
