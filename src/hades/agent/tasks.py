@@ -15,8 +15,11 @@ from pydbus import SystemBus
 from hades.agent import app
 from hades.common.db import (
     Attributes, DatetimeRange, Groups, create_engine,
+    get_all_dhcp_leases as do_get_all_dhcp_leases,
     get_auth_attempts_at_port as do_get_auth_attempts_at_port,
     get_auth_attempts_of_mac as do_get_auth_attempts_of_mac,
+    get_dhcp_lease_of_ip as do_get_dhcp_lease_of_ip,
+    get_dhcp_leases_of_mac as do_get_dhcp_leases_of_mac,
     get_sessions_of_mac as do_get_sessions_of_mac,
 )
 from hades.config.loader import get_config, is_config_loaded
@@ -263,6 +266,43 @@ def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
                 (user_name, packet_type, groups, reply, auth_date.timestamp()),
             do_get_auth_attempts_at_port(connection, nas_ip_address,
                                          nas_port_id, when, limit)))
+
+
+@rpc_task()
+def get_dhcp_leases(when: Optional[TimestampRange] = None,
+                    limit: Optional[int] = 100) -> Optional[
+        List[Tuple[float, str, str, Optional[str]]]]:
+    if when is not None:
+        when = check_timestamp_range("when", when)
+    if limit is not None:
+        limit = check_positive_int("limit", limit)
+    with contextlib.closing(engine.connect()) as connection:
+        return list(starmap(
+            lambda expires_at, mac, ip, hostname:
+                (expires_at.timestamp(), str(mac), str(ip), hostname),
+            do_get_all_dhcp_leases(connection, when, limit)))
+
+
+@rpc_task()
+def get_dhcp_leases_of_ip(ip: str) -> Optional[
+        List[Tuple[float, str, Optional[str]]]]:
+    ip = check_ip_address("ip", ip)
+    with contextlib.closing(engine.connect()) as connection:
+        return list(starmap(
+            lambda expires_at, mac, hostname:
+                (expires_at.timestamp(), str(ip), hostname),
+            do_get_dhcp_lease_of_ip(connection, ip)))
+
+
+@rpc_task()
+def get_dhcp_leases_of_mac(mac: str) -> Optional[
+        List[Tuple[float, str, Optional[str]]]]:
+    mac = check_mac("mac", mac)
+    with contextlib.closing(engine.connect()) as connection:
+        return list(starmap(
+            lambda expires_at, ip, hostname:
+                (expires_at.timestamp(), str(ip), hostname),
+            do_get_dhcp_leases_of_mac(connection, mac)))
 
 
 def dict_from_attributes(obj: object,

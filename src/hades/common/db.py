@@ -674,3 +674,21 @@ def get_dhcp_lease_of_ip(connection: Connection,
     query = select([lease.c.ExpiresAt, lease.c.MAC, lease.c.Hostname,
                     lease.c.ClientID]).where(IPAddress=ip)
     return connection.execute(query).first()
+
+
+def get_dhcp_leases_of_mac(connection: Connection,
+                           mac: netaddr.EUI) -> Iterable[
+        Tuple[datetime, netaddr.EUI, Optional[str], Optional[str]]]:
+    """
+    Get basic information about all leases of a given MAC.
+
+    :param connection: A SQLAlchemy connection
+    :param mac: MAC address
+    :return: An iterable of (Expiry-Time, IP-Address, Hostname, Client-ID)
+    tuples ordered by Expiry-Time descending
+    """
+    logger.debug('Getting DHCP leases for MAC %s', mac)
+    query = (select([lease.c.ExpiresAt, lease.c.IPAddress, lease.c.Hostname,
+                    lease.c.ClientID]).where(MAC=mac)
+             .order_by(lease.c.ExpiresAt.desc()))
+    return iter(connection.execute(query))
