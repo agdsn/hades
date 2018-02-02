@@ -30,7 +30,7 @@ from sqlalchemy.pool import StaticPool
 
 from hades import constants
 from hades.common import db
-from hades.common.db import get_lease
+from hades.common.db import get_dhcp_lease_of_ip
 from hades.common.dbus import handle_glib_error
 from hades.common.privileges import dropped_privileges
 from hades.config.loader import Config, get_config
@@ -327,7 +327,7 @@ class HadesDeputyService(object):
         except ValueError:
             return "ERROR: Illegal IP address %s" % client_ip
         with contextlib.closing(self.engine.connect()) as connection:
-            lease_info = get_lease(connection, client_ip)
+            lease_info = get_dhcp_lease_of_ip(connection, client_ip)
             if lease_info is None:
                 logger.warning("No lease for %s found", client_ip)
                 return "OK"

@@ -660,7 +660,8 @@ def get_all_dhcp_leases(connection: Connection,
     return iter(connection.execute(query))
 
 
-def get_lease(connection: Connection, ip: netaddr.IPAddress) -> Optional[
+def get_dhcp_lease_of_ip(connection: Connection,
+                         ip: netaddr.IPAddress) -> Optional[
         Tuple[datetime, netaddr.EUI, Optional[str], Optional[str]]]:
     """
     Get basic lease information for a given IP.
@@ -669,7 +670,7 @@ def get_lease(connection: Connection, ip: netaddr.IPAddress) -> Optional[
     :param ip: IP address
     :return: An (Expiry-Time, MAC, Hostname, Client-ID)-tuples or None
     """
-    logger.debug('Getting DHCP lease for %s', ip)
+    logger.debug('Getting DHCP lease for IP %s', ip)
     query = select([lease.c.ExpiresAt, lease.c.MAC, lease.c.Hostname,
                     lease.c.ClientID]).where(IPAddress=ip)
     return connection.execute(query).first()

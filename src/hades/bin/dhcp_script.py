@@ -63,7 +63,8 @@ def print_leases(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
 
 def get_env_safe(environ: Dict[str, str], name: str) -> Optional[str]:
     """
-    Try to get a string value from the environment and replace
+    Try to get a string value from the environment and replace illegal
+    characters using backslashreplace.
 
     See `here http://lucumr.pocoo.org/2013/7/2/the-updated-guide-to-unicode/`_
     for details.
