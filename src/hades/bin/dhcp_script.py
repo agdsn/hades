@@ -9,7 +9,8 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, TypeVar
 
 import netaddr
-from sqlalchemy.engine import Connection, RowProxy
+from sqlalchemy.engine.base import Connection
+from sqlalchemy.engine.result import RowProxy
 
 from hades.common.cli import (
     ArgumentParser, parser as parent_parser, setup_cli_logging,
