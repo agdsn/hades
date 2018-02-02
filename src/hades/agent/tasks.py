@@ -54,6 +54,7 @@ def rpc_task(*args, **kwargs):
     def wrapper(f: types.FunctionType):
         kwargs.setdefault('name', 'hades.agent.rpc.' + f.__name__)
         return app.task(*args, **kwargs)(f)
+
     return wrapper
 
 
@@ -99,7 +100,7 @@ def check_int(argument: str, number: Any) -> int:
         return int(number)
     except (ValueError, TypeError) as e:
         raise ArgumentError(argument, "Invalid integer: "
-                                      "{}" .format(number)) from e
+                                      "{}".format(number)) from e
 
 
 def check_positive_int(argument: str, number: Any) -> int:
@@ -172,9 +173,8 @@ def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
                                          nas_port_id, when, limit)))
 
 
-def dict_from_attributes(
-        obj: object, attributes: Sequence[str]
-) -> Dict[str, Any]:
+def dict_from_attributes(obj: object,
+                         attributes: Sequence[str]) -> Dict[str, Any]:
     """
     Get a given sequence of attributes from a given object and return the
     results as dictionary.
@@ -259,9 +259,9 @@ def get_distribution_metadata(
     :return: A metadata dictionary
     """
     return {
-        'name': distribution.project_name,
-        'version': distribution.version,
-        'py_version': distribution.py_version,
+        'name':         distribution.project_name,
+        'version':      distribution.version,
+        'py_version':   distribution.py_version,
         'requirements': {
             requirement.project_name: get_distribution_metadata(requirement)
             for requirement in map(pkg_resources.get_distribution,
@@ -289,12 +289,12 @@ def get_system_information() -> Dict[str, Any]:
     hades = pkg_resources.get_distribution("hades")
     return {
         'distribution': get_distribution_metadata(hades),
-        'platform': {
+        'platform':     {
             attr: getattr(platform, attr)() for attr in platform_attributes
         },
-        'celery': {
+        'celery':       {
             'application_name': app.main,
-            'tasks': {
+            'tasks':            {
                 name: dict_from_attributes(task, task_attributes)
                 for name, task in app.tasks.items()
             }
