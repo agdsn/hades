@@ -64,6 +64,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     python3-flask-babel \
     python3-gi \
     python3-jinja2 \
+    python3-kombu \
     python3-netaddr \
     python3-pip \
     python3-psycopg2 \
