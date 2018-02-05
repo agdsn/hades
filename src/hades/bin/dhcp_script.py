@@ -1,8 +1,10 @@
 import argparse
 import codecs
+import grp
 import itertools
 import logging
 import os
+import pwd
 import sys
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
@@ -12,6 +14,7 @@ import netaddr
 from sqlalchemy.engine.base import Connection
 from sqlalchemy.engine.result import RowProxy
 
+from hades import constants
 from hades.common.cli import (
     ArgumentParser,
     parser as parent_parser,
@@ -22,6 +25,7 @@ from hades.common.db import (
     create_engine,
     get_all_auth_dhcp_leases,
 )
+from hades.common.privileges import drop_privileges
 from hades.config.loader import load_config
 
 logger = logging.getLogger(__name__)
@@ -374,6 +378,19 @@ def create_parser() -> ArgumentParser:
 
 
 def main():
+    # When dnsmasq starts, it calls init before dropping privileges
+    if os.geteuid() == 0:
+        try:
+            passwd = pwd.getpwnam(constants.AUTH_DHCP_USER)
+        except KeyError:
+            logger.critical("No such user: {}".format(constants.AUTH_DHCP_USER))
+            return os.EX_NOUSER
+        try:
+            group = grp.getgrgid(passwd.pw_gid)
+        except KeyError:
+            logger.critical("No such group: {:d}".format(passwd.pw_gid))
+            return os.EX_NOUSER
+        drop_privileges(passwd, group)
     parser = create_parser()
 
     # type: Dict[str, Callable[[Any, Dict[str, str], Dict[bytes, bytes]], int]]
