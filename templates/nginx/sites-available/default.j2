@@ -39,4 +39,8 @@ server {
 		include uwsgi_params;
 		uwsgi_pass unix:{{ constants.PORTAL_UWSGI_SOCKET }};
 	}
+
+	location /assets {
+		alias {{ constants.assetdir }};
+	}
 }

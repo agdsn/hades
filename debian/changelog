@@ -6,6 +6,7 @@ hades (0.4.0dev) UNRELEASED; urgency=medium
   * Improve unit file dependencies
   * Replace leftover static paths in unit files with configured paths
   * Remove ip-netns calls in units
+  * Serve static files with nginx (See GH-56)
 
  -- Sebastian Schrader <sebastian.schrader@agdsn.de>  Fri, 25 Aug 2017 23:11:12 +0200
 
