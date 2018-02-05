@@ -1,11 +1,13 @@
 [Unit]
 Description=Hades DHCP service for authenticated users (dnsmasq)
 Documentation=https://agdsn.github.io/hades/
-After=hades-network.service
-Wants=hades-network.service
+After=hades-auth-netns.service
+BindsTo=hades-auth-netns.service
+JoinsNamespaceOf=hades-auth-netns.service
 
 [Service]
 Type=dbus
+PrivateNetwork=yes
 BusName=@AUTH_DHCP_DBUS_NAME@
 SyslogIdentifier=hades-auth-dhcp
 EnvironmentFile=@systemdenvfile@

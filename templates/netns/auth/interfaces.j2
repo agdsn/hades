@@ -1,0 +1,23 @@
+{% set namespace = "auth" %}
+{% include "netns/common.interfaces.j2" with context %}
+
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static inherits veth
+  # Add address to the root end of the veth pair
+  pre-up {{ constants.IP }} -n root address add {{ HADES_NETNS_MAIN_AUTH_LISTEN }} dev auth-$IFACE
+  # Let ifup handle the configuration of namespace end of the veth pair
+  address {{ HADES_NETNS_AUTH_LISTEN }}
+  gateway {{ HADES_NETNS_MAIN_AUTH_LISTEN.ip }}
+
+auto eth1
+iface eth1 inet manual inherits veth
+  # Attach root end of the veth pair to the VRRP bridge
+  pre-up {{ constants.IP }} -n root link set auth-eth1 master br-vrrp
+
+auto eth2
+iface eth2 inet manual inherits veth
+  # Attach the root end of the veth pair to the bridge
+  pre-up {{ constants.IP }} -n root link set auth-eth2 master br-auth

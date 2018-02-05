@@ -5,9 +5,9 @@ trap 'echo "ERROR: $BASH_SOURCE:$LINENO $BASH_COMMAND" >&2' ERR
 readonly vrrp_instance="$1"
 
 declare -r -A SERVICES=(
-	[auth]='hades-auth-alternative-dns.service hades-auth-dhcp.service hades-auth-pristine-dns.service hades-network.service'
-	[unauth]='hades-unauth-dns.service hades-unauth-http.service hades-unauth-portal.service hades-network.service'
-	[radius]='hades-radius.service hades-network.service'
+	[auth]='hades-auth-alternative-dns.service hades-auth-dhcp.service hades-auth-pristine-dns.service'
+	[unauth]='hades-unauth-dns.service hades-unauth-http.service hades-unauth-portal.service'
+	[radius]='hades-radius.service'
 )
 
 for service in ${SERVICES["${vrrp_instance}"]}; do

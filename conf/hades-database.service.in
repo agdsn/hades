@@ -1,8 +1,8 @@
 [Unit]
 Description=Hades database service (PostgreSQL)
 Documentation=https://agdsn.github.io/hades/
-After=hades-network.service
-Wants=hades-network.service
+After=hades-root-netns.service
+BindsTo=hades-root-netns.service
 
 [Service]
 Type=forking

@@ -1,8 +1,8 @@
 [Unit]
 Description=Hades VRRP service for RADIUS services (keepalived)
 Documentation=https://agdsn.github.io/hades/
-After=hades-network.service hades-database.service
-Wants=hades-network.service hades-database.service
+After=hades-root-netns.service
+BindsTo=hades-root-netns.service
 
 [Service]
 Type=forking

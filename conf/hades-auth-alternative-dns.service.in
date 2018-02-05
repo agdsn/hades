@@ -1,12 +1,14 @@
 [Unit]
 Description=Hades alternative DNS service for authenticated users (unbound)
 Documentation=https://agdsn.github.io/hades/
-After=hades-network.service
-Wants=hades-network.service
+After=hades-auth-netns.service
+BindsTo=hades-auth-netns.service
+JoinsNamespaceOf=hades-auth-netns.service
 
 [Service]
 Group=@AUTH_DNS_GROUP@
 Type=simple
+PrivateNetwork=yes
 PIDFile=@AUTH_DNS_ALTERNATIVE_PID_FILE@
 SyslogIdentifier=hades-auth-alternative-dns
 EnvironmentFile=@systemdenvfile@

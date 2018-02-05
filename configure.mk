@@ -144,12 +144,15 @@ $(call require_program,SHELL,bash)
 # Runtime programs
 $(call require_program,DBUS_SEND,dbus-send)
 $(call require_program,DNSMASQ,dnsmasq)
+$(call require_program,IFDOWN,ifdown)
+$(call require_program,IFUP,ifup)
 $(call require_program,IP,ip)
 $(call require_program,IPSET,ipset)
 $(call require_program,IPTABLES,iptables)
 $(call require_program,IPTABLES_RESTORE,iptables-restore)
 $(call require_program,KEEPALIVED,keepalived)
 $(call require_program,KILL,kill)
+$(call require_program,MOUNT,mount)
 $(call require_program,PG_CONFIG,pg_config)
 $(call require_program,PSQL,psql)
 $(call require_program,PYTHON3,python3)
@@ -159,6 +162,7 @@ $(call require_program,SED,sed)
 $(call require_program,SYSCTL,sysctl)
 $(call require_program,SYSTEMCTL,systemctl)
 $(call require_program,TOUCH,touch)
+$(call require_program,UMOUNT,umount)
 $(call require_program,UNBOUND,unbound)
 $(call require_program,UNBOUND_ANCHOR,unbound-anchor)
 $(call require_program,UNBOUND_CHECKCONF,unbound-checkconf)
@@ -205,26 +209,27 @@ CONFIGURE_FILES = \
     conf/hades-agent.service \
     conf/hades-auth-alternative-dns.service \
     conf/hades-auth-dhcp.service \
+    conf/hades-auth-netns.service \
     conf/hades-auth-pristine-dns.service \
     conf/hades-auth-vrrp.service \
     conf/hades-cleanup.service \
     conf/hades-database.service \
     conf/hades-deputy.service \
     conf/hades-deputy.dbus-service \
-    conf/hades-network.service \
     conf/hades-radius-vrrp.service \
     conf/hades-radius.service \
     conf/hades-refresh.service \
+    conf/hades-root-netns.service \
     conf/hades-forced-refresh.service \
     conf/hades-unauth-dns.service \
     conf/hades-unauth-http.service \
+    conf/hades-unauth-netns.service \
     conf/hades-unauth-portal.service \
     conf/hades-unauth-vrrp.service \
     conf/hades.busconfig \
     conf/hades.tmpfile \
     scripts/check-services.sh \
     scripts/control-database.sh \
-    scripts/control-network.sh \
     scripts/functions.sh \
     scripts/package-setup.sh \
     scripts/update-trust-anchor.sh \

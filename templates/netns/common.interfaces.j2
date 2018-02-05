@@ -1,0 +1,11 @@
+iface veth inet manual
+  # Create a veth pair
+  pre-up {{ constants.IP }} link add name $IFACE type veth peer netns root name {{ namespace }}-$IFACE
+  # Enable the root end of the veth pair
+  pre-up {{ constants.IP }} -n root link set {{ namespace }}-$IFACE up
+  # Delete the veth pair
+  post-down {{ constants.IP }} link delete $IFACE
+
+iface bridge inet manual
+  bridge_stp off
+  bridge_fd 0

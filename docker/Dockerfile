@@ -28,6 +28,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     gdb \
     git \
     git-buildpackage \
+    ifupdown \
     ipset \
     iptables \
     isc-dhcp-relay \

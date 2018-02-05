@@ -1,11 +1,13 @@
 [Unit]
 Description=Hades DNS service for unauthenticated users (dnsmasq)
 Documentation=https://agdsn.github.io/hades/
-After=hades-network.service
-Wants=hades-network.service
+After=hades-unauth-netns.service
+BindsTo=hades-unauth-netns.service
+JoinsNamespaceOf=hades-unauth-netns.service
 
 [Service]
 Type=dbus
+PrivateNetwork=yes
 BusName=@UNAUTH_DNS_DBUS_NAME@
 SyslogIdentifier=hades-unauth-dns
 EnvironmentFile=@systemdenvfile@

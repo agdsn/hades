@@ -2,7 +2,8 @@
 Description=Hades deputy service for privileged operations
 Documentation=https://agdsn.github.io/hades/
 After=hades-auth-dns.service hades-radius.service
-Wants=hades-network.service
+After=hades-root-netns.service
+BindsTo=hades-root-netns.service
 
 [Service]
 Type=dbus

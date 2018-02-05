@@ -1,11 +1,13 @@
 [Unit]
 Description=Hades VRRP service for unauth services (keepalived)
 Documentation=https://agdsn.github.io/hades/
-After=hades-network.service
-Wants=hades-network.service
+After=hades-unauth-netns.service
+BindsTo=hades-unauth-netns.service
+JoinsNamespaceOf=hades-unauth-netns.service
 
 [Service]
 Type=forking
+PrivateNetwork=yes
 PIDFile=@pkgrunstatedir@/unauth-vrrp/keepalived.pid
 KillMode=process
 SyslogIdentifier=hades-unauth-vrrp

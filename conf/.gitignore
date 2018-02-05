@@ -8,7 +8,6 @@
 /hades-deputy.service
 /hades-deputy.dbus-service
 /hades-forced-refresh.service
-/hades-network.service
 /hades-radius-vrrp.service
 /hades-radius.service
 /hades-refresh.service

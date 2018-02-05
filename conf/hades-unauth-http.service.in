@@ -1,11 +1,15 @@
 [Unit]
 Description=Hades http server (nginx)
 Documentation=https://agdsn.github.io/hades/
-After=hades-network.service hades-unauth-portal.service
-Wants=hades-network.service hades-unauth-portal.service
+After=hades-unauth-portal.service
+After=hades-unauth-portal.service
+BindsTo=hades-unauth-netns.service
+JoinsNamespaceOf=hades-unauth-netns.service
+Wants=hades-unauth-portal.service
 
 [Service]
 Type=forking
+PrivateNetwork=yes
 PIDFile=@PORTAL_NGINX_PID_FILE@
 SyslogIdentifier=hades-unauth-http
 EnvironmentFile=@systemdenvfile@

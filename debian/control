@@ -3,6 +3,7 @@ Section: net
 Priority: extra
 Maintainer: Sebastian Schrader <sebastian.schrader@agdsn.de>
 Build-Depends: bash (>= 4),
+ bridge-utils,
  debhelper (>= 9),
  dh-exec,
  dh-python,
@@ -10,6 +11,7 @@ Build-Depends: bash (>= 4),
  dnsmasq,
  freeradius (>= 3.0),
  freeradius-postgresql (>= 3.0),
+ ifupdown,
  ipset,
  iptables,
  keepalived,
@@ -40,9 +42,11 @@ Package: hades
 Architecture: any
 Pre-Depends: dpkg (>= 1.16.1), python3, ${misc:Pre-Depends}
 Depends: bash (>= 4),
+ bridge-utils,
  dnsmasq,
  freeradius (>= 3.0),
  freeradius-postgresql (>= 3.0),
+ ifupdown,
  ipset,
  iptables,
  keepalived,

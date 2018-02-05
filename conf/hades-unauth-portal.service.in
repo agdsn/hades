@@ -1,11 +1,15 @@
 [Unit]
 Description=Hades portal (Flask app on uWSGI)
 Documentation=https://agdsn.github.io/hades/
-After=hades-network.service hades-database.service
-Wants=hades-network.service hades-database.service
+After=hades-database.service
+After=hades-unauth-netns.service
+BindsTo=hades-unauth-netns.service
+JoinsNamespaceOf=hades-unauth-netns.service
+Wants=hades-database.service
 
 [Service]
 Type=notify
+PrivateNetwork=yes
 SyslogIdentifier=hades-unauth-portal
 EnvironmentFile=@systemdenvfile@
 Environment=PGAPPNAME=hades-unauth-portal

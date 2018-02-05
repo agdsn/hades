@@ -1,8 +1,8 @@
 [Unit]
 Description=Hades agent (Celery Worker)
 Documentation=https://agdsn.github.io/hades/
-After=hades-network.service hades-database.service
-Wants=hades-network.service hades-database.service
+After=hades-root-netns.service hades-database.service
+BindsTo=hades-root-netns.service hades-database.service
 
 [Service]
 Type=simple

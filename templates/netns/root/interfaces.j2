@@ -1,0 +1,25 @@
+{% if HADES_CREATE_DUMMY_INTERFACES %}
+  {% for interface in [HADES_RADIUS_INTERFACE, HADES_VRRP_INTERFACE, HADES_AUTH_INTERFACE, HADES_UNAUTH_INTERFACE] %}
+auto {{ interface }}
+iface {{ interface }} inet manual
+  pre-up ip link add {{ interface }} type dummy
+  post-down ip link delete {{ interface }}
+
+  {% endfor %}
+{% endif %}
+{% set namespace = "root" %}
+{% include "netns/common.interfaces.j2" with context %}
+
+auto {{ HADES_VRRP_BRIDGE }}
+iface {{ HADES_VRRP_BRIDGE }} inet static inherits bridge
+  bridge_ports {{ HADES_VRRP_INTERFACE }}
+  address {{ HADES_VRRP_LISTEN_RADIUS }}
+
+auto br-auth
+iface br-auth inet manual inherits bridge
+  bridge_ports {{ HADES_AUTH_INTERFACE }}
+
+auto br-unauth
+iface br-unauth inet manual inherits bridge
+  bridge_ports {{ HADES_UNAUTH_INTERFACE }}
+  up {{ constants.SYSCTL }} -w net.ipv4.conf.$IFACE.log_martians=0
