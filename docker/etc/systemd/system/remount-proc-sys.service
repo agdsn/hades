@@ -8,4 +8,4 @@ ConditionCapability=CAP_SYS_ADMIN
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/bin/mount -o remount,rw /proc/sys
+ExecStart=/bin/mount -o remount,rw /proc/sys
