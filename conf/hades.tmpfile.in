@@ -1,3 +1,6 @@
+# This file can be replace by RuntimeDirectory settings in the unit files
+# starting with systemd 233 (not available in Stretch), because the
+# RuntimeDirectoryPreserve setting was added there.
 d @pkgrunstatedir@/agent            2750    @AGENT_USER@ @AGENT_GROUP@
 d @pkgrunstatedir@/auth-dhcp        2750    @AUTH_DHCP_USER@ @AUTH_DHCP_GROUP@
 d @pkgrunstatedir@/auth-netns       0750    root root

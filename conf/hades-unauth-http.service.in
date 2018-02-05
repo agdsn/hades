@@ -22,6 +22,10 @@ RestartSec=5
 KillSignal=SIGQUIT
 KillMode=mixed
 SyslogLevel=err
+;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
+;RuntimeDirectory=hades/unauth-http
+;RuntimeDirectoryMode=2750
+;RuntimeDirectoryPreserve=yes
 
 [Install]
 WantedBy=hades.target

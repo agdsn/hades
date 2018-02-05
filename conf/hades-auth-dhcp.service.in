@@ -17,6 +17,10 @@ ExecReload=@bindir@/hades-generate-config auth-dnsmasq.conf.j2 @pkgrunstatedir@/
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
+;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
+;RuntimeDirectory=hades/auth-dhcp
+;RuntimeDirectoryMode=2750
+;RuntimeDirectoryPreserve=yes
 
 [Install]
 WantedBy=hades.target

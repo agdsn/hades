@@ -16,6 +16,10 @@ EnvironmentFile=@systemdenvfile@
 ExecStart=@bindir@/hades-agent worker --pidfile=@pkgrunstatedir@/agent/worker.pid $AGENT_OPTS
 Restart=always
 RestartSec=5
+;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
+;RuntimeDirectory=hades/agent
+;RuntimeDirectoryMode=2750
+;RuntimeDirectoryPreserve=yes
 
 [Install]
 WantedBy=hades.target
