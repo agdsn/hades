@@ -7,6 +7,14 @@ import pwd
 logger = logging.getLogger(__name__)
 
 
+def drop_privileges(passwd, group):
+    """Drop privileges completely"""
+    logger.debug("Dropping privileges to user %s", passwd.pw_name)
+    os.setgid(group.gr_gid)
+    os.initgroups(passwd.pw_name, group.gr_gid)
+    os.setuid(passwd.pw_uid)
+
+
 @contextlib.contextmanager
 def dropped_privileges(passwd: pwd.struct_passwd):
     """
