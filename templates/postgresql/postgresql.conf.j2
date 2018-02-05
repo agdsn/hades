@@ -66,7 +66,7 @@ max_connections = 100			# (change requires restart)
 unix_socket_directories = '{{ constants.DATABASE_SOCKET_DIRECTORY }}'	# comma-separated list of directories
 					# (change requires restart)
 unix_socket_group = '{{ constants.SYSTEM_GROUP }}'			# (change requires restart)
-unix_socket_permissions = 0770		# begin with 0 to use octal notation
+unix_socket_permissions = 0660		# begin with 0 to use octal notation
 					# (change requires restart)
 #bonjour = off				# advertise server via Bonjour
 					# (change requires restart)
