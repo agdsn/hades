@@ -69,6 +69,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     python3-pip \
     python3-psycopg2 \
     python3-pydbus \
+    python3-pynacl \
     python3-pyrad \
     python3-pyroute2 \
     python3-pysnmp4 \
