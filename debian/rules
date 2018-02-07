@@ -2,7 +2,7 @@
 
 PACKAGE=$(shell dh_listpackages)
 
-USE_DH_VIRTUALENV ?= 1
+USE_DH_VIRTUALENV ?= 0
 
 configure_args = prefix=/usr libexecdir=/usr/lib sysconfdir=/etc localstatedir=/var pkglocalstatedir=/var/lib/$(PACKAGE) runstatedir=/run
 
