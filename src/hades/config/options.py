@@ -84,7 +84,7 @@ class HADES_USER_NETWORKS(Option):
     Public networks of authenticated users.
 
     Dictionary of networks. Keys are unique identifiers of the network,
-    values are netaddr.IPNetworks objects
+    values are :class:`netaddr.IPNetwork` objects
     """
     type = collections.Mapping
     required = True
