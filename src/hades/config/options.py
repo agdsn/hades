@@ -100,7 +100,7 @@ class HADES_CUSTOM_IPTABLES_INPUT_RULES(Option):
 
     A list of valid iptables-restore rules with leading -A INPUT.
     """
-    type = collections.Iterable
+    type = collections.Sequence
     required = False
     default = []
 
@@ -495,13 +495,13 @@ class HADES_AUTH_NEXT_HOP(Option):
 
 class HADES_AUTH_ALLOWED_TCP_PORTS(Option):
     """Allowed TCP destination ports for unauthenticated users"""
-    type = collections.Iterable
+    type = collections.Sequence
     default = (53, 80, 443, 9053)
 
 
 class HADES_AUTH_ALLOWED_UDP_PORTS(Option):
     """Allowed UDP destination ports for unauthenticated users"""
-    type = collections.Iterable
+    type = collections.Sequence
     default = (53, 67, 9053)
 
 
@@ -562,13 +562,13 @@ class HADES_UNAUTH_LISTEN(Option):
 
 class HADES_UNAUTH_ALLOWED_TCP_PORTS(Option):
     """Allowed TCP destination ports for unauthenticated users"""
-    type = collections.Iterable
+    type = collections.Sequence
     default = (53, 80, 443)
 
 
 class HADES_UNAUTH_ALLOWED_UDP_PORTS(Option):
     """Allowed UDP destination ports for unauthenticated users"""
-    type = collections.Iterable
+    type = collections.Sequence
     default = (53, 67)
 
 
@@ -577,7 +577,7 @@ class HADES_UNAUTH_CAPTURED_TCP_PORTS(Option):
     All traffic destined to these TCP ports is transparently redirected
     (captured) to the unauth listen address of the site node
     """
-    type = collections.Iterable
+    type = collections.Sequence
     default = (53, 80, 443)
 
 
@@ -586,7 +586,7 @@ class HADES_UNAUTH_CAPTURED_UDP_PORTS(Option):
     All traffic destined to these UDP ports is transparently redirected
     (captured) to the unauth listen address of the site node
     """
-    type = collections.Iterable
+    type = collections.Sequence
     default = (53,)
 
 
@@ -602,7 +602,7 @@ class HADES_UNAUTH_WHITELIST_DNS(Option):
     """List of DNS names which are whitelisted for unauthenticated users.
     """
     default = ()
-    type = collections.Iterable
+    type = collections.Sequence
 
 
 class HADES_UNAUTH_WHITELIST_IPSET(Option):
