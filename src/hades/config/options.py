@@ -9,7 +9,7 @@ import netaddr
 
 from hades import constants
 from hades.config import check, compute
-from hades.config.base import Option, OptionCheckError
+from hades.config.base import Option
 
 
 ###################
