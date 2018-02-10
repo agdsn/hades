@@ -27,7 +27,7 @@ http {
 	# server_names_hash_bucket_size 64;
 	# server_name_in_redirect off;
 
-	include {{ BASE_DIRECTORY }}/mime.types;
+	include {{ source_dir }}/mime.types;
 	default_type application/octet-stream;
 
 	##
@@ -64,6 +64,6 @@ http {
 	# Virtual Host Configs
 	##
 
-	include {{ BASE_DIRECTORY }}/conf.d/*.conf;
-	include {{ BASE_DIRECTORY }}/sites-enabled/*;
+	include {{ source_dir }}/conf.d/*.conf;
+	include {{ source_dir }}/sites-enabled/*;
 }
