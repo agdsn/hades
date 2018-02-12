@@ -29,6 +29,10 @@ else
 
 endif
 
+override_dh_fixperms:
+	dh_fixperms
+	chmod u=rw,g=r,o= debian/$(PACKAGE)/etc/hades/config.py
+
 override_dh_auto_clean:
 	dh_auto_clean
 	./configure.mk clean
