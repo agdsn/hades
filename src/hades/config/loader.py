@@ -1,8 +1,12 @@
 import collections
+import importlib.abc
+import importlib.machinery
+import importlib.util
 import itertools
 import logging
 import os
-import types
+import pathlib
+import sys
 from typing import Any, Iterable, Optional, Tuple, Union
 
 # noinspection PyUnresolvedReferences
@@ -146,18 +150,17 @@ class CallableEvaluator(AttributeAccessibleDict):
         return zip(self.keys(), self.values())
 
 
-_config = None
-
-
 def is_config_loaded() -> bool:
-    return _config is not None
+    return 'hades_config' in sys.modules
 
 
 def get_config(*, runtime_checks: bool = False,
                option_cls: Optional[OptionMeta] = None) -> Config:
-    if _config is None:
-        raise RuntimeError("Config has not been loaded")
-    config = Config(_config, runtime_checks=runtime_checks)
+    try:
+        module = sys.modules['hades_config']
+    except KeyError:
+        raise RuntimeError("Config has not been loaded") from None
+    config = Config(module.hades_config, runtime_checks=runtime_checks)
     if option_cls is not None:
         config = config.of_type(option_cls)
     return config
@@ -171,11 +174,19 @@ def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
     if filename is None:
         filename = os.environ.get(
             'HADES_CONFIG', os.path.join(constants.pkgsysconfdir, 'config.py'))
-    d = types.ModuleType(__package__ + '.config_pseudo_module')
-    d.__file__ = filename
+    filepath = pathlib.Path(filename).resolve()
+    filename = str(filepath)
+    package = 'hades_config'
+    loader = importlib.machinery.SourceFileLoader(package, filename)
+    module = importlib.util.module_from_spec(importlib.machinery.ModuleSpec(
+        package, loader, origin=filename, is_package=True
+    ))
+    module.__file__ = filename
+    module.__doc__ = "Config pseudo module"
+    sys.modules[package] = module
+
     try:
-        with open(filename) as f:
-            exec(compile(f.read(), filename, 'exec'), d.__dict__)
+        loader.exec_module(module)
     except FileNotFoundError:
         logger.exception("Config file %s not found", filename)
         raise
@@ -192,10 +203,9 @@ def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
     except (SyntaxError, TypeError) as e:
         logger.exception("Config file %s has errors: %s", filename, str(e))
         raise
-    config.update((name, getattr(d, name))
-                  for name in dir(d) if is_option_name(name))
+    config.update((name, getattr(module, name))
+                  for name in dir(module) if is_option_name(name))
     config = CallableEvaluator(config)
     OptionMeta.check_config(config)
-    global _config
-    _config = config
+    module.hades_config = config
     return get_config(runtime_checks=runtime_checks, option_cls=option_cls)
