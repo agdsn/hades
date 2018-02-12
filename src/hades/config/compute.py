@@ -1,25 +1,30 @@
-from hades.config.base import ConfigError, MissingOptionError, coerce
+import types
+from typing import Union
+
+from hades.config.base import (
+    Compute, ConfigError, MissingOptionError, Option, coerce,
+)
 
 
-def equal_to(other):
-    other_name = coerce(other)
-    if not isinstance(other_name, str):
-        raise TypeError("Expected Option subclass or str, was {}"
-                        .format(type(other_name)))
+class equal_to(Compute):
+    def __init__(self, other: Union[str, type(Option)]):
+        super().__init__()
+        self.other_name = coerce(other)
+        if not isinstance(self.other_name, str):
+            raise TypeError("Expected Option subclass or str, was {}"
+                            .format(type(self.other_name)))
 
-    # noinspection PyDecorator
-    @classmethod
-    def f(cls, config):
+    def __call__(self, config):
         try:
-            return config[other_name]
+            return config[self.other_name]
         except MissingOptionError as e:
-            raise ConfigError("Can not set equal to option {}, option is not "
-                              "defined".format(other_name),
-                              option=cls.__name__) from e
-    return f
+            raise ConfigError(
+                "Can not set equal to option {}, option is not defined"
+                .format(self.other_name), option=self.option.__name__
+            ) from e
 
 
-def deferred_format(fmt_string, *args, **kwargs):
+class deferred_format(Compute):
     """
     Evaluate a format string using values from others config options.
 
@@ -27,18 +32,22 @@ def deferred_format(fmt_string, *args, **kwargs):
     values can be referred to using numbers in the format string.
     Keywords arguments can be used as well to bind other option values to
     specific names that are available in the format string.
-    :param fmt_string:
-    :param args:
-    :param kwargs:
-    :return:
     """
-    args = tuple(coerce(arg) for arg in args)
-    kwargs = {k: coerce(v) for k, v in kwargs}
 
-    # noinspection PyDecorator,PyUnusedLocal
-    @classmethod
-    def f(cls, config):
-        fmt_args = tuple(config[a] for a in args)
-        fmt_kwargs = {k: config[v] for k, v in kwargs}
-        return fmt_string.format(*fmt_args, **fmt_kwargs)
-    return f
+    def __init__(self, fmt_string, *args: Union[str, type(Option)],
+                 **kwargs: Union[str, type(Option)]):
+        """
+        :param fmt_string:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        super().__init__()
+        self.fmt_string = fmt_string
+        self.args = tuple(coerce(arg) for arg in args)
+        self.kwargs = {k: coerce(v) for k, v in kwargs}
+
+    def __call__(self, config):
+        fmt_args = tuple(config[a] for a in self.args)
+        fmt_kwargs = {k: config[v] for k, v in self.kwargs}
+        return self.fmt_string.format(*fmt_args, **fmt_kwargs)

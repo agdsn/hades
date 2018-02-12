@@ -12,7 +12,7 @@ from typing import Any, Iterable, Optional, Tuple, Union
 # noinspection PyUnresolvedReferences
 import hades.config.options
 from hades import constants
-from hades.config.base import ConfigError, OptionMeta, is_option_name
+from hades.config.base import Compute, ConfigError, OptionMeta, is_option_name
 
 CONFIG_PACKAGE_NAME = 'hades_config'
 
@@ -116,8 +116,9 @@ class Config(collections.Mapping):
 
 class CallableEvaluator(AttributeAccessibleDict):
     """
-    Intercept attribute and dict item access. If the return value would be a
-    callable value, call the value with self as the only argument.
+    Intercept attribute and dict item access. If the return value would be an
+    instance of :class:`Compute`, call the compute object with self as the only
+    argument.
 
     Internally a stack of item names, that are looked up, is maintained to
     detect infinite recursion.
@@ -140,7 +141,7 @@ class CallableEvaluator(AttributeAccessibleDict):
                               .format('->'.join(self._stack), key),
                               option=key)
         self._stack.append(key)
-        if callable(value):
+        if isinstance(value, Compute):
             self[key] = value = value(self)
         self._stack.pop()
         return value

@@ -9,7 +9,7 @@ import netaddr
 
 from hades import constants
 from hades.config import check, compute
-from hades.config.base import Option
+from hades.config.base import Compute, Option
 
 
 ###################
@@ -21,24 +21,14 @@ class HADES_SITE_NAME(Option):
     """Name of the site"""
     type = str
     required = True
-
-    # noinspection PyUnusedLocal
-    @classmethod
-    def static_check(cls, config, value):
-        if not re.match(r'\A[a-z][a-z0-9-]*\Z', value, re.ASCII):
-            raise OptionCheckError("not a valid site name", option=cls)
+    static_check = check.match(r'\A[a-z][a-z0-9-]*\Z', re.ASCII)
 
 
 class HADES_SITE_NODE_ID(Option):
     """ID of the site node"""
     type = str
     required = True
-
-    # noinspection PyUnusedLocal
-    @classmethod
-    def static_check(cls, config, value):
-        if not re.match(r'\A[a-z][a-z0-9-]*\Z', value, re.ASCII):
-            raise OptionCheckError("not a valid node ID", option=cls)
+    static_check = check.match(r'\A[a-z][a-z0-9-]*\Z', re.ASCII)
 
 
 class HADES_MAIL_DESTINATION_ADDRESSES(Option):
@@ -433,6 +423,7 @@ class HADES_AUTH_DHCP_LEASE_RENEW_TIMER(Option):
     type = timedelta
     static_check = check.greater_than(timedelta(0))
 
+    @Compute.decorate
     @staticmethod
     def default(config):
         return 0.5 * config.HADES_AUTH_DHCP_LEASE_LIFETIME
@@ -443,6 +434,7 @@ class HADES_AUTH_DHCP_LEASE_REBIND_TIMER(Option):
     type = timedelta
     static_check = check.greater_than(timedelta(0))
 
+    @Compute.decorate
     @staticmethod
     def default(config):
         return 0.875 * config.HADES_AUTH_DHCP_LEASE_LIFETIME
@@ -866,6 +858,7 @@ class BABEL_DEFAULT_TIMEZONE(FlaskOption):
 
 
 class SQLALCHEMY_DATABASE_URI(FlaskOption):
+    @Compute.decorate
     @staticmethod
     def default(config):
         if 'postgresql' not in urllib.parse.uses_netloc:
@@ -967,6 +960,7 @@ class CELERY_DEFAULT_DELIVERY_MODE(CeleryOption):
 
 
 class CELERY_QUEUES(CeleryOption):
+    @Compute.decorate
     @staticmethod
     def default(config):
         """
@@ -1003,13 +997,13 @@ class CELERY_QUEUES(CeleryOption):
         site_key = config.HADES_CELERY_SITE_ROUTING_KEY
         return (
             kombu.Queue(config.HADES_CELERY_NODE_QUEUE, (
-                    kombu.binding(rpc_exchange, routing_key=node_key),
-                    kombu.binding(notify_exchange, routing_key=node_key),
-                    kombu.binding(notify_exchange, routing_key=site_key),
-                    kombu.binding(notify_exchange, routing_key=''),
-                ),
-                auto_delete=True, durable=False),
+                kombu.binding(rpc_exchange, routing_key=node_key),
+                kombu.binding(notify_exchange, routing_key=node_key),
+                kombu.binding(notify_exchange, routing_key=site_key),
+                kombu.binding(notify_exchange, routing_key=''),
+            ), auto_delete=True, durable=False),
         )
+
     type = collections.Sequence
 
 

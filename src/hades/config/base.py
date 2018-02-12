@@ -1,5 +1,5 @@
+import functools
 import re
-
 
 option_name_regex = re.compile(r'\A[A-Z][A-Z0-9_]*\Z', re.ASCII)
 
@@ -81,6 +81,75 @@ class OptionMeta(type):
             self.static_check(config, value)
         if runtime_checks and self.runtime_check:
             self.runtime_check(config, value)
+
+
+class OptionDescriptor:
+    @classmethod
+    def decorate(cls, f):
+        """
+        Convert regular functions into an :class:`OptionDescriptor`.
+
+        The function will be called with the option as its first argument.
+
+        Functions are automatically decorated with :class:`classmethod`, if they
+        are not already an instance of :class:`classmethod` or
+        :class:`staticmethod`.
+        :param f: The function
+        """
+        # Ensure that we have a static or class method
+        if not isinstance(f, (classmethod, staticmethod)):
+            m = classmethod(f)
+        else:
+            m = f
+
+        @functools.wraps(f, updated=())
+        class wrapper(cls):
+            """Descriptor, that binds the given function in addition to an
+            option"""
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.bound = None
+
+            def __call__(self, *args, **kwargs):
+                return self.bound(*args, **kwargs)
+
+            def __get__(self, instance, owner):
+                if self.option is None:
+                    self.bound = m.__get__(instance, owner)
+                return super().__get__(instance, owner)
+
+        return wrapper()
+
+    def __init__(self):
+        self.option = None
+
+    def __get__(self, instance, owner):
+        if self.option is None:
+            self.option = owner
+        return self
+
+
+class Check(OptionDescriptor):
+    """Base class for descriptors, that check the value of options"""
+
+    def __call__(self, config, value):
+        """
+        :param config: The fully expanded config
+        :param value: The value of the Option
+        :raises OptionCheckError: if the value of the option is illegal
+        """
+        raise NotImplemented()
+
+
+class Compute(OptionDescriptor):
+    """Base class for descriptors, that compute the value of options."""
+
+    def __call__(self, config):
+        """
+        :param config: An potentially not fully expanded config object
+        :raises OptionCheckError: if the value can't be computed
+        """
+        raise NotImplemented()
 
 
 class Option(object, metaclass=OptionMeta, abstract=True):
