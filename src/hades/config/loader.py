@@ -165,6 +165,8 @@ def get_config(*, runtime_checks: bool = False,
 
 def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
                 option_cls: Optional[OptionMeta] = None) -> Config:
+    if is_config_loaded():
+        raise RuntimeError("Config already loaded")
     config = AttributeAccessibleDict(OptionMeta.get_defaults())
     if filename is None:
         filename = os.environ.get(
