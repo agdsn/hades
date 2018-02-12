@@ -14,6 +14,8 @@ import hades.config.options
 from hades import constants
 from hades.config.base import ConfigError, OptionMeta, is_option_name
 
+CONFIG_PACKAGE_NAME = 'hades_config'
+
 logger = logging.getLogger(__name__)
 
 
@@ -166,6 +168,25 @@ def get_config(*, runtime_checks: bool = False,
     return config
 
 
+class _safe_install:
+    def __init__(self, module):
+        self.module = module
+
+    def __enter__(self):
+        sys.modules[self.module.__package__] = self.module
+        self.dont_write_bytecode = sys.dont_write_bytecode
+        sys.dont_write_bytecode = True
+        return self
+
+    def __exit__(self, *exc):
+        sys.dont_write_bytecode = self.dont_write_bytecode
+        if any(v is not None for v in exc):
+            try:
+                del sys.modules[CONFIG_PACKAGE_NAME]
+            except KeyError:
+                pass
+
+
 def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
                 option_cls: Optional[OptionMeta] = None) -> Config:
     if is_config_loaded():
@@ -174,19 +195,37 @@ def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
     if filename is None:
         filename = os.environ.get(
             'HADES_CONFIG', os.path.join(constants.pkgsysconfdir, 'config.py'))
-    filepath = pathlib.Path(filename).resolve()
-    filename = str(filepath)
-    package = 'hades_config'
-    loader = importlib.machinery.SourceFileLoader(package, filename)
-    module = importlib.util.module_from_spec(importlib.machinery.ModuleSpec(
-        package, loader, origin=filename, is_package=True
-    ))
-    module.__file__ = filename
-    module.__doc__ = "Config pseudo module"
-    sys.modules[package] = module
+
+    module_path = pathlib.Path(filename).resolve()
+    if module_path.is_dir():
+        module_name = '__init__'
+        module_path = module_path / '__init__.py'
+    else:
+        if module_path.suffix != '.py':
+            raise ConfigError("The file must have a .py extension.")
+        module_name = module_path.stem
+        if not module_name.isidentifier():
+            raise ConfigError("The name of the config file is not a valid "
+                              "Python identifier.")
+    module_qualname = "{}.{}".format(CONFIG_PACKAGE_NAME, module_name)
+    package_path = module_path.with_name('__init__.py')
+    loader = importlib.machinery.SourceFileLoader(CONFIG_PACKAGE_NAME,
+                                                  str(package_path))
+    package_module = importlib.util.module_from_spec(
+        importlib.machinery.ModuleSpec(
+            CONFIG_PACKAGE_NAME, loader, origin=str(package_path),
+            is_package=True
+        )
+    )
+    package_module.__file__ = str(package_path)
+    package_module.__doc__ = "Config pseudo package"
+    package_module.__path__ = [str(package_path.parent)]
 
     try:
-        loader.exec_module(module)
+        with _safe_install(package_module):
+            if package_path.exists():
+                loader.exec_module(package_module)
+            module = importlib.import_module(module_qualname)
     except FileNotFoundError:
         logger.exception("Config file %s not found", filename)
         raise
@@ -207,5 +246,5 @@ def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
                   for name in dir(module) if is_option_name(name))
     config = CallableEvaluator(config)
     OptionMeta.check_config(config)
-    module.hades_config = config
+    package_module.hades_config = config
     return get_config(runtime_checks=runtime_checks, option_cls=option_cls)
