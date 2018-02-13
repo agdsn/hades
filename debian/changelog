@@ -8,6 +8,10 @@ hades (0.4.0~dev) UNRELEASED; urgency=medium
   * Remove ip-netns calls in units
   * Serve static files with nginx (See GH-56)
   * Add dependency for ssl-cert package
+  * Mode and group of generated files can be specified via --mode and --group
+  * Improve reporting of config related errors (See GH-12)
+  * Support relative imports in config files
+  * Support multiple template directories, that can override each other
 
  -- Sebastian Schrader <sebastian.schrader@agdsn.de>  Fri, 25 Aug 2017 23:11:12 +0200
 
