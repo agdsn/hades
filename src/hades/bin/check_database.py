@@ -16,7 +16,8 @@ from hades.common.cli import (
     ArgumentParser, parser as common_parser, setup_cli_logging,
 )
 from hades.common.privileges import dropped_privileges
-from hades.config.loader import load_config
+from hades.config.base import ConfigError
+from hades.config.loader import load_config, print_config_error
 
 logger = logging.getLogger('hades.bin.check_database')
 
@@ -48,7 +49,11 @@ def main():
     parser = ArgumentParser(parents=[common_parser])
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
-    config = load_config(args.config, runtime_checks=True)
+    try:
+        config = load_config(args.config)
+    except ConfigError as e:
+        print_config_error(e)
+        return os.EX_CONFIG
     try:
         engine = db.create_engine(config, poolclass=NullPool)
         agent_pwd = pwd.getpwnam(constants.AGENT_USER)

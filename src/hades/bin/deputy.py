@@ -1,9 +1,11 @@
+import os
 import sys
 
 from hades.common.cli import (
     ArgumentParser, parser as common_parser, setup_cli_logging,
 )
-from hades.config.loader import load_config
+from hades.config.base import ConfigError
+from hades.config.loader import load_config, print_config_error
 from hades.deputy.server import run_event_loop
 
 
@@ -13,7 +15,11 @@ def main():
         parents=[common_parser])
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
-    load_config(args.config)
+    try:
+        load_config(args.config)
+    except ConfigError as e:
+        print_config_error(e)
+        return os.EX_CONFIG
     run_event_loop()
 
 

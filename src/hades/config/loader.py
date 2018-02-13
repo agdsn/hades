@@ -7,12 +7,16 @@ import logging
 import os
 import pathlib
 import sys
+import traceback
 from typing import Any, Iterable, Optional, Tuple, Union
 
 # noinspection PyUnresolvedReferences
 import hades.config.options
 from hades import constants
-from hades.config.base import Compute, ConfigError, OptionMeta, is_option_name
+from hades.config.base import (
+    Compute, ConfigError, ConfigOptionError,
+    OptionMeta, is_option_name,
+)
 
 CONFIG_PACKAGE_NAME = 'hades_config'
 
@@ -137,9 +141,9 @@ class CallableEvaluator(AttributeAccessibleDict):
 
     def _evaluate(self, key, value):
         if key in self._stack:
-            raise ConfigError("Option recursion {} -> {}"
-                              .format('->'.join(self._stack), key),
-                              option=key)
+            raise ConfigOptionError("Option recursion {} -> {}"
+                                    .format(' -> '.join(self._stack), key),
+                                    option=key)
         self._stack.append(key)
         if isinstance(value, Compute):
             self[key] = value = value(self)
@@ -167,6 +171,75 @@ def get_config(*, runtime_checks: bool = False,
     if option_cls is not None:
         config = config.of_type(option_cls)
     return config
+
+
+class ConfigLoadError(ConfigError):
+    """Exception class for errors during config file loading."""
+
+    def __init__(self, *args, filename):
+        self.filename = filename
+        super().__init__(*args)
+
+
+def print_config_error(e: ConfigError):
+    def format_cause():
+        return (''.join(traceback.format_exception_only(type(cause), cause))
+                .strip())
+
+    def config_from_module_name():
+        if cause.name is not None:
+            top, sep, tail = cause.name.partition('.')
+            if top == CONFIG_PACKAGE_NAME:
+                if tail == '':
+                    return '__init__.py'
+                else:
+                    return root_config_dir / (tail.replace('.', '/') + '.py')
+        return None
+
+    def origin():
+        """Try to find the originating config in the traceback"""
+        if e.__cause__ is not None:
+            tb = cause.__traceback__
+        else:
+            tb = e.__traceback__
+        tb_info = traceback.extract_tb(tb)
+        for filename, lineno, funcname, src in reversed(tb_info):
+            if filename is not None:
+                try:
+                    pathlib.PurePath(filename).relative_to(root_config_dir)
+                except ValueError:
+                    pass
+                else:
+                    return filename, lineno, funcname, src
+        return tb_info[-1]
+
+    if isinstance(e, ConfigOptionError):
+        logger.critical("Configuration error with option %s: %s", e.option, e)
+    elif isinstance(e, ConfigLoadError):
+        root_config = pathlib.PurePath(e.filename)
+        root_config_dir = root_config.parent
+        cause = e.__cause__
+        if cause is None:
+            message = str(e)
+        elif isinstance(cause, ImportError) and config_from_module_name():
+            config = config_from_module_name()
+            if config == root_config:
+                message = "File could not be imported"
+            else:
+                message = "The file {} could not be imported".format(config)
+        elif isinstance(cause, SyntaxError):
+            message = format_cause()
+        else:
+            filename, lineno, funcname, src = origin()
+            message = 'File "{}", line {}\n{}'.format(filename, lineno,
+                                                      format_cause())
+        if logger.getEffectiveLevel() > logging.INFO:
+            logger.critical("Error while load config file %s: %s",
+                            root_config, message)
+            logger.critical("Hint: Increase verbosity for a full traceback.")
+        else:
+            logger.info("Error while load config file %s: %s",
+                        root_config, message, exc_info=e)
 
 
 class _safe_install:
@@ -203,11 +276,13 @@ def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
         module_path = module_path / '__init__.py'
     else:
         if module_path.suffix != '.py':
-            raise ConfigError("The file must have a .py extension.")
+            raise ConfigLoadError("The file must have a .py extension.",
+                                  filename=str(module_path))
         module_name = module_path.stem
         if not module_name.isidentifier():
-            raise ConfigError("The name of the config file is not a valid "
-                              "Python identifier.")
+            raise ConfigLoadError("The name of the config file is not a valid "
+                                  "Python identifier.",
+                                  filename=str(module_path))
     module_qualname = "{}.{}".format(CONFIG_PACKAGE_NAME, module_name)
     package_path = module_path.with_name('__init__.py')
     loader = importlib.machinery.SourceFileLoader(CONFIG_PACKAGE_NAME,
@@ -227,22 +302,8 @@ def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
             if package_path.exists():
                 loader.exec_module(package_module)
             module = importlib.import_module(module_qualname)
-    except FileNotFoundError:
-        logger.exception("Config file %s not found", filename)
-        raise
-    except PermissionError:
-        logger.exception("Can't open config file %s (Permission denied)",
-                         filename)
-        raise
-    except IsADirectoryError:
-        logger.exception("Config file %s is a directory", filename)
-        raise
-    except IOError as e:
-        logger.exception("Config file %s (I/O error): %s", filename, str(e))
-        raise
-    except (SyntaxError, TypeError) as e:
-        logger.exception("Config file %s has errors: %s", filename, str(e))
-        raise
+    except Exception as e:
+        raise ConfigLoadError(filename=str(module_path)) from e
     config.update((name, getattr(module, name))
                   for name in dir(module) if is_option_name(name))
     config = CallableEvaluator(config)

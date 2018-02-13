@@ -9,7 +9,7 @@ import netaddr
 from pyroute2.iproute import IPRoute
 
 from hades.config.base import (
-    Check, ConfigError, OptionCheckError, coerce,
+    Check, ConfigOptionError, OptionCheckError, coerce,
 )
 
 
@@ -64,7 +64,7 @@ class sequence(Check):
         for i, v in enumerate(value):
             try:
                 self.element_check(config, v)
-            except ConfigError as e:
+            except ConfigOptionError as e:
                 raise OptionCheckError("Error at index {:d}: {}"
                                        .format(i, e.args[0]),
                                        option=self.option.__name__)
@@ -93,7 +93,7 @@ class mapping(Check):
                     self.key_check(config, k)
                 if self.value_check is not None:
                     self.value_check(config, v)
-            except ConfigError as e:
+            except ConfigOptionError as e:
                 raise OptionCheckError("Error in key {}: {}"
                                        .format(k, e.args[0]),
                                        option=self.option.__name__)

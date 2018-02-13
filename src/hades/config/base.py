@@ -162,17 +162,22 @@ class Option(object, metaclass=OptionMeta, abstract=True):
 
 
 class ConfigError(Exception):
-    def __init__(self, *args, option=None, **kwargs):
-        super(ConfigError, self).__init__(*args, **kwargs)
+    """Base class for all config related errors."""
+
+
+class ConfigOptionError(ConfigError):
+    """Base class for errors related to processing a specific option"""
+    def __init__(self, *args, option: str):
+        super(ConfigOptionError, self).__init__(*args)
         self.option = option
 
-    def __str__(self):
-        return "{}: {}".format(self.option, super(ConfigError, self).__str__())
+
+class MissingOptionError(ConfigOptionError):
+    """Indicates that a required option is missing"""
 
 
-class MissingOptionError(ConfigError):
-    def __init__(self, *args, **kwargs):
-        super(MissingOptionError, self).__init__(*args, **kwargs)
+class OptionCheckError(ConfigOptionError):
+    """Indicates that an option check failed"""
 
 
 def coerce(value):
@@ -180,7 +185,3 @@ def coerce(value):
         return value.__name__
     else:
         return value
-
-
-class OptionCheckError(ConfigError):
-    pass

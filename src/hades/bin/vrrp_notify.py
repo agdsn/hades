@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 import textwrap
 from contextlib import closing
@@ -7,7 +8,8 @@ import kombu
 
 from hades.agent import app
 from hades.common.cli import ArgumentParser, parser as common_parser
-from hades.config.loader import load_config, get_config
+from hades.config.base import ConfigError
+from hades.config.loader import get_config, load_config, print_config_error
 from hades.config.options import CeleryOption
 
 logger = logging.getLogger('hades.bin.vrrp_notify')
@@ -66,8 +68,13 @@ def main() -> int:
     args = parser.parse_args()
     logger.fatal("Transitioning %s to %s with priority %d", args.name,
                  args.state, args.priority)
-    app.config_from_object(
-        load_config(args.config, runtime_checks=True, option_cls=CeleryOption))
+    try:
+        config = load_config(args.config, runtime_checks=True,
+                             option_cls=CeleryOption)
+    except ConfigError as e:
+        print_config_error(e)
+        return os.EX_CONFIG
+    app.config_from_object(config)
     if args.name == 'hades-auth':
         return notify_auth(args.state, args.priority)
     elif args.name == 'hades-radius':

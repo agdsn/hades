@@ -2,7 +2,7 @@ import types
 from typing import Union
 
 from hades.config.base import (
-    Compute, ConfigError, MissingOptionError, Option, coerce,
+    Compute, ConfigOptionError, MissingOptionError, Option, coerce,
 )
 
 
@@ -18,7 +18,7 @@ class equal_to(Compute):
         try:
             return config[self.other_name]
         except MissingOptionError as e:
-            raise ConfigError(
+            raise ConfigOptionError(
                 "Can not set equal to option {}, option is not defined"
                 .format(self.other_name), option=self.option.__name__
             ) from e

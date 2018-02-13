@@ -10,8 +10,9 @@ from hades import constants
 from hades.common.cli import (
     ArgumentParser, parser as common_parser, setup_cli_logging,
 )
+from hades.config.base import ConfigError
 from hades.config.generate import ConfigGenerator
-from hades.config.loader import load_config
+from hades.config.loader import load_config, print_config_error
 
 logger = logging.getLogger()
 template_dir = pathlib.Path(constants.templatedir).resolve()
@@ -67,7 +68,11 @@ def main():
                              "for files; required for directories)")
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
-    config = load_config(args.config)
+    try:
+        config = load_config(args.config)
+    except ConfigError as e:
+        print_config_error(e)
+        return os.EX_CONFIG
     generator = ConfigGenerator(template_dir, config, args.mode, args.group)
     source = template_dir / args.source
     if source.is_dir():
