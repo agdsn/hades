@@ -64,7 +64,7 @@ class OptionMeta(type):
     def check_config(mcs, config, runtime_checks=False):
         for name, option in mcs.options.items():
             if option.required and name not in config:
-                raise ConfigError("required option", option=name)
+                raise MissingOptionError("Required option missing", option=name)
         for name, value in config.items():
             option = mcs.options.get(name)
             if option:
