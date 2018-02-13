@@ -2,6 +2,7 @@ import collections
 import grp
 import io
 import itertools
+import logging
 import os
 import os.path
 import pathlib
@@ -17,6 +18,8 @@ from jinja2.exceptions import FilterArgumentError
 from jinja2.filters import environmentfilter
 
 from hades import constants
+
+logger = logging.getLogger(__name__)
 
 
 def template_filter(name):
@@ -175,6 +178,7 @@ class ConfigGenerator(object):
                                destination_base: pathlib.Path):
         sources = collections.deque()
         sources.append(source_base)
+        logger.info("Generating %s from %s", destination_base, source_base)
         # Clear destination directory contents
         for path in destination_base.iterdir():
             if path.is_dir():
@@ -189,6 +193,7 @@ class ConfigGenerator(object):
             elif source.is_dir():
                 sources.extend(source.iterdir())
                 if destination.exists():
+                    logger.debug("Clearing directory %s", destination)
                     # Clear destination directory contents
                     if destination.is_symlink() or not destination.is_dir():
                         raise ValueError("Destination {} is not a directory"
@@ -199,6 +204,7 @@ class ConfigGenerator(object):
                         else:
                             path.unlink()
                 else:
+                    logger.debug("Creating directory %s", destination)
                     destination.mkdir(self.dir_mode, exist_ok=True)
                 shutil.copystat(str(source), str(destination),
                                 follow_symlinks=False)
@@ -246,14 +252,17 @@ class ConfigGenerator(object):
 
     def _create_symlink(self, source: pathlib.Path, destination: pathlib.Path):
         target = pathlib.Path(os.readlink(str(source)))
+        logger.debug("Creating symlink %s to %s", destination, target)
         destination.symlink_to(target)
         self._setgroup(destination)
 
     def _copy_to_file(self, source: pathlib.Path, destination: pathlib.Path):
+        logger.debug("Copying %s to %s", source, destination)
         shutil.copy2(str(source), str(destination), follow_symlinks=False)
         self._setstat(destination, self.file_mode)
 
     def _copy_to_stdout(self, source: pathlib.Path):
+        logger.debug("Copying %s to stdout", source)
         self._copy_to_fd(source, sys.stdout.fileno())
 
     def _copy_to_fd(self, source: pathlib.Path, fd: int):
@@ -272,6 +281,7 @@ class ConfigGenerator(object):
         # 1. Create with O_CREAT | O_EXCL
         # 2. Unlink if fails
         # 3. Try again
+        logger.info("Creating %s from template %s", destination, source)
         try:
             fd = self._create_file(destination)
         except FileExistsError:
@@ -284,6 +294,7 @@ class ConfigGenerator(object):
                 destination=destination)
 
     def _generate_template_to_stdout(self, source: pathlib.Path):
+        logger.info("Instantiating template %s", source)
         self._generate_template_to_writer(source, sys.stdout)
 
     def _generate_template_to_writer(self, source: pathlib.Path,
