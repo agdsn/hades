@@ -19,6 +19,7 @@ ExecStartPre=@TOUCH@ @RADIUS_CLIENTS_FILE@
 ExecStartPre=@RADIUSD@ -d @pkgrunstatedir@/radius -Cx -lstdout
 ExecStart=@RADIUSD@ -d @pkgrunstatedir@/radius $FREERADIUS_OPTS
 ExecReload=@bindir@/hades-generate-config freeradius @pkgrunstatedir@/radius
+ExecReload=@RADIUSD@ -d @pkgrunstatedir@/radius -Cx -lstdout
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
