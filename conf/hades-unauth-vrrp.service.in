@@ -13,7 +13,7 @@ KillMode=process
 SyslogIdentifier=hades-unauth-vrrp
 EnvironmentFile=@systemdenvfile@
 ExecStartPre=@bindir@/hades-generate-config unauth-keepalived.conf.j2 @pkgrunstatedir@/unauth-vrrp/keepalived.conf
-ExecStart=@IP@ netns exec @UNAUTH_NAMESPACE@ @KEEPALIVED@ --log-console --vrrp --use-file=@pkgrunstatedir@/unauth-vrrp/keepalived.conf --pid=@pkgrunstatedir@/unauth-vrrp/keepalived.pid --vrrp_pid=@pkgrunstatedir@/unauth-vrrp/keepalived-vrrp.pid $UNAUTH_KEEPALIVED_OPTS
+ExecStart=@KEEPALIVED@ --log-console --vrrp --use-file=@pkgrunstatedir@/unauth-vrrp/keepalived.conf --pid=@pkgrunstatedir@/unauth-vrrp/keepalived.pid --vrrp_pid=@pkgrunstatedir@/unauth-vrrp/keepalived-vrrp.pid $UNAUTH_KEEPALIVED_OPTS
 ExecReload=@bindir@/hades-generate-config unauth-keepalived.conf.j2 @pkgrunstatedir@/unauth-vrrp/keepalived.conf
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
