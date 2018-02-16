@@ -13,7 +13,7 @@ KillMode=process
 SyslogIdentifier=hades-auth-vrrp
 EnvironmentFile=@systemdenvfile@
 ExecStartPre=@bindir@/hades-generate-config auth-keepalived.conf.j2 @pkgrunstatedir@/auth-vrrp/keepalived.conf
-ExecStart=@IP@ netns exec @AUTH_NAMESPACE@ /usr/sbin/keepalived --log-console --vrrp --use-file=@pkgrunstatedir@/auth-vrrp/keepalived.conf --pid=@pkgrunstatedir@/auth-vrrp/keepalived.pid --vrrp_pid=@pkgrunstatedir@/auth-vrrp/keepalived-vrrp.pid $AUTH_KEEPALIVED_OPTS
+ExecStart=@IP@ netns exec @AUTH_NAMESPACE@ @KEEPALIVED@ --log-console --vrrp --use-file=@pkgrunstatedir@/auth-vrrp/keepalived.conf --pid=@pkgrunstatedir@/auth-vrrp/keepalived.pid --vrrp_pid=@pkgrunstatedir@/auth-vrrp/keepalived-vrrp.pid $AUTH_KEEPALIVED_OPTS
 ExecReload=@bindir@/hades-generate-config auth-keepalived.conf.j2 @pkgrunstatedir@/auth-vrrp/keepalived.conf
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
