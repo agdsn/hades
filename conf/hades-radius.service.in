@@ -10,6 +10,8 @@ Wants=hades-database.service
 Type=forking
 PIDFile=@RADIUS_PID_FILE@
 SyslogIdentifier=hades-radius
+User=@RADIUS_USER@
+Group=@RADIUS_GROUP@
 Environment=PGAPPNAME=hades-radius
 EnvironmentFile=@systemdenvfile@
 ExecStartPre=@bindir@/hades-generate-config freeradius @pkgrunstatedir@/radius
