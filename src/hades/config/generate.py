@@ -27,7 +27,10 @@ def template_filter(name):
     def decorator(f):
         template_filter.registered[name] = f
         return f
+
     return decorator
+
+
 template_filter.registered = dict()
 
 

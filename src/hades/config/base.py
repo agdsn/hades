@@ -10,6 +10,7 @@ def is_option_name(name):
 
     Valid option names are restricted to ASCII, start with an uppercase letter
     followed by uppercase letters (A-Z), digits (0-9) or the underscore (_).
+
     :param name: Name
     :return: True, if name is string and a valid option name, False otherwise
     :rtype: bool
