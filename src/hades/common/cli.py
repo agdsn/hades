@@ -51,7 +51,9 @@ def setup_cli_logging(program, args):
     effective_verbosity = min(max(verbosity, -len(VERBOSITY_LEVELS)),
                               len(VERBOSITY_LEVELS) - 1)
     level = VERBOSITY_LEVELS[effective_verbosity]
-    logging.basicConfig(level=level, style='%',
-                        format="{} %(levelname)-8s %(asctime)s "
-                               "%(name)-15s %(message)s".format(program),
-                        stream=sys.stderr)
+    if level <= logging.DEBUG:
+        fmt = ("[%(asctime)s] %(levelname)s in %(filename)s:%(lineno)d: "
+               "%(message)s")
+    else:
+        fmt = "%(message)s"
+    logging.basicConfig(level=level, style='%', format=fmt, stream=sys.stderr)
