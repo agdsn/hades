@@ -3,6 +3,9 @@ hades (0.4.0dev) UNRELEASED; urgency=medium
   * Start 0.4.0 branch
   * Protect config files with stricter permissions (See GH-69)
   * Manage networking with systemd and ifupdown
+  * Improve unit file dependencies
+  * Replace leftover static paths in unit files with configured paths
+  * Remove ip-netns calls in units
 
  -- Sebastian Schrader <sebastian.schrader@agdsn.de>  Fri, 25 Aug 2017 23:11:12 +0200
 
