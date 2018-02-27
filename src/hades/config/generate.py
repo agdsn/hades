@@ -1,10 +1,12 @@
 import collections
+import grp
 import io
 import itertools
 import os
 import os.path
 import pathlib
 import shutil
+import stat
 import sys
 from functools import partial
 from typing import Optional, TextIO, Union
@@ -94,7 +96,24 @@ class ConfigGenerator(object):
     TEMPLATE_SUFFIX = ".j2"
 
     def __init__(self, template_dir: Union[str, pathlib.PurePath],
-                 config):
+                 config, mode: int = 0o0750,
+                 group: Optional[grp.struct_group] = None):
+        self.group = group
+        mode = stat.S_IMODE(mode)
+        # The mode could be masked with much less characters.
+        # The verbosity of these statements is for clarity and documentation.
+        # Allow only read, write, sticky, and setgid for directories
+        self.dir_mode = mode & (stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH |
+                                stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH |
+                                stat.S_ISVTX | stat.S_ISGID)
+        # Set execution bits if corresponding read bits are set
+        self.dir_mode |= stat.S_IXUSR if stat.S_IRUSR else 0
+        self.dir_mode |= stat.S_IXGRP if stat.S_IRGRP else 0
+        self.dir_mode |= stat.S_IXOTH if stat.S_IROTH else 0
+        # Allow only read, write, and sticky for files
+        self.file_mode = mode & (stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH |
+                                 stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH |
+                                 stat.S_ISVTX)
         self.config = config
         self.template_dir = pathlib.Path(template_dir)
         self.env = jinja2.Environment(
@@ -113,6 +132,15 @@ class ConfigGenerator(object):
             'constants': constants,
         })
         self.env.filters.update(template_filter.registered)
+
+    def _setgroup(self, destination: pathlib.Path):
+        if self.group is not None:
+            os.chown(str(destination), -1, self.group.gr_gid,
+                     follow_symlinks=False)
+
+    def _setstat(self, destination: pathlib.Path, mode: int):
+        destination.chmod(mode)
+        self._setgroup(destination)
 
     def generate(self, source: Union[str, pathlib.PurePath],
                  destination: Optional[Union[str, pathlib.PurePath]]):
@@ -171,9 +199,10 @@ class ConfigGenerator(object):
                         else:
                             path.unlink()
                 else:
-                    destination.mkdir(exist_ok=True)
+                    destination.mkdir(self.dir_mode, exist_ok=True)
                 shutil.copystat(str(source), str(destination),
                                 follow_symlinks=False)
+                self._setstat(destination, self.dir_mode)
             else:
                 if source.suffix == self.TEMPLATE_SUFFIX:
                     destination = destination.with_name(destination.stem)
@@ -218,9 +247,11 @@ class ConfigGenerator(object):
     def _create_symlink(self, source: pathlib.Path, destination: pathlib.Path):
         target = pathlib.Path(os.readlink(str(source)))
         destination.symlink_to(target)
+        self._setgroup(destination)
 
     def _copy_to_file(self, source: pathlib.Path, destination: pathlib.Path):
         shutil.copy2(str(source), str(destination), follow_symlinks=False)
+        self._setstat(destination, self.file_mode)
 
     def _copy_to_stdout(self, source: pathlib.Path):
         self._copy_to_fd(source, sys.stdout.fileno())
@@ -232,7 +263,7 @@ class ConfigGenerator(object):
 
     def _create_file(self, name: pathlib.Path) -> int:
         flags = os.O_WRONLY | os.O_CLOEXEC | os.O_EXCL | os.O_CREAT
-        return os.open(str(name), flags)
+        return os.open(str(name), flags, mode=self.file_mode)
 
     def _generate_template_to_file(self, source: pathlib.Path,
                                    destination: pathlib.Path):
@@ -246,6 +277,7 @@ class ConfigGenerator(object):
         except FileExistsError:
             destination.unlink()
             fd = self._create_file(destination)
+        self._setgroup(destination)
         with os.fdopen(fd, mode='w', encoding='utf-8') as writer:
             self._generate_template_to_writer(
                 source, writer, destination_dir=destination.parent,
