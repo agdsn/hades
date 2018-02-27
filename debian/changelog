@@ -1,4 +1,4 @@
-hades (0.4.0dev) UNRELEASED; urgency=medium
+hades (0.4.0~dev) UNRELEASED; urgency=medium
 
   * Start 0.4.0 branch
   * Protect config files with stricter permissions (See GH-69)
