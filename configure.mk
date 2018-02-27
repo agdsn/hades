@@ -106,7 +106,7 @@ $(call add_substitution, pkglogdir,        $(logdir)/$(PACKAGE_NAME))
 $(call add_substitution, pythonsitedir,  $(shell python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"))
 $(call add_substitution, assetdir,       $(pythonsitedir)/hades/portal/assets)
 $(call add_substitution, systemdenvfile, /etc/default/hades)
-$(call add_substitution, templatedir,    $(pkgdatadir)/templates)
+$(call add_substitution, templatepath,   $(pkgsysconfdir)/templates:$(pkgdatadir)/templates)
 $(call add_substitution, venvdir,        $(NULL))
 
 # Derived paths

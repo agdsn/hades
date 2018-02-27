@@ -11,11 +11,10 @@ from hades.common.cli import (
     ArgumentParser, parser as common_parser, setup_cli_logging,
 )
 from hades.config.base import ConfigError
-from hades.config.generate import ConfigGenerator
+from hades.config.generate import ConfigGenerator, GeneratorError
 from hades.config.loader import load_config, print_config_error
 
 logger = logging.getLogger()
-template_dir = pathlib.Path(constants.templatedir).resolve()
 
 
 def mode(value: str) -> int:
@@ -38,14 +37,10 @@ def group(value: str) -> grp.struct_group:
         raise argparse.ArgumentTypeError("No such group: {}".format(value))
 
 
-def path(value: str) -> pathlib.Path:
-    p = pathlib.Path(value)
+def relative_path(value: str) -> pathlib.PurePath:
+    p = pathlib.PurePath(value)
     if p.is_absolute():
         raise argparse.ArgumentTypeError("Path must be relative")
-    try:
-        (template_dir / p).resolve().relative_to(template_dir)
-    except ValueError:
-        argparse.ArgumentTypeError("Must be within {}".format(template_dir))
     return p
 
 
@@ -61,7 +56,7 @@ def main():
     parser.add_argument('-g', '--group', type=group, default=None,
                         metavar='GROUP | GID',
                         help="The group of created files and directories.")
-    parser.add_argument(dest='source', type=path, metavar='SOURCE',
+    parser.add_argument(dest='source', type=relative_path, metavar='SOURCE',
                         help="Template file name or template directory name")
     parser.add_argument(dest='destination', metavar='DESTINATION', nargs='?',
                         help="Destination file or directory (default is stdout"
@@ -73,16 +68,14 @@ def main():
     except ConfigError as e:
         print_config_error(e)
         return os.EX_CONFIG
-    generator = ConfigGenerator(template_dir, config, args.mode, args.group)
-    source = template_dir / args.source
-    if source.is_dir():
-        generator.generate_directory(args.source, args.destination)
-    elif source.is_file():
-        generator.generate_file(args.source, args.destination)
-    else:
-        logger.critical("No such file or directory %s in %s",
-                        args.source, template_dir)
-        return os.EX_NOINPUT
+    search_path = constants.templatepath.split(os.path.pathsep)
+    generator = ConfigGenerator(search_path, config, args.mode,
+                                args.group)
+    try:
+        generator.generate(args.source, args.destination)
+    except GeneratorError as e:
+        logger.critical(str(e))
+        return os.EX_DATAERR
 
 
 if __name__ == '__main__':
