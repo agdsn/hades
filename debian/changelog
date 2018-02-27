@@ -12,6 +12,7 @@ hades (0.4.0~dev) UNRELEASED; urgency=medium
   * Improve reporting of config related errors (See GH-12)
   * Support relative imports in config files
   * Support multiple template directories, that can override each other
+  * Fix broken network_ip option check (GH-77)
 
  -- Sebastian Schrader <sebastian.schrader@agdsn.de>  Fri, 25 Aug 2017 23:11:12 +0200
 

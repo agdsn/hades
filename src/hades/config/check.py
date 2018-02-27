@@ -137,12 +137,16 @@ class satisfy_all(Check):
 # noinspection PyDecorator,PyUnusedLocal
 @Check.decorate
 def network_ip(option, config, value):
-    if value.ip == value.value:
+    # Prefix length 31 is special, see RFC 3021
+    if value.version == 4 and value.prefixlen == 31:
+        return
+    if value.version == 6 and value.prefixlen == 127:
+        return
+    if value.ip == value.network:
         raise OptionCheckError("The host part of {} is the network address of "
                                "the subnet. Must be an IP of the subnet."
                                .format(value), option=option.__name__)
-    # Prefix length 31 is special, see RFC 3021
-    if value.prefixlen != 31 and value.ip == value.broadcast:
+    if value.ip == value.broadcast:
         raise OptionCheckError("The host part of {} is the broadcast address "
                                "of the subnet. Must be an IP of the subnet."
                                .format(value), option=option.__name__)
