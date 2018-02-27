@@ -1,4 +1,6 @@
 import collections
+import datetime
+import getpass
 import grp
 import io
 import itertools
@@ -320,11 +322,14 @@ class GeneratorError(Exception):
 
 
 class ConfigGenerator(object):
+    DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S%z"
+    """Format string for producing RFC3339-compatible datetime strings"""
     TEMPLATE_SUFFIX = ".j2"
 
     def __init__(self, template_dirs: Union[PathArg, Iterable[PathArg]],
                  config, mode: int = 0o0750,
                  group: Optional[grp.struct_group] = None):
+        self._current_user = getpass.getuser()
         self.group = group
         mode = stat.S_IMODE(mode)
         # The mode could be masked with much less characters.
@@ -536,8 +541,13 @@ class ConfigGenerator(object):
                                  .format(source,
                                          self._format_search_path())
                                  ) from e
+        now = datetime.datetime.now(datetime.timezone.utc).astimezone()
+        comment = ("Generated on {} from {} by {}"
+                   .format(now.strftime(self.DATETIME_FORMAT), source,
+                           self._current_user))
         relative_source = source.relative_to(base)
         stream = template.stream(**self.config, **extra_variables,
+                                 comment=comment,
                                  source_base=base,
                                  source=relative_source,
                                  source_dir=relative_source.parent)

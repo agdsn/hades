@@ -1,3 +1,5 @@
+# {{ comment }}
+
 server {
 	{% for network in HADES_UNAUTH_LISTEN %}
 	listen {{ network.ip }}:80 default_server;

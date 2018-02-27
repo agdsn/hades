@@ -1,3 +1,5 @@
+# {{ comment }}
+
 iface veth inet manual
   # Create a veth pair
   pre-up {{ constants.IP }} link add name $IFACE type veth peer netns root name {{ namespace }}-$IFACE
