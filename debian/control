@@ -2,7 +2,8 @@ Source: hades
 Section: net
 Priority: extra
 Maintainer: Sebastian Schrader <sebastian.schrader@agdsn.de>
-Build-Depends: bash (>= 4),
+Build-Depends:
+ bash (>= 4),
  bridge-utils,
  debhelper (>= 9),
  dh-exec,
@@ -41,8 +42,12 @@ Standards-Version: 3.9.8
 
 Package: hades
 Architecture: any
-Pre-Depends: dpkg (>= 1.16.1), python3, ${misc:Pre-Depends}
-Depends: bash (>= 4),
+Pre-Depends:
+ bash (>= 4),
+ dpkg (>= 1.16.1),
+ python3,
+ ${misc:Pre-Depends},
+Depends:
  bridge-utils,
  dnsmasq,
  freeradius (>= 3.0),
