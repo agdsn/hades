@@ -1,0 +1,1 @@
+mv_conffile /etc/hades/config.py /etc/hades/config/__init__.py 0.4.0

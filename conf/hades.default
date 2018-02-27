@@ -1,4 +1,4 @@
-#HADES_CONFIG=/etc/hades/config.py
+#HADES_CONFIG=/etc/hades/config/__init__.py
 #HADES_VERBOSITY=1
 
 # You can add custom options to the daemons started by systemd

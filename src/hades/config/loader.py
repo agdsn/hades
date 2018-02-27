@@ -19,6 +19,7 @@ from hades.config.base import (
 )
 
 CONFIG_PACKAGE_NAME = 'hades_config'
+DEFAULT_CONFIG = os.path.join(constants.pkgsysconfdir, 'config', '__init__.py')
 
 logger = logging.getLogger(__name__)
 
@@ -267,8 +268,7 @@ def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
         raise RuntimeError("Config already loaded")
     config = AttributeAccessibleDict(OptionMeta.get_defaults())
     if filename is None:
-        filename = os.environ.get(
-            'HADES_CONFIG', os.path.join(constants.pkgsysconfdir, 'config.py'))
+        filename = os.environ.get('HADES_CONFIG', DEFAULT_CONFIG)
 
     module_path = pathlib.Path(filename).resolve()
     if module_path.is_dir():

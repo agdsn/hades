@@ -44,7 +44,7 @@ Package: hades
 Architecture: any
 Pre-Depends:
  bash (>= 4),
- dpkg (>= 1.16.1),
+ dpkg (>= 1.17.14),
  python3,
  ${misc:Pre-Depends},
 Depends:

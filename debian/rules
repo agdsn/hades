@@ -31,7 +31,7 @@ endif
 
 override_dh_fixperms:
 	dh_fixperms
-	chmod u=rw,g=r,o= debian/$(PACKAGE)/etc/hades/config.py
+	chmod -R u=rwX,g=rX,o= debian/$(PACKAGE)/etc/hades/config
 
 override_dh_auto_clean:
 	dh_auto_clean

@@ -2,7 +2,7 @@
 conf/*.service lib/systemd/system/
 conf/*.target lib/systemd/system/
 conf/*.timer lib/systemd/system/
-conf/config.py etc/hades
+conf/config.py => etc/hades/config/__init__.py
 conf/hades.busconfig => etc/dbus-1/system.d/de.agdsn.hades.conf
 conf/hades.default => etc/default/hades
 conf/hades.tmpfile => usr/lib/tmpfiles.d/hades.conf
