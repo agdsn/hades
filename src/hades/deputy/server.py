@@ -77,8 +77,8 @@ def generate_dhcp_host_reservations(
 ) -> Iterable[str]:
     for mac, ip in hosts:
         mac = netaddr.EUI(mac)
-        mac.dialect=netaddr.mac_unix_expanded
-        yield "{0},{1}\n".format(mac, ip)
+        mac.dialect = netaddr.mac_unix_expanded
+        yield "{0},id:*,{1}\n".format(mac, ip)
 
 
 def generate_dhcp_hosts_file(

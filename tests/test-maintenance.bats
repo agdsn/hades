@@ -73,9 +73,9 @@ teardown() {
 	file=/var/lib/hades/auth-dhcp/dnsmasq-dhcp.hosts
 	cat "$file" >&2
 	[[ -f "$file" ]]
-	[[ "$(<"$file")" = "de:ad:be:ef:00:00,${client_ip_address}" ]]
+	[[ "$(<"$file")" = "de:ad:be:ef:00:00,id:*,${client_ip_address}" ]]
 
 	data 1
 	[[ -f "$file" ]]
-	[[ "$(<"$file")" = "de:ad:be:ef:00:01,${client_ip_address}" ]]
+	[[ "$(<"$file")" = "de:ad:be:ef:00:01,id:*,${client_ip_address}" ]]
 }
