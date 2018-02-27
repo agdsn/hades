@@ -44,12 +44,12 @@ class OptionMeta(type):
             raise TypeError('not a valid option name')
         if not abstract and 'default' in attributes:
             attributes['has_default'] = True
-        class_ = super(OptionMeta, mcs).__new__(mcs, name, bases, attributes)
-        if class_.has_default and class_.required:
+        cls = super(OptionMeta, mcs).__new__(mcs, name, bases, attributes)
+        if cls.has_default and cls.required:
             raise TypeError("required options can't have defaults")
         if not abstract:
-            mcs.options[name] = class_
-        return class_
+            mcs.options[name] = cls
+        return cls
 
     # noinspection PyUnusedLocal
     def __init__(cls, name, bases, attributes, abstract=False):
