@@ -54,10 +54,6 @@ server hades {
 		preprocess
 
 		chap
-		eap {
-			ok = return
-			updated = return
-		}
 		{% if HADES_RADIUS_DATABASE_FAIL_ACCEPT %}
 		redundant {
 			lookup_sql
@@ -66,6 +62,12 @@ server hades {
 		{% else %}
 		lookup_sql
 		{% endif %}
+
+		eap {
+			ok = return
+			updated = return
+		}
+
 		pap
 	}
 
