@@ -142,8 +142,8 @@ class CallableEvaluator(AttributeAccessibleDict):
 
     def _evaluate(self, key, value):
         if key in self._stack:
-            raise ConfigOptionError("Option recursion {} -> {}"
-                                    .format(' -> '.join(self._stack), key),
+            raise ConfigOptionError("Option recursion {} => {}"
+                                    .format(' => '.join(self._stack), key),
                                     option=key)
         self._stack.append(key)
         if isinstance(value, Compute):
