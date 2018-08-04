@@ -83,7 +83,7 @@ teardown() {
 
 	fakedns
 
-	run ns dig short www.google.de
+	run ns dig +short www.google.de
 	[[ -n "$output" && "$output" != 127.0.0.1 ]]
 
 	run ns dig +short fake.news.com
