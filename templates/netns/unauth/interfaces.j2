@@ -15,9 +15,9 @@ iface eth0 inet static inherits veth
 auto eth1
 iface eth1 inet manual inherits veth
   # Attach root end of the veth pair to the VRRP bridge
-  pre-up {{ constants.IP }} -n root link set unauth-eth1 master br-vrrp
+  pre-up {{ constants.IP }} -n root link set unauth-eth1 master {{ HADES_VRRP_BRIDGE }}
 
 auto eth2
 iface eth2 inet manual inherits veth
   # Attach the root end of the veth pair to the bridge
-  pre-up {{ constants.IP }} -n root link set unauth-eth2 master br-unauth
+  pre-up {{ constants.IP }} -n root link set unauth-eth2 master {{ HADES_UNAUTH_BRIDGE }}

@@ -475,6 +475,13 @@ class HADES_AUTH_INTERFACE(Option):
     runtime_check = check.interface_exists
 
 
+class HADES_AUTH_BRIDGE(Option):
+    """Name of the auth bridge interface"""
+    type = str
+    default = "br-auth"
+    static_check = check.match('\A[A-Za-z0-9_-]{1,15}\Z', re.ASCII)
+
+
 class HADES_AUTH_NEXT_HOP(Option):
     """
     The next hop, where packets to user networks (e.g. DHCP replies, DNS
@@ -532,6 +539,13 @@ class HADES_UNAUTH_INTERFACE(Option):
     type = str
     required = True
     runtime_check = check.interface_exists
+
+
+class HADES_UNAUTH_BRIDGE(Option):
+    """Name of the unauth bridge interface"""
+    type = str
+    default = "br-unauth"
+    static_check = check.match('\A[A-Za-z0-9_-]{1,15}\Z', re.ASCII)
 
 
 class HADES_UNAUTH_LISTEN(Option):
