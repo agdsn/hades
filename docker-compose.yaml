@@ -5,7 +5,7 @@ services:
       context: ./docker
       args:
         BUILDER_UID: ${UID:-1000}
-        BUILDER_GID: ${GID:-100}
+        BUILDER_GID: ${GID:-1000}
     image: hades
     container_name: hades
     network_mode: bridge
