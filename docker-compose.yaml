@@ -22,6 +22,8 @@ services:
     stop_signal: SIGRTMIN+3
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-      - ../hades-build:/build
+      - "home:/build"
       - ./:/build/hades
 
+volumes:
+  home:
