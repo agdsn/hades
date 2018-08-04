@@ -42,11 +42,11 @@ teardown() {
 
 @test "check that DNS queries get redirected" {
 	for i in www.google.de www.msftncsi.com unknown.tld; do
-		run ns dig +short "$i"
+		run ns dig +timeout=1 +short "$i"
 		[[ "$output" = 10.66.0.1 ]]
 	done
 
-	run ns dig +short dns.msftncsi.com
+	run ns dig +timeout=1 +short dns.msftncsi.com
 	[[ "$output" = 131.107.255.255 ]]
 }
 
@@ -73,7 +73,7 @@ teardown() {
 
 @test "check that pass-through DNS is working" {
 	for i in agdsn.de ftp.agdsn.de; do
-		run ns dig +short agdsn.de
+		run ns dig +timeout=1 +short agdsn.de
 		echo "$output" >&2
 		[[ -n $output && $output != 10.66.0.1 && $output =~ [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ ]]
 	done
@@ -87,7 +87,7 @@ teardown() {
 	run ipset_count
 	echo "$output" >&2
 	[[ "$output" -eq 0 ]]
-	ns dig +short agdsn.de
+	ns dig +timeout=1 +short agdsn.de
 	sleep 1
 	run ipset_count
 	echo "$output" >&2
@@ -96,7 +96,7 @@ teardown() {
 
 @test "check that pass-through host is reachable" {
 	for i in mail.agdsn.de ftp.agdsn.de; do
-		ns dig agdsn.de >&2
+		ns dig +timeout=1 agdsn.de >&2
 		run ns ping -n -i0.1 -c10 "$i"
 		echo "$output" >&2
 		egrep ' 0% packet loss' <<<"$output"

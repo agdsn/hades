@@ -67,7 +67,7 @@ teardown() {
 @test "check that DNS queries get answered" {
 	ns cat /etc/resolv.conf >&2
 	for i in www.google.de www.msftncsi.com; do
-		run ns dig +short "$i"
+		run ns dig +timeout=1 +short "$i"
 		echo "$output" >&2
 		[[ -n $output && $output != 10.66.0.1 && $output =~ [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ ]]
 	done
@@ -76,16 +76,16 @@ teardown() {
 @test "check that alternative DNS is working" {
 	ns cat /etc/resolv.conf >&2
 	for i in www.google.de fake.news.com; do
-		run ns dig +short "$i"
+		run ns dig +timeout=1 +short "$i"
 		echo "$output" >&2
 		[[ -n "$output" && "$output" != 127.0.0.1 ]]
 	done
 
 	fakedns
 
-	run ns dig +short www.google.de
+	run ns dig +timeout=1 +short www.google.de
 	[[ -n "$output" && "$output" != 127.0.0.1 ]]
 
-	run ns dig +short fake.news.com
+	run ns dig +timeout=1 +short fake.news.com
 	[[ "$output" = 127.0.0.1 ]]
 }
