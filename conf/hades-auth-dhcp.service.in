@@ -11,10 +11,10 @@ PrivateNetwork=yes
 BusName=@AUTH_DHCP_DBUS_NAME@
 SyslogIdentifier=hades-auth-dhcp
 EnvironmentFile=@systemdenvfile@
-ExecStartPre=@bindir@/hades-generate-config auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
+ExecStartPre=@bindir@/hades-generate-config --group=@AUTH_DHCP_GROUP@ auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
 ExecStartPre=@DNSMASQ@ --test -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf $AUTH_DNSMASQ_OPTS
 ExecStart=@DNSMASQ@ -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf $AUTH_DNSMASQ_OPTS
-ExecReload=@bindir@/hades-generate-config auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
+ExecReload=@bindir@/hades-generate-config --group=@AUTH_DHCP_GROUP@ auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
 ExecReload=@DNSMASQ@ --test -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf $AUTH_DNSMASQ_OPTS
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always

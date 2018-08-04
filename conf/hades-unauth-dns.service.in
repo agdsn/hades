@@ -11,10 +11,10 @@ PrivateNetwork=yes
 BusName=@UNAUTH_DNS_DBUS_NAME@
 SyslogIdentifier=hades-unauth-dns
 EnvironmentFile=@systemdenvfile@
-ExecStartPre=@bindir@/hades-generate-config unauth-dnsmasq.conf.j2 @pkgrunstatedir@/unauth-dns/dnsmasq.conf
+ExecStartPre=@bindir@/hades-generate-config --group=@UNAUTH_DNS_GROUP@ unauth-dnsmasq.conf.j2 @pkgrunstatedir@/unauth-dns/dnsmasq.conf
 ExecStartPre=@DNSMASQ@ --test -k --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf $UNAUTH_DNSMASQ_OPTS
 ExecStart=@DNSMASQ@ -k --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf $UNAUTH_DNSMASQ_OPTS
-ExecReload=@bindir@/hades-generate-config unauth-dnsmasq.conf.j2 @pkgrunstatedir@/unauth-dns/dnsmasq.conf
+ExecReload=@bindir@/hades-generate-config --group=@UNAUTH_DNS_GROUP@ unauth-dnsmasq.conf.j2 @pkgrunstatedir@/unauth-dns/dnsmasq.conf
 ExecReload=@DNSMASQ@ --test -k --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf $UNAUTH_DNSMASQ_OPTS
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always

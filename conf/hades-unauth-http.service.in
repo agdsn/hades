@@ -13,9 +13,9 @@ PrivateNetwork=yes
 PIDFile=@PORTAL_NGINX_PID_FILE@
 SyslogIdentifier=hades-unauth-http
 EnvironmentFile=@systemdenvfile@
-ExecStartPre=@bindir@/hades-generate-config nginx @pkgrunstatedir@/unauth-http
+ExecStartPre=@bindir@/hades-generate-config --group=@PORTAL_GROUP@ nginx @pkgrunstatedir@/unauth-http
 ExecStart=@NGINX@ -c @pkgrunstatedir@/unauth-http/nginx.conf $NGINX_OPTS
-ExecReload=@bindir@/hades-generate-config nginx @pkgrunstatedir@/unauth-http
+ExecReload=@bindir@/hades-generate-config --group=@PORTAL_GROUP@ nginx @pkgrunstatedir@/unauth-http
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
