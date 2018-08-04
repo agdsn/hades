@@ -5,7 +5,6 @@ server hades {
 		ipv6addr = ::1
 		port = {{ HADES_RADIUS_AUTHENTICATION_PORT }}
 		type = auth
-		interface = lo
 	}
 
 	listen {
@@ -13,7 +12,6 @@ server hades {
 		ipv6addr = ::1
 		port = {{ HADES_RADIUS_ACCOUNTING_PORT }}
 		type = acct
-		interface = lo
 	}
 
 	{% for network in HADES_RADIUS_LISTEN %}
@@ -25,7 +23,6 @@ server hades {
 		{% endif %}
 		port = {{ HADES_RADIUS_AUTHENTICATION_PORT }}
 		type = auth
-		interface = {{ HADES_RADIUS_INTERFACE }}
 	#	clients = per_socket_clients
 	}
 
@@ -37,7 +34,6 @@ server hades {
 		{% endif %}
 		port = {{ HADES_RADIUS_ACCOUNTING_PORT }}
 		type = acct
-		interface = {{ HADES_RADIUS_INTERFACE }}
 	#	clients = per_socket_clients
 	}
 	{% endfor %}
