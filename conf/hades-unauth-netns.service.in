@@ -5,6 +5,12 @@ StopWhenUnneeded=true
 BindsTo=hades-root-netns.service
 After=hades-root-netns.service
 
+# Due to a bug in the systemd version shipped with Stretch ExecStopPost is not
+# executed for Type=oneshot services. This has been fixed in an unknown, later
+# version of systemd.
+OnFailure=hades-unauth-netns-cleanup.service
+Conflicts=hades-unauth-netns-cleanup.service
+
 [Service]
 Type=oneshot
 RemainAfterExit=yes

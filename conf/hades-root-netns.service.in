@@ -3,6 +3,12 @@ Description=Hades root network namespace
 Documentation=https://github.com/systemd/systemd/issues/2741#issuecomment-336736214
 StopWhenUnneeded=true
 
+# Due to a bug in the systemd version shipped with Stretch ExecStopPost is not
+# executed for Type=oneshot services. This has been fixed in an unknown, later
+# version of systemd.
+OnFailure=hades-root-netns-cleanup.service
+Conflicts=hades-root-netns-cleanup.service
+
 [Service]
 Type=oneshot
 RemainAfterExit=yes
