@@ -1,4 +1,4 @@
-hades (0.4.0~dev) UNRELEASED; urgency=medium
+hades (0.4.0) stretch; urgency=low
 
   * Start 0.4.0 branch
   * Protect config files with stricter permissions (See GH-69)
@@ -13,6 +13,8 @@ hades (0.4.0~dev) UNRELEASED; urgency=medium
   * Support relative imports in config files
   * Support multiple template directories, that can override each other
   * Fix broken network_ip option check (GH-77)
+  * Add EAP-MD5 support for D-Links DGS-3100
+  * Add signed Celery messages
 
  -- Sebastian Schrader <sebastian.schrader@agdsn.de>  Fri, 25 Aug 2017 23:11:12 +0200
 
