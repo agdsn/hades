@@ -34,3 +34,5 @@ var/
 
 /.pybuild
 /setup.py
+
+/vendor
