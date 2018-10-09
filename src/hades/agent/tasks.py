@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import netaddr
 import pkg_resources
-from celery.signals import import_modules
+from celery.signals import worker_process_init
 from celery.utils.log import get_task_logger
 from pydbus import SystemBus
 
@@ -33,8 +33,8 @@ if not is_config_loaded() and not app.configured:
 
 
 # noinspection PyUnusedLocal
-@import_modules.connect
-def import_modules(sender, *args, **kwargs):
+@worker_process_init.connect
+def setup_engine(sender, *args, **kwargs):
     global engine
     config = get_config()
     engine = create_engine(config)
