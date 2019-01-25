@@ -13,16 +13,20 @@ readonly known_user_mac=40-61-86-1c-df-fd
 readonly unknown_user_mac=1e-a7-de-ad-be-ef
 readonly known_vlan_name=1KnownVLAN
 readonly unknown_vlan_name=1UnknownVLAN
+readonly known_user_port_id=K1
+readonly unknown_user_port_id=U1
 
 setup() {
 	psql foreign <<-EOF
 		INSERT INTO radcheck ("Priority", "NASIPAddress", "NASPortId", "UserName", "Attribute", "Op", "Value")
-		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '$(lowercase $(mac_sextuple ${known_user_mac} :))', 'Calling-Station-Id', '==', '$(lowercase $(mac_sextuple "${nas_mac}" -))');
+		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '$(lowercase $(mac_sextuple ${known_user_mac} :))', 'Calling-Station-Id', '==', '$(lowercase $(mac_sextuple "${nas_mac}" -))'),
+		(1, inet '${nas_ip}', '${known_user_port_id}', NULL, 'Calling-Station-Id', '==', '$(lowercase $(mac_sextuple "${nas_mac}" -))');
 		INSERT INTO radreply ("Priority", "NASIPAddress", "NASPortId", "UserName", "Attribute", "Op", "Value")
 		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '$(lowercase $(mac_sextuple ${known_user_mac} :))', 'Reply-Message', '+=', 'radreply test'),
 		(1, NULL, NULL, 'unknown', 'Reply-Message', '+=', 'radreply unknown');
 		INSERT INTO radusergroup ("Priority", "NASIPAddress", "NASPortId", "UserName", "GroupName")
 		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '$(lowercase $(mac_sextuple ${known_user_mac} :))', 'test'),
+		(1, inet '${nas_ip}', '${known_user_port_id}', NULL, 'test'),
 		(1, NULL, NULL, 'unknown', 'unknown');
 		INSERT INTO radgroupreply ("Priority", "GroupName", "Attribute", "Op", "Value")
 		VALUES (1, 'test', 'Egress-VLAN-Name', '+=', '${known_vlan_name}'),
@@ -136,6 +140,44 @@ do_request() {
 	)
 	declare -Ar filter=(
 		[Packet-Type]=Access-Reject
+	)
+	do_request "$(declare -p request)" "$(declare -p filter)"
+}
+
+@test "check that any user at a known port authenticates via CHAP correctly" {
+	declare -Ar request=(
+		[Packet-Type]=Access-Request
+		[Service-Type]=Call-Check
+		[Framed-Protocol]=PPP
+		[User-Name]="${unknown_user_mac}"
+		[Calling-Station-Id]="${unknown_user_mac}"
+		[CHAP-Password]="${unknown_user_mac}"
+	        [NAS-Port-Id]="\"${known_user_port_id}\""
+	)
+	declare -Ar filter=(
+		[Packet-Type]=Access-Accept
+		[Egress-VLAN-Name]="\"${known_vlan_name}\""
+		[Reply-Message]="\"radreply test\""
+		[Reply-Message]="\"radgroupreply test\""
+	)
+	do_request "$(declare -p request)" "$(declare -p filter)"
+}
+
+@test "check that any user at an unkown port authenticates via CHAP correctly" {
+	declare -Ar request=(
+		[Packet-Type]=Access-Request
+		[Service-Type]=Call-Check
+		[Framed-Protocol]=PPP
+		[User-Name]="${unknown_user_mac}"
+		[Calling-Station-Id]="${unknown_user_mac}"
+		[CHAP-Password]="${unknown_user_mac}"
+	        [NAS-Port-Id]="\"${unknown_user_port_id}\""
+	)
+	declare -Ar filter=(
+		[Packet-Type]=Access-Accept
+		[Egress-VLAN-Name]="\"${unknown_vlan_name}\""
+		[Reply-Message]="\"radreply unknown\""
+		[Reply-Message]="\"radgroupreply unknown\""
 	)
 	do_request "$(declare -p request)" "$(declare -p filter)"
 }
