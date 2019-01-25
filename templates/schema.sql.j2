@@ -325,7 +325,7 @@ ALTER FOREIGN TABLE foreign_nas OWNER TO "{{ constants.DATABASE_USER }}";
 
 CREATE FOREIGN TABLE foreign_radcheck (
     "Priority" integer /* NOT NULL */,
-    "UserName" text  /* NOT NULL */,
+    "UserName" text,
     {% if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
     "NASIPAddress" text,
     {% else %}
@@ -388,7 +388,7 @@ ALTER FOREIGN TABLE foreign_radgroupreply OWNER TO "{{ constants.DATABASE_USER }
 
 CREATE FOREIGN TABLE foreign_radreply (
     "Priority" integer /* NOT NULL */,
-    "UserName" text /* NOT NULL */,
+    "UserName" text,
     {% if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
     "NASIPAddress" text,
     {% else %}
@@ -412,7 +412,7 @@ ALTER FOREIGN TABLE foreign_radreply OWNER TO "{{ constants.DATABASE_USER }}";
 --
 
 CREATE FOREIGN TABLE foreign_radusergroup (
-    "UserName" text /* NOT NULL */,
+    "UserName" text,
     {% if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
     "NASIPAddress" text,
     {% else %}
@@ -542,8 +542,7 @@ CREATE MATERIALIZED VIEW radcheck AS
     foreign_radcheck."Op",
     foreign_radcheck."Value"
    FROM foreign_radcheck
-  WHERE ((foreign_radcheck."UserName" IS NOT NULL)
-    AND (foreign_radcheck."Attribute" IS NOT NULL)
+  WHERE ((foreign_radcheck."Attribute" IS NOT NULL)
     AND (foreign_radcheck."Op" IS NOT NULL)
     AND (foreign_radcheck."Value" IS NOT NULL))
   WINDOW w AS (PARTITION BY foreign_radcheck."UserName", foreign_radcheck."NASIPAddress", foreign_radcheck."NASPortId" ORDER BY foreign_radcheck."Priority")
@@ -600,7 +599,7 @@ ALTER TABLE radgroupreply OWNER TO "{{ constants.DATABASE_USER }}";
 
 CREATE TABLE radpostauth (
     "Id" bigint NOT NULL,
-    "UserName" text NOT NULL,
+    "UserName" text,
     "NASIPAddress" inet NOT NULL,
     "NASPortId" text,
     "PacketType" text NOT NULL,
@@ -652,8 +651,7 @@ CREATE MATERIALIZED VIEW radreply AS
     foreign_radreply."Op",
     foreign_radreply."Value"
    FROM foreign_radreply
-  WHERE ((foreign_radreply."UserName" IS NOT NULL)
-   AND (foreign_radreply."Attribute" IS NOT NULL)
+  WHERE ((foreign_radreply."Attribute" IS NOT NULL)
    AND (foreign_radreply."Op" IS NOT NULL)
    AND (foreign_radreply."Value" IS NOT NULL))
   WINDOW w AS (PARTITION BY foreign_radreply."UserName", foreign_radreply."NASIPAddress", foreign_radreply."NASPortId" ORDER BY foreign_radreply."Priority")
@@ -677,8 +675,7 @@ CREATE MATERIALIZED VIEW radusergroup AS
     foreign_radusergroup."GroupName",
     row_number() OVER w AS "Priority"
    FROM foreign_radusergroup
-  WHERE ((foreign_radusergroup."UserName" IS NOT NULL)
-   AND (foreign_radusergroup."GroupName" IS NOT NULL))
+  WHERE ((foreign_radusergroup."GroupName" IS NOT NULL))
   WINDOW w AS (PARTITION BY foreign_radusergroup."UserName", foreign_radusergroup."NASIPAddress", foreign_radusergroup."NASPortId" ORDER BY foreign_radusergroup."Priority")
   WITH DATA;
 
