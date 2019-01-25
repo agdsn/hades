@@ -4,6 +4,7 @@ PACKAGE=$(shell dh_listpackages)
 
 USE_DH_VIRTUALENV ?= 0
 
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 configure_args = prefix=/usr libexecdir=/usr/lib sysconfdir=/etc localstatedir=/var pkglocalstatedir=/var/lib/$(PACKAGE) runstatedir=/run
 
 ifeq ($(USE_DH_VIRTUALENV),1)
