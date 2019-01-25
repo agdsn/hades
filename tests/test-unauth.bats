@@ -67,7 +67,7 @@ teardown() {
 @test "check that ping 8.8.8.8 results in packet filtering" {
 	run ns ping -n -i0.1 -c10 8.8.8.8
 	echo "$output" >&2
-	egrep 'Packet Filtered' <<<"$output"
+	egrep 'Packet filtered' <<<"$output"
 	egrep ' 100% packet loss' <<< "$output"
 }
 
@@ -104,7 +104,7 @@ teardown() {
 }
 
 @test "check that pass-through HTTP is working" {
-	run ns curl -qi https://ftp.agdsn.de/pub
+	run ns curl -qi https://ftp.agdsn.de/pub/
 	echo "$output" >&2
 	[[ $status = 0 ]]
 	egrep 'HTTP/[0-9]+\.[0-9] 200' <<<"$output"
