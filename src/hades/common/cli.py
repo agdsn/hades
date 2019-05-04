@@ -40,6 +40,7 @@ def setup_cli_logging(program, args):
     :param program: The name of the program
     :param args: The parsed arguments of the program
     """
+    reset_cli_logging()
     if args.verbosity is None:
         verbosity = os.environ.get('HADES_VERBOSITY', DEFAULT_VERBOSITY)
         try:
@@ -56,3 +57,20 @@ def setup_cli_logging(program, args):
     else:
         fmt = "%(message)s"
     logging.basicConfig(level=level, style='%', format=fmt, stream=sys.stderr)
+
+
+def reset_cli_logging():
+    """Reset root logger configuration"""
+    root = logging.root
+    for h in root.handlers:
+        try:
+            h.acquire()
+            h.flush()
+            h.close()
+        except (OSError, ValueError):
+            pass
+        finally:
+            h.release()
+        root.removeHandler(h)
+    for f in root.filters:
+        root.removeFilter(f)
