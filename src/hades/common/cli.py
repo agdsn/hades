@@ -1,5 +1,5 @@
 import argparse
-import logging
+import logging.handlers
 import os
 import sys
 from gettext import gettext as _
@@ -26,6 +26,10 @@ parser.add_argument('-q', '--quiet', dest='verbosity',
                     action='store_const', const=0, help='Be quiet')
 parser.add_argument('-V', '--version', action='version',
                     version=constants.PACKAGE_VERSION)
+parser.add_argument('--syslog', nargs='?', const='/dev/log',
+                    help="Log to syslog instead of stderr. A path to the log "
+                         "socket may be provided, defaults to /dev/log "
+                         "otherwise")
 VERBOSITY_LEVELS = [logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG]
 DEFAULT_VERBOSITY = 1
 
@@ -56,7 +60,17 @@ def setup_cli_logging(program, args):
                "%(message)s")
     else:
         fmt = "%(message)s"
-    logging.basicConfig(level=level, style='%', format=fmt, stream=sys.stderr)
+    stderr_handler = logging.StreamHandler(stream=sys.stderr)
+    stderr_handler.name = "stderr"
+    if args.syslog is not None:
+        # Also log critical messages to stderr
+        stderr_handler.setLevel(logging.CRITICAL)
+        syslog_handler = logging.handlers.SysLogHandler(address=args.syslog)
+        syslog_handler.name = "syslog"
+        handlers = [syslog_handler, stderr_handler]
+    else:
+        handlers = [stderr_handler]
+    logging.basicConfig(level=level, style='%', format=fmt, handlers=handlers)
 
 
 def reset_cli_logging():
