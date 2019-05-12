@@ -1,7 +1,7 @@
 import argparse
+import inspect
 import os
 import sys
-import textwrap
 
 from hades.agent import app
 from hades.common.cli import (
@@ -22,7 +22,7 @@ class Formatter(argparse.HelpFormatter):
 
 
 def main():
-    description = textwrap.dedent(
+    description = inspect.cleandoc(
         """
         Run the celery command configured for Hades.
 
