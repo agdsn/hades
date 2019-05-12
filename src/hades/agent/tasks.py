@@ -230,7 +230,6 @@ units = (
     'hades-database.service',
     'hades-deputy.service',
     'hades-forced-refresh.timer',
-    'hades-network.service',
     'hades-radius-vrrp.service',
     'hades-radius.service',
     'hades-refresh.timer',
