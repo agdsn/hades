@@ -235,11 +235,11 @@ def print_config_error(e: ConfigError):
             message = 'File "{}", line {}\n{}'.format(filename, lineno,
                                                       format_cause())
         if logger.getEffectiveLevel() > logging.INFO:
-            logger.critical("Error while load config file %s: %s",
+            logger.critical("Error while loading config file %s: %s",
                             root_config, message)
             logger.critical("Hint: Increase verbosity for a full traceback.")
         else:
-            logger.info("Error while load config file %s: %s",
+            logger.info("Error while loading config file %s: %s",
                         root_config, message, exc_info=e)
 
 
