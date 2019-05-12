@@ -4,7 +4,10 @@ import sys
 import textwrap
 
 from hades.agent import app
-from hades.common.cli import ArgumentParser, parser as common_parser
+from hades.common.cli import (
+    ArgumentParser, parser as common_parser, reset_cli_logging,
+    setup_cli_logging,
+)
 from hades.config.base import ConfigError
 from hades.config.loader import load_config, print_config_error
 from hades.config.options import CeleryOption
@@ -33,11 +36,13 @@ def main():
     parser.add_argument('-A', '--app', dest='app', help=argparse.SUPPRESS)
     parser.add_argument('command')
     args, argv = parser.parse_known_args()
+    setup_cli_logging(parser.prog, args)
     try:
         config = load_config(args.config)
     except ConfigError as e:
         print_config_error(e)
         return os.EX_CONFIG
+    reset_cli_logging()
     app.config_from_object(config.of_type(CeleryOption))
     if args.app:
         parser.error("You may not provide the -A/--app worker argument")
