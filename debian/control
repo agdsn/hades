@@ -5,7 +5,7 @@ Maintainer: Sebastian Schrader <sebastian.schrader@agdsn.de>
 Build-Depends:
  bash (>= 4),
  bridge-utils,
- debhelper (>= 9),
+ debhelper (>= 10),
  dh-exec,
  dh-python,
  dh-virtualenv (>= 0.8),
