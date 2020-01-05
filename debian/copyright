@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: hades
 Upstream-Contact: https://github.com/agdsn/hades/issues
-Source: https://github.com/sebschrader/python-arpreq
+Source: https://github.com/sebschrader/hades
 License: Expat
 
 Files: *
