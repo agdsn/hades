@@ -53,8 +53,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Hades'
-copyright = '2015, Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN), Sebastian Schrader'
-author = 'Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN), Sebastian Schrader'
+copyright = '2015-2020, Sebastian Schrader, Stefan Haller'
+author = 'Sebastian Schrader, Stefan Haller'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

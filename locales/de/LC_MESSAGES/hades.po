@@ -1,5 +1,5 @@
 # German translations for Hades.
-# Copyright (C) 2015 Sebastian Schrader
+# Copyright (C) 2015-2020 Sebastian Schrader, Stefan Haller
 # This file is distributed under MIT License.
 # Sebastian Schrader <schrader@agdsn.de>, 2015.
 #
