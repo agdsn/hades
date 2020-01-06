@@ -184,7 +184,10 @@ $(call add_substitution, CREATEUSER, $(shell $(get_pg_path) createuser))
 $(call add_substitution, PG_CTL,     $(shell $(get_pg_path) pg_ctl))
 $(call add_substitution, POSTGRES,   $(shell $(get_pg_path) postgres))
 
-# User and group settings
+# ----------------- #
+# Users and groups  #
+# ----------------- #
+
 $(call add_substitution, SYSTEM_GROUP,     hades)
 $(call add_substitution, AGENT_USER,       hades-agent)
 $(call add_substitution, AGENT_GROUP,      hades-agent)
