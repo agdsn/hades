@@ -29,7 +29,7 @@ def check_database(engine: Engine, user_name: pwd.struct_passwd,
         conn = engine.connect()
     except DBAPIError as e:
         logger.critical("Could not connect to database as %s: %s",
-                        user_name, e)
+                        user_name, exc_info=e)
         raise
     with contextlib.closing(conn):
         for table in tables:
@@ -37,7 +37,7 @@ def check_database(engine: Engine, user_name: pwd.struct_passwd,
                 check_table(conn, table)
             except DBAPIError as e:
                 logger.critical("Query check for table %s as user %s failed: "
-                                "%s", table.name, user_name, e)
+                                "%s", table.name, user_name, exc_info=e)
                 raise
 
 
