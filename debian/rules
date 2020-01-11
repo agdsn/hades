@@ -1,4 +1,4 @@
-#!/usr/bin/make -f
+#!/usr/bin/make -rRf
 
 PACKAGE=$(shell dh_listpackages)
 
