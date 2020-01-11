@@ -211,6 +211,13 @@ $(call add_substitution, UNAUTH_DNS_USER,  hades-unauth)
 $(call add_substitution, UNAUTH_DNS_GROUP, hades-unauth)
 $(call add_substitution, UNAUTH_DNS_HOME,  $(pkglocalstatedir)/unauth-dns)
 
+# ---------- #
+# Arguments  #
+# ---------- #
+
+cli_variables := $(foreach var,$(.VARIABLES),$(if $(findstring command line,$(origin $(var))),$(var)))
+$(call add_substitution, CONFIGURE_ARGS, $(foreach var,$(cli_variables),$(var)=$($(var))))
+
 NULL :=
 
 # Disable make's built-in suffix rules
