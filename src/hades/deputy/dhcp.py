@@ -1,5 +1,5 @@
 import ctypes
-import random
+import secrets
 import socket
 from contextlib import closing
 from typing import Optional
@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class DHCPPacket(ctypes.BigEndianStructure):
+    """
+    RFC 2131 DHCP packet structure
+    """
     _pack_ = 1
     _fields_ = (
         ("op", ctypes.c_ubyte),
@@ -41,9 +44,12 @@ class DHCPOption(ctypes.BigEndianStructure):
     )
 
 
-def make_release_packet(server_ip: netaddr.IPAddress,
-                        client_ip: netaddr.IPAddress, client_mac: netaddr.EUI,
-                        client_id: Optional[bytes] = None) -> bytearray:
+def make_release_packet(
+        server_ip: netaddr.IPAddress,
+        client_ip: netaddr.IPAddress,
+        client_mac: netaddr.EUI,
+        client_id: Optional[bytes] = None,
+) -> bytearray:
     """
     Create a valid DHCPRELEASE packet for a given client IP address, client
     MAC address and server IP address.
@@ -51,19 +57,22 @@ def make_release_packet(server_ip: netaddr.IPAddress,
     Optionally a client identifier can be specified too. The DHCP packet will
     contain the message option with the contents
     ``b"Lease revoked administratively"``.
+
     :param server_ip: IP address of the DHCP server
     :param client_ip: IP address of the DHCP client
     :param client_mac: Ethernet MAC address of the DHCP client
     :param client_id: Client identifier of the DHCP client (optional)
     :return: A DHCP packet
     """
+    if server_ip.version != 4 or client_ip.version != 4:
+        raise ValueError("Illegal IP version")
     buf = bytearray(ctypes.sizeof(DHCPPacket))
     client_mac_packed = client_mac.packed
     packet = DHCPPacket.from_buffer(buf)
     packet.op = 1  # BOOTREQUEST
     packet.htype = 1  # Ethernet
     packet.hlen = len(client_mac_packed)
-    packet.xid = random.randint(0, 2**32 - 1)
+    packet.xid = secrets.randbits(32)
     packet.hops = 0
     packet.secs = 0
     packet.flags = 0
@@ -94,8 +103,10 @@ def make_release_packet(server_ip: netaddr.IPAddress,
     options.append(255)
     # ctypes can't memmove from bytearray
     options_type = ctypes.c_byte * len(options)
-    ctypes.memmove(packet.options, options_type.from_buffer(options),
-                   len(options))
+    ctypes.memmove(
+        packet.options, options_type.from_buffer(options),
+        len(options)
+    )
     return buf
 
 
@@ -110,9 +121,11 @@ class in_pktinfo(ctypes.Structure):
     )
 
 
-def send_dhcp_packet(server_ip: netaddr.IPAddress, packet: bytearray,
-                     from_interface: Optional[str] = None,
-                     from_ip: Optional[netaddr.IPAddress] = None):
+def send_dhcp_packet(
+        server_ip: netaddr.IPAddress, packet: bytearray,
+        from_interface: Optional[str] = None,
+        from_ip: Optional[netaddr.IPAddress] = None,
+):
     """
     Send a given DHCP packet as a DHCP client (port 68) to a DHCP server (port
     67).
@@ -127,8 +140,10 @@ def send_dhcp_packet(server_ip: netaddr.IPAddress, packet: bytearray,
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     with closing(sock):
         if from_interface is not None:
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BINDTODEVICE,
-                            from_interface)
+            sock.setsockopt(
+                socket.SOL_SOCKET, socket.SO_BINDTODEVICE,
+                from_interface.encode('ascii')
+            )
         bind_address = str(from_ip) if from_ip is not None else ''
         sock.bind((bind_address, 68))
         sent = sock.sendto(packet, (str(server_ip), 67))
@@ -136,11 +151,14 @@ def send_dhcp_packet(server_ip: netaddr.IPAddress, packet: bytearray,
             logger.error("Only %d of %d bytes were sent", sent, len(packet))
 
 
-def release_dhcp_lease(server_ip: netaddr.IPAddress,
-                       client_ip: netaddr.IPAddress, client_mac: netaddr.EUI,
-                       client_id: Optional[bytes] = None,
-                       from_interface: Optional[str] = None,
-                       from_ip: Optional[netaddr.IPAddress] = None):
+def release_dhcp_lease(
+        server_ip: netaddr.IPAddress,
+        client_ip: netaddr.IPAddress,
+        client_mac: netaddr.EUI,
+        client_id: Optional[bytes] = None,
+        from_interface: Optional[str] = None,
+        from_ip: Optional[netaddr.IPAddress] = None,
+):
     """
     Send a DHCPRELEASE packet to the given server_ip for lease of given
     client_ip and client_mac.

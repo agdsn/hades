@@ -2,6 +2,7 @@ include babel.cfg
 include LICENSE
 include README.md
 include setup.cfg
+include src/hades/bin/hades-dhcp-script.c
 include src/hades/deputy/interface.xml
 include src/hades/logging.ini
 recursive-include src/hades/portal/assets *
