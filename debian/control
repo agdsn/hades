@@ -2,6 +2,9 @@ Source: hades
 Section: net
 Priority: extra
 Maintainer: Sebastian Schrader <sebastian.schrader@agdsn.de>
+Homepage: https://github.com/agdsn/hades
+Vcs-Browser: https://github.com/agdsn/hades
+Vcs-Git: https://github.com/agdsn/hades.git
 Build-Depends:
  bash (>= 4),
  bridge-utils,
@@ -42,6 +45,7 @@ X-Python3-Version: >= 3.5
 Standards-Version: 3.9.8
 
 Package: hades
+Homepage: https://github.com/agdsn/hades
 Architecture: any
 Pre-Depends:
  bash (>= 4),
