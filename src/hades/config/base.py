@@ -25,6 +25,11 @@ def qualified_name(type_):
         return type_.__module__ + '.' + type_.__qualname__
 
 
+def option_reference(option):
+    option = coerce(option)
+    return ":hades:option:`{}`".format(option)
+
+
 # noinspection PyUnresolvedReferences
 class OptionMeta(type):
     """
