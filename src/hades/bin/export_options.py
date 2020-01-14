@@ -10,7 +10,7 @@ from hades.config.export import export
 from hades.config.loader import load_config, print_config_error
 
 
-def main():
+def create_parser():
     parser = ArgumentParser(description='Export options as shell variables',
                             epilog='Python sequence and mapping types will '
                                    'only be exported, if the destination '
@@ -22,6 +22,11 @@ def main():
     parser.add_argument('file', type=argparse.FileType('wb'), metavar='FILE',
                         default='-', nargs='?',
                         help='Output destination (default: stdout)')
+    return parser
+
+
+def main():
+    parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
     try:

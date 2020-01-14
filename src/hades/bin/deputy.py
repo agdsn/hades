@@ -9,10 +9,15 @@ from hades.config.loader import load_config, print_config_error
 from hades.deputy.server import run_event_loop
 
 
-def main():
+def create_parser() -> ArgumentParser:
     parser = ArgumentParser(
         description='Provides a DBus API to perform privileged operations',
         parents=[common_parser])
+    return parser
+
+
+def main() -> int:
+    parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
     try:

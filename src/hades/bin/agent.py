@@ -21,7 +21,7 @@ class Formatter(argparse.HelpFormatter):
         super().add_usage(usage, actions, groups, prefix)
 
 
-def main():
+def create_parser() -> ArgumentParser:
     description = inspect.cleandoc(
         """
         Run the celery command configured for Hades.
@@ -35,6 +35,11 @@ def main():
                             parents=[common_parser])
     parser.add_argument('-A', '--app', dest='app', help=argparse.SUPPRESS)
     parser.add_argument('command')
+    return parser
+
+
+def main() -> int:
+    parser = create_parser()
     args, argv = parser.parse_known_args()
     setup_cli_logging(parser.prog, args)
     try:

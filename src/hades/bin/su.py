@@ -17,11 +17,16 @@ def drop_privileges(passwd, group):
     os.setuid(passwd.pw_uid)
 
 
-def main():
+def create_parser() -> ArgumentParser:
     parser = ArgumentParser(parents=[common_parser])
     parser.add_argument('user')
     parser.add_argument('command')
     parser.add_argument('arguments', nargs='*')
+    return parser
+
+
+def main() -> int:
+    parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
     try:

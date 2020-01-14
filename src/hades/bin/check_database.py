@@ -45,8 +45,13 @@ def check_table(conn, table):
     conn.execute(select([exists(select([null()]).select_from(table))])).scalar()
 
 
-def main():
+def create_parser() -> ArgumentParser:
     parser = ArgumentParser(parents=[common_parser])
+    return parser
+
+
+def main() -> int:
+    parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
     try:

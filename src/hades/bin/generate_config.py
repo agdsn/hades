@@ -44,7 +44,7 @@ def relative_path(value: str) -> pathlib.PurePath:
     return p
 
 
-def main():
+def create_parser() -> ArgumentParser:
     parser = ArgumentParser(parents=[common_parser])
     parser.add_argument('-m', '--mode', type=mode, default=0o0750,
                         help="The mode of created files and directories. Only"
@@ -61,6 +61,11 @@ def main():
     parser.add_argument(dest='destination', metavar='DESTINATION', nargs='?',
                         help="Destination file or directory (default is stdout"
                              "for files; required for directories)")
+    return parser
+
+
+def main():
+    parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
     try:
