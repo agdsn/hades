@@ -35,9 +35,6 @@ from hades.common.privileges import dropped_privileges
 from hades.config.loader import Config, get_config
 
 logger = logging.getLogger(__name__)
-auth_dhcp_pwd = pwd.getpwnam(constants.AUTH_DHCP_USER)
-database_pwd = pwd.getpwnam(constants.DATABASE_USER)
-radius_pwd = pwd.getpwnam(constants.RADIUS_USER)
 
 
 def reload_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
@@ -91,6 +88,7 @@ def generate_dhcp_hosts_file(
     """Generate the dnsmasq hosts file for authenticated users"""
     file_name = constants.AUTH_DHCP_HOSTS_FILE
     logger.info("Generating DHCP hosts file %s", file_name)
+    auth_dhcp_pwd = pwd.getpwnam(constants.AUTH_DHCP_USER)
     try:
         with open(file_name, mode='w', encoding='ascii') as f:
             fd = f.fileno()
@@ -186,6 +184,7 @@ def generate_radius_clients_file(
     """
     logger.info("Generating freeRADIUS clients configuration")
     file_name = constants.RADIUS_CLIENTS_FILE
+    radius_pwd = pwd.getpwnam(constants.RADIUS_USER)
     try:
         with open(file_name, mode='w', encoding='ascii') as f:
             fd = f.fileno()
@@ -219,6 +218,7 @@ class HadesDeputyService(object):
         self.bus = bus
         self.config = config
         self.engine = db.create_engine(config, poolclass=StaticPool)
+        database_pwd = pwd.getpwnam(constants.DATABASE_USER)
         original_creator = self.engine.pool._creator
 
         def creator(connection_record=None):
