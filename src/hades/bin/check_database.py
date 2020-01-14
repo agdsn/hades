@@ -22,14 +22,14 @@ from hades.config.loader import load_config, print_config_error
 logger = logging.getLogger('hades.bin.check_database')
 
 
-def check_database(engine: Engine, user_name: pwd.struct_passwd,
+def check_database(engine: Engine, user: pwd.struct_passwd,
                    tables: Iterable[Table]):
-    logger.info("Checking database access as user %s", user_name)
+    logger.info("Checking database access as user %s", user.pw_name)
     try:
         conn = engine.connect()
     except DBAPIError as e:
         logger.critical("Could not connect to database as %s: %s",
-                        user_name, exc_info=e)
+                        user.pw_name, exc_info=e)
         raise
     with contextlib.closing(conn):
         for table in tables:
@@ -37,7 +37,7 @@ def check_database(engine: Engine, user_name: pwd.struct_passwd,
                 check_table(conn, table)
             except DBAPIError as e:
                 logger.critical("Query check for table %s as user %s failed: "
-                                "%s", table.name, user_name, exc_info=e)
+                                "%s", table.name, user.pw_name, exc_info=e)
                 raise
 
 
@@ -61,17 +61,17 @@ def main() -> int:
         return os.EX_CONFIG
     try:
         engine = db.create_engine(config, poolclass=NullPool)
-        agent_pwd = pwd.getpwnam(constants.AGENT_USER)
+        agent_pwd: pwd.struct_passwd = pwd.getpwnam(constants.AGENT_USER)
         with dropped_privileges(agent_pwd):
-            check_database(engine, agent_pwd.pw_name,
+            check_database(engine, agent_pwd,
                            (db.radacct, db.radpostauth))
-        portal_pwd = pwd.getpwnam(constants.PORTAL_USER)
+        portal_pwd: pwd.struct_passwd = pwd.getpwnam(constants.PORTAL_USER)
         with dropped_privileges(portal_pwd):
-            check_database(engine, portal_pwd.pw_name,
+            check_database(engine, portal_pwd,
                            (db.radacct, db.radpostauth, db.radusergroup))
-        radius_pwd = pwd.getpwnam(constants.RADIUS_USER)
+        radius_pwd: pwd.struct_passwd = pwd.getpwnam(constants.RADIUS_USER)
         with dropped_privileges(radius_pwd):
-            check_database(engine, radius_pwd.pw_name,
+            check_database(engine, radius_pwd,
                            (db.radacct, db.radgroupcheck, db.radgroupreply,
                             db.radpostauth, db.radreply, db.radusergroup))
     except DBAPIError:
