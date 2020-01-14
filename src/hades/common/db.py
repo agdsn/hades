@@ -13,7 +13,7 @@ from sqlalchemy import (
     table,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, INET, MACADDR
-from sqlalchemy.engine import Connection
+from sqlalchemy.engine.base import Connection
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
 
