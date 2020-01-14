@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+"""Export Hades options in a format suitable for various tools, such as shells.
+
+Exports the subset of Hades options, that can be represented in the target
+format in a format that can be sourced by the target tool. POSIX shells or
+systemd don't support arrays for example, whereas advanced shells like ``bash``
+or ``zsh`` do.
+"""
 import argparse
 import os
 import sys

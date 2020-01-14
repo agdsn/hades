@@ -169,7 +169,8 @@ class Check(OptionDescriptor):
     """Base class for descriptors, that check the value of options"""
 
     def __call__(self, config, value):
-        """
+        """Check the ``value`` of an option given ``config``.
+
         :param config: The fully expanded config
         :param value: The value of the Option
         :raises OptionCheckError: if the value of the option is illegal
@@ -181,7 +182,8 @@ class Compute(OptionDescriptor):
     """Base class for descriptors, that compute the value of options."""
 
     def __call__(self, config):
-        """
+        """Compute the value of the option using ``config``.
+
         :param config: An potentially not fully expanded config object
         :raises OptionCheckError: if the value can't be computed
         """

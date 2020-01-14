@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+"""Check the status of the Hades database.
+
+Try to select data as the different hades users from the database to check if
+the database is running and accessible.
+"""
 import contextlib
 import logging
 import os
@@ -24,6 +30,13 @@ logger = logging.getLogger('hades.bin.check_database')
 
 def check_database(engine: Engine, user: pwd.struct_passwd,
                    tables: Iterable[Table]):
+    """Check a set of tables as a user.
+
+    :param engine: The SQLAlchemy engine
+    :param user: The user to switch to
+    :param tables: The tables to check
+    :raises DBAPIError: if errors occur.
+    """
     logger.info("Checking database access as user %s", user.pw_name)
     try:
         conn = engine.connect()
@@ -42,6 +55,7 @@ def check_database(engine: Engine, user: pwd.struct_passwd,
 
 
 def check_table(conn, table):
+    """Perform :sql:`SELECT NULL` on a given table."""
     conn.execute(select([exists(select([null()]).select_from(table))])).scalar()
 
 

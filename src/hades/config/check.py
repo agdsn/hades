@@ -114,6 +114,7 @@ class type_is(Check):
 # noinspection PyUnusedLocal
 @Check.decorate
 def not_empty(option, config, value):
+    """Must not be empty"""
     if len(value) <= 0:
         raise OptionCheckError("Must not be empty", option=option.__name__)
 
@@ -137,6 +138,7 @@ class satisfy_all(Check):
 # noinspection PyDecorator,PyUnusedLocal
 @Check.decorate
 def network_ip(option, config, value):
+    """Must not be network or broadcast address (except if /31)"""
     # Prefix length 31 is special, see RFC 3021
     if value.version == 4 and value.prefixlen == 31:
         return
@@ -155,6 +157,7 @@ def network_ip(option, config, value):
 # noinspection PyUnusedLocal
 @Check.decorate
 def directory_exists(option, config, value):
+    """Must be an existing directory"""
     if not os.path.exists(value):
         raise OptionCheckError("Directory {} does not exists".format(value),
                                option=option.__name__)
@@ -166,6 +169,7 @@ def directory_exists(option, config, value):
 # noinspection PyUnusedLocal
 @Check.decorate
 def file_exists(option, config, value):
+    """Must be an existing file"""
     if not os.path.exists(value):
         raise OptionCheckError("File {} does not exists".format(value),
                                option=option.__name__)
@@ -176,6 +180,7 @@ def file_exists(option, config, value):
 
 @Check.decorate
 def file_creatable(option, config, value):
+    """Must be a creatable file name"""
     parent = os.path.dirname(value)
     directory_exists(option, config, parent)
 
@@ -183,6 +188,7 @@ def file_creatable(option, config, value):
 # noinspection PyUnusedLocal
 @Check.decorate
 def interface_exists(option, config, value):
+    """Network interface must exists"""
     try:
         socket.if_nametoindex(value)
     except OSError:
@@ -193,6 +199,7 @@ def interface_exists(option, config, value):
 # noinspection PyUnusedLocal
 @Check.decorate
 def address_exists(option, config, value):
+    """IP address must be configured"""
     ip = IPRoute()
     if value.version == 4:
         family = socket.AF_INET
@@ -226,6 +233,7 @@ class ip_range_in_networks(Check):
 # noinspection PyUnusedLocal
 @Check.decorate
 def user_exists(option, config, value):
+    """Must be a valid UNIX user"""
     try:
         return pwd.getpwnam(value)
     except KeyError:
@@ -236,6 +244,7 @@ def user_exists(option, config, value):
 # noinspection PyUnusedLocal
 @Check.decorate
 def group_exists(option, config, value):
+    """Must be a valid UNIX group"""
     try:
         return grp.getgrnam(value)
     except KeyError:

@@ -1,3 +1,4 @@
+"""Database utilities"""
 import logging
 import operator
 from datetime import datetime, timedelta, timezone, tzinfo
@@ -27,6 +28,8 @@ DatetimeRange = Tuple[Optional[datetime], Optional[datetime]]
 
 
 def as_copy(original_table, new_name):
+    """Create a copy of a table with a different name and the ``temporary``
+    info set."""
     return Table(new_name, original_table.metadata,
                  *(Column(col.name, col.type)
                    for col in original_table.columns),
@@ -34,6 +37,11 @@ def as_copy(original_table, new_name):
 
 
 class MACAddress(TypeDecorator):
+    """Custom SQLAlchemy type for MAC addresses.
+
+    Use the PostgreSQL ``macaddr`` type on the database side and
+    :class:`netaddr.EUI` on the Python side.
+    """
     impl = MACADDR
     python_type = netaddr.EUI
 
@@ -51,6 +59,11 @@ class MACAddress(TypeDecorator):
 
 
 class IPAddress(TypeDecorator):
+    """Custom SQLAlchemy type for IP addresses.
+
+    Use the PostgreSQL ``inet`` type on the database side and
+    :class:`netaddr.IPAddress` on the Python side.
+    """
     impl = INET
     python_type = netaddr.IPAddress
 
@@ -68,6 +81,7 @@ class IPAddress(TypeDecorator):
 
 
 class TupleArray(ARRAY):
+    """Convenience subclass for :class:`ARRAY` for zero-indexed tuples."""
     def __init__(self, item_type, dimensions=None):
         super().__init__(item_type, as_tuple=True, dimensions=dimensions,
                          zero_indexes=True)
@@ -263,6 +277,7 @@ def lock_table(connection: Connection, target_table: Table):
     Lock a table using a PostgreSQL advisory lock
 
     The OID of the table in the pg_class relation is used as lock id.
+
     :param connection: DB connection
     :param target_table: Table object
     """
@@ -278,6 +293,7 @@ def create_temp_copy(connection: Connection, source: Table, destination: Table):
     """
     Create a temporary table as a copy of a source table that will be dropped
     at the end of the running transaction.
+
     :param connection: DB connection
     :param source: Source table
     :param destination: Destination table
@@ -304,11 +320,12 @@ def diff_tables(connection: Connection, master: Table, copy: Table,
     Compute the differences in the contents of two tables with identical
     columns.
 
-    The master table must have at least one PrimaryKeyConstraint or
-    UniqueConstraint with only non-null columns defined.
+    The master table must have at least one :class:`PrimaryKeyConstraint` or
+    :class:`UniqueConstraint` with only non-null columns defined.
 
     If there are multiple constraints defined the constraints that contains the
     least number of columns are used.
+
     :param connection: DB connection
     :param master: Master table
     :param copy: Copy of master table
@@ -361,6 +378,12 @@ def diff_tables(connection: Connection, master: Table, copy: Table,
 
 
 def refresh_materialized_view(connection: Connection, view: Table):
+    """Execute :sql:`REFRESH MATERIALIZED VIEW CONCURRENTLY` for the given
+    `view`.
+
+    :param connection: A valid SQLAlchemy connection
+    :param view: The view to refresh
+    """
     logger.debug('Refreshing materialized view "%s"', view.name)
     preparer = connection.dialect.identifier_preparer
     connection.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY {view}'
@@ -371,6 +394,17 @@ def refresh_and_diff_materialized_view(
         connection: Connection, view: Table, copy: Table,
         result_columns: Iterable[Column]) -> Tuple[
         List[Tuple], List[Tuple], List[Tuple]]:
+    """Lock the given `view` with an advisory lock, create a temporary table
+    of the view, refresh the view and compute the difference.
+
+    :param connection: A valid SQLAlchemy connection
+    :param view: The view to refresh and diff
+    :param copy: A temporary table to create and diff
+    :param result_columns: The columns to return
+    :return: A 3-tuple containing three lists of tuples of the `result_columns`
+     of added, deleted and modified records due to the refresh.
+
+    """
     with connection.begin():
         lock_table(connection, view)
         create_temp_copy(connection, view, copy)
@@ -379,6 +413,7 @@ def refresh_and_diff_materialized_view(
 
 
 def delete_old_sessions(connection: Connection, interval: timedelta):
+    """Delete old session from the ``radacct`` table."""
     logger.debug('Deleting sessions in table "%s" older than "%s"',
                  radacct.name, interval)
     connection.execute(radacct.delete().where(and_(
@@ -387,6 +422,7 @@ def delete_old_sessions(connection: Connection, interval: timedelta):
 
 
 def delete_old_auth_attempts(connection: Connection, interval: timedelta):
+    """Delete old authentication results from the ``radpostauth`` table."""
     logger.debug('Deleting auth attempts in table "%s" older than "%s"',
                  radpostauth.name, interval)
     connection.execute(radpostauth.delete().where(and_(
@@ -402,7 +438,7 @@ def get_groups(connection: Connection, mac: netaddr.EUI) -> Iterable[
     :param connection: A SQLAlchemy connection
     :param mac: MAC address
     :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id, Group-Name)-
-    tuples
+     tuples
     """
     logger.debug('Getting groups of MAC "%s"', mac)
     results = connection.execute(select([radusergroup.c.NASIPAddress,
@@ -422,9 +458,9 @@ def get_latest_auth_attempt(connection: Connection,
     :param connection: A SQLAlchemy connection
     :param str mac: MAC address
     :return: A (NAS-IP-Address, NAS-Port-Id, Packet-Type, Groups, Reply,
-    Auth-Date) tuple or None if no attempt was found. Groups is an tuple of
-    group names and Reply is a tuple of (Attribute, Value)-pairs that were sent
-    in Access-Accept responses.
+     Auth-Date) tuple or None if no attempt was found. Groups is an tuple of
+     group names and Reply is a tuple of (Attribute, Value)-pairs that were sent
+     in Access-Accept responses.
     """
     logger.debug('Getting latest auth attempt for MAC "%s"', mac)
     config = get_config(runtime_checks=True)
@@ -456,7 +492,7 @@ def get_all_nas_clients(connection: Connection) -> Iterable[
 
     :param connection: A SQLAlchemy connection
     :return: An iterable that yields (shortname, nasname, type, ports, secret,
-    server, community, description)-tuples
+     server, community, description)-tuples
     """
     result = connection.execute(
         select([nas.c.ShortName, nas.c.NASName, nas.c.Type, nas.c.Ports,
@@ -478,8 +514,8 @@ def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
     :param when: Range in which Session-Start-Time must be within
     :param limit: Maximum number of records
     :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id,
-    Session-Start-Time, Session-Stop-Time)-tuples ordered by Session-Start-Time
-    descending
+     Session-Start-Time, Session-Stop-Time)-tuples ordered by Session-Start-Time
+     descending
     """
     logger.debug('Getting all sessions for MAC "%s"', mac)
     query = (
@@ -509,7 +545,7 @@ def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
     :param when: Range in which Auth-Date must be within
     :param limit: Maximum number of records
     :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id, Packet-Type,
-    Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
+     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts of MAC %s', mac)
     query = (

@@ -1,3 +1,14 @@
+#!/usr/bin/env python3
+"""Switch user (``su``) helper.
+
+The ``su`` utility, that comes with *util-linux* does a lot more than
+necessary. In particular, it starts a new PAM session, forks and keeps running
+in the background until the command it invoked exits.
+
+In addition to being a minor nuisance, it breaks some features such as running
+systemd services that follow the ``Type=forking`` model. For these services,
+systemd can't detect the correct main process.
+"""
 import grp
 import logging
 import os

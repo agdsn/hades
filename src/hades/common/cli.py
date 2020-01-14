@@ -1,3 +1,4 @@
+"""Functionality for the Hades command-line utilities in :mod:`hades.bin`."""
 import argparse
 import logging.handlers
 import os
@@ -8,10 +9,8 @@ from hades import constants
 
 
 class ArgumentParser(argparse.ArgumentParser):
-    """
-    ArgumentParser subclass that exists with os.EX_USAGE exit code if parsing
-    fails.
-    """
+    """ArgumentParser subclass that exists with :data:`os.EX_USAGE` exit code if
+    parsing fails."""
     def error(self, message):
         self.print_usage(sys.stderr)
         args = {'prog': self.prog, 'message': message}
@@ -39,10 +38,15 @@ def setup_cli_logging(program, args):
     Setup logging for CLI applications, that do not configure logging
     themselves.
 
+    Set log level using command-line options parsed with :data:`parser`, the
+    :std:envvar:`HADES_CONFIG` environment variable or finally the default value
+    :data:`DEFAULT_VERBOSITY`-
+
     Flask and Celery are quite opinionated about logging, so this function
     should probably not be called in their launchers.
     :param program: The name of the program
-    :param args: The parsed arguments of the program
+    :param args: The parsed arguments of the program with :data:`parser` or a
+    subparser.
     """
     reset_cli_logging()
     if args.verbosity is None:

@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+"""Hades frontend for the ``celery`` command.
+
+Loads the Hades configuration and transfers control to Celery.
+"""
 import argparse
 import inspect
 import os

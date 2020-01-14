@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+"""Keepalived notification receiver.
+
+Invoked by keepalived, if the state of VRRP instances changes.
+"""
 import logging
 import os
 import sys

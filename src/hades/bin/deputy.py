@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+"""Run the Hades DBus daemon for privileged operations.
+
+"""
 import os
 import sys
 

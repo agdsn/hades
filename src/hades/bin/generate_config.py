@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+"""Generate configuration files from templates and directories.
+"""
 import argparse
 import grp
 import logging
