@@ -40,6 +40,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'guzzle_sphinx_theme',
     'sphinxarg.ext',
+    'hades.config.sphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
