@@ -90,8 +90,9 @@ def generate_dhcp_hosts_file(
     logger.info("Generating DHCP hosts file %s", file_name)
     auth_dhcp_pwd = pwd.getpwnam(constants.AUTH_DHCP_USER)
     try:
-        with open(file_name, mode='w', encoding='ascii') as f:
-            fd = f.fileno()
+        fd = os.open(file_name, os.O_CREAT | os.O_WRONLY | os.O_CLOEXEC,
+                     stat.S_IRUSR | stat.S_IRGRP)
+        with open(fd, mode='w', encoding='ascii') as f:
             os.fchown(fd, auth_dhcp_pwd.pw_uid, auth_dhcp_pwd.pw_gid)
             os.fchmod(fd, stat.S_IRUSR | stat.S_IRGRP)
             f.writelines(generate_dhcp_host_reservations(hosts))
