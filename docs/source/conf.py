@@ -36,7 +36,9 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
+    'sphinxarg.ext',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -82,6 +84,16 @@ pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+intersphinx_mapping = {
+    'python':     ('https://docs.python.org/3/', None),
+    'netaddr':    ('https://netaddr.readthedocs.io/en/latest/', None),
+    'flask':      ('http://flask.pocoo.org/docs/0.12/', None),
+    'jinja2':     ('http://jinja.pocoo.org/docs/2.10/', None),
+    'celery':     ('http://docs.celeryproject.org/en/latest/', None),
+    'psycopg2':   ('http://initd.org/psycopg/docs/', None),
+    'sqlalchemy': ('http://docs.sqlalchemy.org/en/latest/', None),
+}
 
 
 # -- Options for HTML output ----------------------------------------------
