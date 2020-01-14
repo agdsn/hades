@@ -34,19 +34,20 @@ class HADES_SITE_NODE_ID(Option):
 class HADES_MAIL_DESTINATION_ADDRESSES(Option):
     """Automatic notification mails will be send to this address."""
     type = collections.Sequence
-    default = []
+    static_check = check.satisfy_all(
+        check.not_empty,
+        check.sequence(check.type_is(str))
+    )
 
 
 class HADES_MAIL_SENDER_ADDRESS(Option):
     """Automatic notification mails will use this address as sender."""
     type = str
-    default = ''
 
 
 class HADES_MAIL_SMTP_SERVER(Option):
     """Name or IP address of SMTP relay server."""
     type = str
-    default = ''
 
 
 class HADES_REAUTHENTICATION_INTERVAL(Option):
