@@ -502,8 +502,8 @@ def get_all_nas_clients(connection: Connection) -> Iterator[
 
 
 def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
-                        when: Optional[DatetimeRange]=None,
-                        limit: Optional[int]=None) -> Iterator[
+                        when: Optional[DatetimeRange] = None,
+                        limit: Optional[int] = None) -> Iterator[
         Tuple[netaddr.IPAddress, str, datetime, datetime]]:
     """
     Return accounting sessions of a particular MAC address ordered by
@@ -533,8 +533,8 @@ def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
 
 
 def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
-                             when: Optional[DatetimeRange]=None,
-                             limit: Optional[int]=None) -> Iterator[
+                             when: Optional[DatetimeRange] = None,
+                             limit: Optional[int] = None) -> Iterator[
         Tuple[netaddr.IPAddress, str, str, Groups, Attributes, datetime]]:
     """
     Return auth attempts of a particular MAC address order by Auth-Date
@@ -566,7 +566,7 @@ def get_auth_attempts_at_port(connection: Connection,
                               nas_ip_address: netaddr.IPAddress,
                               nas_port_id: str,
                               when: Optional[DatetimeRange] = None,
-                              limit: Optional[int]=None)-> Iterator[
+                              limit: Optional[int] = None) -> Iterator[
         Tuple[str, str, Groups, Attributes, datetime]]:
     """
     Return auth attempts at a particular port of an NAS ordered by Auth-Date
