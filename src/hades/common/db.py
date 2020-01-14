@@ -17,7 +17,7 @@ from sqlalchemy.engine.base import Connection
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
 
-from hades.config.loader import get_config
+from hades.config.loader import Config, get_config
 
 logger = logging.getLogger(__name__)
 metadata = MetaData()
@@ -244,9 +244,9 @@ class UTCTZInfoFactory(tzinfo):
     This class is implemented as a singleton that always returns the same
     instance.
     """
-    def __new__(cls, offset):
+    def __new__(cls, offset: int):
         if offset != 0:
-            raise psycopg2.DataError("UTC Offset is not zero: " + offset)
+            raise psycopg2.DataError("UTC Offset is not zero: ".format(offset))
         return timezone.utc
 
 
@@ -265,7 +265,7 @@ class UTCTZInfoCursorFactory(psycopg2.extensions.cursor):
         self.tzinfo_factory = UTCTZInfoFactory
 
 
-def create_engine(config, **kwargs):
+def create_engine(config: Config, **kwargs):
     kwargs.setdefault('connect_args', {}).update(
         options="-c TimeZone=UTC", cursor_factory=UTCTZInfoCursorFactory
     )
