@@ -22,7 +22,7 @@ from hades.common.cli import (
 logger = logging.getLogger(__name__)
 
 
-def drop_privileges(passwd, group):
+def drop_privileges(passwd: pwd.struct_passwd, group: grp.struct_group):
     os.setgid(group.gr_gid)
     os.initgroups(passwd.pw_name, group.gr_gid)
     os.setuid(passwd.pw_uid)
