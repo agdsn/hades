@@ -41,7 +41,6 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     policykit-1 \
     postgresql \
     postgresql-contrib \
-    postgresql-server-dev-all \
     pypy \
     pypy-dev \
     pypy-ipaddress \
