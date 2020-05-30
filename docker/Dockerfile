@@ -92,8 +92,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pg_lsclusters --no-header | cut -d ' ' -f 1-2 | xargs --no-run-if-empty --max-args=2 pg_dropcluster \
-    && find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' \
+RUN find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' \
         ! -name '*dbus*' \
         ! -name '*journal*' \
         ! -name '*tmpfiles*' \
