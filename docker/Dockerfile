@@ -76,6 +76,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     python3-pytest-runner \
     python3-sqlalchemy \
     python3-setuptools \
+    python3-systemd \
     python3-venv \
     rabbitmq-server \
     strace \

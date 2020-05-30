@@ -11,4 +11,5 @@ pygobject~=3.22
 pyrad~=2.0
 pyroute2~=0.3.16
 pysnmp~=4.3.2
+python-systemd>=233
 SQLAlchemy~=1.0.14
