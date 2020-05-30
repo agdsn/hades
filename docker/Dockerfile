@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM debian:buster
 MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
 ARG BUILDER_UID=1000
 ARG BUILDER_GID=1000
