@@ -39,9 +39,9 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     nginx \
     packaging-dev \
     policykit-1 \
-    postgresql-9.6 \
-    postgresql-contrib-9.6 \
-    postgresql-server-dev-9.6 \
+    postgresql \
+    postgresql-contrib \
+    postgresql-server-dev-all \
     pypy \
     pypy-dev \
     pypy-ipaddress \
