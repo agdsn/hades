@@ -22,8 +22,8 @@ endif
 # variables.
 define add_substitution
 $(eval
-$1 = $2
-SUBSTITUTIONS += $1
+$(strip $1) = $(strip $2)
+SUBSTITUTIONS += $(strip $1)
 )
 endef
 
@@ -32,11 +32,11 @@ endef
 # Find the full path of a program. A specific PATH may be specified optionally.
 define find_program
 $(shell
-    $(if $2,PATH="$2";,)
+    $(if $(strip $2),PATH="$(strip $2)";,)
     IFS=':';
     for path in $$PATH; do
         IFS=;
-        for exec in $1; do
+        for exec in $(strip $1); do
             if [[ -x "$${path}/$${exec}" ]]; then
                 printf "%s/%s" "$$path" "$$exec";
             exit 0;
@@ -55,13 +55,13 @@ endef
 # The variable is added to list of substitution variables.
 define require_program
 $(eval
-$1 := $$(call find_program,$2,$3)
-ifeq "$$(strip $$($1))" ""
-    $$(error Could not find $2)
+$(strip $1) := $$(strip $$(call find_program,$2,$3))
+ifeq "$$($(strip $1))" ""
+    $$(error Could not find $(strip $2))
 else
-    $$(info Found $2 at $$($1))
+    $$(info Found $(strip $2) at $$($(strip $1)))
 endif
-SUBSTITUTIONS += $1
+SUBSTITUTIONS += $(strip $1)
 )
 endef
 
