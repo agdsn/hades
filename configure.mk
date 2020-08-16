@@ -36,7 +36,7 @@ $(shell
     for path in $$PATH; do
         IFS=;
         for exec in $1; do
-            if [ -x "$${path}/$${exec}" ]; then
+            if [[ -x "$${path}/$${exec}" ]]; then
                 printf "%s/%s" "$$path" "$$exec";
             exit 0;
             fi;
