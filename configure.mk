@@ -10,6 +10,7 @@ SHELL := $(shell if output="$$(command -v bash)"; then echo "$${output}"; fi)
 ifeq ($(strip $(SHELL)),)
 $(error Could not find bash)
 endif
+.SHELLFLAGS := -euo pipefail -c
 
 # --------- #
 # Functions #
