@@ -1,4 +1,7 @@
 #!/usr/bin/make -Rrf
+
+NULL :=
+
 # --------- #
 # Functions #
 # --------- #
@@ -217,8 +220,6 @@ $(call add_substitution, UNAUTH_DNS_HOME,  $(pkglocalstatedir)/unauth-dns)
 
 cli_variables := $(foreach var,$(.VARIABLES),$(if $(findstring command line,$(origin $(var))),$(var)))
 $(call add_substitution, CONFIGURE_ARGS, $(foreach var,$(cli_variables),$(var)=$($(var))))
-
-NULL :=
 
 # Disable make's built-in suffix rules
 .SUFFIXES:
