@@ -2,6 +2,15 @@
 
 NULL :=
 
+# ----- #
+# Shell #
+# ----- #
+
+SHELL := $(shell if output="$$(command -v bash)"; then echo "$${output}"; fi)
+ifeq ($(strip $(SHELL)),)
+$(error Could not find bash)
+endif
+
 # --------- #
 # Functions #
 # --------- #
@@ -145,8 +154,6 @@ $(call add_substitution, UNAUTH_VRRP_DBUS_NAME, de.agdsn.hades.unauth_vrrp)
 # -------- #
 # Programs #
 # -------- #
-
-$(call require_program,SHELL,bash)
 
 # Runtime programs
 $(call require_program,DBUS_SEND,dbus-send)
