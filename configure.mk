@@ -82,7 +82,7 @@ $(call add_substitution, PACKAGE_VERSION,      0.4.0)
 $(call add_substitution, PACKAGE_AUTHOR,       Sebastian Schrader)
 $(call add_substitution, PACKAGE_AUTHOR_EMAIL, sebastian.schrader@agdsn.de)
 $(call add_substitution, PACKAGE_LICENSE,      MIT)
-$(call add_substitution, PACKAGE_URL,          http://github.com/agdsn/hades)
+$(call add_substitution, PACKAGE_URL,          https://github.com/agdsn/hades)
 
 # ----------- #
 # Directories #
