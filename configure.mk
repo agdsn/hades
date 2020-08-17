@@ -54,14 +54,10 @@ endef
 # optionally.
 # The variable is added to list of substitution variables.
 define require_program
-$(eval
-$(strip $1) := $$(strip $$(call find_program,$2,$3))
-ifeq "$$($(strip $1))" ""
-    $$(error Could not find $(strip $2))
-else
-    $$(info Found $(strip $2) at $$($(strip $1)))
-endif
-SUBSTITUTIONS += $(strip $1)
+$(call add_substitution,$1,$(call find_program,$2,$3))
+$(if $($(strip $1)),
+    $(info Found $(strip $2) at $($(strip $1))),
+    $(error Could not find $(strip $2))
 )
 endef
 
