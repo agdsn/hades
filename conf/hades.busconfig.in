@@ -20,8 +20,8 @@
                 <allow send_destination="@DEPUTY_DBUS_NAME@"/>
         </policy>
         <policy user="@AUTH_DNS_USER@">
-                <allow own="@AUTH_DNS_DBUS_NAME@"/>
-                <allow send_destination="@AUTH_DNS_DBUS_NAME@"/>
+                <allow own="@AUTH_DHCP_DBUS_NAME@"/>
+                <allow send_destination="@AUTH_DHCP_DBUS_NAME@"/>
         </policy>
         <policy user="@UNAUTH_DNS_USER@">
                 <allow own="@UNAUTH_DNS_DBUS_NAME@"/>

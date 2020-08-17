@@ -280,6 +280,11 @@ $(CONFIGURE_FILES): %: %.in configure.mk .FORCE
 	@echo Configuring $@
 	@$(SED) $(foreach var,$(SUBSTITUTIONS),-e 's|@$(var)@|$($(var))|g' ) < $< > $@
 	@chmod --reference=$< $@
+	@if grep --silent -E '@[^@]+@' $@; then \
+		echo 'Unsubstituted substitution variables in $@:' >&2; \
+		grep --with-filename --line-number -E '@[^@]+@' $@ >&2; \
+		exit 1; \
+	fi
 
 src/hades/constants.py: configure.mk .FORCE
 	@echo Creating $@
