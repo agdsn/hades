@@ -28,7 +28,7 @@ SUBSTITUTIONS += $(strip $1)
 endef
 
 # find_program(NAMES, [PATH])
-# -------------------------------------
+# ---------------------------
 # Find the full path of a program. A specific PATH may be specified optionally.
 define find_program
 $(shell
