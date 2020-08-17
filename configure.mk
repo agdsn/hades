@@ -27,6 +27,17 @@ SUBSTITUTIONS += $(strip $1)
 )
 endef
 
+# add_shell_substitution(VARIABLE, CODE)
+# --------------------------------------
+# Set VARIABLE to the output of executing CODE in a shell and add VARIABLE to
+# the list of substitution variables.
+define add_shell_substitution
+$(call add_substitution,$1,$(shell if output="$$($(strip $2))"; then echo "$$output"; fi))
+$(if $($(strip $1)),,
+	$(error Failed to execute $(strip $2) (No output or non-zero exit status))
+)
+endef
+
 # find_program(NAMES, [PATH])
 # ---------------------------
 # Find the full path of a program. A specific PATH may be specified optionally.
@@ -112,7 +123,7 @@ $(call add_substitution, pkgdatadir,       $(datadir)/$(PACKAGE_NAME))
 $(call add_substitution, pkglogdir,        $(logdir)/$(PACKAGE_NAME))
 
 # Additional directories
-$(call add_substitution, pythonsitedir,  $(shell python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"))
+$(call add_shell_substitution, pythonsitedir, python3 -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())')
 $(call add_substitution, assetdir,       $(pythonsitedir)/hades/portal/assets)
 $(call add_substitution, systemdenvfile, /etc/default/hades)
 $(call add_substitution, templatepath,   $(pkgsysconfdir)/templates:$(pkgdatadir)/templates)
@@ -182,14 +193,14 @@ $(call require_program,UWSGI,uwsgi)
 
 get_pg_version := perl -MPgCommon -e 'print get_newest_version();'
 
-$(call add_substitution, PG_VERSION, $(shell $(get_pg_version)))
+$(call add_shell_substitution, PG_VERSION, $(get_pg_version))
 
 get_pg_path := perl -MPgCommon -e 'print get_program_path($$ARGV[0], "$(PG_VERSION)");'
 
-$(call add_substitution, CREATEDB,   $(shell $(get_pg_path) createdb))
-$(call add_substitution, CREATEUSER, $(shell $(get_pg_path) createuser))
-$(call add_substitution, PG_CTL,     $(shell $(get_pg_path) pg_ctl))
-$(call add_substitution, POSTGRES,   $(shell $(get_pg_path) postgres))
+$(call add_shell_substitution, CREATEDB,   $(get_pg_path) createdb)
+$(call add_shell_substitution, CREATEUSER, $(get_pg_path) createuser)
+$(call add_shell_substitution, PG_CTL,     $(get_pg_path) pg_ctl)
+$(call add_shell_substitution, POSTGRES,   $(get_pg_path) postgres)
 
 # ----------------- #
 # Users and groups  #
