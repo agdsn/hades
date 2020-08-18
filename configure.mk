@@ -68,7 +68,7 @@ define require_program
 $(call add_substitution,$1,$(call find_program,$2,$3))
 $(if $($(strip $1)),
     $(info Found $(strip $2) at $($(strip $1))),
-    $(error Could not find $(strip $2))
+    $(error Could not find $(strip $2) in PATH=$(if $(strip $3)),$(PATH),$(strip $3))
 )
 endef
 
