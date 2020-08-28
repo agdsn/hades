@@ -1,85 +1,20 @@
-# {{ comment }}
+{% extends 'common-keepalived.conf.j2' %}
+{% set dbus_name = constants.AUTH_VRRP_DBUS_NAME %}
+{% set instance = 'auth' %}
+{% set interface = 'eth1' %}
+{% set ip_address = HADES_VRRP_LISTEN_AUTH %}
+{% set virtual_router_id = HADES_VRRP_VIRTUAL_ROUTER_ID_AUTH %}
 
-global_defs {
-    {% if HADES_MAIL_DESTINATION_ADDRESSES is defined %}
-    notification_email {
-        {% for address in HADES_MAIL_DESTINATION_ADDRESSES %}
-        {{ address }}
-        {% endfor %}
-    }
-    {% endif %}
-    {% if HADES_MAIL_SENDER_ADDRESS is defined %}
-    notification_email_from {{ HADES_MAIL_SENDER_ADDRESS }}
-    {% endif %}
-    router_id {{ HADES_SITE_NAME }}
-    enable_script_security
-    script_user root
-    {% if HADES_MAIL_SMTP_SERVER is defined %}
-    smtp_server {{ HADES_MAIL_SMTP_SERVER }}
-    smtp_connect_timeout 30
-    {% endif %}
-
-    enable_dbus
-    dbus_service_name {{ constants.AUTH_VRRP_DBUS_NAME }}
-}
-
-instance hades_auth
-
-static_ipaddress {
-    {{ HADES_VRRP_LISTEN_AUTH  }} dev eth1
-}
-
-vrrp_script check_services {
-    script "{{ constants.pkglibexecdir }}/check-services.sh auth"
-    interval 2
-    fall 3
-    rise 3
-    timeout 10
-}
-
-vrrp_instance hades-auth {
-    {% if HADES_INITIAL_MASTER %}
-    state MASTER
-    {% else %}
-    state BACKUP
-    {% endif %}
-    preempt_delay {{ HADES_VRRP_PREEMPTION_DELAY.total_seconds()|int }}
-
-    interface eth1
-
-    track_script {
-        check_services
-    }
-
-    mcast_src_ip {{ HADES_VRRP_LISTEN_AUTH.ip }}
-
-    garp_master_refresh {{ HADES_GRATUITOUS_ARP_INTERVAL.total_seconds()|int }}
-    garp_master_refresh_repeat 1
-
-    virtual_router_id {{ HADES_VRRP_VIRTUAL_ROUTER_ID_AUTH }}
-    advert_int {{ HADES_VRRP_ADVERTISEMENT_INTERVAL.total_seconds()|int }}
-    {% if HADES_MAIL_SMTP_SERVER is defined %}
-    smtp_alert
-    {% endif %}
-
-    priority {{ HADES_PRIORITY }}
-
-    authentication {
-        auth_type PASS
-        auth_pass {{ HADES_VRRP_PASSWORD }}
-    }
-
-    virtual_ipaddress {
+{% block virtual_ipaddress %}
+{{ super() }}
         {% for network in HADES_AUTH_LISTEN %}
         {{ network }} dev eth2
         {% endfor %}
-    }
+{% endblock %}
 
-    virtual_routes {
+{% block virtual_routes %}
+{{ super() }}
         {% for network in HADES_USER_NETWORKS.values() %}
         {{ network.cidr }} via {{ HADES_AUTH_NEXT_HOP.ip }} dev eth2
         {% endfor %}
-    }
-
-    notify "{{ constants.bindir }}/hades-vrrp-notify"
-}
+{% endblock %}

@@ -1,0 +1,95 @@
+# {{ comment }}
+
+global_defs {
+{% block global_defs %}
+    {% if HADES_MAIL_DESTINATION_ADDRESSES is defined %}
+    notification_email {
+        {% for address in HADES_MAIL_DESTINATION_ADDRESSES %}
+        {{ address }}
+        {% endfor %}
+    }
+    {% endif %}
+    {% if HADES_MAIL_SENDER_ADDRESS is defined %}
+    notification_email_from {{ HADES_MAIL_SENDER_ADDRESS }}
+    {% endif %}
+    router_id {{ HADES_SITE_NAME }}
+    enable_script_security
+    script_user root
+    {% if HADES_MAIL_SMTP_SERVER is defined %}
+    smtp_server {{ HADES_MAIL_SMTP_SERVER }}
+    smtp_connect_timeout 30
+    {% endif %}
+
+    enable_dbus
+    dbus_service_name {{ dbus_name }}
+{% endblock %}
+}
+
+instance hades_{{ instance }}
+
+static_ipaddress {
+{% block static_ipaddress %}
+    {{ ip_address }} dev {{ interface }}
+{% endblock %}
+}
+
+{% block vrrp_scripts %}
+vrrp_script check_services {
+{% block vrrp_script_check_services %}
+    script "{{ constants.pkglibexecdir }}/check-services.sh {{ instance }}"
+    interval 2
+    fall 3
+    rise 3
+    timeout 10
+{% endblock %}
+}
+{% endblock %}
+
+vrrp_instance hades-{{ instance }} {
+{% block vrrp_instance %}
+    {% if HADES_INITIAL_MASTER %}
+    state MASTER
+    {% else %}
+    state BACKUP
+    {% endif %}
+    preempt_delay {{ HADES_VRRP_PREEMPTION_DELAY.total_seconds()|int }}
+
+    interface {{ interface }}
+
+    track_script {
+    {% block track_script %}
+        check_services
+    {% endblock %}
+    }
+
+    mcast_src_ip {{ ip_address.ip }}
+
+    garp_master_refresh {{ HADES_GRATUITOUS_ARP_INTERVAL.total_seconds()|int }}
+    garp_master_refresh_repeat 1
+
+    virtual_router_id {{ virtual_router_id }}
+    advert_int {{ HADES_VRRP_ADVERTISEMENT_INTERVAL.total_seconds()|int }}
+    {% if HADES_MAIL_SMTP_SERVER is defined %}
+    smtp_alert
+    {% endif %}
+
+    priority {{ HADES_PRIORITY }}
+
+    authentication {
+        auth_type PASS
+        auth_pass {{ HADES_VRRP_PASSWORD }}
+    }
+
+    virtual_ipaddress {
+    {% block virtual_ipaddress %}
+    {% endblock %}
+    }
+
+    virtual_routes {
+    {% block virtual_routes %}
+    {% endblock %}
+    }
+
+    notify "{{ constants.bindir }}/hades-vrrp-notify"
+{% endblock %}
+}
