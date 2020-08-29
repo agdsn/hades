@@ -37,13 +37,6 @@ hades-generate-config
    :func: create_parser
    :prog: hades-generate-config
 
-hades-su
-========
-.. argparse::
-   :module: hades.bin.su
-   :func: create_parser
-   :prog: hades-su
-
 hades-vrrp-notify
 =================
 .. argparse::
