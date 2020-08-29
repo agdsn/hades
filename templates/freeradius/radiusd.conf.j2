@@ -2,10 +2,10 @@
 
 # -*- text -*-
 ##
-## radiusd.conf	-- FreeRADIUS server configuration file - 3.0.13
+## radiusd.conf	-- FreeRADIUS server configuration file - 3.0.17
 ##
 ##	http://www.freeradius.org/
-##	$Id: c62f4ffed53a073a885f243b728129f5c482fad7 $
+##	$Id: 59e59f3ac443e75663333a5b7732664b67c5567d $
 ##
 
 ######################################################################
@@ -284,47 +284,7 @@ log {
 	#  If the server is running in debugging mode, this file is
 	#  NOT used.
 	#
-	#file = ${logdir}/radius.log
-
-	#
-	#  If this configuration parameter is set, then log messages for
-	#  a *request* go to this file, rather than to radius.log.
-	#
-	#  i.e. This is a log file per request, once the server has accepted
-	#  the request as being from a valid client.  Messages that are
-	#  not associated with a request still go to radius.log.
-	#
-	#  Not all log messages in the server core have been updated to use
-	#  this new internal API.  As a result, some messages will still
-	#  go to radius.log.  Please submit patches to fix this behavior.
-	#
-	#  The file name is expanded dynamically.  You should ONLY user
-	#  server-side attributes for the filename (e.g. things you control).
-	#  Using this feature MAY also slow down the server substantially,
-	#  especially if you do thinks like SQL calls as part of the
-	#  expansion of the filename.
-	#
-	#  The name of the log file should use attributes that don't change
-	#  over the lifetime of a request, such as User-Name,
-	#  Virtual-Server or Packet-Src-IP-Address.  Otherwise, the log
-	#  messages will be distributed over multiple files.
-	#
-	#  Logging can be enabled for an individual request by a special
-	#  dynamic expansion macro:  %{debug: 1}, where the debug level
-	#  for this request is set to '1' (or 2, 3, etc.).  e.g.
-	#
-	#	...
-	#	update control {
-	#	       Tmp-String-0 = "%{debug:1}"
-	#	}
-	#	...
-	#
-	#  The attribute that the value is assigned to is unimportant,
-	#  and should be a "throw-away" attribute with no side effects.
-	#
-	{% raw %}
-	#requests = ${logdir}/radiusd-%{%{Virtual-Server}:-DEFAULT}-%Y%m%d.log
-	{% endraw %}
+	file = ${logdir}/radius.log
 
 	#
 	#  Which syslog facility to use, if ${destination} == "syslog"
@@ -503,15 +463,7 @@ security {
 	#
 	status_server = yes
 
-	#
-	#  allow_vulnerable_openssl: Allow the server to start with
-	#  versions of OpenSSL known to have critical vulnerabilities.
-	#
-	#  This check is based on the version number reported by libssl
-	#  and may not reflect patches applied to libssl by
-	#  distribution maintainers.
-	#
-	allow_vulnerable_openssl = no
+
 }
 
 # PROXY CONFIGURATION
@@ -626,12 +578,8 @@ thread pool {
 	#
 #	max_queue_size = 65536
 
-	#  There may be memory leaks or resource allocation problems with
-	#  the server.  If so, set this value to 300 or so, so that the
-	#  resources will be cleaned up periodically.
-	#
-	#  This should only be necessary if there are serious bugs in the
-	#  server which have not yet been fixed.
+	#  Clean up old threads periodically.  For no reason other than
+	#  it might be useful.
 	#
 	#  '0' is a special value meaning 'infinity', or 'the servers never
 	#  exit'

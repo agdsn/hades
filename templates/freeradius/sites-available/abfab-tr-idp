@@ -7,7 +7,7 @@
 #	This file does not include a TLS listener; see abfab-tls for a simple
 #	example of a RADSEC listener for ABFAB.
 #
-#	$Id: 3ef581e54dd7b397ea49e3d1db53f0c543a826d2 $
+#	$Id: e0224864ec1d81405f57a6d872f86c8a7958fdab $
 #
 
 server abfab-idp {
@@ -79,12 +79,6 @@ post-auth {
 	#
 	#  See "Authentication Logging Queries" in sql.conf
 	-sql
-
-	#
-	#  Instead of sending the query to the SQL server,
-	#  write it into a log file.
-	#
-#	sql_log
 
 	#
 	#  Un-comment the following if you want to modify the user's object

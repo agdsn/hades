@@ -76,8 +76,8 @@ ordering when the modules are loaded.
 
 Modules can be enabled by creating a soft link.  For module ``foo``, do::
 
-  $ cd raddb
-  $ ln -s mods-available/foo mods-enabled/foo
+  $ cd raddb/mods-enabled
+  $ ln -s ../mods-available/foo
 
 To create "local" versions of the modules, we suggest copying the file
 instead.  This leaves the original file (with documentation) in the
@@ -660,6 +660,6 @@ That configuration will never show the ``if (1)`` output in debugging mode.
 Dialup_admin
 ------------
 
-The dialip_admin directory has been removed.  No one stepped forward
+The dialup_admin directory has been removed.  No one stepped forward
 to maintain it, and the code had not been changed in many years.
 
