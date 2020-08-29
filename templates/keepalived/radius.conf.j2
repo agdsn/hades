@@ -1,4 +1,4 @@
-{% extends 'common-keepalived.conf.j2' %}
+{% extends 'keepalived/common.conf.j2' %}
 {% set dbus_name = constants.RADIUS_VRRP_DBUS_NAME %}
 {% set instance = 'radius' %}
 {% set interface = HADES_VRRP_BRIDGE %}
