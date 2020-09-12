@@ -7,7 +7,7 @@ JoinsNamespaceOf=hades-auth-netns.service
 
 [Service]
 Group=@AUTH_DNS_GROUP@
-Type=simple
+Type=notify
 PrivateNetwork=yes
 PIDFile=@AUTH_DNS_ALTERNATIVE_PID_FILE@
 SyslogIdentifier=hades-auth-alternative-dns
