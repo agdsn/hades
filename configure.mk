@@ -277,11 +277,13 @@ CONFIGURE_FILES = \
 # ------- #
 
 all: $(CONFIGURE_FILES) src/hades/constants.py
+.PHONY: all
 
 # Disable make's built-in suffix rules
 .SUFFIXES:
 
 .FORCE:
+.PHONY: .FORCE
 
 $(CONFIGURE_FILES): %: %.in configure.mk .FORCE
 	@echo Configuring $@
@@ -303,5 +305,4 @@ src/hades/constants.py: configure.mk .FORCE
 clean:
 	$(RM) -f $(CONFIGURE_FILES)
 	$(RM) -f src/hades/constants.py
-
-.PHONY: all clean .FORCE
+.PHONY: clean
