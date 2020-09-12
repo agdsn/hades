@@ -236,8 +236,6 @@ $(call add_substitution, UNAUTH_DNS_HOME,  $(pkglocalstatedir)/unauth-dns)
 cli_variables := $(foreach var,$(.VARIABLES),$(if $(findstring command line,$(origin $(var))),$(var)))
 $(call add_substitution, CONFIGURE_ARGS, $(foreach var,$(cli_variables),$(var)=$($(var))))
 
-# Disable make's built-in suffix rules
-.SUFFIXES:
 
 CONFIGURE_FILES = \
     conf/hades-agent.service \
@@ -274,7 +272,16 @@ CONFIGURE_FILES = \
     src/hades/deputy/interface.xml \
     $(NULL)
 
+# ------- #
+# Targets #
+# ------- #
+
 all: $(CONFIGURE_FILES) src/hades/constants.py
+
+# Disable make's built-in suffix rules
+.SUFFIXES:
+
+.FORCE:
 
 $(CONFIGURE_FILES): %: %.in configure.mk .FORCE
 	@echo Configuring $@
@@ -296,7 +303,5 @@ src/hades/constants.py: configure.mk .FORCE
 clean:
 	$(RM) -f $(CONFIGURE_FILES)
 	$(RM) -f src/hades/constants.py
-
-.FORCE:
 
 .PHONY: all clean .FORCE
