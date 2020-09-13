@@ -72,6 +72,8 @@ $(if $($(strip $1)),
 )
 endef
 
+# Don't set variables if clean is the only goal
+ifneq ($(MAKECMDGOALS),clean)
 
 # -------- #
 # Metadata #
@@ -236,6 +238,7 @@ $(call add_substitution, UNAUTH_DNS_HOME,  $(pkglocalstatedir)/unauth-dns)
 cli_variables := $(foreach var,$(.VARIABLES),$(if $(findstring command line,$(origin $(var))),$(var)))
 $(call add_substitution, CONFIGURE_ARGS, $(foreach var,$(cli_variables),$(var)=$($(var))))
 
+endif # ifneq ($(MAKECMDGOALS),clean)
 
 CONFIGURE_FILES = \
     conf/hades-agent.service \
@@ -303,6 +306,6 @@ src/hades/constants.py: configure.mk .FORCE
 	} > $@
 
 clean:
-	$(RM) -f $(CONFIGURE_FILES)
-	$(RM) -f src/hades/constants.py
+	rm -f $(CONFIGURE_FILES)
+	rm -f src/hades/constants.py
 .PHONY: clean
