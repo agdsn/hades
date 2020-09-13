@@ -10,11 +10,11 @@ Wants=hades-database.service
 [Service]
 Type=notify
 PrivateNetwork=yes
-SyslogIdentifier=hades-unauth-portal
 User=@PORTAL_USER@
 Group=@PORTAL_GROUP@
-EnvironmentFile=@systemdenvfile@
+SyslogIdentifier=hades-unauth-portal
 Environment=PGAPPNAME=hades-unauth-portal
+EnvironmentFile=@systemdenvfile@
 ExecStartPre=@bindir@/hades-generate-config uwsgi.ini.j2 @pkgrunstatedir@/unauth-portal/uwsgi.ini
 ExecStart=@UWSGI@ --ini=@pkgrunstatedir@/unauth-portal/uwsgi.ini $UWSGI_OPTS
 ExecReload=@bindir@/hades-generate-config uwsgi.ini.j2 @pkgrunstatedir@/unauth-portal/uwsgi.ini
