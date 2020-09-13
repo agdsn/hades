@@ -244,24 +244,24 @@ CONFIGURE_FILES = \
     conf/hades-agent.service \
     conf/hades-auth-alternative-dns.service \
     conf/hades-auth-dhcp.service \
-    conf/hades-auth-netns.service \
     conf/hades-auth-netns-cleanup.service \
+    conf/hades-auth-netns.service \
     conf/hades-auth-pristine-dns.service \
     conf/hades-auth-vrrp.service \
     conf/hades-cleanup.service \
     conf/hades-database.service \
-    conf/hades-deputy.service \
     conf/hades-deputy.dbus-service \
+    conf/hades-deputy.service \
+    conf/hades-forced-refresh.service \
     conf/hades-radius-vrrp.service \
     conf/hades-radius.service \
     conf/hades-refresh.service \
-    conf/hades-root-netns.service \
     conf/hades-root-netns-cleanup.service \
-    conf/hades-forced-refresh.service \
+    conf/hades-root-netns.service \
     conf/hades-unauth-dns.service \
     conf/hades-unauth-http.service \
-    conf/hades-unauth-netns.service \
     conf/hades-unauth-netns-cleanup.service \
+    conf/hades-unauth-netns.service \
     conf/hades-unauth-portal.service \
     conf/hades-unauth-vrrp.service \
     conf/hades.busconfig \
