@@ -9,7 +9,6 @@ Wants=hades-database.service
 
 [Service]
 Type=notify
-PrivateNetwork=yes
 User=@PORTAL_USER@
 Group=@PORTAL_GROUP@
 SyslogIdentifier=hades-unauth-portal
@@ -25,6 +24,7 @@ KillSignal=SIGINT
 StandardError=syslog
 NotifyAccess=all
 
+PrivateNetwork=yes
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/unauth-portal
 ;RuntimeDirectoryMode=2750

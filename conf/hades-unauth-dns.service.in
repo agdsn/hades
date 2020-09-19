@@ -7,7 +7,6 @@ JoinsNamespaceOf=hades-unauth-netns.service
 
 [Service]
 Type=dbus
-PrivateNetwork=yes
 BusName=@UNAUTH_DNS_DBUS_NAME@
 SyslogIdentifier=hades-unauth-dns
 EnvironmentFile=@systemdenvfile@
@@ -20,6 +19,7 @@ ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
 
+PrivateNetwork=yes
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/unauth-dns
 ;RuntimeDirectoryMode=2750

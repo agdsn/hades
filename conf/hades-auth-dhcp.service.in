@@ -7,7 +7,6 @@ JoinsNamespaceOf=hades-auth-netns.service
 
 [Service]
 Type=dbus
-PrivateNetwork=yes
 BusName=@AUTH_DHCP_DBUS_NAME@
 SyslogIdentifier=hades-auth-dhcp
 EnvironmentFile=@systemdenvfile@
@@ -20,6 +19,7 @@ ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
 
+PrivateNetwork=yes
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/auth-dhcp
 ;RuntimeDirectoryMode=2750

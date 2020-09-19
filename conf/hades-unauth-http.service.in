@@ -9,7 +9,6 @@ Wants=hades-unauth-portal.service
 
 [Service]
 Type=forking
-PrivateNetwork=yes
 PIDFile=@PORTAL_NGINX_PID_FILE@
 SyslogIdentifier=hades-unauth-http
 EnvironmentFile=@systemdenvfile@
@@ -23,6 +22,7 @@ KillSignal=SIGQUIT
 KillMode=mixed
 SyslogLevel=err
 
+PrivateNetwork=yes
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/unauth-http
 ;RuntimeDirectoryMode=2750

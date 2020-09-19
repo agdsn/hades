@@ -8,7 +8,6 @@ JoinsNamespaceOf=hades-auth-netns.service
 [Service]
 Type=dbus
 BusName=@AUTH_VRRP_DBUS_NAME@
-PrivateNetwork=yes
 PIDFile=@pkgrunstatedir@/auth-vrrp/keepalived.pid
 KillMode=process
 SyslogIdentifier=hades-auth-vrrp
@@ -20,6 +19,7 @@ ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
 
+PrivateNetwork=yes
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/auth-vrrp
 ;RuntimeDirectoryMode=0750

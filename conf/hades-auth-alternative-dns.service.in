@@ -7,7 +7,6 @@ JoinsNamespaceOf=hades-auth-netns.service
 
 [Service]
 Type=notify
-PrivateNetwork=yes
 PIDFile=@AUTH_DNS_ALTERNATIVE_PID_FILE@
 Group=@AUTH_DNS_GROUP@
 SyslogIdentifier=hades-auth-alternative-dns
@@ -22,6 +21,7 @@ ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
 
+PrivateNetwork=yes
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/auth-dns
 ;RuntimeDirectoryMode=2750

@@ -14,7 +14,6 @@ Conflicts=hades-unauth-netns-cleanup.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-PrivateNetwork=yes
 
 ExecStartPre=@bindir@/hades-generate-config netns/unauth/ @pkgrunstatedir@/unauth-netns/
 ExecStartPre=@IFUP@ --interfaces=@pkgrunstatedir@/unauth-netns/interfaces --state-dir=@pkgrunstatedir@/unauth-netns --all --no-act
@@ -41,6 +40,7 @@ ExecStop=@IFDOWN@ --interfaces=@pkgrunstatedir@/unauth-netns/interfaces --state-
 # Delete the network namespace
 ExecStopPost=-@IP@ netns delete unauth
 
+PrivateNetwork=yes
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/unauth-netns
 ;RuntimeDirectoryMode=0750
