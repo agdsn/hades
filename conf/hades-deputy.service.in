@@ -21,6 +21,7 @@ EnvironmentFile=@systemdenvfile@
 ExecStart=@bindir@/hades-deputy $DEPUTY_OPTS
 Restart=always
 RestartSec=5
+
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/deputy
 ;RuntimeDirectoryMode=0750

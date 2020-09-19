@@ -24,6 +24,7 @@ RestartSec=5
 KillSignal=SIGINT
 StandardError=syslog
 NotifyAccess=all
+
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/unauth-portal
 ;RuntimeDirectoryMode=2750

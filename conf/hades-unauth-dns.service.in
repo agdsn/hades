@@ -19,6 +19,7 @@ ExecReload=@DNSMASQ@ --test -k --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
+
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/unauth-dns
 ;RuntimeDirectoryMode=2750

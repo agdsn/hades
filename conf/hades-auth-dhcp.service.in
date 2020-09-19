@@ -19,6 +19,7 @@ ExecReload=@DNSMASQ@ --test -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
+
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/auth-dhcp
 ;RuntimeDirectoryMode=2750

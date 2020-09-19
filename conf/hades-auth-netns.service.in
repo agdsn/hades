@@ -15,11 +15,6 @@ Conflicts=hades-auth-netns-cleanup.service
 Type=oneshot
 RemainAfterExit=yes
 PrivateNetwork=yes
-;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
-;RuntimeDirectory=hades/auth-netns
-;RuntimeDirectoryMode=0750
-;RuntimeDirectoryPreserve=yes
-
 ExecStart=@bindir@/hades-generate-config netns/auth/ @pkgrunstatedir@/auth-netns/
 ExecStart=@IFUP@ --interfaces=@pkgrunstatedir@/auth-netns/interfaces --state-dir=@pkgrunstatedir@/auth-netns --all --no-act
 
@@ -44,3 +39,8 @@ ExecStop=@IFDOWN@ --verbose --interfaces=@pkgrunstatedir@/auth-netns/interfaces 
 
 # Delete the network namespace
 ExecStopPost=-@IP@ netns delete auth
+
+;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
+;RuntimeDirectory=hades/auth-netns
+;RuntimeDirectoryMode=0750
+;RuntimeDirectoryPreserve=yes

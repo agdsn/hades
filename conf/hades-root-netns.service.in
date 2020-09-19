@@ -12,10 +12,6 @@ Conflicts=hades-root-netns-cleanup.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
-;RuntimeDirectory=hades/root-netns
-;RuntimeDirectoryMode=0750
-;RuntimeDirectoryPreserve=yes
 
 ExecStartPre=@bindir@/hades-generate-config netns/root/ @pkgrunstatedir@/root-netns/
 ExecStartPre=@IFUP@ --interfaces=@pkgrunstatedir@/root-netns/interfaces --state-dir=@pkgrunstatedir@/root-netns --all --no-act
@@ -39,6 +35,11 @@ ExecStop=@IFDOWN@ --verbose --no-loopback --interfaces=@pkgrunstatedir@/root-net
 
 # Delete the network namespace
 ExecStopPost=-@IP@ netns delete root
+
+;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
+;RuntimeDirectory=hades/root-netns
+;RuntimeDirectoryMode=0750
+;RuntimeDirectoryPreserve=yes
 
 [Install]
 WantedBy=hades.target

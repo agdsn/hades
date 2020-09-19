@@ -19,6 +19,7 @@ ExecReload=@bindir@/hades-generate-config keepalived/auth.conf.j2 @pkgrunstatedi
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
+
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/auth-vrrp
 ;RuntimeDirectoryMode=0750
