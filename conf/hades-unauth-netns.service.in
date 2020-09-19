@@ -1,6 +1,7 @@
 [Unit]
 Description=Hades unauth network namespace
 Documentation=https://github.com/systemd/systemd/issues/2741#issuecomment-336736214
+RefuseManualStart=yes
 StopWhenUnneeded=true
 BindsTo=hades-root-netns.service
 After=hades-root-netns.service

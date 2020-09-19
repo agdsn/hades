@@ -1,6 +1,7 @@
 [Unit]
 Description=Hades root network namespace
 Documentation=https://github.com/systemd/systemd/issues/2741#issuecomment-336736214
+RefuseManualStart=yes
 StopWhenUnneeded=true
 
 # Due to a bug in the systemd version shipped with Stretch ExecStopPost is not
