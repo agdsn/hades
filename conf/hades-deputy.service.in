@@ -1,12 +1,14 @@
 [Unit]
 Description=Hades deputy service for privileged operations
 Documentation=https://agdsn.github.io/hades/
-After=hades-auth-dns.service
+After=hades-auth-alternative-dns.service
+After=hades-auth-pristine-dns.service
 After=hades-database.service
 After=hades-radius.service
 After=hades-root-netns.service
 BindsTo=hades-root-netns.service
-Wants=hades-auth-dns.service
+Wants=hades-auth-alternative-dns.service
+Wants=hades-auth-pristine-dns.service
 Wants=hades-database.service
 Wants=hades-radius.service
 
