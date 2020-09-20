@@ -5,7 +5,6 @@ PartOf=hades.service
 ReloadPropagatedFrom=hades.service
 Before=hades.service
 After=hades-unauth-portal.service
-After=hades-unauth-portal.service
 BindsTo=hades-unauth-netns.service
 JoinsNamespaceOf=hades-unauth-netns.service
 Wants=hades-unauth-portal.service
