@@ -24,6 +24,3 @@ Restart=always
 ;RuntimeDirectory=hades/database hades/database/conf
 ;RuntimeDirectoryMode=2751
 ;RuntimeDirectoryPreserve=yes
-
-[Install]
-WantedBy=hades.service
