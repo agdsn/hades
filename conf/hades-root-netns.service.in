@@ -25,7 +25,7 @@ ExecStart=@IP@ netns add root
 ExecStart=@UMOUNT@ --verbose /var/run/netns/root
 
 # Re-use the same name for the network namespace that systemd put us in, this
-# should be root namespace.
+# should be the root namespace.
 ExecStart=@MOUNT@ --bind /proc/self/ns/net /var/run/netns/root
 ExecStart=@SYSCTL@ --write net.ipv4.ip_nonlocal_bind=1 net.ipv4.ip_forward=1
 ExecStart=@IFUP@ --verbose --no-loopback --interfaces=@pkgrunstatedir@/root-netns/interfaces --state-dir=@pkgrunstatedir@/root-netns --all
