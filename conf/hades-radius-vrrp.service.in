@@ -1,6 +1,9 @@
 [Unit]
 Description=Hades VRRP service for RADIUS services (keepalived)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+Before=hades.service
 After=hades-root-netns.service
 BindsTo=hades-root-netns.service
 
@@ -24,4 +27,4 @@ RestartSec=5
 ;RuntimeDirectoryPreserve=yes
 
 [Install]
-WantedBy=hades.target
+WantedBy=hades.service

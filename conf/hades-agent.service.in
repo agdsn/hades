@@ -1,6 +1,8 @@
 [Unit]
 Description=Hades agent (Celery Worker)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+Before=hades.service
 After=hades-database.service
 After=hades-root-netns.service
 BindsTo=hades-database.service
@@ -25,4 +27,4 @@ RestartSec=5
 ;RuntimeDirectoryPreserve=yes
 
 [Install]
-WantedBy=hades.target
+WantedBy=hades.service

@@ -1,10 +1,12 @@
 [Unit]
 Description=Hades cleanup task (Timer)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+Before=hades.service
 
 [Timer]
 OnActiveSec=10
 OnUnitActiveSec=3600
 
 [Install]
-WantedBy=hades.target
+WantedBy=hades.service

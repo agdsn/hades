@@ -328,7 +328,7 @@ units = (
     'hades-unauth-netns.service',
     'hades-unauth-portal.service',
     'hades-unauth-vrrp.service',
-    'hades.target',
+    'hades.service',
 )
 """The Hades systemd units that should be reported by the
 :func:`get_get_systemd_status` task."""

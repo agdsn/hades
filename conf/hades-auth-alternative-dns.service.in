@@ -1,6 +1,9 @@
 [Unit]
 Description=Hades alternative DNS service for authenticated users (unbound)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+Before=hades.service
 After=hades-auth-netns.service
 BindsTo=hades-auth-netns.service
 JoinsNamespaceOf=hades-auth-netns.service
@@ -28,4 +31,4 @@ PrivateNetwork=yes
 ;RuntimeDirectoryPreserve=yes
 
 [Install]
-WantedBy=hades.target
+WantedBy=hades.service

@@ -1,6 +1,9 @@
 [Unit]
 Description=Hades VRRP service for unauth services (keepalived)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+Before=hades.service
 After=hades-unauth-netns.service
 BindsTo=hades-unauth-netns.service
 JoinsNamespaceOf=hades-unauth-netns.service
@@ -26,4 +29,4 @@ PrivateNetwork=yes
 ;RuntimeDirectoryPreserve=yes
 
 [Install]
-WantedBy=hades.target
+WantedBy=hades.service

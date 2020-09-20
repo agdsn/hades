@@ -1,6 +1,9 @@
 [Unit]
 Description=Hades deputy service for privileged operations
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+Before=hades.service
 After=hades-auth-alternative-dns.service
 After=hades-auth-pristine-dns.service
 After=hades-database.service
@@ -28,4 +31,4 @@ RestartSec=5
 ;RuntimeDirectoryPreserve=yes
 
 [Install]
-WantedBy=hades.target
+WantedBy=hades.service

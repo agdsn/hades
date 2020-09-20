@@ -1,6 +1,9 @@
 [Unit]
 Description=Hades database service (PostgreSQL)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+Before=hades.service
 After=hades-root-netns.service
 BindsTo=hades-root-netns.service
 
@@ -23,4 +26,4 @@ Restart=always
 ;RuntimeDirectoryPreserve=yes
 
 [Install]
-WantedBy=hades.target
+WantedBy=hades.service

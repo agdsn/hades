@@ -1,6 +1,9 @@
 [Unit]
 Description=Hades DNS service for unauthenticated users (dnsmasq)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+Before=hades.service
 After=hades-unauth-netns.service
 BindsTo=hades-unauth-netns.service
 JoinsNamespaceOf=hades-unauth-netns.service
@@ -26,5 +29,5 @@ PrivateNetwork=yes
 ;RuntimeDirectoryPreserve=yes
 
 [Install]
-WantedBy=hades.target
 Alias=hades-unauth-dhcp.service
+WantedBy=hades.service

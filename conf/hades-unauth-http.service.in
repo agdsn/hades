@@ -1,6 +1,9 @@
 [Unit]
 Description=Hades http server (nginx)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+Before=hades.service
 After=hades-unauth-portal.service
 After=hades-unauth-portal.service
 BindsTo=hades-unauth-netns.service
@@ -29,4 +32,4 @@ PrivateNetwork=yes
 ;RuntimeDirectoryPreserve=yes
 
 [Install]
-WantedBy=hades.target
+WantedBy=hades.service
