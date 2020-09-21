@@ -748,8 +748,8 @@ class HADES_VRRP_LISTEN_AUTH(Option):
     runtime_check = check.address_exists
 
 
-class HADES_VRRP_LISTEN_RADIUS(Option):
-    """IP and network for VRRP communication (radius instance)"""
+class HADES_VRRP_LISTEN_ROOT(Option):
+    """IP and network for VRRP communication (root instance)"""
     type = netaddr.IPNetwork
     static_check = check.network_ip
     runtime_check = check.address_exists
@@ -777,8 +777,8 @@ class HADES_VRRP_VIRTUAL_ROUTER_ID_AUTH(Option):
     static_check = check.between(0, 255)
 
 
-class HADES_VRRP_VIRTUAL_ROUTER_ID_RADIUS(Option):
-    """Virtual router ID used by Hades (radius instance)"""
+class HADES_VRRP_VIRTUAL_ROUTER_ID_ROOT(Option):
+    """Virtual router ID used by Hades (root instance)"""
     type = int
     default = 67
     static_check = check.between(0, 255)
@@ -991,8 +991,8 @@ class CELERY_QUEUES(CeleryOption):
         Each agent/site node has a single queue specific to this node. This
         queue is bound to the RPC exchange with a node-specific routing key and
         to the notify exchange with the site-specific, node-specific, and empty
-        routing key. The agent on a site node, which has become the RADIUS VRRP
-        MASTER, will also bind its queue to the RPC exchange with the
+        routing key. The agent on a site node, where the root VRRP instance has
+        become MASTER, will also bind its queue to the RPC exchange with the
         site-specific routing key and remove this binding as soon as the sites
         leaves the MASTER state.
 

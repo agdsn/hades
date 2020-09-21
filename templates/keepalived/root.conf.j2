@@ -1,9 +1,9 @@
 {% extends 'keepalived/common.conf.j2' %}
-{% set dbus_name = constants.RADIUS_VRRP_DBUS_NAME %}
-{% set instance = 'radius' %}
+{% set dbus_name = constants.ROOT_VRRP_DBUS_NAME %}
+{% set instance = 'root' %}
 {% set interface = HADES_VRRP_BRIDGE %}
-{% set ip_address = HADES_VRRP_LISTEN_RADIUS %}
-{% set virtual_router_id = HADES_VRRP_VIRTUAL_ROUTER_ID_RADIUS %}
+{% set ip_address = HADES_VRRP_LISTEN_ROOT %}
+{% set virtual_router_id = HADES_VRRP_VIRTUAL_ROUTER_ID_ROOT %}
 
 {% block vrrp_scripts %}
 {{ super() }}

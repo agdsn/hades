@@ -10,8 +10,8 @@ d @pkgrunstatedir@/database         2751    @DATABASE_USER@ @DATABASE_GROUP@
 d @pkgrunstatedir@/database/conf    2750    @DATABASE_USER@ @DATABASE_GROUP@
 d @pkgrunstatedir@/deputy           0750    root root
 d @pkgrunstatedir@/radius           2750    @RADIUS_USER@ @RADIUS_GROUP@
-d @pkgrunstatedir@/radius-vrrp      0750    root root
 d @pkgrunstatedir@/root-netns       0750    root root
+d @pkgrunstatedir@/root-vrrp        0750    root root
 d @pkgrunstatedir@/unauth-dns       2750    @UNAUTH_DNS_USER@ @UNAUTH_DNS_GROUP@
 d @pkgrunstatedir@/unauth-http      2750    @PORTAL_USER@ @PORTAL_GROUP@
 d @pkgrunstatedir@/unauth-netns     0750    root root

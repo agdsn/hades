@@ -14,7 +14,7 @@ iface {{ interface }} inet manual
 auto {{ HADES_VRRP_BRIDGE }}
 iface {{ HADES_VRRP_BRIDGE }} inet static inherits bridge
   bridge_ports {{ HADES_VRRP_INTERFACE }}
-  address {{ HADES_VRRP_LISTEN_RADIUS }}
+  address {{ HADES_VRRP_LISTEN_ROOT }}
 
 auto {{ HADES_AUTH_BRIDGE }}
 iface {{ HADES_AUTH_BRIDGE }} inet manual inherits bridge
