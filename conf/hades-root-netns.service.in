@@ -28,7 +28,9 @@ ExecStart=@IFUP@ --verbose --no-loopback --interfaces=@pkgrunstatedir@/root-netn
 ExecStart=@IPTABLES_RESTORE@ @pkgrunstatedir@/root-netns/iptables-rules
 
 # Teardown network interfaces
-ExecStop=@IFDOWN@ --verbose --no-loopback --interfaces=@pkgrunstatedir@/root-netns/interfaces --state-dir=@pkgrunstatedir@/root-netns --all
+# This is done forcefully in ExecStopPost in the root netns, because ip netns
+# delete won't clean up after us in the root network namespace.
+ExecStopPost=-@IFDOWN@ --verbose --force --no-loopback --interfaces=@pkgrunstatedir@/root-netns/interfaces --state-dir=@pkgrunstatedir@/root-netns --all
 
 # Delete the network namespace
 ExecStopPost=-@IP@ netns delete root
