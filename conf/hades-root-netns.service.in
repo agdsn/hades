@@ -32,6 +32,9 @@ ExecStart=@IPTABLES_RESTORE@ @pkgrunstatedir@/root-netns/iptables-rules
 # delete won't clean up after us in the root network namespace.
 ExecStopPost=-@IFDOWN@ --verbose --force --no-loopback --interfaces=@pkgrunstatedir@/root-netns/interfaces --state-dir=@pkgrunstatedir@/root-netns --all
 
+# Reset iptables
+ExecStopPost=-@IPTABLES_RESTORE@ /dev/null
+
 # Delete the network namespace
 ExecStopPost=-@IP@ netns delete root
 
