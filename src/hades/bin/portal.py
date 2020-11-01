@@ -1,16 +1,34 @@
+#!/usr/bin/env python3
+"""Run the Hades captive-portal Flask WSGI application in debug mode if executed
+as a command-line application.
+
+Also export the app object for use by WSGI application servers, if imported as
+an ordinary Python module.
+"""
 from hades.config.loader import load_config
 from hades.config.options import FlaskOption
 # noinspection PyUnresolvedReferences
 from hades.portal import app, views
 
-
-app.config.from_object(load_config(option_cls=FlaskOption))
 application = app
 
 
-def main():
-    return app.run(debug=True)
+def configure_app():
+    app.config.from_object(load_config(option_cls=FlaskOption))
+
+
+def main() -> int:
+    configure_app()
+    app.run(debug=True)
+    return 0
 
 
 if __name__ == '__main__':
     main()
+else:
+    try:
+        import uwsgi
+    except ImportError:
+        pass
+    else:
+        configure_app()

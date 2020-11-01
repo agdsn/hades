@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+"""Keepalived notification receiver.
+
+Invoked by keepalived, if the state of VRRP instances changes.
+"""
 import logging
 import os
 import sys
@@ -49,7 +54,7 @@ def notify_unauth(state, priority) -> int:
     return 0
 
 
-def main() -> int:
+def create_parser() -> ArgumentParser:
     description = textwrap.dedent(
         """
         Hades keepalived VRRP notify script.
@@ -65,6 +70,11 @@ def main() -> int:
     parser.add_argument('state', choices=['MASTER', 'BACKUP', 'FAULT'],
                         help="The state it's transitioning to")
     parser.add_argument('priority', type=int, help="The priority value")
+    return parser
+
+
+def main() -> int:
+    parser = create_parser()
     args = parser.parse_args()
     logger.fatal("Transitioning %s to %s with priority %d", args.name,
                  args.state, args.priority)

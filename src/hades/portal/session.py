@@ -26,6 +26,7 @@ class NullSession(collections.MutableMapping, SessionMixin):
 
 
 class NullSessionInterface(SessionInterface):
+    """A :class:`SessionInterface` for :class:`NullSession`"""
     def open_session(self, app, request):
         return NullSession()
 

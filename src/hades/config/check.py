@@ -4,12 +4,14 @@ import os
 import pwd
 import re
 import socket
+import textwrap
+from typing import Sequence, Type, Union
 
 import netaddr
 from pyroute2.iproute import IPRoute
 
 from hades.config.base import (
-    Check, ConfigOptionError, OptionCheckError, coerce,
+    Check, ConfigOptionError, OptionCheckError, coerce, option_reference,
 )
 
 
@@ -24,6 +26,10 @@ class greater_than(Check):
                                    .format(self.threshold),
                                    option=self.option.__name__)
 
+    @property
+    def __doc__(self):
+        return "Must be greater than :python:`{!r}`".format(self.threshold)
+
 
 class between(Check):
     def __init__(self, low, high):
@@ -37,6 +43,11 @@ class between(Check):
                                    .format(self.low, self.high),
                                    option=self.option.__name__)
 
+    @property
+    def __doc__(self):
+        return ("Must be between :python:`{!r}` and :python:`{!r}` inclusively"
+                .format(self.low, self.high))
+
 
 class match(Check):
     def __init__(self, expr, flags=0):
@@ -48,6 +59,11 @@ class match(Check):
             raise OptionCheckError("Does not match regular expression {!r}"
                                    .format(self.expr.pattern),
                                    option=self.option.name)
+
+    @property
+    def __doc__(self):
+        return ("Must match regular expression: :python:`{!r}`"
+                .format(self.expr.pattern))
 
 
 class sequence(Check):
@@ -68,6 +84,11 @@ class sequence(Check):
                 raise OptionCheckError("Error at index {:d}: {}"
                                        .format(i, e.args[0]),
                                        option=self.option.__name__)
+
+    @property
+    def __doc__(self):
+        return ("All elements must satisfy: {}"
+                .format(self.element_check.__doc__))
 
 
 class mapping(Check):
@@ -98,11 +119,28 @@ class mapping(Check):
                                        .format(k, e.args[0]),
                                        option=self.option.__name__)
 
+    @property
+    def __doc__(self):
+        s = []
+        if self.key_check is not None:
+            s.append("All keys must satisfy: {}"
+                     .format(self.key_check.__doc__))
+        if self.value_check is not None:
+            s.append("All values must satisfy: {}"
+                     .format(self.value_check.__doc__))
+        if self.key_check is not None and self.value_check is not None:
+            return textwrap.indent('\n'.join(s), '- ')
+        else:
+            return s[0]
+
 
 class type_is(Check):
     def __init__(self, types):
         super().__init__()
-        self.types = types
+        if isinstance(types, collections.Sequence):
+            self.types = tuple(types)
+        else:
+            self.types = (types,)
 
     def __call__(self, config, value):
         if not isinstance(value, self.types):
@@ -110,10 +148,21 @@ class type_is(Check):
                                    .format(', '.join(self.types)),
                                    option=self.option.__name__)
 
+    @property
+    def __doc__(self):
+        if len(self.types) > 1:
+            return "Type must be one of {}".format(
+                ', '.join(':class:`{}`'.format(type_.__qualname__)
+                          for type_ in self.types)
+            )
+        else:
+            return "Type must be :class:`{}`".format(self.types[0].__qualname__)
+
 
 # noinspection PyUnusedLocal
 @Check.decorate
 def not_empty(option, config, value):
+    """Must not be empty"""
     if len(value) <= 0:
         raise OptionCheckError("Must not be empty", option=option.__name__)
 
@@ -133,10 +182,17 @@ class satisfy_all(Check):
         for check in self.checks:
             check(config, value)
 
+    @property
+    def __doc__(self):
+        return "Must satisfy all of the following:\n\n{}".format(
+            textwrap.indent('\n'.join(c.__doc__ for c in self.checks), '- ')
+        )
+
 
 # noinspection PyDecorator,PyUnusedLocal
 @Check.decorate
 def network_ip(option, config, value):
+    """Must not be network or broadcast address (except if /31)"""
     # Prefix length 31 is special, see RFC 3021
     if value.version == 4 and value.prefixlen == 31:
         return
@@ -155,6 +211,7 @@ def network_ip(option, config, value):
 # noinspection PyUnusedLocal
 @Check.decorate
 def directory_exists(option, config, value):
+    """Must be an existing directory"""
     if not os.path.exists(value):
         raise OptionCheckError("Directory {} does not exists".format(value),
                                option=option.__name__)
@@ -166,6 +223,7 @@ def directory_exists(option, config, value):
 # noinspection PyUnusedLocal
 @Check.decorate
 def file_exists(option, config, value):
+    """Must be an existing file"""
     if not os.path.exists(value):
         raise OptionCheckError("File {} does not exists".format(value),
                                option=option.__name__)
@@ -176,6 +234,7 @@ def file_exists(option, config, value):
 
 @Check.decorate
 def file_creatable(option, config, value):
+    """Must be a creatable file name"""
     parent = os.path.dirname(value)
     directory_exists(option, config, parent)
 
@@ -183,6 +242,7 @@ def file_creatable(option, config, value):
 # noinspection PyUnusedLocal
 @Check.decorate
 def interface_exists(option, config, value):
+    """Network interface must exists"""
     try:
         socket.if_nametoindex(value)
     except OSError:
@@ -193,6 +253,7 @@ def interface_exists(option, config, value):
 # noinspection PyUnusedLocal
 @Check.decorate
 def address_exists(option, config, value):
+    """IP address must be configured"""
     ip = IPRoute()
     if value.version == 4:
         family = socket.AF_INET
@@ -222,10 +283,16 @@ class ip_range_in_networks(Check):
                                    .format(', '.join(networks)),
                                    option=self.option.__name__)
 
+    @property
+    def __doc__(self):
+        return ("Must be contained in the networks configured with {}"
+                .format(option_reference(self.other_option)))
+
 
 # noinspection PyUnusedLocal
 @Check.decorate
 def user_exists(option, config, value):
+    """Must be a valid UNIX user"""
     try:
         return pwd.getpwnam(value)
     except KeyError:
@@ -236,6 +303,7 @@ def user_exists(option, config, value):
 # noinspection PyUnusedLocal
 @Check.decorate
 def group_exists(option, config, value):
+    """Must be a valid UNIX group"""
     try:
         return grp.getgrnam(value)
     except KeyError:
@@ -266,6 +334,12 @@ class has_keys(Check):
                 raise OptionCheckError("Missing key",
                                        option=self.option.name + path) from None
 
+    @property
+    def __doc__(self):
+        return "Must contain ".format(' -> '.join(
+            '{!r}'.format(key) for key in self.keys)
+        )
+
 
 class user_mapping_for_user_exists(Check):
     def __init__(self, user_name):
@@ -277,3 +351,8 @@ class user_mapping_for_user_exists(Check):
             raise OptionCheckError("No mapping for user {}"
                                    .format(self.user_name),
                                    option=self.option.__name__)
+
+    @property
+    def __doc__(self):
+        return ("Must have contain a mapping for {} or PUBLIC"
+                .format(self.user_name))

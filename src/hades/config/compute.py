@@ -2,7 +2,7 @@ import types
 from typing import Union
 
 from hades.config.base import (
-    Compute, ConfigOptionError, MissingOptionError, Option, coerce,
+    Compute, ConfigOptionError, MissingOptionError, Option, coerce, option_reference,
 )
 
 
@@ -22,6 +22,10 @@ class equal_to(Compute):
                 "Can not set equal to option {}, option is not defined"
                 .format(self.other_name), option=self.option.__name__
             ) from e
+
+    @property
+    def __doc__(self):
+        return "Equal to {}".format(option_reference(self.other_name))
 
 
 class deferred_format(Compute):
@@ -51,3 +55,25 @@ class deferred_format(Compute):
         fmt_args = tuple(config[a] for a in self.args)
         fmt_kwargs = {k: config[v] for k, v in self.kwargs}
         return self.fmt_string.format(*fmt_args, **fmt_kwargs)
+
+    @property
+    def __doc__(self):
+        args, kwargs = "", ""
+        if self.args:
+            args = (
+                ", with {} as positional {}".format(
+                    ', '.join(option_reference(opt) for opt in self.args),
+                    "arguments" if len(self.args) > 1 else "argument")
+            )
+
+        if self.kwargs:
+            kwargs = (
+                ", with {} as keyword {}"
+                .format(', '.join("{}={}".format(
+                    key, option_reference(opt))
+                    for key, opt in self.kwargs.items()),
+                 "arguments" if len(self.args) > 1 else "argument")
+            )
+
+        return ("Will be computed from the format string :python:`{!r}`{}{}."
+                .format(self.fmt_string, args, kwargs))

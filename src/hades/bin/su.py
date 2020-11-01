@@ -1,3 +1,14 @@
+#!/usr/bin/env python3
+"""Switch user (``su``) helper.
+
+The ``su`` utility, that comes with *util-linux* does a lot more than
+necessary. In particular, it starts a new PAM session, forks and keeps running
+in the background until the command it invoked exits.
+
+In addition to being a minor nuisance, it breaks some features such as running
+systemd services that follow the ``Type=forking`` model. For these services,
+systemd can't detect the correct main process.
+"""
 import grp
 import logging
 import os
@@ -11,17 +22,22 @@ from hades.common.cli import (
 logger = logging.getLogger(__name__)
 
 
-def drop_privileges(passwd, group):
+def drop_privileges(passwd: pwd.struct_passwd, group: grp.struct_group):
     os.setgid(group.gr_gid)
     os.initgroups(passwd.pw_name, group.gr_gid)
     os.setuid(passwd.pw_uid)
 
 
-def main():
+def create_parser() -> ArgumentParser:
     parser = ArgumentParser(parents=[common_parser])
     parser.add_argument('user')
     parser.add_argument('command')
     parser.add_argument('arguments', nargs='*')
+    return parser
+
+
+def main() -> int:
+    parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
     try:

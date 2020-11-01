@@ -3,7 +3,7 @@ Deputy daemon that provides a service via DBus for performing privileged
 operations.
 
 Some operations, such as generating configuration files, sending signals to
-other processes etc. needs certain privileges. The Deputy service runs as root
+other processes etc. need certain privileges. The Deputy service runs as *root*
 and provides a very simple service over DBus.
 """
 import contextlib
@@ -35,14 +35,11 @@ from hades.common.privileges import dropped_privileges
 from hades.config.loader import Config, get_config
 
 logger = logging.getLogger(__name__)
-auth_dhcp_pwd = pwd.getpwnam(constants.AUTH_DHCP_USER)
-database_pwd = pwd.getpwnam(constants.DATABASE_USER)
-radius_pwd = pwd.getpwnam(constants.RADIUS_USER)
 
 
 def reload_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
-    """
-    Instruct systemd to reload a given unit.
+    """Instruct systemd to reload a given unit.
+
     :param bus: A DBus Bus
     :param unit: The name of the systemd unit
     :param timeout: Timeout in milliseconds
@@ -57,8 +54,8 @@ def reload_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
 
 
 def restart_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
-    """
-    Instruct systemd to restart a given unit.
+    """Instruct systemd to restart a given unit.
+
     :param bus: A DBus Bus
     :param unit: The name of the systemd unit
     :param timeout: Timeout in milliseconds
@@ -75,6 +72,10 @@ def restart_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
 def generate_dhcp_host_reservations(
         hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress]]
 ) -> Iterable[str]:
+    """Generate lines suitable for dnsmasq's ``--dhcp-hostsfile=`` option.
+
+    :param hosts: The MAC address-IP address pairs of the hosts
+    """
     for mac, ip in hosts:
         mac = netaddr.EUI(mac)
         mac.dialect = netaddr.mac_unix_expanded
@@ -84,8 +85,10 @@ def generate_dhcp_host_reservations(
 def generate_dhcp_hosts_file(
         hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress]]
 ) -> None:
+    """Generate the dnsmasq hosts file for authenticated users"""
     file_name = constants.AUTH_DHCP_HOSTS_FILE
     logger.info("Generating DHCP hosts file %s", file_name)
+    auth_dhcp_pwd = pwd.getpwnam(constants.AUTH_DHCP_USER)
     try:
         with open(file_name, mode='w', encoding='ascii') as f:
             fd = f.fileno()
@@ -98,6 +101,13 @@ def generate_dhcp_hosts_file(
 
 def generate_ipset_swap(ipset_name: str, tmp_ipset_name: str,
                         ips: Iterable[netaddr.IPAddress]) -> Iterable[str]:
+    """Generate an ``ipset`` script, that replaces an existing ``hash:ip`` ipset
+    with new contents.
+
+    :param ipset_name: The ipset to replace
+    :param tmp_ipset_name: Name of the temporary ipset
+    :param ips: The new contents of the ipset
+    """
     yield 'create {} hash:ip -exist\n'.format(tmp_ipset_name)
     yield 'flush {}\n'.format(tmp_ipset_name)
     yield from map(partial('add {} {}\n'.format, tmp_ipset_name), ips)
@@ -106,6 +116,10 @@ def generate_ipset_swap(ipset_name: str, tmp_ipset_name: str,
 
 
 def update_alternative_dns_ipset(ips: Iterable[netaddr.IPAddress]) -> None:
+    """Update the *alternative DNS ipset* with the new IP addresses
+
+    :param ips: The new IP addresses
+    """
     conf = get_config()
     ipset_name = conf['HADES_AUTH_DNS_ALTERNATIVE_IPSET']
     tmp_ipset_name = 'tmp_' + ipset_name
@@ -121,6 +135,14 @@ def update_alternative_dns_ipset(ips: Iterable[netaddr.IPAddress]) -> None:
 def generate_radius_clients(
         clients: Iterable[Tuple[str, str, str, int, str, str, str, str]]
 ) -> Iterable[str]:
+    """Generate the FreeRADIUS configuration for a given list of NAS clients in
+    the ``clients.conf`` format.
+
+    :param clients: An iterable of (Shortname, NAS-Name, NAS-Type, Port, Secret,
+     Server, Community, Description)-tuples. Currently only shortname NAS-Name,
+     NAS-Type and the Secret elements are used.
+    :return: configuration snippets for the given NAS clients
+    """
     escape_pattern = re.compile(r'(["\\])')
     replacement = r'\\\1'
 
@@ -156,8 +178,13 @@ def generate_radius_clients(
 def generate_radius_clients_file(
         clients: Iterable[Tuple[str, str, str, int, str, str, str, str]]
 ) -> None:
+    """Generate a FreeRADIUS ``clients.conf`` file.
+
+    :param clients: See :func:`generate_radius_clients` for a description
+    """
     logger.info("Generating freeRADIUS clients configuration")
     file_name = constants.RADIUS_CLIENTS_FILE
+    radius_pwd = pwd.getpwnam(constants.RADIUS_USER)
     try:
         with open(file_name, mode='w', encoding='ascii') as f:
             fd = f.fileno()
@@ -169,13 +196,29 @@ def generate_radius_clients_file(
 
 
 class HadesDeputyService(object):
+    """Deputy DBus service
+
+    This class implements a DBus service that exposes some privileged operations
+    for use by the :mod:`hades.agent` or the periodic systemd timer services.
+
+    For security reasons, the service doesn't accept data from the DBus clients
+    and always queries the database itself, so that this service can't be
+    misused.
+    """
     dbus = pkg_resources.resource_string(
         __package__, 'interface.xml').decode('utf-8')
+    """DBus object introspection specification"""
 
     def __init__(self, bus: Bus, config: Config):
+        """
+
+        :param bus: The bus (typically the system bus)
+        :param config: The configuration object
+        """
         self.bus = bus
         self.config = config
         self.engine = db.create_engine(config, poolclass=StaticPool)
+        database_pwd = pwd.getpwnam(constants.DATABASE_USER)
         original_creator = self.engine.pool._creator
 
         def creator(connection_record=None):
@@ -187,8 +230,8 @@ class HadesDeputyService(object):
         self.engine.pool._creator = creator
 
     def Refresh(self, force: bool) -> str:
-        """
-        Refresh the materialized views.
+        """Refresh the materialized views.
+
         If necessary depended config files are regenerate and the corresponding
         services are reloaded.
         """
@@ -261,9 +304,7 @@ class HadesDeputyService(object):
         return "OK"
 
     def Cleanup(self) -> str:
-        """
-        Clean up old records in the radacct and radpostauth tables.
-        :return: 
+        """Clean up old records in the ``radacct`` and ``radpostauth`` tables.
         """
         logger.info("Cleaning up old records")
         interval = self.config.HADES_RETENTION_INTERVAL
@@ -274,6 +315,7 @@ class HadesDeputyService(object):
 
 
 def run_event_loop():
+    """Run the DBus :class:`HadesDeputyService` on the GLib event loop."""
     bus = SystemBus()
     logger.debug('Publishing interface %s on DBus', constants.DEPUTY_DBUS_NAME)
     config = get_config()
