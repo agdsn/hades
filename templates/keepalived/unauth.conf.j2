@@ -1,0 +1,15 @@
+{% extends 'keepalived/common.conf.j2' %}
+{% set dbus_name = constants.UNAUTH_VRRP_DBUS_NAME %}
+{% set instance = 'unauth' %}
+{% set interface = 'eth1' %}
+{% set ip_address = HADES_VRRP_LISTEN_UNAUTH %}
+{% set virtual_router_id = HADES_VRRP_VIRTUAL_ROUTER_ID_UNAUTH %}
+
+{% block virtual_ipaddress %}
+        {% for network in HADES_UNAUTH_LISTEN %}
+        {{ network }} dev eth2
+        {% endfor %}
+        {% for network in HADES_USER_NETWORKS.values() %}
+        {{ network }} dev eth2
+        {% endfor %}
+{% endblock %}

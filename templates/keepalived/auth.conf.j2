@@ -1,0 +1,20 @@
+{% extends 'keepalived/common.conf.j2' %}
+{% set dbus_name = constants.AUTH_VRRP_DBUS_NAME %}
+{% set instance = 'auth' %}
+{% set interface = 'eth1' %}
+{% set ip_address = HADES_VRRP_LISTEN_AUTH %}
+{% set virtual_router_id = HADES_VRRP_VIRTUAL_ROUTER_ID_AUTH %}
+
+{% block virtual_ipaddress %}
+{{ super() }}
+        {% for network in HADES_AUTH_LISTEN %}
+        {{ network }} dev eth2
+        {% endfor %}
+{% endblock %}
+
+{% block virtual_routes %}
+{{ super() }}
+        {% for network in HADES_USER_NETWORKS.values() %}
+        {{ network.cidr }} via {{ HADES_AUTH_NEXT_HOP.ip }} dev eth2
+        {% endfor %}
+{% endblock %}

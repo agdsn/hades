@@ -1,0 +1,37 @@
+{% extends 'keepalived/common.conf.j2' %}
+{% set dbus_name = constants.RADIUS_VRRP_DBUS_NAME %}
+{% set instance = 'radius' %}
+{% set interface = HADES_VRRP_BRIDGE %}
+{% set ip_address = HADES_VRRP_LISTEN_RADIUS %}
+{% set virtual_router_id = HADES_VRRP_VIRTUAL_ROUTER_ID_RADIUS %}
+
+{% block vrrp_scripts %}
+{{ super() }}
+
+vrrp_script check_database {
+    script "{{ constants.bindir }}/hades-check-database"
+    interval 5
+    fall 1
+    rise 3
+    timeout 10
+}
+{% endblock %}
+
+{% block vrrp_instance %}
+{{ super() }}
+    track_interface {
+        {{ HADES_RADIUS_INTERFACE }}
+    }
+{% endblock %}
+
+{% block track_script %}
+{{ super() }}
+        check_database
+{% endblock %}
+
+{% block virtual_ipaddress %}
+{{ super() }}
+        {% for network in HADES_RADIUS_LISTEN %}
+        {{ network }} dev {{ HADES_RADIUS_INTERFACE }}
+        {% endfor %}
+{% endblock %}
