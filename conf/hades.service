@@ -4,6 +4,20 @@
 [Unit]
 Description=Hades
 Documentation=https://agdsn.github.io/hades/
+Wants=hades-agent.service
+Wants=hades-auth-alternative-dns.service
+Wants=hades-auth-dhcp.service
+Wants=hades-auth-pristine-dns.service
+Wants=hades-auth-vrrp.service
+Wants=hades-cleanup.timer
+Wants=hades-deputy.service
+Wants=hades-forced-refresh.timer
+Wants=hades-radius.service
+Wants=hades-refresh.timer
+Wants=hades-root-vrrp.service
+Wants=hades-unauth-dns.service
+Wants=hades-unauth-http.service
+Wants=hades-unauth-vrrp.service
 
 [Service]
 Type=oneshot
@@ -13,17 +27,3 @@ RemainAfterExit=on
 
 [Install]
 WantedBy=multi-user.target
-Also=hades-agent.service
-Also=hades-auth-alternative-dns.service
-Also=hades-auth-dhcp.service
-Also=hades-auth-pristine-dns.service
-Also=hades-auth-vrrp.service
-Also=hades-cleanup.timer
-Also=hades-deputy.service
-Also=hades-forced-refresh.timer
-Also=hades-radius.service
-Also=hades-refresh.timer
-Also=hades-root-vrrp.service
-Also=hades-unauth-dns.service
-Also=hades-unauth-http.service
-Also=hades-unauth-vrrp.service

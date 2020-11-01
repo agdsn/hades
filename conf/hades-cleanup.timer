@@ -7,6 +7,3 @@ Before=hades.service
 [Timer]
 OnActiveSec=10
 OnUnitActiveSec=3600
-
-[Install]
-WantedBy=hades.service

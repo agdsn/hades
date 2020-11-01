@@ -29,6 +29,3 @@ PrivateNetwork=yes
 ;RuntimeDirectory=hades/auth-dns
 ;RuntimeDirectoryMode=2750
 ;RuntimeDirectoryPreserve=yes
-
-[Install]
-WantedBy=hades.service

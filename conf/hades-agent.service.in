@@ -25,6 +25,3 @@ RestartSec=5
 ;RuntimeDirectory=hades/agent
 ;RuntimeDirectoryMode=2750
 ;RuntimeDirectoryPreserve=yes
-
-[Install]
-WantedBy=hades.service

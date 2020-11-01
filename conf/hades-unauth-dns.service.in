@@ -30,4 +30,3 @@ PrivateNetwork=yes
 
 [Install]
 Alias=hades-unauth-dhcp.service
-WantedBy=hades.service

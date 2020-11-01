@@ -31,6 +31,3 @@ RestartSec=5
 ;RuntimeDirectory=hades/radius
 ;RuntimeDirectoryMode=2750
 ;RuntimeDirectoryPreserve=yes
-
-[Install]
-WantedBy=hades.service
