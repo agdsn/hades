@@ -25,6 +25,11 @@ def qualified_name(type_):
         return type_.__module__ + '.' + type_.__qualname__
 
 
+def option_reference(option):
+    option = coerce(option)
+    return ":hades:option:`{}`".format(option)
+
+
 # noinspection PyUnresolvedReferences
 class OptionMeta(type):
     """
@@ -84,6 +89,41 @@ class OptionMeta(type):
             self.runtime_check(config, value)
 
 
+class Option(object, metaclass=OptionMeta, abstract=True):
+    has_default = False
+    required = False
+    default = None
+    type = None
+    runtime_check = None
+    static_check = None
+
+
+class ConfigError(Exception):
+    """Base class for all config related errors."""
+
+
+class ConfigOptionError(ConfigError):
+    """Base class for errors related to processing a specific option"""
+    def __init__(self, *args, option: str):
+        super(ConfigOptionError, self).__init__(*args)
+        self.option = option
+
+
+class MissingOptionError(ConfigOptionError):
+    """Indicates that a required option is missing"""
+
+
+class OptionCheckError(ConfigOptionError):
+    """Indicates that an option check failed"""
+
+
+def coerce(value):
+    if isinstance(value, type) and issubclass(value, Option):
+        return value.__name__
+    else:
+        return value
+
+
 class OptionDescriptor:
     @classmethod
     def decorate(cls, f):
@@ -134,7 +174,8 @@ class Check(OptionDescriptor):
     """Base class for descriptors, that check the value of options"""
 
     def __call__(self, config, value):
-        """
+        """Check the ``value`` of an option given ``config``.
+
         :param config: The fully expanded config
         :param value: The value of the Option
         :raises OptionCheckError: if the value of the option is illegal
@@ -146,43 +187,9 @@ class Compute(OptionDescriptor):
     """Base class for descriptors, that compute the value of options."""
 
     def __call__(self, config):
-        """
+        """Compute the value of the option using ``config``.
+
         :param config: An potentially not fully expanded config object
         :raises OptionCheckError: if the value can't be computed
         """
         raise NotImplemented()
-
-
-class Option(object, metaclass=OptionMeta, abstract=True):
-    has_default = False
-    required = False
-    default = None
-    type = None
-    runtime_check = None
-    static_check = None
-
-
-class ConfigError(Exception):
-    """Base class for all config related errors."""
-
-
-class ConfigOptionError(ConfigError):
-    """Base class for errors related to processing a specific option"""
-    def __init__(self, *args, option: str):
-        super(ConfigOptionError, self).__init__(*args)
-        self.option = option
-
-
-class MissingOptionError(ConfigOptionError):
-    """Indicates that a required option is missing"""
-
-
-class OptionCheckError(ConfigOptionError):
-    """Indicates that an option check failed"""
-
-
-def coerce(value):
-    if isinstance(value, type) and issubclass(value, Option):
-        return value.__name__
-    else:
-        return value

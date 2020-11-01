@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+"""Hades frontend for the ``celery`` command.
+
+Loads the Hades configuration and transfers control to Celery.
+"""
 import argparse
 import inspect
 import os
@@ -21,7 +26,7 @@ class Formatter(argparse.HelpFormatter):
         super().add_usage(usage, actions, groups, prefix)
 
 
-def main():
+def create_parser() -> ArgumentParser:
     description = inspect.cleandoc(
         """
         Run the celery command configured for Hades.
@@ -35,6 +40,11 @@ def main():
                             parents=[common_parser])
     parser.add_argument('-A', '--app', dest='app', help=argparse.SUPPRESS)
     parser.add_argument('command')
+    return parser
+
+
+def main() -> int:
+    parser = create_parser()
     args, argv = parser.parse_known_args()
     setup_cli_logging(parser.prog, args)
     try:

@@ -1,3 +1,6 @@
+"""
+Provides the client-side API for the deputy daemon.
+"""
 import logging
 
 # noinspection PyPackageRequirements
@@ -11,9 +14,7 @@ logger = logging.Logger(__name__)
 
 
 def signal_refresh(timeout: int = 1) -> None:
-    """
-    Signal the deputy to perform a refresh.
-    """
+    """Signal the deputy to perform a refresh."""
     logger.debug("Signaling refresh on DBus: %s.%s",
                  constants.DEPUTY_DBUS_NAME, 'Refresh')
     try:
@@ -26,6 +27,7 @@ def signal_refresh(timeout: int = 1) -> None:
 
 
 def signal_cleanup(timeout: int = 1) -> None:
+    """Signal the deputy to perform a cleanup."""
     logger.debug("Signaling cleanup on DBus: %s.%s",
                  constants.DEPUTY_DBUS_NAME, 'Cleanup')
     try:

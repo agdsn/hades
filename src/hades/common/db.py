@@ -1,7 +1,8 @@
+"""Database utilities"""
 import logging
 import operator
 from datetime import datetime, timedelta, timezone, tzinfo
-from typing import Iterable, List, Optional, Tuple
+from typing import Iterable, Iterator, List, Optional, Tuple
 
 import netaddr
 import psycopg2.extensions
@@ -12,11 +13,11 @@ from sqlalchemy import (
     table,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, INET, MACADDR
-from sqlalchemy.engine import Connection
+from sqlalchemy.engine.base import Connection
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
 
-from hades.config.loader import get_config
+from hades.config.loader import Config, get_config
 
 logger = logging.getLogger(__name__)
 metadata = MetaData()
@@ -26,7 +27,9 @@ Attributes = Tuple[Tuple[str, str], ...]
 DatetimeRange = Tuple[Optional[datetime], Optional[datetime]]
 
 
-def as_copy(original_table, new_name):
+def as_copy(original_table: Table, new_name: str):
+    """Create a copy of a table with a different name and the ``temporary``
+    info set."""
     return Table(new_name, original_table.metadata,
                  *(Column(col.name, col.type)
                    for col in original_table.columns),
@@ -34,6 +37,11 @@ def as_copy(original_table, new_name):
 
 
 class MACAddress(TypeDecorator):
+    """Custom SQLAlchemy type for MAC addresses.
+
+    Use the PostgreSQL ``macaddr`` type on the database side and
+    :class:`netaddr.EUI` on the Python side.
+    """
     impl = MACADDR
     python_type = netaddr.EUI
 
@@ -51,6 +59,11 @@ class MACAddress(TypeDecorator):
 
 
 class IPAddress(TypeDecorator):
+    """Custom SQLAlchemy type for IP addresses.
+
+    Use the PostgreSQL ``inet`` type on the database side and
+    :class:`netaddr.IPAddress` on the Python side.
+    """
     impl = INET
     python_type = netaddr.IPAddress
 
@@ -68,6 +81,7 @@ class IPAddress(TypeDecorator):
 
 
 class TupleArray(ARRAY):
+    """Convenience subclass for :class:`ARRAY` for zero-indexed tuples."""
     def __init__(self, item_type, dimensions=None):
         super().__init__(item_type, as_tuple=True, dimensions=dimensions,
                          zero_indexes=True)
@@ -230,9 +244,9 @@ class UTCTZInfoFactory(tzinfo):
     This class is implemented as a singleton that always returns the same
     instance.
     """
-    def __new__(cls, offset):
+    def __new__(cls, offset: int):
         if offset != 0:
-            raise psycopg2.DataError("UTC Offset is not zero: " + offset)
+            raise psycopg2.DataError("UTC Offset is not zero: ".format(offset))
         return timezone.utc
 
 
@@ -251,7 +265,7 @@ class UTCTZInfoCursorFactory(psycopg2.extensions.cursor):
         self.tzinfo_factory = UTCTZInfoFactory
 
 
-def create_engine(config, **kwargs):
+def create_engine(config: Config, **kwargs):
     kwargs.setdefault('connect_args', {}).update(
         options="-c TimeZone=UTC", cursor_factory=UTCTZInfoCursorFactory
     )
@@ -263,6 +277,7 @@ def lock_table(connection: Connection, target_table: Table):
     Lock a table using a PostgreSQL advisory lock
 
     The OID of the table in the pg_class relation is used as lock id.
+
     :param connection: DB connection
     :param target_table: Table object
     """
@@ -278,6 +293,7 @@ def create_temp_copy(connection: Connection, source: Table, destination: Table):
     """
     Create a temporary table as a copy of a source table that will be dropped
     at the end of the running transaction.
+
     :param connection: DB connection
     :param source: Source table
     :param destination: Destination table
@@ -304,11 +320,12 @@ def diff_tables(connection: Connection, master: Table, copy: Table,
     Compute the differences in the contents of two tables with identical
     columns.
 
-    The master table must have at least one PrimaryKeyConstraint or
-    UniqueConstraint with only non-null columns defined.
+    The master table must have at least one :class:`PrimaryKeyConstraint` or
+    :class:`UniqueConstraint` with only non-null columns defined.
 
     If there are multiple constraints defined the constraints that contains the
     least number of columns are used.
+
     :param connection: DB connection
     :param master: Master table
     :param copy: Copy of master table
@@ -361,6 +378,12 @@ def diff_tables(connection: Connection, master: Table, copy: Table,
 
 
 def refresh_materialized_view(connection: Connection, view: Table):
+    """Execute :sql:`REFRESH MATERIALIZED VIEW CONCURRENTLY` for the given
+    `view`.
+
+    :param connection: A valid SQLAlchemy connection
+    :param view: The view to refresh
+    """
     logger.debug('Refreshing materialized view "%s"', view.name)
     preparer = connection.dialect.identifier_preparer
     connection.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY {view}'
@@ -371,6 +394,17 @@ def refresh_and_diff_materialized_view(
         connection: Connection, view: Table, copy: Table,
         result_columns: Iterable[Column]) -> Tuple[
         List[Tuple], List[Tuple], List[Tuple]]:
+    """Lock the given `view` with an advisory lock, create a temporary table
+    of the view, refresh the view and compute the difference.
+
+    :param connection: A valid SQLAlchemy connection
+    :param view: The view to refresh and diff
+    :param copy: A temporary table to create and diff
+    :param result_columns: The columns to return
+    :return: A 3-tuple containing three lists of tuples of the `result_columns`
+     of added, deleted and modified records due to the refresh.
+
+    """
     with connection.begin():
         lock_table(connection, view)
         create_temp_copy(connection, view, copy)
@@ -379,6 +413,7 @@ def refresh_and_diff_materialized_view(
 
 
 def delete_old_sessions(connection: Connection, interval: timedelta):
+    """Delete old session from the ``radacct`` table."""
     logger.debug('Deleting sessions in table "%s" older than "%s"',
                  radacct.name, interval)
     connection.execute(radacct.delete().where(and_(
@@ -387,6 +422,7 @@ def delete_old_sessions(connection: Connection, interval: timedelta):
 
 
 def delete_old_auth_attempts(connection: Connection, interval: timedelta):
+    """Delete old authentication results from the ``radpostauth`` table."""
     logger.debug('Deleting auth attempts in table "%s" older than "%s"',
                  radpostauth.name, interval)
     connection.execute(radpostauth.delete().where(and_(
@@ -394,15 +430,15 @@ def delete_old_auth_attempts(connection: Connection, interval: timedelta):
     )))
 
 
-def get_groups(connection: Connection, mac: netaddr.EUI) -> Iterable[
+def get_groups(connection: Connection, mac: netaddr.EUI) -> Iterator[
         Tuple[netaddr.IPAddress, str, str]]:
     """
     Get the groups of a user.
 
     :param connection: A SQLAlchemy connection
     :param mac: MAC address
-    :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id, Group-Name)-
-    tuples
+    :return: An iterator that yields (NAS-IP-Address, NAS-Port-Id, Group-Name)-
+     tuples
     """
     logger.debug('Getting groups of MAC "%s"', mac)
     results = connection.execute(select([radusergroup.c.NASIPAddress,
@@ -422,9 +458,9 @@ def get_latest_auth_attempt(connection: Connection,
     :param connection: A SQLAlchemy connection
     :param str mac: MAC address
     :return: A (NAS-IP-Address, NAS-Port-Id, Packet-Type, Groups, Reply,
-    Auth-Date) tuple or None if no attempt was found. Groups is an tuple of
-    group names and Reply is a tuple of (Attribute, Value)-pairs that were sent
-    in Access-Accept responses.
+     Auth-Date) tuple or None if no attempt was found. Groups is an tuple of
+     group names and Reply is a tuple of (Attribute, Value)-pairs that were sent
+     in Access-Accept responses.
     """
     logger.debug('Getting latest auth attempt for MAC "%s"', mac)
     config = get_config(runtime_checks=True)
@@ -436,27 +472,27 @@ def get_latest_auth_attempt(connection: Connection,
         return None
 
 
-def get_all_dhcp_hosts(connection: Connection) -> Iterable[
+def get_all_dhcp_hosts(connection: Connection) -> Iterator[
         Tuple[netaddr.EUI, netaddr.IPAddress]]:
     """
     Return all DHCP host configurations.
 
     :param connection: A SQLAlchemy connection
-    :return: An iterable that yields (mac, ip)-tuples
+    :return: An iterator that yields (mac, ip)-tuples
     """
     logger.debug("Getting all DHCP hosts")
     result = connection.execute(select([dhcphost.c.MAC, dhcphost.c.IPAddress]))
     return iter(result)
 
 
-def get_all_nas_clients(connection: Connection) -> Iterable[
+def get_all_nas_clients(connection: Connection) -> Iterator[
         Tuple[str, str, str, int, str, str, str, str]]:
     """
     Return all NAS clients.
 
     :param connection: A SQLAlchemy connection
-    :return: An iterable that yields (shortname, nasname, type, ports, secret,
-    server, community, description)-tuples
+    :return: An iterator that yields (shortname, nasname, type, ports, secret,
+     server, community, description)-tuples
     """
     result = connection.execute(
         select([nas.c.ShortName, nas.c.NASName, nas.c.Type, nas.c.Ports,
@@ -466,8 +502,8 @@ def get_all_nas_clients(connection: Connection) -> Iterable[
 
 
 def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
-                        when: Optional[DatetimeRange]=None,
-                        limit: Optional[int]=None) -> Iterable[
+                        when: Optional[DatetimeRange] = None,
+                        limit: Optional[int] = None) -> Iterator[
         Tuple[netaddr.IPAddress, str, datetime, datetime]]:
     """
     Return accounting sessions of a particular MAC address ordered by
@@ -477,9 +513,9 @@ def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
     :param str mac: MAC address
     :param when: Range in which Session-Start-Time must be within
     :param limit: Maximum number of records
-    :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id,
-    Session-Start-Time, Session-Stop-Time)-tuples ordered by Session-Start-Time
-    descending
+    :return: An iterator that yields (NAS-IP-Address, NAS-Port-Id,
+     Session-Start-Time, Session-Stop-Time)-tuples ordered by Session-Start-Time
+     descending
     """
     logger.debug('Getting all sessions for MAC "%s"', mac)
     query = (
@@ -497,8 +533,8 @@ def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
 
 
 def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
-                             when: Optional[DatetimeRange]=None,
-                             limit: Optional[int]=None) -> Iterable[
+                             when: Optional[DatetimeRange] = None,
+                             limit: Optional[int] = None) -> Iterator[
         Tuple[netaddr.IPAddress, str, str, Groups, Attributes, datetime]]:
     """
     Return auth attempts of a particular MAC address order by Auth-Date
@@ -508,8 +544,8 @@ def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
     :param mac: MAC address
     :param when: Range in which Auth-Date must be within
     :param limit: Maximum number of records
-    :return: An iterable that yields (NAS-IP-Address, NAS-Port-Id, Packet-Type,
-    Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
+    :return: An iterator that yields (NAS-IP-Address, NAS-Port-Id, Packet-Type,
+     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts of MAC %s', mac)
     query = (
@@ -529,8 +565,8 @@ def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
 def get_auth_attempts_at_port(connection: Connection,
                               nas_ip_address: netaddr.IPAddress,
                               nas_port_id: str,
-                              when: Optional[DatetimeRange]=None,
-                              limit: Optional[int]=None)-> Iterable[
+                              when: Optional[DatetimeRange] = None,
+                              limit: Optional[int] = None) -> Iterator[
         Tuple[str, str, Groups, Attributes, datetime]]:
     """
     Return auth attempts at a particular port of an NAS ordered by Auth-Date
@@ -541,7 +577,7 @@ def get_auth_attempts_at_port(connection: Connection,
     :param nas_port_id: NAS Port ID
     :param when: Range in which Auth-Date must be within
     :param limit: Maximum number of records
-    :return: An iterable that yields (User-Name, Packet-Type, Groups, Reply,
+    :return: An iterator that yields (User-Name, Packet-Type, Groups, Reply,
              Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts at port %2$s of %1$s',
@@ -561,13 +597,13 @@ def get_auth_attempts_at_port(connection: Connection,
     return iter(connection.execute(query))
 
 
-def get_all_alternative_dns_ips(connection: Connection) -> Iterable[
+def get_all_alternative_dns_ips(connection: Connection) -> Iterator[
         netaddr.IPAddress]:
     """
     Return all IPs for alternative DNS configuration.
 
     :param connection: A SQLAlchemy connection
-    :return: An iterable that yields ip addresses
+    :return: An iterator that yields ip addresses
     """
     logger.debug("Getting all alternative DNS clients")
     result = connection.execute(select([alternative_dns.c.IPAddress]))

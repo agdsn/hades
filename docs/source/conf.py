@@ -36,7 +36,11 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
+    'guzzle_sphinx_theme',
+    'sphinxarg.ext',
+    'hades.config.sphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -83,19 +87,38 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
+intersphinx_mapping = {
+    'python':     ('https://docs.python.org/3/', None),
+    'netaddr':    ('https://netaddr.readthedocs.io/en/latest/', None),
+    'flask':      ('http://flask.pocoo.org/docs/0.12/', None),
+    'jinja2':     ('http://jinja.pocoo.org/docs/2.10/', None),
+    'celery':     ('http://docs.celeryproject.org/en/latest/', None),
+    'psycopg2':   ('http://initd.org/psycopg/docs/', None),
+    'sqlalchemy': ('http://docs.sqlalchemy.org/en/latest/', None),
+}
+
 
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'guzzle_sphinx_theme'
+
+html_logo = '_static/logo.png'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+import guzzle_sphinx_theme
+
+html_theme_path = guzzle_sphinx_theme.html_theme_path()
+html_theme_options = {
+    #'show_related': True,
+    #'github_user': 'agdsn',
+    #'github_repo': 'hades',
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -107,7 +130,14 @@ html_static_path = ['_static']
 #
 # This is required for the alabaster theme
 # refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
-# html_sidebars = {}
+html_sidebars = {
+    '**': [
+        #'about.html',
+        #'navigation.html',
+        'globaltoc.html',
+        'searchbox.html',
+    ]
+}
 
 
 # -- Options for HTMLHelp output ------------------------------------------
@@ -167,4 +197,5 @@ texinfo_documents = [
 ]
 
 
-
+def setup(app):
+    app.add_stylesheet('custom.css')

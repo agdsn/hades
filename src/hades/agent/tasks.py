@@ -41,6 +41,7 @@ def setup_engine(sender, *args, **kwargs):
 
 
 class ArgumentError(Exception):
+    """Exception for illegal task arguments"""
     def __init__(self, argument: str, message: str):
         super().__init__(argument, message)
         self.argument = argument
@@ -48,6 +49,18 @@ class ArgumentError(Exception):
 
 
 def rpc_task(*args, **kwargs):
+    """
+    A convenience decorator that invokes :func:`celery.Celery.task`, but sets
+    the following options, if not explicitly overridden:
+
+    ============= =========================================
+    Option        Value
+    ============= =========================================
+    ``acks_late`` :python:`True`
+    ``throws``    :python:`(ArgumentError,)`
+    ``name``      :python:`'hades.agent.rpc.' + f.__name__`
+    ============= =========================================
+    """
     kwargs.setdefault('acks_late', True)
     kwargs.setdefault('throws', (ArgumentError,))
 
@@ -59,6 +72,12 @@ def rpc_task(*args, **kwargs):
 
 
 def check_str(argument: str, string: Any) -> str:
+    """Try to convert the argument to a string.
+
+    :param argument: Name of the argument
+    :param string: The value to convert
+    :raises ArgumentError: if the argument is invalid
+    """
     try:
         return str(string)
     except ValueError as e:
@@ -67,6 +86,12 @@ def check_str(argument: str, string: Any) -> str:
 
 
 def check_mac(argument: str, mac: Any) -> netaddr.EUI:
+    """Try to convert the argument to a MAC.
+
+    :param argument: Name of the argument
+    :param mac: The value to convert
+    :raises ArgumentError: if the argument is invalid
+    """
     try:
         return netaddr.EUI(mac)
     except (netaddr.AddrFormatError, TypeError) as e:
@@ -75,6 +100,12 @@ def check_mac(argument: str, mac: Any) -> netaddr.EUI:
 
 
 def check_ip_address(argument: str, ip_address: Any) -> netaddr.IPAddress:
+    """Try to convert the argument to an IP address.
+
+    :param argument: Name of the argument
+    :param ip_address: The value to convert
+    :raises ArgumentError: if the argument is invalid
+    """
     try:
         return netaddr.IPAddress(ip_address)
     except netaddr.AddrFormatError as e:
@@ -83,6 +114,13 @@ def check_ip_address(argument: str, ip_address: Any) -> netaddr.IPAddress:
 
 
 def check_timestamp_range(argument: str, timestamp_range: Any) -> DatetimeRange:
+    """Try to convert the argument to a datetime range (tuple of
+    :class:`datetime.datetime` objects or ``None``.
+
+    :param argument: Name of the argument
+    :param timestamp_range: The value to convert
+    :raises ArgumentError: if the argument is invalid
+    """
     try:
         low, high = timestamp_range[0:2]
         if low is not None:
@@ -96,6 +134,12 @@ def check_timestamp_range(argument: str, timestamp_range: Any) -> DatetimeRange:
 
 
 def check_int(argument: str, number: Any) -> int:
+    """Try to convert the argument to an integer.
+
+    :param argument: Name of the argument
+    :param number: The value to convert
+    :raises ArgumentError: if the argument is invalid
+    """
     try:
         return int(number)
     except (ValueError, TypeError) as e:
@@ -104,6 +148,12 @@ def check_int(argument: str, number: Any) -> int:
 
 
 def check_positive_int(argument: str, number: Any) -> int:
+    """Try to convert the argument to a positive integer.
+
+    :param argument: Name of the argument
+    :param number: The value to convert
+    :raises ArgumentError: if the argument is invalid
+    """
     number = check_int(argument, number)
     if number < 0:
         raise ArgumentError(argument, "Not a positive integer: "
@@ -113,11 +163,13 @@ def check_positive_int(argument: str, number: Any) -> int:
 
 @rpc_task()
 def refresh():
+    """Perform a refresh of all materialized views"""
     signal_refresh()
 
 
 @rpc_task()
 def cleanup():
+    """Perform a database cleanup"""
     signal_cleanup()
 
 
@@ -125,6 +177,15 @@ def cleanup():
 def get_sessions_of_mac(mac: str, when: Optional[TimestampRange] = None,
                         limit: Optional[int] = 100) -> Optional[
         List[Tuple[str, str, float, float]]]:
+    """Get the session of a given MAC address ordered by ``Session-Start-Time``
+
+    :param mac: The MAC address
+    :param when: Interval where the ``Session-Start-Time`` must be within
+    :param limit: The maximum number of sessions to return
+    :return: A list of (NAS-IP-Address, NAS-Port, Session-Start-Time,
+     Session-Stop-Time)-tuples
+    :raises ArgumentError: if illegal arguments are provided
+    """
     mac = check_mac("mac", mac)
     if when is not None:
         when = check_timestamp_range("when", when)
@@ -141,6 +202,17 @@ def get_sessions_of_mac(mac: str, when: Optional[TimestampRange] = None,
 def get_auth_attempts_of_mac(mac: str, when: Optional[TimestampRange] = None,
                              limit: Optional[int] = 100) -> Optional[
         List[Tuple[str, str, str, Groups, Attributes, float]]]:
+    """Get the authentication attempts of a given MAC address ordered by
+    ``Auth-Date``
+
+    :param mac: The MAC address
+    :param when: Interval where the ``Auth-Date`` must be within
+    :param limit: The maximum number of attempts to return
+    :return: A list of (NAS-IP-Address, NAS-Port, Packet-Type, Groups, Reply,
+     Auth-Date)-tuples. Groups is a tuple of the RADIUS groups at the time of
+     the authentication attempt. Reply is a tuple of attribute value pairs.
+    :raises ArgumentError: if illegal arguments are provided
+    """
     mac = check_mac("mac", mac)
     if when is not None:
         when = check_timestamp_range("when", when)
@@ -159,6 +231,18 @@ def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
                               when: Optional[TimestampRange] = None,
                               limit: Optional[int] = 100) -> Optional[
         List[Tuple[str, str, Groups, Attributes, float]]]:
+    """Get the authentication attempts at a given port ordered by
+    ``Auth-Date``
+
+    :param nas_ip_address: The NAS-IP-Address of the NAS
+    :param nas_port_id: The port id of the NAS
+    :param when: Interval where the ``Auth-Date`` must be within
+    :param limit: The maximum number of attempts to return
+    :return: A list of (User-Name, Packet-Type, Groups, Reply,
+     Auth-Date)-tuples. Groups is a tuple of the RADIUS groups at the time of
+     the authentication attempt. Reply is a tuple of attribute value pairs.
+    :raises ArgumentError: if illegal arguments are provided
+    """
     nas_ip_address = check_ip_address("nas_ip_address", nas_ip_address)
     nas_port_id = check_str("nas_port_id", nas_port_id)
     if when is not None:
@@ -204,6 +288,11 @@ timer_properties = (
 
 
 def get_unit_status(unit_name: str) -> Dict[str, Any]:
+    """Get the status of a given systemd unit.
+
+    :param unit_name: The name of the unit.
+    :returns: A dictionary of the unit properties
+    """
     bus = SystemBus()
     systemd = bus.get('org.freedesktop.systemd1')
     path = systemd.GetUnit(unit_name)
@@ -241,10 +330,13 @@ units = (
     'hades-unauth-vrrp.service',
     'hades.target',
 )
+"""The Hades systemd units that should be reported by the
+:func:`get_get_systemd_status` task."""
 
 
 @rpc_task()
 def get_systemd_status() -> Dict[str, Any]:
+    """Return information about the status of the Hades systemd units."""
     return {
         'units': {
             unit_name: get_unit_status(unit_name) for unit_name in units
@@ -257,6 +349,7 @@ def get_distribution_metadata(
 ) -> Dict[str, Any]:
     """
     Get metadata of a given distribution and all its dependencies.
+
     :param distribution: A distribution object
     :return: A metadata dictionary
     """
@@ -278,16 +371,22 @@ platform_attributes = (
     'python_revision', 'python_version', 'python_version_tuple',
     'release', 'system', 'version', 'uname',
 )
+"""The attributes of the Python platform, that should be return by the
+:func:`get_get_system_information` task."""
+
 task_attributes = (
     'name', 'max_retries', 'default_retry_delay', 'rate_limit', 'time_limit',
     'soft_time_limit', 'ignore_result', 'store_errors_even_if_ignored',
     'serializer', 'acks_late', 'track_started', 'expires',
-
 )
+"""The attributes of the Celery tasks, that should be returned by the
+:func:`get_get_system_information` task."""
 
 
 @rpc_task()
 def get_system_information() -> Dict[str, Any]:
+    """Return information about the Python platform, the Hades distribution and
+    its dependencies and the Celery tasks of the agent."""
     hades = pkg_resources.get_distribution("hades")
     return {
         'distribution': get_distribution_metadata(hades),

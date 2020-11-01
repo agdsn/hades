@@ -86,10 +86,9 @@ class HADES_USER_NETWORKS(Option):
 
 
 class HADES_CUSTOM_IPTABLES_INPUT_RULES(Option):
-    """
-    Additional iptables rules for INPUT chain.
+    """Additional iptables rules for ``INPUT`` chain.
 
-    A list of valid iptables-restore rules with leading -A INPUT.
+    A list of valid ``iptables-restore`` rule lines with leading ``-A INPUT``.
     """
     type = collections.Sequence
     required = False
@@ -153,7 +152,8 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_FDW(Option):
     """
     Name of the foreign data wrapper extensions that should be used.
 
-    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
+    ignored.
     """
     default = 'postgres_fdw'
     type = str
@@ -163,7 +163,8 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS(Option):
     """
     Foreign data wrapper specific server options
 
-    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
+    ignored.
     """
     type = collections.Mapping
     default = {}
@@ -183,7 +184,8 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_VERSION(Option):
     """
     Foreign data wrapper specific server version
 
-    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
+    ignored.
     """
     type = (str, type(None))
     default = None
@@ -194,7 +196,8 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
     Foreign data wrapper options that are set on each foreign table.
     The options can be overridden with table specific options.
 
-    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
+    ignored.
     """
     default = {
         'dbname': 'hades',
@@ -203,18 +206,17 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING(Option):
-    """
-    Whether the ipaddress column of the foreign alternative_dns table has a string type
-    """
+    """Whether the ``IPAddress`` column of the foreign ``alternative_dns`` table
+    has a string type"""
     type = bool
     default = False
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_OPTIONS(Option):
-    """
-    Foreign data wrapper options for the alternative_dns table
+    """Foreign data wrapper options for the ``alternative_dns`` table
 
-    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
+    ignored.
     """
     default = {
         'table_name': 'alternative_dns',
@@ -223,24 +225,24 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING(Option):
-    """
-    Whether the ipaddress column of the foreign dhcphost table has a string type
-    """
+    """Whether the ``IPAddress`` column of the foreign ``dhcphost`` table has a
+    string type"""
     type = bool
     default = False
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING(Option):
-    """Whether the mac column of the foreign dhcphost table has a string type"""
+    """Whether the ``MAC`` column of the foreign ``dhcphost`` table has a string
+    type"""
     type = bool
     default = False
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS(Option):
-    """
-    Foreign data wrapper options for the dhcphost table
+    """Foreign data wrapper options for the ``dhcphost`` table
 
-    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
+    ignored.
     """
     default = {
         'table_name': 'dhcphost',
@@ -249,10 +251,10 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS(Option):
-    """
-    Foreign data wrapper options for the nas table
+    """Foreign data wrapper options for the ``nas`` table
 
-    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
+    ignored.
     """
     default = {
         'table_name': 'nas',
@@ -261,19 +263,17 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING(Option):
-    """
-    Whether the nasipaddress column of the foreign radcheck table has a string
-    type
-    """
+    """Whether the ``NASIPAddress`` column of the foreign ``radcheck`` table has
+    a string type."""
     type = bool
     default = False
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS(Option):
-    """
-    Foreign data wrapper options for the radcheck table
+    """Foreign data wrapper options for the ``radcheck`` table
 
-    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
+    ignored.
     """
     default = {
         'table_name': 'radcheck',
@@ -282,10 +282,10 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS(Option):
-    """
-    Foreign data wrapper options for the radgroupcheck table
+    """Foreign data wrapper options for the ``radgroupcheck`` table
 
-    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
+    ignored.
     """
     default = {
         'table_name': 'radgroupcheck',
@@ -294,10 +294,10 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS(Option):
-    """
-    Foreign data wrapper options for the radgroupreply table
+    """Foreign data wrapper options for the ``radgroupreply`` table
 
-    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
+    ignored.
     """
     default = {
         'table_name': 'radgroupreply',
@@ -306,19 +306,17 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING(Option):
-    """
-    Whether the nasipaddress column of the foreign radgroupcheck table has a
-    string type
-    """
+    """Whether the ``NASIPAddress`` column of the foreign ``radgroupcheck``
+    table has a string type"""
     type = bool
     default = False
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS(Option):
-    """
-    Foreign data wrapper options for the radreply table
+    """Foreign data wrapper options for the ``radreply`` table
 
-    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
+    ignored.
     """
     default = {
         'table_name': 'radreply',
@@ -327,19 +325,17 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS(Option):
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING(Option):
-    """
-    Whether the nasipaddress column of the foreign radgroupcheck table has a
-    string type
-    """
+    """Whether the ``NASIPAddress`` column of the foreign ``radgroupcheck``
+    table has a string type"""
     type = bool
     default = False
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS(Option):
-    """
-    Foreign data wrapper options for the radusergroup table
+    """Foreign data wrapper options for the ``radusergroup`` table
 
-    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
+    ignored.
     """
     default = {
         'table_name': 'radusergroup',
@@ -352,7 +348,8 @@ class HADES_POSTGRESQL_USER_MAPPINGS(Option):
     User mappings from local database users to users on the foreign database
     server
 
-    If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
+    If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
+    ignored.
     """
     type = collections.Mapping
     static_check = check.user_mapping_for_user_exists(constants.DATABASE_USER)
@@ -427,6 +424,7 @@ class HADES_AUTH_DHCP_LEASE_RENEW_TIMER(Option):
     @Compute.decorate
     @staticmethod
     def default(config):
+        """Half of :hades:option:`HADES_AUTH_DHCP_LEASE_LIFETIME`"""
         return 0.5 * config.HADES_AUTH_DHCP_LEASE_LIFETIME
 
 
@@ -438,6 +436,7 @@ class HADES_AUTH_DHCP_LEASE_REBIND_TIMER(Option):
     @Compute.decorate
     @staticmethod
     def default(config):
+        """0.875 of :hades:option:`HADES_AUTH_DHCP_LEASE_LIFETIME`"""
         return 0.875 * config.HADES_AUTH_DHCP_LEASE_LIFETIME
 
 
@@ -468,8 +467,8 @@ class HADES_AUTH_INTERFACE(Option):
     this interface are managed by the keepalived hades-auth VRRP instance.
 
     This interface should therefore be managed completely by Hades. Aside from
-    its creation other tools, e.g. ifupdown, systemd-network, should not
-    interfere. No other daemons should listen on or bind to this interface.
+    its creation other tools, e.g. ``ifupdown``, ``systemd-networkd``, should
+    not interfere. No other daemons should listen on or bind to this interface.
     """
     type = str
     required = True
@@ -599,7 +598,7 @@ class HADES_UNAUTH_CAPTURED_UDP_PORTS(Option):
 
 class HADES_UNAUTH_DHCP_RANGE(Option):
     """DHCP range for the unauth VLAN. Must be contained within the
-    HADES_UNAUTH_LISTEN network."""
+    :hades:option:`HADES_UNAUTH_LISTEN` network."""
     default = netaddr.IPRange('10.66.0.10', '10.66.31.254')
     type = netaddr.IPRange
     static_check = check.ip_range_in_networks(HADES_UNAUTH_LISTEN)
@@ -664,17 +663,17 @@ class HADES_RADIUS_LOCALHOST_SECRET(Option):
 
 
 class HADES_RADIUS_DATABASE_FAIL_ACCEPT(Option):
-    """Send Access-Accept packets if the sql module fails"""
+    """Send ``Access-Accept`` packets if the RADIUS ``sql`` module fails"""
     type = bool
     default = True
 
 
 class HADES_RADIUS_DATABASE_FAIL_REPLY_ATTRIBUTES(Option):
     """
-    Reply attributes that will be set in Access-Accept packets if the sql
-    module fails.
+    Reply attributes that will be set in ``Access-Accept`` packets if the RADIUS
+    ``sql`` module fails.
 
-    The attribute value must be specified in proper freeRADIUS syntax. That
+    The attribute value must be specified in proper FreeRADIUS syntax. That
     means that string replies should be enclosed in single quotes.
     """
     type = collections.Mapping
@@ -684,6 +683,8 @@ class HADES_RADIUS_DATABASE_FAIL_REPLY_ATTRIBUTES(Option):
 
 
 class HADES_RADIUS_UNKNOWN_USER(Option):
+    """The ``User-Name``, that is used as fallback if the MAC address was not
+    found in the database."""
     type = str
     default = "unknown"
 
@@ -696,8 +697,9 @@ class HADES_RADIUS_UNKNOWN_USER(Option):
 class HADES_GRATUITOUS_ARP_INTERVAL(Option):
     """
     Period in which gratuitous ARP requests are broadcasted to notify
-    a) clients of the MAC address of current master site node instance
-    b) clients switching from the auth to the unauth VLAN of the new gateway MAC
+
+    #. clients of the MAC address of current master site node instance
+    #. clients switching from the auth to the unauth VLAN of the new gateway MAC
     """
     type = timedelta
     default = timedelta(seconds=1)
@@ -712,6 +714,7 @@ class HADES_GRATUITOUS_ARP_INTERVAL(Option):
 class HADES_PRIORITY(Option):
     """
     Priority of the site node instance.
+
     The available instance with the highest priority becomes master.
     """
     type = int
@@ -720,7 +723,7 @@ class HADES_PRIORITY(Option):
 
 
 class HADES_INITIAL_MASTER(Option):
-    """Flag that indicates if site node instance starts in master state"""
+    """Flag that indicates if the site node instance starts in master state"""
     type = bool
     default = False
 
@@ -797,7 +800,7 @@ class HADES_VRRP_ADVERTISEMENT_INTERVAL(Option):
 
 class HADES_VRRP_PREEMPTION_DELAY(Option):
     """
-    Delay before a MASTER transitions to BACKUP when a node with a higher
+    Delay before a *MASTER* transitions to *BACKUP* when a node with a higher
     priority comes online
     """
     type = timedelta

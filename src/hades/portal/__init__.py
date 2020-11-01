@@ -18,4 +18,6 @@ babel = Babel(app)
 
 @app.context_processor
 def add_globals():
+    """Add the configure constants and the config object as global variable to
+    the web portal's Jinja2 templates"""
     return {'constants': constants, 'config': get_config(runtime_checks=True)}

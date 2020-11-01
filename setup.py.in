@@ -31,6 +31,14 @@ setup(name='@PACKAGE_NAME@',
           "pysnmp",
           "SQLAlchemy",
       ],
+      extras_require={
+          'docs': [
+              'docutils',
+              'sphinx',
+              'sphinx_autodoc_typehints',
+              'sphinxarg.ext',
+          ],
+      },
       entry_points={
           'console_scripts': [
               'hades-agent = hades.bin.agent:main',
