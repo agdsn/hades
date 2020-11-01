@@ -1,0 +1,5 @@
+# The hades config files may contain sensitive information and therefore need
+# to be protected.
+hades binary: non-standard-dir-perm etc/hades/config/ 0750 != 0755
+hades binary: non-standard-file-perm etc/hades/config/*
+

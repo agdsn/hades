@@ -1,11 +1,11 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: hades
 Upstream-Contact: https://github.com/agdsn/hades/issues
-Source: https://github.com/sebschrader/python-arpreq
+Source: https://github.com/sebschrader/hades
 License: Expat
 
 Files: *
-Copyright: 2015-2017 Sebastian Schrader
+Copyright: 2015-2020 Sebastian Schrader, Stefan Haller
 License: Expat
 
 Files: templates/freeradius/*
@@ -16,7 +16,7 @@ License: GPL-2+
 License: Expat
  The MIT License (MIT)
  .
- Copyright (c) 2015 Sebastian Schrader
+ Copyright (c) 2015-2020 Sebastian Schrader, Stefan Haller
  .
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal

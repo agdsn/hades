@@ -1,7 +1,7 @@
 # Translations template for hades.
-# Copyright (C) 2016 Sebastian Schrader
+# Copyright (C) 2015-2020 Sebastian Schrader, Stefan Haller
 # This file is distributed under the same license as the hades project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
 #
 #, fuzzy
 msgid ""
