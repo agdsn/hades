@@ -1,13 +1,15 @@
 [Unit]
 Description=Hades DNS service for unauthenticated users (dnsmasq)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+Before=hades.service
 After=hades-unauth-netns.service
 BindsTo=hades-unauth-netns.service
 JoinsNamespaceOf=hades-unauth-netns.service
 
 [Service]
 Type=dbus
-PrivateNetwork=yes
 BusName=@UNAUTH_DNS_DBUS_NAME@
 SyslogIdentifier=hades-unauth-dns
 EnvironmentFile=@systemdenvfile@
@@ -19,11 +21,12 @@ ExecReload=@DNSMASQ@ --test -k --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
+
+PrivateNetwork=yes
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/unauth-dns
 ;RuntimeDirectoryMode=2750
 ;RuntimeDirectoryPreserve=yes
 
 [Install]
-WantedBy=hades.target
 Alias=hades-unauth-dhcp.service

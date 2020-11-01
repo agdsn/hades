@@ -26,7 +26,7 @@ def notify_auth(state, priority) -> int:
 
 
 # noinspection PyUnusedLocal
-def notify_radius(state, priority) -> int:
+def notify_root(state, priority) -> int:
     config = get_config(runtime_checks=True)
     queue_name = config.HADES_CELERY_NODE_QUEUE
     exchange_name = config.HADES_CELERY_RPC_EXCHANGE
@@ -87,8 +87,8 @@ def main() -> int:
     app.config_from_object(config)
     if args.name == 'hades-auth':
         return notify_auth(args.state, args.priority)
-    elif args.name == 'hades-radius':
-        return notify_radius(args.state, args.priority)
+    elif args.name == 'hades-root':
+        return notify_root(args.state, args.priority)
     elif args.name == 'hades-unauth':
         return notify_unauth(args.state, args.priority)
 

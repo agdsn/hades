@@ -1,6 +1,9 @@
 [Unit]
 Description=Hades portal (Flask app on uWSGI)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+Before=hades.service
 After=hades-database.service
 After=hades-unauth-netns.service
 BindsTo=hades-unauth-netns.service
@@ -9,12 +12,11 @@ Wants=hades-database.service
 
 [Service]
 Type=notify
-PrivateNetwork=yes
-SyslogIdentifier=hades-unauth-portal
 User=@PORTAL_USER@
 Group=@PORTAL_GROUP@
-EnvironmentFile=@systemdenvfile@
+SyslogIdentifier=hades-unauth-portal
 Environment=PGAPPNAME=hades-unauth-portal
+EnvironmentFile=@systemdenvfile@
 ExecStartPre=@bindir@/hades-generate-config uwsgi.ini.j2 @pkgrunstatedir@/unauth-portal/uwsgi.ini
 ExecStart=@UWSGI@ --ini=@pkgrunstatedir@/unauth-portal/uwsgi.ini $UWSGI_OPTS
 ExecReload=@bindir@/hades-generate-config uwsgi.ini.j2 @pkgrunstatedir@/unauth-portal/uwsgi.ini
@@ -24,10 +26,9 @@ RestartSec=5
 KillSignal=SIGINT
 StandardError=syslog
 NotifyAccess=all
+
+PrivateNetwork=yes
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/unauth-portal
 ;RuntimeDirectoryMode=2750
 ;RuntimeDirectoryPreserve=yes
-
-[Install]
-WantedBy=hades.target

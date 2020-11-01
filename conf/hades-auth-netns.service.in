@@ -1,27 +1,17 @@
 [Unit]
 Description=Hades auth network namespace
 Documentation=https://github.com/systemd/systemd/issues/2741#issuecomment-336736214
+RefuseManualStart=yes
 StopWhenUnneeded=true
 After=hades-root-netns.service
 BindsTo=hades-root-netns.service
 
-# Due to a bug in the systemd version shipped with Stretch ExecStopPost is not
-# executed for Type=oneshot services. This has been fixed in an unknown, later
-# version of systemd.
-OnFailure=hades-auth-netns-cleanup.service
-Conflicts=hades-auth-netns-cleanup.service
-
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-PrivateNetwork=yes
-;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
-;RuntimeDirectory=hades/auth-netns
-;RuntimeDirectoryMode=0750
-;RuntimeDirectoryPreserve=yes
 
-ExecStart=@bindir@/hades-generate-config netns/auth/ @pkgrunstatedir@/auth-netns/
-ExecStart=@IFUP@ --interfaces=@pkgrunstatedir@/auth-netns/interfaces --state-dir=@pkgrunstatedir@/auth-netns --all --no-act
+ExecStartPre=@bindir@/hades-generate-config netns/auth/ @pkgrunstatedir@/auth-netns/
+ExecStartPre=@IFUP@ --interfaces=@pkgrunstatedir@/auth-netns/interfaces --state-dir=@pkgrunstatedir@/auth-netns --all --no-act
 
 # Ask ip netns to create a named network namespace
 # (This ensures that things like /var/run/netns are properly setup)
@@ -44,3 +34,9 @@ ExecStop=@IFDOWN@ --verbose --interfaces=@pkgrunstatedir@/auth-netns/interfaces 
 
 # Delete the network namespace
 ExecStopPost=-@IP@ netns delete auth
+
+PrivateNetwork=yes
+;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
+;RuntimeDirectory=hades/auth-netns
+;RuntimeDirectoryMode=0750
+;RuntimeDirectoryPreserve=yes

@@ -1,0 +1,29 @@
+# systemd service for managing all Hades services. This service is actually a
+# systemd target, but we are using a service since targets cannot be reloaded.
+
+[Unit]
+Description=Hades
+Documentation=https://agdsn.github.io/hades/
+Wants=hades-agent.service
+Wants=hades-auth-alternative-dns.service
+Wants=hades-auth-dhcp.service
+Wants=hades-auth-pristine-dns.service
+Wants=hades-auth-vrrp.service
+Wants=hades-cleanup.timer
+Wants=hades-deputy.service
+Wants=hades-forced-refresh.timer
+Wants=hades-radius.service
+Wants=hades-refresh.timer
+Wants=hades-root-vrrp.service
+Wants=hades-unauth-dns.service
+Wants=hades-unauth-http.service
+Wants=hades-unauth-vrrp.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/true
+ExecReload=/bin/true
+RemainAfterExit=on
+
+[Install]
+WantedBy=multi-user.target

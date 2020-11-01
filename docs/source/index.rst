@@ -128,8 +128,8 @@ and test Hades inside the container:
    builder@0123456789ab:~$ sudo dpkg -i hades_0.4.0_amd64.deb
    builder@0123456789ab:~$ cd /build/hades
    builder@0123456789ab:~/hades$ sudo cp tests/config.py /etc/hades
-   builder@0123456789ab:~/hades$ sudo systemctl enable hades.target
-   builder@0123456789ab:~/hades$ sudo systemctl start hades.target
+   builder@0123456789ab:~/hades$ sudo systemctl enable hades.service
+   builder@0123456789ab:~/hades$ sudo systemctl start hades.service
 
 Congratulations, you've successfully started a test instance of Hades!
 

@@ -1,0 +1,27 @@
+[Unit]
+Description=Hades VRRP service for root services (keepalived)
+Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+Before=hades.service
+After=hades-root-netns.service
+BindsTo=hades-root-netns.service
+
+[Service]
+Type=dbus
+BusName=@ROOT_VRRP_DBUS_NAME@
+PIDFile=@pkgrunstatedir@/root-vrrp/keepalived.pid
+KillMode=process
+SyslogIdentifier=hades-root-vrrp
+EnvironmentFile=@systemdenvfile@
+ExecStartPre=@bindir@/hades-generate-config keepalived/root.conf.j2 @pkgrunstatedir@/root-vrrp/keepalived.conf
+ExecStart=@KEEPALIVED@ --log-console --vrrp --use-file=@pkgrunstatedir@/root-vrrp/keepalived.conf --pid=@pkgrunstatedir@/root-vrrp/keepalived.pid --vrrp_pid=@pkgrunstatedir@/root-vrrp/keepalived-vrrp.pid $ROOT_KEEPALIVED_OPTS
+ExecReload=@bindir@/hades-generate-config keepalived/root.conf.j2 @pkgrunstatedir@/root-vrrp/keepalived.conf
+ExecReload=@KILL@ -HUP $MAINPID
+Restart=always
+RestartSec=5
+
+;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
+;RuntimeDirectory=hades/root-vrrp
+;RuntimeDirectoryMode=0750
+;RuntimeDirectoryPreserve=yes

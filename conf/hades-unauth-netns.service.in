@@ -1,24 +1,14 @@
 [Unit]
 Description=Hades unauth network namespace
 Documentation=https://github.com/systemd/systemd/issues/2741#issuecomment-336736214
+RefuseManualStart=yes
 StopWhenUnneeded=true
-BindsTo=hades-root-netns.service
 After=hades-root-netns.service
-
-# Due to a bug in the systemd version shipped with Stretch ExecStopPost is not
-# executed for Type=oneshot services. This has been fixed in an unknown, later
-# version of systemd.
-OnFailure=hades-unauth-netns-cleanup.service
-Conflicts=hades-unauth-netns-cleanup.service
+BindsTo=hades-root-netns.service
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-PrivateNetwork=yes
-;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
-;RuntimeDirectory=hades/unauth-netns
-;RuntimeDirectoryMode=0750
-;RuntimeDirectoryPreserve=yes
 
 ExecStartPre=@bindir@/hades-generate-config netns/unauth/ @pkgrunstatedir@/unauth-netns/
 ExecStartPre=@IFUP@ --interfaces=@pkgrunstatedir@/unauth-netns/interfaces --state-dir=@pkgrunstatedir@/unauth-netns --all --no-act
@@ -44,3 +34,9 @@ ExecStop=@IFDOWN@ --interfaces=@pkgrunstatedir@/unauth-netns/interfaces --state-
 
 # Delete the network namespace
 ExecStopPost=-@IP@ netns delete unauth
+
+PrivateNetwork=yes
+;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
+;RuntimeDirectory=hades/unauth-netns
+;RuntimeDirectoryMode=0750
+;RuntimeDirectoryPreserve=yes

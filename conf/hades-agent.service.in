@@ -1,8 +1,12 @@
 [Unit]
 Description=Hades agent (Celery Worker)
 Documentation=https://agdsn.github.io/hades/
-After=hades-root-netns.service hades-database.service
-BindsTo=hades-root-netns.service hades-database.service
+PartOf=hades.service
+Before=hades.service
+After=hades-database.service
+After=hades-root-netns.service
+BindsTo=hades-database.service
+BindsTo=hades-root-netns.service
 
 [Service]
 Type=simple
@@ -16,10 +20,8 @@ EnvironmentFile=@systemdenvfile@
 ExecStart=@bindir@/hades-agent worker --pidfile=@pkgrunstatedir@/agent/worker.pid $AGENT_OPTS
 Restart=always
 RestartSec=5
+
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/agent
 ;RuntimeDirectoryMode=2750
 ;RuntimeDirectoryPreserve=yes
-
-[Install]
-WantedBy=hades.target

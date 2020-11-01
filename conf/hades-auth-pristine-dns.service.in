@@ -1,15 +1,17 @@
 [Unit]
 Description=Hades DNS service for authenticated users (unbound)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+Before=hades.service
 After=hades-auth-netns.service
 BindsTo=hades-auth-netns.service
 JoinsNamespaceOf=hades-auth-netns.service
 
 [Service]
-Group=@AUTH_DNS_GROUP@
-Type=simple
-PrivateNetwork=yes
+Type=notify
 PIDFile=@AUTH_DNS_PRISTINE_PID_FILE@
+Group=@AUTH_DNS_GROUP@
 SyslogIdentifier=hades-auth-pristine-dns
 EnvironmentFile=@systemdenvfile@
 ExecStartPre=@bindir@/hades-generate-config unbound-pristine.conf.j2 @pkgrunstatedir@/auth-dns/unbound-pristine.conf
@@ -21,10 +23,9 @@ ExecReload=@UNBOUND_CHECKCONF@ @pkgrunstatedir@/auth-dns/unbound-pristine.conf
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
+
+PrivateNetwork=yes
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/auth-dns
 ;RuntimeDirectoryMode=2750
 ;RuntimeDirectoryPreserve=yes
-
-[Install]
-WantedBy=hades.target

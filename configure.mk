@@ -161,7 +161,7 @@ $(call add_substitution, DEPUTY_DBUS_NAME, de.agdsn.hades.deputy)
 $(call add_substitution, LOCAL_MASTER_DATABASE_NAME, foreign)
 $(call add_substitution, LOCAL_MASTER_DATABASE_PASSWORD, foreign)
 $(call add_substitution, LOCAL_MASTER_DATABASE_USER, foreign)
-$(call add_substitution, RADIUS_VRRP_DBUS_NAME, de.agdsn.hades.radius_vrrp)
+$(call add_substitution, ROOT_VRRP_DBUS_NAME, de.agdsn.hades.root_vrrp)
 $(call add_substitution, UNAUTH_DNS_DBUS_NAME, de.agdsn.hades.unauth_dnsmasq)
 $(call add_substitution, UNAUTH_NAMESPACE, unauth)
 $(call add_substitution, UNAUTH_VRRP_DBUS_NAME, de.agdsn.hades.unauth_vrrp)
@@ -249,7 +249,6 @@ CONFIGURE_FILES = \
     conf/hades-agent.service \
     conf/hades-auth-alternative-dns.service \
     conf/hades-auth-dhcp.service \
-    conf/hades-auth-netns-cleanup.service \
     conf/hades-auth-netns.service \
     conf/hades-auth-pristine-dns.service \
     conf/hades-auth-vrrp.service \
@@ -258,14 +257,12 @@ CONFIGURE_FILES = \
     conf/hades-deputy.dbus-service \
     conf/hades-deputy.service \
     conf/hades-forced-refresh.service \
-    conf/hades-radius-vrrp.service \
     conf/hades-radius.service \
     conf/hades-refresh.service \
-    conf/hades-root-netns-cleanup.service \
+    conf/hades-root-vrrp.service \
     conf/hades-root-netns.service \
     conf/hades-unauth-dns.service \
     conf/hades-unauth-http.service \
-    conf/hades-unauth-netns-cleanup.service \
     conf/hades-unauth-netns.service \
     conf/hades-unauth-portal.service \
     conf/hades-unauth-vrrp.service \

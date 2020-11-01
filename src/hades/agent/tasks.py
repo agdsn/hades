@@ -319,16 +319,16 @@ units = (
     'hades-database.service',
     'hades-deputy.service',
     'hades-forced-refresh.timer',
-    'hades-radius-vrrp.service',
     'hades-radius.service',
     'hades-refresh.timer',
     'hades-root-netns.service',
+    'hades-root-vrrp.service',
     'hades-unauth-dns.service',
     'hades-unauth-http.service',
     'hades-unauth-netns.service',
     'hades-unauth-portal.service',
     'hades-unauth-vrrp.service',
-    'hades.target',
+    'hades.service',
 )
 """The Hades systemd units that should be reported by the
 :func:`get_get_systemd_status` task."""

@@ -1,7 +1,9 @@
 [Unit]
 Description=Hades http server (nginx)
 Documentation=https://agdsn.github.io/hades/
-After=hades-unauth-portal.service
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+Before=hades.service
 After=hades-unauth-portal.service
 BindsTo=hades-unauth-netns.service
 JoinsNamespaceOf=hades-unauth-netns.service
@@ -9,7 +11,6 @@ Wants=hades-unauth-portal.service
 
 [Service]
 Type=forking
-PrivateNetwork=yes
 PIDFile=@PORTAL_NGINX_PID_FILE@
 SyslogIdentifier=hades-unauth-http
 EnvironmentFile=@systemdenvfile@
@@ -22,10 +23,9 @@ RestartSec=5
 KillSignal=SIGQUIT
 KillMode=mixed
 SyslogLevel=err
+
+PrivateNetwork=yes
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/unauth-http
 ;RuntimeDirectoryMode=2750
 ;RuntimeDirectoryPreserve=yes
-
-[Install]
-WantedBy=hades.target

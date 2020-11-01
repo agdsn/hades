@@ -1,6 +1,9 @@
 [Unit]
 Description=Hades RADIUS service (FreeRADIUS)
 Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+Before=hades.service
 After=hades-database.service
 After=hades-root-netns.service
 BindsTo=hades-root-netns.service
@@ -9,9 +12,9 @@ Wants=hades-database.service
 [Service]
 Type=forking
 PIDFile=@RADIUS_PID_FILE@
-SyslogIdentifier=hades-radius
 User=@RADIUS_USER@
 Group=@RADIUS_GROUP@
+SyslogIdentifier=hades-radius
 Environment=PGAPPNAME=hades-radius
 EnvironmentFile=@systemdenvfile@
 ExecStartPre=@bindir@/hades-generate-config freeradius @pkgrunstatedir@/radius
@@ -23,10 +26,8 @@ ExecReload=@RADIUSD@ -d @pkgrunstatedir@/radius -Cx -lstdout
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
+
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/radius
 ;RuntimeDirectoryMode=2750
 ;RuntimeDirectoryPreserve=yes
-
-[Install]
-WantedBy=hades.target

@@ -6,8 +6,8 @@ readonly vrrp_instance="$1"
 
 declare -r -A SERVICES=(
 	[auth]='hades-auth-alternative-dns.service hades-auth-dhcp.service hades-auth-pristine-dns.service'
+	[root]='hades-radius.service'
 	[unauth]='hades-unauth-dns.service hades-unauth-http.service hades-unauth-portal.service'
-	[radius]='hades-radius.service'
 )
 
 for service in ${SERVICES["${vrrp_instance}"]}; do
