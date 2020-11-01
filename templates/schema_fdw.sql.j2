@@ -91,7 +91,7 @@ ALTER TABLE nas OWNER TO "{{ constants.DATABASE_USER }}";
 
 CREATE TABLE radcheck (
     "Priority" integer NOT NULL,
-    "UserName" text NOT NULL,
+    "UserName" text,
     {% if HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING %}
     "NASIPAddress" text,
     {% else %}
@@ -142,7 +142,7 @@ ALTER TABLE radgroupreply OWNER TO "{{ constants.DATABASE_USER }}";
 
 CREATE TABLE radreply (
     "Priority" integer NOT NULL,
-    "UserName" text NOT NULL,
+    "UserName" text,
     {% if HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING %}
     "NASIPAddress" text,
     {% else %}
@@ -162,7 +162,7 @@ ALTER TABLE radreply OWNER TO "{{ constants.DATABASE_USER }}";
 --
 
 CREATE TABLE radusergroup (
-    "UserName" text NOT NULL,
+    "UserName" text,
     {% if HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING %}
     "NASIPAddress" text,
     {% else %}
