@@ -18,6 +18,9 @@ global_defs {
     smtp_server {{ HADES_MAIL_SMTP_SERVER }}
     smtp_connect_timeout 30
     {% endif %}
+
+    enable_dbus
+    dbus_service_name {{ constants.RADIUS_VRRP_DBUS_NAME }}
 }
 
 instance hades_radius
