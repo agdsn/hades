@@ -1,8 +1,7 @@
-import collections
 from flask.sessions import SessionInterface, SessionMixin
 
 
-class NullSession(collections.MutableMapping, SessionMixin):
+class NullSession(SessionMixin):
     """
     A session similar to the Flask's :class:`flask.sessions.NullSession`, but
     with a different error message.

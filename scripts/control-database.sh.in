@@ -73,7 +73,7 @@ do_init() {
 		msg "Creating local master database @LOCAL_MASTER_DATABASE_NAME@ for testing."
 		@CREATEDB@ @LOCAL_MASTER_DATABASE_NAME@
 		@PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction postgres <<-COMMAND
-			CREATE ROLE "@LOCAL_MASTER_DATABASE_USER@" WITH LOGIN INHERIT UNENCRYPTED PASSWORD '@LOCAL_MASTER_DATABASE_PASSWORD@';
+			CREATE ROLE "@LOCAL_MASTER_DATABASE_USER@" WITH LOGIN INHERIT PASSWORD '@LOCAL_MASTER_DATABASE_PASSWORD@';
 			COMMAND
 		msg "Loading local master database schema"
 		@bindir@/hades-generate-config schema_fdw.sql.j2 | @PSQL@ --quiet --set=ON_ERROR_STOP=1 --no-psqlrc --single-transaction --file=- @LOCAL_MASTER_DATABASE_NAME@

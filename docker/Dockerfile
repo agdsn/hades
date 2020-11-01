@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM debian:buster
 MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
 ARG BUILDER_UID=1000
 ARG BUILDER_GID=1000
@@ -39,9 +39,8 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     nginx \
     packaging-dev \
     policykit-1 \
-    postgresql-9.6 \
-    postgresql-contrib-9.6 \
-    postgresql-server-dev-9.6 \
+    postgresql \
+    postgresql-contrib \
     pypy \
     pypy-dev \
     pypy-ipaddress \
@@ -77,6 +76,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     python3-pytest-runner \
     python3-sqlalchemy \
     python3-setuptools \
+    python3-systemd \
     python3-venv \
     rabbitmq-server \
     strace \
@@ -92,8 +92,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pg_lsclusters --no-header | cut -d ' ' -f 1-2 | xargs --no-run-if-empty --max-args=2 pg_dropcluster \
-    && find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' \
+RUN find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' \
         ! -name '*dbus*' \
         ! -name '*journal*' \
         ! -name '*tmpfiles*' \
@@ -101,8 +100,8 @@ RUN pg_lsclusters --no-header | cut -d ' ' -f 1-2 | xargs --no-run-if-empty --ma
         ! -name remount-proc-sys.service \
         ! -name remount-sys.service \
         ! -name systemd-logind.service \
-        -printf '%f\0' | sort --unique --zero-terminated | xargs --null --no-run-if-empty systemctl mask \
-    && find -L /etc/init.d -type f -perm /u+x,g+x,o+x ! -name rc ! -name rcS -printf '%f\0' | xargs --null --no-run-if-empty --max-args=1 sh -c 'update-rc.d -f "$1" remove' sh \
+        -printf '%f\0' | sort --unique --zero-terminated | xargs --null --no-run-if-empty --verbose systemctl mask \
+    && find -L /etc/init.d -type f -perm /u+x,g+x,o+x ! -name rc ! -name rcS -printf '%f\0' | xargs --null --no-run-if-empty --max-args=1 -I'{}' --verbose update-rc.d -f '{}' remove \
     && { addgroup --system --gid $BUILDER_GID builder || true; } \
     && adduser --system --home /build --shell /bin/bash --uid $BUILDER_UID --gid $BUILDER_GID builder \
     && sed -i -re 's/^#?(ForwardTo[^=]+)=.*$/\1=no/' /etc/systemd/journald.conf

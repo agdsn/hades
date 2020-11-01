@@ -23,7 +23,10 @@ sqlippool dhcp_sqlippool {
 	pool_key = "%{Calling-Station-Id}"
 
 	# For now, it works with MySQL.
-	$INCLUDE ${modconfdir}/sql/ippool-dhcp/mysql/queries.conf
+	# This line is commented by default to enable clean startup when you
+	# don't have freeradius-mysql installed. Uncomment this line if you 
+	# use this module.
+	#$INCLUDE ${modconfdir}/sql/ippool-dhcp/mysql/queries.conf
 
 	# It may also work with sqlite - this is very experimental.
 	# Comment out the above line and add the following include.

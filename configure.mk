@@ -155,7 +155,6 @@ $(call require_program,KEEPALIVED,keepalived)
 $(call require_program,KILL,kill)
 $(call require_program,MOUNT,mount)
 $(call require_program,NGINX,nginx)
-$(call require_program,PG_CONFIG,pg_config)
 $(call require_program,PSQL,psql)
 $(call require_program,PYTHON3,python3)
 $(call require_program,RADIUSD,radiusd freeradius)
@@ -171,12 +170,16 @@ $(call require_program,UNBOUND_CHECKCONF,unbound-checkconf)
 $(call require_program,UNBOUND_CONTROL,unbound-control)
 $(call require_program,UWSGI,uwsgi)
 
-pgbindir := $(shell $(PG_CONFIG) --bindir)
+get_pg_version := perl -MPgCommon -e 'print get_newest_version();'
 
-$(call require_program,CREATEDB,createdb,$(pgbindir))
-$(call require_program,CREATEUSER,createuser,$(pgbindir))
-$(call require_program,PG_CTL,pg_ctl,$(pgbindir))
-$(call require_program,POSTGRES,postgres,$(pgbindir))
+$(call add_substitution, PG_VERSION, $(shell $(get_pg_version)))
+
+get_pg_path := perl -MPgCommon -e 'print get_program_path($$ARGV[0], "$(PG_VERSION)");'
+
+$(call add_substitution, CREATEDB,   $(shell $(get_pg_path) createdb))
+$(call add_substitution, CREATEUSER, $(shell $(get_pg_path) createuser))
+$(call add_substitution, PG_CTL,     $(shell $(get_pg_path) pg_ctl))
+$(call add_substitution, POSTGRES,   $(shell $(get_pg_path) postgres))
 
 # User and group settings
 $(call add_substitution, SYSTEM_GROUP,     hades)

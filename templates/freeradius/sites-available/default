@@ -11,7 +11,7 @@
 #	the "inner-tunnel" virtual server.  You will likely have to edit
 #	that, too, for authentication to work.
 #
-#	$Id: 292abcc492c6e21594ed93b2fbbd9ab226e4440d $
+#	$Id: 3616050e7625eb6b5e2ba44782fcb737b2ae6136 $
 #
 ######################################################################
 #
@@ -258,7 +258,6 @@ listen {
 #		max_connections = 0
 	}
 }
-
 
 #  Authorization. First preprocess (hints and huntgroups files),
 #  then realms, and finally look in the "users" file.
@@ -578,7 +577,7 @@ preacct {
 	#
 
 #	update request {
-#	  	FreeRADIUS-Acct-Session-Start-Time = "%{expr: %l - %{%{Acct-Session-Time}:-0} - %{%{Acct-Delay-Time}:-0}}"
+#	  	&FreeRADIUS-Acct-Session-Start-Time = "%{expr: %l - %{%{Acct-Session-Time}:-0} - %{%{Acct-Delay-Time}:-0}}"
 #	}
 
 
@@ -653,12 +652,6 @@ accounting {
 #	if (noop) {
 #		ok
 #	}
-
-	#
-	#  Instead of sending the query to the SQL server,
-	#  write it into a log file.
-	#
-#	sql_log
 
 	#  Cisco VoIP specific bulk accounting
 #	pgsql-voip
@@ -737,12 +730,6 @@ post-auth {
 	#
 	#  See "Authentication Logging Queries" in mods-available/sql
 	-sql
-
-	#
-	#  Instead of sending the query to the SQL server,
-	#  write it into a log file.
-	#
-#	sql_log
 
 	#
 	#  Un-comment the following if you want to modify the user's object

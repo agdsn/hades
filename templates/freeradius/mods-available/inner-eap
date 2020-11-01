@@ -1,6 +1,6 @@
 # -*- text -*-
 #
-#  $Id: 2b4df6267d26dc58bbb273656480d55a0e60e8bf $
+#  $Id: 576eb7739ebf18ca6323cb740a7d4278ff6d6ea2 $
 
 #
 #  Sample configuration for an EAP module that occurs *inside*
@@ -45,6 +45,15 @@ eap inner-eap {
 	#  You SHOULD use different certificates than are used
 	#  for the outer EAP configuration!
 	#
+	#  You can create the "inner-server.pem" file by doing:
+	#
+	#	cd raddb/certs
+	#	vi inner-server.cnf
+	#	make inner-server
+	#
+	#  The certificate MUST be different from the "server.cnf"
+	#  file.
+	#
 	#  Support for PEAP/TLS and RFC 5176 TLS/TLS is experimental.
 	#  It might work, or it might not.
 	#
@@ -62,7 +71,7 @@ eap inner-eap {
 		#  only the server certificate, but ALSO all
 		#  of the CA certificates used to sign the
 		#  server certificate.
-		certificate_file = ${certdir}/inner-server.pem
+		certificate_file = /etc/ssl/certs/ssl-cert-snakeoil.pem
 
 		#  You may want different CAs for inner and outer
 		#  certificates.  If so, edit this file.
@@ -85,6 +94,10 @@ eap inner-eap {
 		#  file for details.
 	#	check_crl = yes
 	#	ca_path = /path/to/directory/with/ca_certs/and/crls/
+
+		# Accept an expired Certificate Revocation List
+		#
+#		allow_expired_crl = no
 
 		#
 		#  The session resumption / fast re-authentication
