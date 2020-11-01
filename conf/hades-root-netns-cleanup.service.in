@@ -1,7 +1,0 @@
-[Unit]
-Description=Hades root network namespace cleanup
-Documentation=https://bugzilla.redhat.com/show_bug.cgi?id=1353039
-
-[Service]
-Type=oneshot
-ExecStart=-@IP@ netns delete root
