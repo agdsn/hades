@@ -3,6 +3,7 @@ import argparse
 import logging.handlers
 import os
 import sys
+import textwrap
 from gettext import gettext as _
 
 from hades import constants
@@ -17,14 +18,57 @@ class ArgumentParser(argparse.ArgumentParser):
         self.exit(os.EX_USAGE, _('%(prog)s: error: %(message)s\n') % args)
 
 
+class VersionAction(argparse.Action):
+    # noinspection PyShadowingBuiltins
+    def __init__(self,
+                 option_strings,
+                 version_info=None,
+                 dest=argparse.SUPPRESS,
+                 default=argparse.SUPPRESS,
+                 help="show program's version number, configure options, copyright notice and exit"):
+        super(VersionAction, self).__init__(
+            option_strings=option_strings,
+            dest=dest,
+            default=default,
+            nargs=0,
+            help=help)
+        self.version_info = version_info
+
+    def __call__(self, parser: argparse.ArgumentParser, namespace: argparse.Namespace, values, option_string=None):
+        version_info = self.version_info
+        print(version_info)
+        parser.exit()
+
+
 parser = ArgumentParser(add_help=False)
 parser.add_argument('-c', '--config', default=None, help="Path to config file")
 parser.add_argument('-v', '--verbose', dest='verbosity',
                     default=None, action='count', help='Be more verbose')
 parser.add_argument('-q', '--quiet', dest='verbosity',
                     action='store_const', const=0, help='Be quiet')
-parser.add_argument('-V', '--version', action='version',
-                    version=constants.PACKAGE_VERSION)
+parser.add_argument(
+    '-V', '--version', action=VersionAction, version_info=textwrap.dedent(
+        """\
+        {PACKAGE_NAME} version {PACKAGE_VERSION}
+        Configure Options: {CONFIGURE_ARGS}
+
+        Copyright (c) 2015-2020 {PACKAGE_AUTHOR}
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+        THE SOFTWARE.
+        """
+    ).rstrip().format(
+        PACKAGE_NAME=constants.PACKAGE_NAME,
+        PACKAGE_VERSION=constants.PACKAGE_VERSION,
+        CONFIGURE_ARGS=constants.CONFIGURE_ARGS,
+        PACKAGE_AUTHOR=constants.PACKAGE_AUTHOR,
+    )
+)
 parser.add_argument('--syslog', nargs='?', const='/dev/log',
                     help="Log to syslog instead of stderr. A path to the log "
                          "socket may be provided, defaults to /dev/log "
