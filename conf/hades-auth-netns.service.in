@@ -9,8 +9,9 @@ BindsTo=hades-root-netns.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=@bindir@/hades-generate-config netns/auth/ @pkgrunstatedir@/auth-netns/
-ExecStart=@IFUP@ --interfaces=@pkgrunstatedir@/auth-netns/interfaces --state-dir=@pkgrunstatedir@/auth-netns --all --no-act
+
+ExecStartPre=@bindir@/hades-generate-config netns/auth/ @pkgrunstatedir@/auth-netns/
+ExecStartPre=@IFUP@ --interfaces=@pkgrunstatedir@/auth-netns/interfaces --state-dir=@pkgrunstatedir@/auth-netns --all --no-act
 
 # Ask ip netns to create a named network namespace
 # (This ensures that things like /var/run/netns are properly setup)
