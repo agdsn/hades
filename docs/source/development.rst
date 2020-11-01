@@ -57,6 +57,8 @@ Building the Documentation
 The documentation for Hades is build with `sphinx <http://sphinx-doc.org>`_.
 An html build is stored in the gh-pages branch in order to host the
 documentation using `GitHub Pages <https://pages.github.com/>`_.
+Whatever python setup you chose, make sure that the extra requirements given 
+in the ``setup.py`` are installed (e.g. ``sphinx`` and relevant extensions).
 
 After cloning a repository for the first time, initialize the git submodules of
 this repository:
