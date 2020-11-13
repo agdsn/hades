@@ -30,7 +30,7 @@ clear_pgdata() {
 
 cleanup() {
 	error "Aborting database initialisation"
-	@PG_CTL@ stop -s || true
+	@PG_CTL@ stop -s || :
 	clear_pgdata
 }
 
