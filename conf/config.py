@@ -3,7 +3,7 @@ import netaddr
 
 HADES_SITE_NAME = 'dev'
 HADES_SITE_NODE_ID = 'dev-01'
-BROKER_URL = 'amqp://guest@127.0.0.1'
+BROKER_URL = 'amqp://guest:guest@127.0.0.1/hades'
 HADES_CREATE_DUMMY_INTERFACES = True
 HADES_BRIDGE_SERVICE_INTERFACES = True
 HADES_LOCAL_MASTER_DATABASE = True
