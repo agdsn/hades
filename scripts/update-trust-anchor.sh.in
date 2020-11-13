@@ -28,7 +28,7 @@ main() {
 	load_config
 	if [[ ! -f "$DNS_ROOT_KEY_FILE" ]]; then
 		error "Error: DNS root key file $DNS_ROOT_KEY_FILE missing. Install the dns-root-data package."
-		exit 2
+		exit "$EX_UNAVAILABLE"
 	fi
 	if [[ "$DNS_ROOT_KEY_FILE" -nt "$ROOT_TRUST_ANCHOR_FILE" ]]; then
 		if [[ -f "$ROOT_TRUST_ANCHOR_FILE" ]]; then

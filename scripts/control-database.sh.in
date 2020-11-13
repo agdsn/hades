@@ -106,7 +106,7 @@ do_start() {
 		check_cluster_version
 	else
 		error "Error: PostgreSQL cluster at $PGDATA does not exists"
-		return 2
+		return "$EX_UNAVAILABLE"
 	fi
 	generate_config
 	@PG_CTL@ start -s -w -t 30 -o '-c config_file=@pkgrunstatedir@/database/conf/postgresql.conf' ${POSTGRESQL_OPTS:+"-o ${POSTGRESQL_OPTS}"}
