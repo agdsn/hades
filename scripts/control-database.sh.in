@@ -44,6 +44,7 @@ check_cluster_version() {
 	local PG_VERSION="$(@POSTGRES@ --version | @SED@ 's/.* \([0-9]\+\.[0-9]\+\).[0-9]\+/\1/')"
 	if [[ "$PG_VERSION" != "$CLUSTER_VERSION" ]]; then
 		error "Error: version of PostgreSQL cluster located at $PGDATA ($CLUSTER_VERSION) does not match version of postgres executable ($PG_VERSION)"
+		return "$EX_SOFTWARE"
 	fi
 }
 

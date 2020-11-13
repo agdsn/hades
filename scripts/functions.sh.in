@@ -1,5 +1,6 @@
 readonly EX_OK=0
 readonly EX_USAGE=64
+readonly EX_SOFTWARE=70
 
 msg() {
 	echo "$@"
