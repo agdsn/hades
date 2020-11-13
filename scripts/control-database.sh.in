@@ -18,8 +18,7 @@ Commands:
   clear                 Clear the database
 
 Options
-  -h --help             Print this message
-  --clear               Delete existing cluster before"
+  -h --help             Print this message"
 }
 
 clear_pgdata() {
