@@ -1,3 +1,6 @@
+"""
+Checks for configuration option values
+"""
 import collections
 import grp
 import os
