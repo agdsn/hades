@@ -8,7 +8,7 @@ print_usage() {
 	msg "\
 Usage: $0 [-h] [--help]
 
-Update unbound's trust anchor with
+Update unbound's trust anchor with distribution root key file.
 
 Options:
   -h --help             Print this message"
