@@ -11,7 +11,7 @@ services:
     container_name: hades
     network_mode: bridge
     tmpfs:
-      - /tmp
+      - "/tmp:exec"
       - /run
     cap_add:
       - SYS_ADMIN
