@@ -69,7 +69,7 @@ parser.add_argument(
         PACKAGE_AUTHOR=constants.PACKAGE_AUTHOR,
     )
 )
-parser.add_argument('--syslog', nargs='?', const='/dev/log',
+parser.add_argument('--syslog', nargs='?', const='/dev/log', metavar='SOCKET',
                     help="Log to syslog instead of stderr. A path to the log "
                          "socket may be provided, defaults to /dev/log "
                          "otherwise")
