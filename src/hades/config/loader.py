@@ -159,13 +159,13 @@ class CallableEvaluator(AttributeAccessibleDict):
 
 
 def is_config_loaded() -> bool:
-    return 'hades_config' in sys.modules
+    return CONFIG_PACKAGE_NAME in sys.modules
 
 
 def get_config(*, runtime_checks: bool = False,
                option_cls: Optional[OptionMeta] = None) -> Config:
     try:
-        module = sys.modules['hades_config']
+        module = sys.modules[CONFIG_PACKAGE_NAME]
     except KeyError:
         raise RuntimeError("Config has not been loaded") from None
     config = Config(module.hades_config, runtime_checks=runtime_checks)
