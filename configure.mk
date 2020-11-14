@@ -172,6 +172,7 @@ $(call add_substitution, UNAUTH_VRRP_DBUS_NAME, de.agdsn.hades.unauth_vrrp)
 # -------- #
 
 # Runtime programs
+$(call require_program,BRIDGE,bridge)
 $(call require_program,DBUS_SEND,dbus-send)
 $(call require_program,DNSMASQ,dnsmasq)
 $(call require_program,IFDOWN,ifdown)

@@ -12,3 +12,5 @@ iface bridge inet manual
   bridge_stp off
   bridge_fd 0
   bridge_maxwait 0
+  # Enable VLAN filtering to allow proper isolation
+  up echo 1 > /sys/class/net/$IFACE/bridge/vlan_filtering
