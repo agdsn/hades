@@ -7,6 +7,7 @@ services:
         BUILDER_UID: ${UID:-1000}
         BUILDER_GID: ${GID:-1000}
     image: hades
+    hostname: hades
     container_name: hades
     network_mode: bridge
     tmpfs:
