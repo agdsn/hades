@@ -199,9 +199,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
     ignored.
     """
-    default = {
-        'dbname': 'hades',
-    }
+    default = {}
     type = collections.Mapping
 
 
