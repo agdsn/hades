@@ -50,7 +50,7 @@ def relative_path(value: str) -> pathlib.PurePath:
 def create_parser() -> ArgumentParser:
     parser = ArgumentParser(parents=[common_parser])
     parser.add_argument('-m', '--mode', type=mode, default=0o0750,
-                        help="The mode of created files and directories. Only"
+                        help="The mode of created files and directories. Only "
                              "read, write, setgid, and sticky bits are "
                              "respected. Files are never executable or setgid. "
                              "Directories are always executable if they are "
@@ -62,7 +62,7 @@ def create_parser() -> ArgumentParser:
     parser.add_argument(dest='source', type=relative_path, metavar='SOURCE',
                         help="Template file name or template directory name")
     parser.add_argument(dest='destination', metavar='DESTINATION', nargs='?',
-                        help="Destination file or directory (default is stdout"
+                        help="Destination file or directory (default is stdout "
                              "for files; required for directories)")
     return parser
 
