@@ -5,8 +5,8 @@
   {% for interface in [HADES_RADIUS_INTERFACE, HADES_VRRP_INTERFACE, HADES_AUTH_INTERFACE, HADES_UNAUTH_INTERFACE] %}
 auto {{ interface }}
 iface {{ interface }} inet manual
-  pre-up ip link add {{ interface }} type dummy
-  post-down ip link delete {{ interface }}
+  pre-up {{ constants.IP }} link add {{ interface }} type dummy
+  post-down {{ constants.IP }} link delete {{ interface }}
 
   {% endfor %}
 {% endif %}
