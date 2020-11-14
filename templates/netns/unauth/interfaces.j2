@@ -7,7 +7,7 @@ iface lo inet loopback
 auto eth0
 iface eth0 inet static inherits veth
   # Add address to the root end of the veth pair
-  pre-up {{ constants.IP }} -n root address add {{ HADES_NETNS_MAIN_UNAUTH_LISTEN }} dev unauth-$IFACE
+  pre-up {{ constants.IP }} -netns root address add {{ HADES_NETNS_MAIN_UNAUTH_LISTEN }} dev unauth-$IFACE
   # Let ifup handle the configuration of namespace end of the veth pair
   address {{ HADES_NETNS_UNAUTH_LISTEN }}
   gateway {{ HADES_NETNS_MAIN_UNAUTH_LISTEN.ip }}
@@ -15,9 +15,9 @@ iface eth0 inet static inherits veth
 auto eth1
 iface eth1 inet manual inherits veth
   # Attach root end of the veth pair to the VRRP bridge
-  pre-up {{ constants.IP }} -n root link set unauth-eth1 master {{ HADES_VRRP_BRIDGE }}
+  pre-up {{ constants.IP }} -netns root link set unauth-eth1 master {{ HADES_VRRP_BRIDGE }}
 
 auto eth2
 iface eth2 inet manual inherits veth
   # Attach the root end of the veth pair to the bridge
-  pre-up {{ constants.IP }} -n root link set unauth-eth2 master {{ HADES_UNAUTH_BRIDGE }}
+  pre-up {{ constants.IP }} -netns root link set unauth-eth2 master {{ HADES_UNAUTH_BRIDGE }}
