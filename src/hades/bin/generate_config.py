@@ -52,7 +52,7 @@ def create_parser() -> ArgumentParser:
     parser.add_argument('-m', '--mode', type=mode, default=0o0750,
                         help="The mode of created files and directories. Only "
                              "read, write, setgid, and sticky bits are "
-                             "respected. Files are never executable or setgid. "
+                             "respected. Files are never executable or setuid. "
                              "Directories are always executable if they are "
                              "readable and optionally have setgid and sticky "
                              "bits set.")
