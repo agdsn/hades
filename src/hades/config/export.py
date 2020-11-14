@@ -24,6 +24,7 @@ def escape(value):
 def export(config, output_format, file):
     """
     Export config as shell variables.
+
     :param config: Configuration to export
     :param output_format: One of systemd, posix, bash, zsh
     :param file: File-like object
