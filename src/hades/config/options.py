@@ -91,7 +91,6 @@ class HADES_CUSTOM_IPTABLES_INPUT_RULES(Option):
     A list of valid ``iptables-restore`` rule lines with leading ``-A INPUT``.
     """
     type = collections.Sequence
-    required = False
     default = []
 
 
