@@ -51,7 +51,7 @@ teardown() {
 }
 
 @test "check that client can acquire DHCP lease" {
-	run ns dhcpcd --noipv4ll --ipv4only --oneshot eth0
+	run ns dhcpcd --config /dev/null --option domain_name_servers,domain_name,domain_search,host_name --timeout 10 --noipv4ll --ipv4only --oneshot eth0
 	echo "$output" >&2
 	[[ $status = 0 ]]
 	egrep 'leased [^ ]+ for [0-9]+ seconds' <<<"$output"
