@@ -1,2 +1,6 @@
-{% include "unbound-common.j2" %}
+{% extends "unbound-common.j2" %}
+
+{% block server %}
+{{ super() }}
     pidfile: "{{ constants.AUTH_DNS_PRISTINE_PID_FILE }}"
+{% endblock %}

@@ -1,8 +1,11 @@
 # {{ comment }}
 
+{% block remote_control %}
 remote-control:
     control-enable: no
+{% endblock %}
 
+{% block server %}
 server:
     directory: "{{ constants.AUTH_DNS_HOME }}"
     username: {{ constants.AUTH_DNS_USER }}
@@ -23,3 +26,4 @@ server:
     log-time-ascii: yes
     outgoing-num-tcp: 100
     incoming-num-tcp: 100
+{% endblock %}

@@ -1,4 +1,7 @@
-{% include "unbound-common.j2" %}
+{% extends "unbound-common.j2" %}
+
+{% block server %}
+{{ super() }}
     pidfile: "{{ constants.AUTH_DNS_ALTERNATIVE_PID_FILE }}"
     port: 9053
     {% for name, zone in HADES_AUTH_DNS_ALTERNATIVE_ZONES.items() %}
@@ -7,3 +10,4 @@
     local-data: "{{ rr.name }} {{ rr.ttl }} {{ rr.class }} {{ rr.type }} {{ rr.data }}"
     {% endfor %}
     {% endfor %}
+{% endblock %}
