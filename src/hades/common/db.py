@@ -88,14 +88,16 @@ class TupleArray(ARRAY):
 
 
 alternative_dns = Table(
-    'alternative_dns', metadata,
+    "alternative_dns",
+    metadata,
     Column('IPAddress', IPAddress, nullable=False),
     UniqueConstraint('IPAddress'),
 )
 temp_alternative_dns = as_copy(alternative_dns, 'temp_alternative_dns')
 
 dhcphost = Table(
-    'dhcphost', metadata,
+    "dhcphost",
+    metadata,
     Column('MAC', MACAddress, nullable=False),
     Column('IPAddress', IPAddress, nullable=False),
     UniqueConstraint('MAC'),
@@ -104,7 +106,8 @@ dhcphost = Table(
 temp_dhcphost = as_copy(dhcphost, 'temp_dhcphost')
 
 nas = Table(
-    'nas', metadata,
+    "nas",
+    metadata,
     Column('Id', Integer, unique=True, nullable=False),
     Column('NASName', Text, unique=True, nullable=False),
     Column('ShortName', Text, unique=True, nullable=False),
@@ -121,7 +124,8 @@ nas = Table(
 temp_nas = as_copy(nas, 'temp_nas')
 
 radacct = Table(
-    'radacct', metadata,
+    "radacct",
+    metadata,
     Column('RadAcctId', BigInteger, primary_key=True, nullable=False),
     Column('AcctSessionId', Text, nullable=False),
     Column('AcctUniqueId', Text, unique=True, nullable=False),
@@ -150,7 +154,8 @@ radacct = Table(
 )
 
 radcheck = Table(
-    'radcheck', metadata,
+    "radcheck",
+    metadata,
     Column('Priority', Integer, nullable=False),
     Column('UserName', Text, nullable=False),
     Column('NASIPAddress', IPAddress, nullable=False),
@@ -163,7 +168,8 @@ radcheck = Table(
 temp_radcheck = as_copy(radcheck, 'temp_radcheck')
 
 radgroupcheck = Table(
-    'radgroupcheck', metadata,
+    "radgroupcheck",
+    metadata,
     Column('Priority', Integer, nullable=False),
     Column('GroupName', Text, nullable=False),
     Column('Attribute', Text, nullable=False),
@@ -174,7 +180,8 @@ radgroupcheck = Table(
 temp_radgroupcheck = as_copy(radgroupcheck, 'temp_radgroupcheck')
 
 radgroupreply = Table(
-    'radgroupreply', metadata,
+    "radgroupreply",
+    metadata,
     Column('Priority', Integer, nullable=False),
     Column('GroupName', Text, nullable=False),
     Column('Attribute', Text, nullable=False),
@@ -185,7 +192,8 @@ radgroupreply = Table(
 temp_radgroupreply = as_copy(radgroupreply, 'temp_radgroupreply')
 
 radpostauth = Table(
-    'radpostauth', metadata,
+    "radpostauth",
+    metadata,
     Column('Id', BigInteger, primary_key=True, nullable=False),
     Column('UserName', Text, nullable=False),
     Column('NASIPAddress', IPAddress, nullable=False),
@@ -200,7 +208,8 @@ radpostauth = Table(
 )
 
 radreply = Table(
-    'radreply', metadata,
+    "radreply",
+    metadata,
     Column('Priority', Integer, nullable=False),
     Column('UserName', Text, nullable=False),
     Column('NASIPAddress', IPAddress, nullable=False),
@@ -213,7 +222,8 @@ radreply = Table(
 temp_radreply = as_copy(radreply, 'temp_radreply')
 
 radusergroup = Table(
-    'radusergroup', metadata,
+    "radusergroup",
+    metadata,
     Column('Priority', Integer, nullable=False),
     Column('UserName', Text, nullable=False),
     Column('NASIPAddress', IPAddress, nullable=False),
