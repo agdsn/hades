@@ -145,9 +145,11 @@ class type_is(Check):
 
     def __call__(self, config, value):
         if not isinstance(value, self.types):
-            raise OptionCheckError("Must be an instance of {}"
-                                   .format(', '.join([type_.__qualname__ for type_ in self.types])),
-                                   option=self.option.__name__)
+            types = ", ".join([type_.__qualname__ for type_ in self.types])
+            raise OptionCheckError(
+                "Must be an instance of {}".format(types),
+                option=self.option.__name__,
+            )
 
 
 # noinspection PyUnusedLocal
