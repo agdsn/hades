@@ -14,6 +14,8 @@ class equal_to(Compute):
             raise TypeError("Expected Option subclass or str, was {}"
                             .format(type(self.other_name)))
 
+        self.__doc__ = "Equal to {}".format(option_reference(self.other_name))
+
     def __call__(self, config):
         try:
             return config[self.other_name]
@@ -22,10 +24,6 @@ class equal_to(Compute):
                 "Can not set equal to option {}, option is not defined"
                 .format(self.other_name), option=self.option.__name__
             ) from e
-
-    @property
-    def __doc__(self):
-        return "Equal to {}".format(option_reference(self.other_name))
 
 
 class deferred_format(Compute):
@@ -51,13 +49,6 @@ class deferred_format(Compute):
         self.args = tuple(coerce(arg) for arg in args)
         self.kwargs = {k: coerce(v) for k, v in kwargs}
 
-    def __call__(self, config):
-        fmt_args = tuple(config[a] for a in self.args)
-        fmt_kwargs = {k: config[v] for k, v in self.kwargs}
-        return self.fmt_string.format(*fmt_args, **fmt_kwargs)
-
-    @property
-    def __doc__(self):
         args, kwargs = "", ""
         if self.args:
             args = (
@@ -75,5 +66,12 @@ class deferred_format(Compute):
                  "arguments" if len(self.args) > 1 else "argument")
             )
 
-        return ("Will be computed from the format string :python:`{!r}`{}{}."
-                .format(self.fmt_string, args, kwargs))
+        self.__doc__ = (
+            "Will be computed from the format string :python:`{!r}`{}{}."
+            .format(self.fmt_string, args, kwargs)
+        )
+
+    def __call__(self, config):
+        fmt_args = tuple(config[a] for a in self.args)
+        fmt_kwargs = {k: config[v] for k, v in self.kwargs}
+        return self.fmt_string.format(*fmt_args, **fmt_kwargs)
