@@ -298,7 +298,7 @@ class has_keys(Check):
     def __init__(self, *keys):
         super().__init__()
         self.keys = keys
-        self.__doc__ = "Must contain ".format(
+        self.__doc__ = "Must contain {}".format(
             " -> ".join("{!r}".format(key) for key in self.keys),
         )
 
