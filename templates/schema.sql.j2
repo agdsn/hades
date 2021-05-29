@@ -36,13 +36,9 @@
 {% endif %}
 
 {% macro join_options(options) %}
-    {% if options %}
-    {% set items = options.items()|list %}
-    {% for name, value in items[:-1] %}
-    {{ name }} '{{ value }}',
+    {% for name, value in options.items() %}
+    {{ name }} '{{ value }}'{% if not loop.last %},{% endif %}
     {% endfor %}
-    {{ items[-1][0] }} '{{ items[-1][1] }}'
-    {% endif %}
 {% endmacro %}
 
 
