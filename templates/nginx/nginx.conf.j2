@@ -8,6 +8,8 @@ daemon on;
 
 error_log stderr;
 
+include {{ destination_dir }}/modules-enabled/*.conf;
+
 events {
 	worker_connections 768;
 	# multi_accept on;
