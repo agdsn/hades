@@ -8,9 +8,10 @@ readonly client_hostname=test
 readonly gateway_ip_address=141.30.226.1/23
 readonly relay_ip_address=10.66.67.1/24
 readonly auth_ip=10.66.67.10/24
+readonly dhcrelay_pid_file=/run/test-dhcrelay.pid
 
 dhcrelay() {
-	ns_exec test-relay dhcrelay -pf /run/test-dhcrelay.pid -4 -a -id eth0 -iu eth1 "$(netaddr.ip "$auth_ip")"
+	ns_exec test-relay dhcrelay -pf "$dhcrelay_pid_file" -4 -a -id eth0 -iu eth1 "$(netaddr.ip "$auth_ip")"
 }
 
 ns() {
@@ -36,7 +37,8 @@ setup() {
 }
 
 teardown() {
-	[[ -f /run/test-dhcrelay.pid ]] && kill "$(</run/test-dhcrelay.pid)"
+	[[ -f "$dhcrelay_pid_file" ]] && kill "$(<"$dhcrelay_pid_file")" || :
+	rm -f "$dhcrelay_pid_file"
 	unlink_namespace test-relay eth1
 	unlink_namespace test-relay eth0
 	unlink_namespace test-auth eth0
