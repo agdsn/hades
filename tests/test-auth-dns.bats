@@ -2,7 +2,6 @@
 
 load common
 
-readonly client_mac_address=de:ad:be:ef:00:00
 readonly client_ip_address=141.30.227.13/23
 readonly relay_ip_address=10.66.67.1/24
 readonly nameserver_ip_address=10.66.67.10/24
@@ -42,16 +41,13 @@ setup() {
 	echo auth routes:
 	ns_exec auth ip route
 	psql foreign <<-EOF
-		TRUNCATE dhcphost;
 		TRUNCATE alternative_dns;
-		INSERT INTO dhcphost VALUES ('${client_mac_address}', '$(netaddr.ip "${client_ip_address}")')
 	EOF
 	refresh
 }
 
 teardown() {
 	psql foreign <<-EOF
-		TRUNCATE dhcphost;
 		TRUNCATE alternative_dns;
 	EOF
 	refresh
