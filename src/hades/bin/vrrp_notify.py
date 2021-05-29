@@ -66,7 +66,11 @@ def create_parser() -> ArgumentParser:
                             parents=[common_parser])
     parser.add_argument('type', choices=['GROUP', 'INSTANCE'],
                         help="Type indication")
-    parser.add_argument('name', help="The name of the group or instance")
+    parser.add_argument(
+        "name",
+        help="The name of the group or instance",
+        choices=["hades-auth", "hades-root", "hades-unauth"],
+    )
     parser.add_argument('state', choices=['MASTER', 'BACKUP', 'FAULT'],
                         help="The state it's transitioning to")
     parser.add_argument('priority', type=int, help="The priority value")
