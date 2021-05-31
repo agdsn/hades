@@ -46,12 +46,28 @@ refresh() {
 	systemctl start --wait hades-refresh.service
 }
 
+netaddr.broadcast() {
+	python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).broadcast)" "$1"
+}
+
 netaddr.ip() {
 	python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).ip)" "$1"
 }
 
 netaddr.cidr() {
 	python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).cidr)" "$1"
+}
+
+netaddr.netmask() {
+	python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).netmask)" "$1"
+}
+
+netaddr.network() {
+	python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).network)" "$1"
+}
+
+netaddr.prefixlen() {
+	python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).prefixlen)" "$1"
 }
 
 netaddr.value() {
