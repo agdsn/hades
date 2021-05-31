@@ -23,7 +23,7 @@ setup() {
 	setup_namespace test-relay
 	ip link add br-relay up type bridge
 	iptables -I FORWARD 1 -m physdev --physdev-is-bridged -i br-relay -o br-relay -j ACCEPT
-	link_namespace test-auth br-relay eth0 de:ad:be:ef:00:00
+	link_namespace test-auth br-relay eth0 "$client_mac_address"
 	link_namespace test-relay br-relay eth0
 	link_namespace test-relay br-auth eth1
 	ns_exec test-relay ip address add "$gateway_ip_address" dev eth0
