@@ -311,7 +311,7 @@ class has_keys(Check):
         for key in self.keys:
             if not isinstance(obj, collections.Mapping):
                 path = ''.join(map('[{!r}]'.format, checked))
-                raise OptionCheckError("must be a mapping type like dict"
+                raise OptionCheckError("must be a mapping type like dict",
                                        option=self.option.name + path)
             checked.append(key)
             try:
