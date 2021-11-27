@@ -202,9 +202,11 @@ radpostauth = Table(
     Column('Groups', TupleArray(Text, dimensions=1)),
     Column('Reply', TupleArray(Text, dimensions=2)),
     Column('AuthDate', DateTime(timezone=True), nullable=False),
-    CheckConstraint(func.array_ndim("Groups") == 1),
-    CheckConstraint(func.array_ndim("Reply") == 2 and
-                    func.array_length("Reply", 2) == 2),
+    CheckConstraint(func.coalesce(func.array_ndims("Groups"), 1) == 1),
+    CheckConstraint(
+        func.coalesce(func.array_ndims("Reply"), 2) == 2
+        and func.coalesce(func.array_length("Reply", 2), 2) == 2
+    ),
 )
 
 radreply = Table(
