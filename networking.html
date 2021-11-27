@@ -1,69 +1,155 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Networking &mdash; Hades 0.1.0-177-g0b187d3 documentation</title>
-    
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1.0-177-g0b187d3',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Hades 0.1.0-177-g0b187d3 documentation" href="index.html" />
-    <link rel="next" title="Configuration" href="configuration.html" />
-    <link rel="prev" title="Components" href="components.html" />
-   
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>Networking &#8212; Hades 0.4.0-180-g86b2a9b documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/guzzle.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Replication" href="replication.html" />
+    <link rel="prev" title="Components" href="components.html" />
+  
+   
 
-  </head>
-  <body role="document">  
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="replication.html" title="Replication"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="components.html" title="Components"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Networking</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
-  <div class="section" id="networking">
-<h1>Networking<a class="headerlink" href="#networking" title="Permalink to this headline">¶</a></h1>
-<p>Hades was designed with the AG DSN network topology in mind.
-In principal four different types of IP subnets were assumed/are supported:</p>
-<ul class="simple">
-<li>internal subnets: Subnet for internal services that should not be exposed
-to users, e.g. RADIUS, VRRP</li>
-<li>an unauth subnet: A private subnet for all unauthorized users of a site.
-DNS, DHCP and a captive portal are offered on this network</li>
-<li>an auth subnet: The subnet where the site node listens to offer services to
-authorized users, e.g. DNS and DHCP</li>
-<li>the user subnets: The actual subnets of authorized users</li>
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Networking</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#network-namespaces">Network Namespaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vlan-transitions">VLAN Transitions</a></li>
 </ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="replication.html">Replication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alternative-dns.html">Alternative DNS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/hades.html">Code Documentation</a></li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="index.html">Docs</a></li>
+              
+              <li>Networking</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <section id="networking">
+<span id="id1"></span><h1>Networking<a class="headerlink" href="#networking" title="Permalink to this headline">¶</a></h1>
+<p>Hades was designed specifically for the needs of the AG DSN.
+It may not be suited perfectly for other networks without changes.
+In principal a network topology with four different types of IP subnets was
+assumed/is supported:</p>
+<ol class="arabic simple">
+<li><p>internal subnets: Subnets for internal services that should not be exposed
+to users, e.g. RADIUS, VRRP</p></li>
+<li><p>an unauth subnet: A private subnet for all unauthorized users of a site.
+DNS, DHCP and a captive portal are offered on this network</p></li>
+<li><p>an auth subnet: The subnet where the site node listens to offer services to
+authorized users, e.g. DNS and DHCP</p></li>
+<li><p>the user subnets: The actual subnets of authorized users</p></li>
+</ol>
 <p>A Hades site note is expected to be directly attached to the first three types
-of subnets (internal, unauth, auth).
-A site node must not be attached directly to the user subnets.
-Authenticated users must therefore be routed to the site node.
-This is due to VLAN transitions.</p>
-<div class="section" id="vlan-transitions">
+of subnets (internal, unauth, auth).</p>
+<section id="network-namespaces">
+<h2>Network Namespaces<a class="headerlink" href="#network-namespaces" title="Permalink to this headline">¶</a></h2>
+<p>The network requirements of Had.</p>
+<p>For example, normal
+Due to the complexity of the networking, Hades uses network namespaces.</p>
+<p>For more information about network namespaces, please see the namespaces man
+pages
+<a class="reference external" href="https://manpages.debian.org/stretch/manpages/namespaces.7.en.html">namespaces(7)</a>,
+<a class="reference external" href="https://manpages.debian.org/stretch-backports/manpages/network_namespaces.7.en.html">network_namespaces(7)</a>,
+and the <code class="docutils literal notranslate"><span class="pre">iproute2</span></code> man page about <code class="docutils literal notranslate"><span class="pre">netns</span></code> subcommand of <code class="docutils literal notranslate"><span class="pre">ip</span></code> to manage
+named network namespaces
+<a class="reference external" href="https://manpages.debian.org/stretch/iproute2/ip-netns.8.en.html">ip-netns(8)</a>.</p>
+</section>
+<section id="vlan-transitions">
 <h2>VLAN Transitions<a class="headerlink" href="#vlan-transitions" title="Permalink to this headline">¶</a></h2>
 <p>The authorization status of users may change, previously authorized users may
 become unauthorized and subsequently switch from the auth network to the unauth
-network. Users or rather the network stack of their devices won&#8217;t notice this
+network. Users or rather the network stack of their devices won't notice this
 switch and retain their previously assigned IP address. This could be handled
 with short DHCP lease times, short lease times are however not recommended.
-RFC 2131 recommends a minimum lease time of one hour for production systems.</p>
+<a class="reference external" href="https://tools.ietf.org/html/rfc2131">RFC 2131</a>
+recommends a minimum lease time of one hour for production systems.</p>
 <p>In Hades we handle this problem differently, by allowing the user to retain
 their original user network IP in the unauth network. This is accomplished by
 adding the IP addresses of the default gateways of the user networks to the
@@ -73,7 +159,7 @@ has changed.</p>
 <p>This approach works, but has a big problem. Authenticated users also make
 requests (DNS and DHCP) to the site node. The Kernel would either discard these
 requests if strict reverse path forwarding/filtering is enabled, because the
-requests are arriving on the wrong interface according to the Kernel&#8217;s routing
+requests are arriving on the wrong interface according to the Kernel's routing
 table (because the Kernel thinks requests from the user networks should arrive
 on the unauth interface), or replies to the requests would be sent out on the
 unauth interface.</p>
@@ -84,78 +170,54 @@ sets up two different routing tables, one for connections originating from the
 unauth interface (default table id 2) and one for any other connection (default
 table id 1). The main routing table of the Kernel is only used as a template to
 setup the other tables.</p>
-</div>
-<div class="section" id="fail-over-vrrp">
-<h2>Fail-Over (VRRP)<a class="headerlink" href="#fail-over-vrrp" title="Permalink to this headline">¶</a></h2>
-<p>Hades employs the Virtual Router Redundancy Protocol (VRRP) to allow multiple
-site node instances for a single sites.
-It uses keepalived</p>
-<p>Even if there is only a single site node instance per site, keepalived is still
-started to setup most of the network configuration.</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Networking</a><ul>
-<li><a class="reference internal" href="#vlan-transitions">VLAN Transitions</a></li>
-<li><a class="reference internal" href="#fail-over-vrrp">Fail-Over (VRRP)</a></li>
-</ul>
-</li>
-</ul>
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="components.html" title="previous chapter">Components</a></li>
-      <li>Next: <a href="configuration.html" title="next chapter">Configuration</a></li>
-  </ul></li>
-</ul>
-</div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/networking.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2015, Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN), Sebastian Schrader.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
-      
-      |
-      <a href="_sources/networking.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
+            
+  <div class="footer-relations">
     
-
+      <div class="pull-left">
+        <a class="btn btn-default" href="components.html" title="previous chapter (use the left arrow)">Components</a>
+      </div>
     
+      <div class="pull-right">
+        <a class="btn btn-default" href="replication.html" title="next chapter (use the right arrow)">Replication</a>
+      </div>
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="replication.html" title="Replication"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="components.html" title="Components"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Networking</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2015-2020, Sebastian Schrader, Stefan Haller. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
   </body>
 </html>

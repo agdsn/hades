@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="../../../_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="../../../_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="../../../_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="../../../_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>hades.config.base &#8212; Hades 0.4.0-180-g86b2a9b documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/guzzle.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  
+   
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.config.base</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../components.html">Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../networking.html">Networking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../replication.html">Replication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../alternative-dns.html">Alternative DNS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">CLI Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/hades.html">Code Documentation</a></li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="../../../search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="../../../index.html">Docs</a></li>
+              
+                <li><a href="../../index.html">Module code</a></li>
+              
+              <li>hades.config.base</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <h1>Source code for hades.config.base</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="n">option_name_regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\A[A-Z][A-Z0-9_]*\Z&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">ASCII</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="is_option_name"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.is_option_name">[docs]</a><span class="k">def</span> <span class="nf">is_option_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if a given object is a valid option name.</span>
+
+<span class="sd">    Valid option names are restricted to ASCII, start with an uppercase letter</span>
+<span class="sd">    followed by uppercase letters (A-Z), digits (0-9) or the underscore (_).</span>
+
+<span class="sd">    :param name: Name</span>
+<span class="sd">    :return: True, if name is string and a valid option name, False otherwise</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">option_name_regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="qualified_name"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.qualified_name">[docs]</a><span class="k">def</span> <span class="nf">qualified_name</span><span class="p">(</span><span class="n">type_</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">type_</span><span class="o">.</span><span class="vm">__module__</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">type_</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">==</span> <span class="s1">&#39;builtins&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">type_</span><span class="o">.</span><span class="vm">__qualname__</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">type_</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">type_</span><span class="o">.</span><span class="vm">__qualname__</span></div>
+
+
+<div class="viewcode-block" id="option_reference"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.option_reference">[docs]</a><span class="k">def</span> <span class="nf">option_reference</span><span class="p">(</span><span class="n">option</span><span class="p">):</span>
+    <span class="n">option</span> <span class="o">=</span> <span class="n">coerce</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;:hades:option:`</span><span class="si">{}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">option</span><span class="p">)</span></div>
+
+
+<span class="c1"># noinspection PyUnresolvedReferences</span>
+<div class="viewcode-block" id="OptionMeta"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.OptionMeta">[docs]</a><span class="k">class</span> <span class="nc">OptionMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Metaclass for options.</span>
+
+<span class="sd">    Classes with this metaclass, which are named not declared abstract by</span>
+<span class="sd">    setting the abstract keyword argument are added to the :attr:`.options`</span>
+<span class="sd">    dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">mcs</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;option named </span><span class="si">{}</span><span class="s2"> already defined as </span><span class="si">{}</span><span class="s2">.&quot;</span>
+                            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">qualified_name</span><span class="p">(</span><span class="n">mcs</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">name</span><span class="p">])))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">abstract</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_option_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;not a valid option name&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">abstract</span> <span class="ow">and</span> <span class="s1">&#39;default&#39;</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+            <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;has_default&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">OptionMeta</span><span class="p">,</span> <span class="n">mcs</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attributes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">has_default</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;required options can&#39;t have defaults&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">abstract</span><span class="p">:</span>
+            <span class="n">mcs</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+        <span class="k">return</span> <span class="bp">cls</span>
+
+    <span class="c1"># noinspection PyUnusedLocal</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attributes</span><span class="p">)</span>
+
+<div class="viewcode-block" id="OptionMeta.get_defaults"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.OptionMeta.get_defaults">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_defaults</span><span class="p">(</span><span class="n">mcs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">option</span><span class="o">.</span><span class="n">default</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">mcs</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">has_default</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="OptionMeta.check_config"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.OptionMeta.check_config">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">check_config</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">runtime_checks</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">mcs</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MissingOptionError</span><span class="p">(</span><span class="s2">&quot;Required option missing&quot;</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">option</span> <span class="o">=</span> <span class="n">mcs</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">option</span><span class="p">:</span>
+                <span class="n">option</span><span class="o">.</span><span class="n">check_option</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span>
+                                    <span class="n">runtime_checks</span><span class="o">=</span><span class="n">runtime_checks</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OptionMeta.check_option"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.OptionMeta.check_option">[docs]</a>    <span class="k">def</span> <span class="nf">check_option</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">runtime_checks</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
+            <span class="n">expected</span> <span class="o">=</span> <span class="n">qualified_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+            <span class="n">got</span> <span class="o">=</span> <span class="n">qualified_name</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">OptionCheckError</span><span class="p">(</span><span class="s2">&quot;Must be a subtype of </span><span class="si">{}</span><span class="s2">, was </span><span class="si">{}</span><span class="s2">&quot;</span>
+                                   <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">got</span><span class="p">),</span> <span class="n">option</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_check</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">static_check</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">runtime_checks</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">runtime_check</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runtime_check</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">OptionMeta</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">has_default</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">runtime_check</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">static_check</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="ConfigError"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.ConfigError">[docs]</a><span class="k">class</span> <span class="nc">ConfigError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for all config related errors.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="ConfigOptionError"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.ConfigOptionError">[docs]</a><span class="k">class</span> <span class="nc">ConfigOptionError</span><span class="p">(</span><span class="n">ConfigError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for errors related to processing a specific option&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ConfigOptionError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">option</span> <span class="o">=</span> <span class="n">option</span></div>
+
+
+<div class="viewcode-block" id="MissingOptionError"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.MissingOptionError">[docs]</a><span class="k">class</span> <span class="nc">MissingOptionError</span><span class="p">(</span><span class="n">ConfigOptionError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Indicates that a required option is missing&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="OptionCheckError"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.OptionCheckError">[docs]</a><span class="k">class</span> <span class="nc">OptionCheckError</span><span class="p">(</span><span class="n">ConfigOptionError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Indicates that an option check failed&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="coerce"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.coerce">[docs]</a><span class="k">def</span> <span class="nf">coerce</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Option</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="OptionDescriptor"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.OptionDescriptor">[docs]</a><span class="k">class</span> <span class="nc">OptionDescriptor</span><span class="p">:</span>
+<div class="viewcode-block" id="OptionDescriptor.decorate"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.OptionDescriptor.decorate">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">decorate</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert regular functions into an :class:`OptionDescriptor`.</span>
+
+<span class="sd">        The function will be called with the option as its first argument.</span>
+
+<span class="sd">        Functions are automatically decorated with :class:`classmethod`, if they</span>
+<span class="sd">        are not already an instance of :class:`classmethod` or</span>
+<span class="sd">        :class:`staticmethod`.</span>
+<span class="sd">        :param f: The function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Ensure that we have a static or class method</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="nb">classmethod</span><span class="p">,</span> <span class="nb">staticmethod</span><span class="p">)):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="nb">classmethod</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">f</span>
+
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">updated</span><span class="o">=</span><span class="p">())</span>
+        <span class="k">class</span> <span class="nc">wrapper</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Descriptor, that binds the given function in addition to an</span>
+<span class="sd">            option&quot;&quot;&quot;</span>
+            <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bound</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bound</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">owner</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">option</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">bound</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">owner</span><span class="p">)</span>
+                <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">owner</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wrapper</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">option</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">owner</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">option</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">option</span> <span class="o">=</span> <span class="n">owner</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="Check"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.Check">[docs]</a><span class="k">class</span> <span class="nc">Check</span><span class="p">(</span><span class="n">OptionDescriptor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for descriptors, that check the value of options&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check the ``value`` of an option given ``config``.</span>
+
+<span class="sd">        :param config: The fully expanded config</span>
+<span class="sd">        :param value: The value of the Option</span>
+<span class="sd">        :raises OptionCheckError: if the value of the option is illegal</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Compute"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.base.Compute">[docs]</a><span class="k">class</span> <span class="nc">Compute</span><span class="p">(</span><span class="n">OptionDescriptor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for descriptors, that compute the value of options.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute the value of the option using ``config``.</span>
+
+<span class="sd">        :param config: An potentially not fully expanded config object</span>
+<span class="sd">        :raises OptionCheckError: if the value can&#39;t be computed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+            
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.config.base</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="../../../_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2015-2020, Sebastian Schrader, Stefan Haller. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

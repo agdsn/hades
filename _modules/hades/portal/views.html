@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="../../../_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="../../../_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="../../../_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="../../../_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>hades.portal.views &#8212; Hades 0.4.0-180-g86b2a9b documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/guzzle.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  
+   
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../portal.html" accesskey="U">hades.portal</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.portal.views</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../components.html">Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../networking.html">Networking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../replication.html">Replication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../alternative-dns.html">Alternative DNS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">CLI Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/hades.html">Code Documentation</a></li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="../../../search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="../../../index.html">Docs</a></li>
+              
+                <li><a href="../../index.html">Module code</a></li>
+              
+                <li><a href="../portal.html">hades.portal</a></li>
+              
+              <li>hades.portal.views</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <h1>Source code for hades.portal.views</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">arpreq</span>
+
+<span class="kn">import</span> <span class="nn">sqlalchemy.exc</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span>
+<span class="kn">from</span> <span class="nn">flask_babel</span> <span class="kn">import</span> <span class="n">_</span><span class="p">,</span> <span class="n">lazy_gettext</span>
+
+<span class="kn">from</span> <span class="nn">hades.common.db</span> <span class="kn">import</span> <span class="n">create_engine</span><span class="p">,</span> <span class="n">get_groups</span><span class="p">,</span> <span class="n">get_latest_auth_attempt</span>
+<span class="kn">from</span> <span class="nn">hades.config.loader</span> <span class="kn">import</span> <span class="n">get_config</span>
+<span class="kn">from</span> <span class="nn">hades.portal</span> <span class="kn">import</span> <span class="n">app</span><span class="p">,</span> <span class="n">babel</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">logger</span>
+
+
+<span class="n">messages</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;traffic&#39;</span><span class="p">:</span> <span class="n">lazy_gettext</span><span class="p">(</span><span class="s2">&quot;You&#39;ve exceeded your traffic limit.&quot;</span><span class="p">),</span>
+    <span class="s1">&#39;violation&#39;</span><span class="p">:</span> <span class="n">lazy_gettext</span><span class="p">(</span><span class="s2">&quot;You violated our Terms of Services. &quot;</span>
+                              <span class="s2">&quot;Please contact our support.&quot;</span><span class="p">),</span>
+    <span class="s1">&#39;security&#39;</span><span class="p">:</span> <span class="n">lazy_gettext</span><span class="p">(</span><span class="s2">&quot;We had to block you due to security problems &quot;</span>
+                             <span class="s2">&quot;with your devices. &quot;</span>
+                             <span class="s2">&quot;Please contact our support.&quot;</span><span class="p">),</span>
+    <span class="s1">&#39;default_in_payment&#39;</span><span class="p">:</span> <span class="n">lazy_gettext</span><span class="p">(</span>
+        <span class="s2">&quot;You are late with paying your fees. &quot;</span>
+        <span class="s2">&quot;Please pay the outstanding fees. &quot;</span>
+        <span class="s2">&quot;To regain network connectivity immediately, inform our support. &quot;</span>
+        <span class="s2">&quot;Otherwise your account will be re-enabled as soon as your money &quot;</span>
+        <span class="s2">&quot;arrived on our bank account.&quot;</span><span class="p">),</span>
+    <span class="s1">&#39;wrong_port&#39;</span><span class="p">:</span> <span class="n">lazy_gettext</span><span class="p">(</span><span class="s2">&quot;According to our records you live in a &quot;</span>
+                               <span class="s2">&quot;different room. &quot;</span>
+                               <span class="s2">&quot;Please inform us of your relocation.&quot;</span><span class="p">),</span>
+    <span class="s1">&#39;unknown&#39;</span><span class="p">:</span> <span class="n">lazy_gettext</span><span class="p">(</span><span class="s2">&quot;We don&#39;t recognize your MAC address. &quot;</span>
+                            <span class="s2">&quot;If you are already a AG DSN member, you are &quot;</span>
+                            <span class="s2">&quot;probably using a different device, please tell us &quot;</span>
+                            <span class="s2">&quot;its MAC address. &quot;</span>
+                            <span class="s2">&quot;If you are not a member, please apply.&quot;</span><span class="p">),</span>
+    <span class="s1">&#39;membership_ended&#39;</span><span class="p">:</span> <span class="n">lazy_gettext</span><span class="p">(</span><span class="s2">&quot;Your current membership status does not &quot;</span>
+                                     <span class="s2">&quot;allow network access. &quot;</span>
+                                     <span class="s2">&quot;Please contact our support.&quot;</span><span class="p">),</span>
+    <span class="s1">&#39;reject&#39;</span><span class="p">:</span> <span class="n">lazy_gettext</span><span class="p">(</span><span class="s2">&quot;Unknown reason. Please contact our support&quot;</span><span class="p">),</span>
+<span class="p">}</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="get_locale"><a class="viewcode-back" href="../../../api/hades.portal.html#hades.portal.views.get_locale">[docs]</a><span class="nd">@babel</span><span class="o">.</span><span class="n">localeselector</span>
+<span class="k">def</span> <span class="nf">get_locale</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">accept_languages</span><span class="o">.</span><span class="n">best_match</span><span class="p">([</span><span class="s1">&#39;de&#39;</span><span class="p">,</span> <span class="s1">&#39;en&#39;</span><span class="p">])</span></div>
+
+
+<span class="c1"># noinspection PyUnusedLocal</span>
+<div class="viewcode-block" id="handle_database_error"><a class="viewcode-back" href="../../../api/hades.portal.html#hades.portal.views.handle_database_error">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">errorhandler</span><span class="p">(</span><span class="n">sqlalchemy</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">handle_database_error</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;error.html&quot;</span><span class="p">,</span>
+                              <span class="n">message</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;The database is unavailable&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">content</span><span class="p">,</span> <span class="mi">500</span></div>
+
+
+<div class="viewcode-block" id="init_engine"><a class="viewcode-back" href="../../../api/hades.portal.html#hades.portal.views.init_engine">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">before_first_request</span>
+<span class="k">def</span> <span class="nf">init_engine</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">engine</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">(</span><span class="n">runtime_checks</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="index"><a class="viewcode-back" href="../../../api/hades.portal.html#hades.portal.views.index">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="n">ip</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">remote_addr</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mac</span> <span class="o">=</span> <span class="n">arpreq</span><span class="o">.</span><span class="n">arpreq</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Could not resolve IP </span><span class="si">{}</span><span class="s2"> into MAC: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;error.html&quot;</span><span class="p">,</span>
+                                  <span class="n">message</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;An unexpected error occurred &quot;</span>
+                                            <span class="s2">&quot;while resolving your IP address &quot;</span>
+                                            <span class="s2">&quot;into a MAC address.&quot;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">content</span><span class="p">,</span> <span class="mi">500</span>
+    <span class="k">if</span> <span class="n">mac</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;error.html&quot;</span><span class="p">,</span>
+                                  <span class="n">error</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;No MAC address could be found for &quot;</span>
+                                          <span class="s2">&quot;your IP address </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ip</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">content</span><span class="p">,</span> <span class="mi">500</span>
+
+    <span class="k">with</span> <span class="n">engine</span><span class="o">.</span><span class="n">begin</span><span class="p">()</span> <span class="k">as</span> <span class="n">connection</span><span class="p">:</span>
+        <span class="n">mac_groups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_groups</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">mac</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mac_groups</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;status.html&quot;</span><span class="p">,</span> <span class="n">reasons</span><span class="o">=</span><span class="p">[</span><span class="n">messages</span><span class="p">[</span><span class="s1">&#39;unknown&#39;</span><span class="p">]],</span>
+                                   <span class="n">mac</span><span class="o">=</span><span class="n">mac</span><span class="p">,</span> <span class="n">show_mac</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">latest_auth_attempt</span> <span class="o">=</span> <span class="n">get_latest_auth_attempt</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">mac</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">latest_auth_attempt</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;error.html&quot;</span><span class="p">,</span>
+                                      <span class="n">error</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;No authentication attempt found &quot;</span>
+                                              <span class="s2">&quot;for your MAC address.&quot;</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">content</span><span class="p">,</span> <span class="mi">500</span>
+
+        <span class="n">nas_ip_address</span><span class="p">,</span> <span class="n">nas_port_id</span><span class="p">,</span> <span class="n">packet_type</span><span class="p">,</span> <span class="o">*</span><span class="n">ignore</span> <span class="o">=</span> <span class="n">latest_auth_attempt</span>
+
+        <span class="n">port_groups</span> <span class="o">=</span> <span class="p">[</span><span class="n">group</span> <span class="k">for</span> <span class="n">nai</span><span class="p">,</span> <span class="n">npi</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">mac_groups</span>
+                       <span class="k">if</span> <span class="n">nas_ip_address</span> <span class="o">==</span> <span class="n">nai</span> <span class="ow">and</span> <span class="n">nas_port_id</span> <span class="o">==</span> <span class="n">npi</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">port_groups</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;status.html&quot;</span><span class="p">,</span> <span class="n">mac</span><span class="o">=</span><span class="n">mac</span><span class="p">,</span> <span class="n">show_mac</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                   <span class="n">reasons</span><span class="o">=</span><span class="p">[</span><span class="n">messages</span><span class="p">[</span><span class="s1">&#39;wrong_port&#39;</span><span class="p">]])</span>
+
+        <span class="n">reasons</span> <span class="o">=</span> <span class="p">[</span><span class="n">messages</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">port_groups</span>
+                   <span class="k">if</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reasons</span> <span class="ow">and</span> <span class="n">packet_type</span> <span class="o">!=</span> <span class="s1">&#39;Access-Accept&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;status.html&quot;</span><span class="p">,</span> <span class="n">mac</span><span class="o">=</span><span class="n">mac</span><span class="p">,</span> <span class="n">show_mac</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">reasons</span><span class="o">=</span><span class="p">[</span><span class="n">messages</span><span class="p">[</span><span class="s1">&#39;fail&#39;</span><span class="p">]])</span>
+
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;status.html&quot;</span><span class="p">,</span> <span class="n">reasons</span><span class="o">=</span><span class="n">reasons</span><span class="p">,</span>
+                               <span class="n">mac</span><span class="o">=</span><span class="n">mac</span><span class="p">,</span> <span class="n">show_mac</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+            
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../portal.html" >hades.portal</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.portal.views</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="../../../_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2015-2020, Sebastian Schrader, Stefan Haller. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

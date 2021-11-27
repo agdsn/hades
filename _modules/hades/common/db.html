@@ -1,0 +1,893 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="../../../_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="../../../_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="../../../_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="../../../_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>hades.common.db &#8212; Hades 0.4.0-180-g86b2a9b documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/guzzle.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  
+   
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.common.db</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../components.html">Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../networking.html">Networking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../replication.html">Replication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../alternative-dns.html">Alternative DNS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">CLI Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/hades.html">Code Documentation</a></li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="../../../search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="../../../index.html">Docs</a></li>
+              
+                <li><a href="../../index.html">Module code</a></li>
+              
+              <li>hades.common.db</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <h1>Source code for hades.common.db</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Database utilities&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">timezone</span><span class="p">,</span> <span class="n">tzinfo</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">netaddr</span>
+<span class="kn">import</span> <span class="nn">psycopg2.extensions</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BigInteger</span><span class="p">,</span> <span class="n">CheckConstraint</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">LargeBinary</span><span class="p">,</span>
+    <span class="n">MetaData</span><span class="p">,</span> <span class="n">PrimaryKeyConstraint</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Table</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">TypeDecorator</span><span class="p">,</span>
+    <span class="n">UniqueConstraint</span><span class="p">,</span> <span class="n">and_</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">create_engine</span> <span class="k">as</span> <span class="n">sqa_create_engine</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span>
+    <span class="n">null</span><span class="p">,</span> <span class="n">or_</span><span class="p">,</span> <span class="n">select</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">literal</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.dialects.postgresql</span> <span class="kn">import</span> <span class="n">ARRAY</span><span class="p">,</span> <span class="n">INET</span><span class="p">,</span> <span class="n">MACADDR</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.engine.base</span> <span class="kn">import</span> <span class="n">Connection</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.ext.compiler</span> <span class="kn">import</span> <span class="n">compiles</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="kn">import</span> <span class="n">expression</span>
+
+<span class="kn">from</span> <span class="nn">hades.config.loader</span> <span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">get_config</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+
+<span class="n">Groups</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<span class="n">Attributes</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
+<span class="n">DatetimeRange</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]]</span>
+
+
+<div class="viewcode-block" id="as_copy"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.as_copy">[docs]</a><span class="k">def</span> <span class="nf">as_copy</span><span class="p">(</span><span class="n">original_table</span><span class="p">:</span> <span class="n">Table</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a copy of a table with a different name and the ``temporary``</span>
+<span class="sd">    info set.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Table</span><span class="p">(</span><span class="n">new_name</span><span class="p">,</span> <span class="n">original_table</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+                 <span class="o">*</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">col</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+                   <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">original_table</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span>
+                 <span class="n">info</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;temporary&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="MACAddress"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.MACAddress">[docs]</a><span class="k">class</span> <span class="nc">MACAddress</span><span class="p">(</span><span class="n">TypeDecorator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Custom SQLAlchemy type for MAC addresses.</span>
+
+<span class="sd">    Use the PostgreSQL ``macaddr`` type on the database side and</span>
+<span class="sd">    :class:`netaddr.EUI` on the Python side.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">impl</span> <span class="o">=</span> <span class="n">MACADDR</span>
+    <span class="n">python_type</span> <span class="o">=</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">EUI</span>
+
+<div class="viewcode-block" id="MACAddress.process_bind_param"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.MACAddress.process_bind_param">[docs]</a>    <span class="k">def</span> <span class="nf">process_bind_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dialect</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">netaddr</span><span class="o">.</span><span class="n">EUI</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">netaddr</span><span class="o">.</span><span class="n">mac_pgsql</span><span class="p">))</span></div>
+
+    <span class="n">process_literal_param</span> <span class="o">=</span> <span class="n">process_bind_param</span>
+
+<div class="viewcode-block" id="MACAddress.process_result_value"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.MACAddress.process_result_value">[docs]</a>    <span class="k">def</span> <span class="nf">process_result_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dialect</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">EUI</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">netaddr</span><span class="o">.</span><span class="n">mac_pgsql</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="IPAddress"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.IPAddress">[docs]</a><span class="k">class</span> <span class="nc">IPAddress</span><span class="p">(</span><span class="n">TypeDecorator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Custom SQLAlchemy type for IP addresses.</span>
+
+<span class="sd">    Use the PostgreSQL ``inet`` type on the database side and</span>
+<span class="sd">    :class:`netaddr.IPAddress` on the Python side.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">impl</span> <span class="o">=</span> <span class="n">INET</span>
+    <span class="n">python_type</span> <span class="o">=</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span>
+
+<div class="viewcode-block" id="IPAddress.process_bind_param"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.IPAddress.process_bind_param">[docs]</a>    <span class="k">def</span> <span class="nf">process_bind_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dialect</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+    <span class="n">process_literal_param</span> <span class="o">=</span> <span class="n">process_bind_param</span>
+
+<div class="viewcode-block" id="IPAddress.process_result_value"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.IPAddress.process_result_value">[docs]</a>    <span class="k">def</span> <span class="nf">process_result_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dialect</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TupleArray"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.TupleArray">[docs]</a><span class="k">class</span> <span class="nc">TupleArray</span><span class="p">(</span><span class="n">ARRAY</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convenience subclass for :class:`ARRAY` for zero-indexed tuples.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_type</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">item_type</span><span class="p">,</span> <span class="n">as_tuple</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="n">dimensions</span><span class="p">,</span>
+                         <span class="n">zero_indexes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<span class="n">alternative_dns</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="s2">&quot;alternative_dns&quot;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">UniqueConstraint</span><span class="p">(</span><span class="s1">&#39;IPAddress&#39;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">temp_alternative_dns</span> <span class="o">=</span> <span class="n">as_copy</span><span class="p">(</span><span class="n">alternative_dns</span><span class="p">,</span> <span class="s1">&#39;temp_alternative_dns&#39;</span><span class="p">)</span>
+
+<span class="n">dhcphost</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="s2">&quot;dhcphost&quot;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;MAC&#39;</span><span class="p">,</span> <span class="n">MACAddress</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">UniqueConstraint</span><span class="p">(</span><span class="s1">&#39;MAC&#39;</span><span class="p">),</span>
+    <span class="n">UniqueConstraint</span><span class="p">(</span><span class="s1">&#39;IPAddress&#39;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">temp_dhcphost</span> <span class="o">=</span> <span class="n">as_copy</span><span class="p">(</span><span class="n">dhcphost</span><span class="p">,</span> <span class="s1">&#39;temp_dhcphost&#39;</span><span class="p">)</span>
+
+<span class="n">auth_dhcp_lease</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="s2">&quot;auth_dhcp_lease&quot;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;MAC&quot;</span><span class="p">,</span> <span class="n">MACAddress</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;IPAddress&quot;</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;Hostname&quot;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;Domain&quot;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;SuppliedHostname&quot;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;ExpiresAt&quot;</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">(</span><span class="n">timezone</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span>
+        <span class="s2">&quot;CreatedAt&quot;</span><span class="p">,</span>
+        <span class="n">DateTime</span><span class="p">(</span><span class="n">timezone</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">server_default</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
+    <span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span>
+        <span class="s2">&quot;UpdatedAt&quot;</span><span class="p">,</span>
+        <span class="n">DateTime</span><span class="p">(</span><span class="n">timezone</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">server_default</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
+    <span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;RelayIPAddress&quot;</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span>
+        <span class="s2">&quot;Tags&quot;</span><span class="p">,</span>
+        <span class="n">TupleArray</span><span class="p">(</span><span class="n">Text</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">server_default</span><span class="o">=</span><span class="n">literal</span><span class="p">((),</span> <span class="n">type_</span><span class="o">=</span><span class="n">TupleArray</span><span class="p">(</span><span class="n">Text</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;Domain&quot;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;ClientID&quot;</span><span class="p">,</span> <span class="n">LargeBinary</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;CircuitID&quot;</span><span class="p">,</span> <span class="n">LargeBinary</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;SubscriberID&quot;</span><span class="p">,</span> <span class="n">LargeBinary</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;RemoteID&quot;</span><span class="p">,</span> <span class="n">LargeBinary</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;VendorClass&quot;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span>
+        <span class="s2">&quot;RequestedOptions&quot;</span><span class="p">,</span>
+        <span class="n">TupleArray</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">server_default</span><span class="o">=</span><span class="n">literal</span><span class="p">((),</span> <span class="n">type_</span><span class="o">=</span><span class="n">TupleArray</span><span class="p">(</span><span class="n">Text</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span>
+        <span class="s2">&quot;UserClasses&quot;</span><span class="p">,</span>
+        <span class="n">TupleArray</span><span class="p">(</span><span class="n">Text</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">server_default</span><span class="o">=</span><span class="n">literal</span><span class="p">((),</span> <span class="n">type_</span><span class="o">=</span><span class="n">TupleArray</span><span class="p">(</span><span class="n">Text</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="p">),</span>
+    <span class="n">CheckConstraint</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">array_ndims</span><span class="p">(</span><span class="s2">&quot;Tags&quot;</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">CheckConstraint</span><span class="p">(</span>
+        <span class="n">func</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">array_ndims</span><span class="p">(</span><span class="s2">&quot;RequestedOptions&quot;</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">CheckConstraint</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">array_ndims</span><span class="p">(</span><span class="s2">&quot;UserClasses&quot;</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">nas</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="s2">&quot;nas&quot;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;NASName&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;ShortName&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;other&#39;</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Ports&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Secret&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Server&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Community&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Description&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">UniqueConstraint</span><span class="p">(</span><span class="s1">&#39;Id&#39;</span><span class="p">),</span>
+    <span class="n">UniqueConstraint</span><span class="p">(</span><span class="s1">&#39;NASName&#39;</span><span class="p">),</span>
+    <span class="n">UniqueConstraint</span><span class="p">(</span><span class="s1">&#39;ShortName&#39;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">temp_nas</span> <span class="o">=</span> <span class="n">as_copy</span><span class="p">(</span><span class="n">nas</span><span class="p">,</span> <span class="s1">&#39;temp_nas&#39;</span><span class="p">)</span>
+
+<span class="n">radacct</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="s2">&quot;radacct&quot;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;RadAcctId&#39;</span><span class="p">,</span> <span class="n">BigInteger</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;AcctSessionId&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;AcctUniqueId&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;UserName&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;GroupName&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Realm&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;NASIPAddress&#39;</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;NASPortId&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;NASPortType&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;AcctStartTime&#39;</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">(</span><span class="n">timezone</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;AcctUpdateTime&#39;</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">(</span><span class="n">timezone</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;AcctStopTime&#39;</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">(</span><span class="n">timezone</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;AcctInterval&#39;</span><span class="p">,</span> <span class="n">BigInteger</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;AcctSessionTime&#39;</span><span class="p">,</span> <span class="n">BigInteger</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;AcctAuthentic&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;ConnectInfo_start&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;ConnectInfo_stop&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;AcctInputOctets&#39;</span><span class="p">,</span> <span class="n">BigInteger</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;AcctOutputOctets&#39;</span><span class="p">,</span> <span class="n">BigInteger</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;CalledStationId&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;CallingStationId&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;AcctTerminateCause&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;ServiceType&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;FramedProtocol&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;FramedIPAddress&#39;</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">radcheck</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="s2">&quot;radcheck&quot;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Priority&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;UserName&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;NASIPAddress&#39;</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;NASPortId&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Attribute&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Op&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Value&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">UniqueConstraint</span><span class="p">(</span><span class="s1">&#39;UserName&#39;</span><span class="p">,</span> <span class="s1">&#39;NASIPAddress&#39;</span><span class="p">,</span> <span class="s1">&#39;NASPortId&#39;</span><span class="p">,</span> <span class="s1">&#39;Priority&#39;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">temp_radcheck</span> <span class="o">=</span> <span class="n">as_copy</span><span class="p">(</span><span class="n">radcheck</span><span class="p">,</span> <span class="s1">&#39;temp_radcheck&#39;</span><span class="p">)</span>
+
+<span class="n">radgroupcheck</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="s2">&quot;radgroupcheck&quot;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Priority&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;GroupName&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Attribute&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Op&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Value&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">UniqueConstraint</span><span class="p">(</span><span class="s1">&#39;GroupName&#39;</span><span class="p">,</span> <span class="s1">&#39;Priority&#39;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">temp_radgroupcheck</span> <span class="o">=</span> <span class="n">as_copy</span><span class="p">(</span><span class="n">radgroupcheck</span><span class="p">,</span> <span class="s1">&#39;temp_radgroupcheck&#39;</span><span class="p">)</span>
+
+<span class="n">radgroupreply</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="s2">&quot;radgroupreply&quot;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Priority&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;GroupName&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Attribute&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Op&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Value&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">UniqueConstraint</span><span class="p">(</span><span class="s1">&#39;GroupName&#39;</span><span class="p">,</span> <span class="s1">&#39;Priority&#39;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">temp_radgroupreply</span> <span class="o">=</span> <span class="n">as_copy</span><span class="p">(</span><span class="n">radgroupreply</span><span class="p">,</span> <span class="s1">&#39;temp_radgroupreply&#39;</span><span class="p">)</span>
+
+<span class="n">radpostauth</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="s2">&quot;radpostauth&quot;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Id&#39;</span><span class="p">,</span> <span class="n">BigInteger</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;UserName&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;NASIPAddress&#39;</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;NASPortId&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;PacketType&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Groups&#39;</span><span class="p">,</span> <span class="n">TupleArray</span><span class="p">(</span><span class="n">Text</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Reply&#39;</span><span class="p">,</span> <span class="n">TupleArray</span><span class="p">(</span><span class="n">Text</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;AuthDate&#39;</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">(</span><span class="n">timezone</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">CheckConstraint</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">array_ndims</span><span class="p">(</span><span class="s2">&quot;Groups&quot;</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">CheckConstraint</span><span class="p">(</span>
+        <span class="n">func</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">array_ndims</span><span class="p">(</span><span class="s2">&quot;Reply&quot;</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="ow">and</span> <span class="n">func</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">array_length</span><span class="p">(</span><span class="s2">&quot;Reply&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">radreply</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="s2">&quot;radreply&quot;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Priority&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;UserName&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;NASIPAddress&#39;</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;NASPortId&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Attribute&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Op&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Value&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">UniqueConstraint</span><span class="p">(</span><span class="s1">&#39;UserName&#39;</span><span class="p">,</span> <span class="s1">&#39;NASIPAddress&#39;</span><span class="p">,</span> <span class="s1">&#39;NASPortId&#39;</span><span class="p">,</span> <span class="s1">&#39;Priority&#39;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">temp_radreply</span> <span class="o">=</span> <span class="n">as_copy</span><span class="p">(</span><span class="n">radreply</span><span class="p">,</span> <span class="s1">&#39;temp_radreply&#39;</span><span class="p">)</span>
+
+<span class="n">radusergroup</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="s2">&quot;radusergroup&quot;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Priority&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;UserName&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;NASIPAddress&#39;</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;NASPortId&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;GroupName&#39;</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">UniqueConstraint</span><span class="p">(</span><span class="s1">&#39;UserName&#39;</span><span class="p">,</span> <span class="s1">&#39;NASIPAddress&#39;</span><span class="p">,</span> <span class="s1">&#39;NASPortId&#39;</span><span class="p">,</span> <span class="s1">&#39;Priority&#39;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">temp_radusergroup</span> <span class="o">=</span> <span class="n">as_copy</span><span class="p">(</span><span class="n">radusergroup</span><span class="p">,</span> <span class="s1">&#39;temp_radusergroup&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="utcnow"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.utcnow">[docs]</a><span class="k">class</span> <span class="nc">utcnow</span><span class="p">(</span><span class="n">expression</span><span class="o">.</span><span class="n">FunctionElement</span><span class="p">):</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">DateTime</span><span class="p">()</span></div>
+
+
+<span class="c1"># noinspection PyUnusedLocal</span>
+<div class="viewcode-block" id="pg_utcnow"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.pg_utcnow">[docs]</a><span class="nd">@compiles</span><span class="p">(</span><span class="n">utcnow</span><span class="p">,</span> <span class="s1">&#39;postgresql&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">pg_utcnow</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">compiler</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;CURRENT_TIMESTAMP AT TIME ZONE &#39;UTC&#39;&quot;</span></div>
+
+
+<div class="viewcode-block" id="UTCTZInfoFactory"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.UTCTZInfoFactory">[docs]</a><span class="k">class</span> <span class="nc">UTCTZInfoFactory</span><span class="p">(</span><span class="n">tzinfo</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A tzinfo factory compatible with :class:`psycopg2.tz.FixedOffsetTimezone`,</span>
+<span class="sd">    that checks if the provided UTC offset is zero and returns</span>
+<span class="sd">    :attr:`datetime.timezone.utc`. If the offset is not zero an</span>
+<span class="sd">    :exc:`psycopg2.DataError` is raised.</span>
+
+<span class="sd">    This class is implemented as a singleton that always returns the same</span>
+<span class="sd">    instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">psycopg2</span><span class="o">.</span><span class="n">DataError</span><span class="p">(</span><span class="s2">&quot;UTC Offset is not zero: &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">offset</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">timezone</span><span class="o">.</span><span class="n">utc</span></div>
+
+
+<div class="viewcode-block" id="UTCTZInfoCursorFactory"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.UTCTZInfoCursorFactory">[docs]</a><span class="k">class</span> <span class="nc">UTCTZInfoCursorFactory</span><span class="p">(</span><span class="n">psycopg2</span><span class="o">.</span><span class="n">extensions</span><span class="o">.</span><span class="n">cursor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Cursor factory that sets the</span>
+<span class="sd">    :attr:`psycopg2.extensions.cursor.tzinfo_factory` to</span>
+<span class="sd">    :class:`UTCTZInfoFactory`.</span>
+
+<span class="sd">    The C implementation of the cursor class does not use the proper Python</span>
+<span class="sd">    attribute lookup, therefore we have to set the instance variable rather</span>
+<span class="sd">    than use a class attribute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tzinfo_factory</span> <span class="o">=</span> <span class="n">UTCTZInfoFactory</span></div>
+
+
+<div class="viewcode-block" id="create_engine"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.create_engine">[docs]</a><span class="k">def</span> <span class="nf">create_engine</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;connect_args&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="n">options</span><span class="o">=</span><span class="s2">&quot;-c TimeZone=UTC&quot;</span><span class="p">,</span> <span class="n">cursor_factory</span><span class="o">=</span><span class="n">UTCTZInfoCursorFactory</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">sqa_create_engine</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">SQLALCHEMY_DATABASE_URI</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="lock_table"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.lock_table">[docs]</a><span class="k">def</span> <span class="nf">lock_table</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">target_table</span><span class="p">:</span> <span class="n">Table</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Lock a table using a PostgreSQL advisory lock</span>
+
+<span class="sd">    The OID of the table in the pg_class relation is used as lock id.</span>
+
+<span class="sd">    :param connection: DB connection</span>
+<span class="sd">    :param target_table: Table object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Locking table &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">target_table</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">oid</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">select</span><span class="p">([</span><span class="n">column</span><span class="p">(</span><span class="s2">&quot;oid&quot;</span><span class="p">)])</span>
+                             <span class="o">.</span><span class="n">select_from</span><span class="p">(</span><span class="n">table</span><span class="p">(</span><span class="s2">&quot;pg_class&quot;</span><span class="p">))</span>
+                             <span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">column</span><span class="p">(</span><span class="s2">&quot;relname&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">target_table</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                             <span class="p">)</span><span class="o">.</span><span class="n">scalar</span><span class="p">()</span>
+    <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">select</span><span class="p">([</span><span class="n">func</span><span class="o">.</span><span class="n">pg_advisory_xact_lock</span><span class="p">(</span><span class="n">oid</span><span class="p">)]))</span><span class="o">.</span><span class="n">scalar</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="create_temp_copy"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.create_temp_copy">[docs]</a><span class="k">def</span> <span class="nf">create_temp_copy</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Table</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">Table</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a temporary table as a copy of a source table that will be dropped</span>
+<span class="sd">    at the end of the running transaction.</span>
+
+<span class="sd">    :param connection: DB connection</span>
+<span class="sd">    :param source: Source table</span>
+<span class="sd">    :param destination: Destination table</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Creating temporary table &quot;</span><span class="si">%s</span><span class="s1">&quot; as copy of &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span>
+                 <span class="n">destination</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">connection</span><span class="o">.</span><span class="n">in_transaction</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;must be executed in a transaction to have any &quot;</span>
+                           <span class="s2">&quot;effect&quot;</span><span class="p">)</span>
+    <span class="n">preparer</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">dialect</span><span class="o">.</span><span class="n">identifier_preparer</span>
+    <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="s1">&#39;CREATE TEMPORARY TABLE </span><span class="si">{destination}</span><span class="s1"> ON COMMIT DROP AS &#39;</span>
+        <span class="s1">&#39;SELECT * FROM </span><span class="si">{source}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">source</span><span class="o">=</span><span class="n">preparer</span><span class="o">.</span><span class="n">format_table</span><span class="p">(</span><span class="n">source</span><span class="p">),</span>
+            <span class="n">destination</span><span class="o">=</span><span class="n">preparer</span><span class="o">.</span><span class="n">format_table</span><span class="p">(</span><span class="n">destination</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="diff_tables"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.diff_tables">[docs]</a><span class="k">def</span> <span class="nf">diff_tables</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">master</span><span class="p">:</span> <span class="n">Table</span><span class="p">,</span> <span class="n">copy</span><span class="p">:</span> <span class="n">Table</span><span class="p">,</span>
+                <span class="n">result_columns</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Column</span><span class="p">]</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the differences in the contents of two tables with identical</span>
+<span class="sd">    columns.</span>
+
+<span class="sd">    The master table must have at least one :class:`PrimaryKeyConstraint` or</span>
+<span class="sd">    :class:`UniqueConstraint` with only non-null columns defined.</span>
+
+<span class="sd">    If there are multiple constraints defined the constraints that contains the</span>
+<span class="sd">    least number of columns are used.</span>
+
+<span class="sd">    :param connection: DB connection</span>
+<span class="sd">    :param master: Master table</span>
+<span class="sd">    :param copy: Copy of master table</span>
+<span class="sd">    :param result_columns: columns to return</span>
+<span class="sd">    :return: True, if the contents differ, otherwise False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Calculating diff between &quot;</span><span class="si">%s</span><span class="s1">&quot; and &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span>
+                 <span class="n">master</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">result_columns</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result_columns</span><span class="p">)</span>
+    <span class="n">unique_columns</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">constraint</span><span class="o">.</span><span class="n">columns</span>
+         <span class="k">for</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">master</span><span class="o">.</span><span class="n">constraints</span>
+         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constraint</span><span class="p">,</span> <span class="p">(</span><span class="n">UniqueConstraint</span><span class="p">,</span> <span class="n">PrimaryKeyConstraint</span><span class="p">))</span> <span class="ow">and</span>
+         <span class="n">constraint</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;nullable&#39;</span><span class="p">),</span>
+                                            <span class="n">constraint</span><span class="o">.</span><span class="n">columns</span><span class="p">))),</span>
+        <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">[])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">unique_columns</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;To diff table </span><span class="si">{}</span><span class="s2"> it must have at least one &quot;</span>
+                             <span class="s2">&quot;PrimaryKeyConstraint/UniqueConstraint with only &quot;</span>
+                             <span class="s2">&quot;NOT NULL columns defined on it.&quot;</span>
+                             <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">master</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+    <span class="n">unique_column_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">unique_columns</span><span class="p">)</span>
+    <span class="n">other_column_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">master</span><span class="o">.</span><span class="n">c</span>
+                               <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_column_names</span><span class="p">)</span>
+    <span class="n">on_clause</span> <span class="o">=</span> <span class="n">and_</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">master</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="n">column_name</span><span class="p">)</span> <span class="o">==</span>
+                       <span class="nb">getattr</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="n">column_name</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="n">column_name</span> <span class="ow">in</span> <span class="n">unique_column_names</span><span class="p">))</span>
+    <span class="n">added</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="n">select</span><span class="p">(</span><span class="n">result_columns</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">select_from</span><span class="p">(</span><span class="n">master</span><span class="o">.</span><span class="n">outerjoin</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="n">on_clause</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">or_</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="n">column_name</span><span class="p">)</span><span class="o">.</span><span class="n">is_</span><span class="p">(</span><span class="n">null</span><span class="p">())</span>
+                     <span class="k">for</span> <span class="n">column_name</span> <span class="ow">in</span> <span class="n">unique_column_names</span><span class="p">)))</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+    <span class="n">deleted</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="n">select</span><span class="p">(</span><span class="n">result_columns</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">select_from</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">outerjoin</span><span class="p">(</span><span class="n">master</span><span class="p">,</span> <span class="n">on_clause</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">or_</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">master</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="n">column_name</span><span class="p">)</span><span class="o">.</span><span class="n">is_</span><span class="p">(</span><span class="n">null</span><span class="p">())</span>
+                     <span class="k">for</span> <span class="n">column_name</span> <span class="ow">in</span> <span class="n">unique_column_names</span><span class="p">)))</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+    <span class="n">modified</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="n">select</span><span class="p">(</span><span class="n">result_columns</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">select_from</span><span class="p">(</span><span class="n">master</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="n">on_clause</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">or_</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">master</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="n">column_name</span><span class="p">)</span> <span class="o">!=</span>
+                     <span class="nb">getattr</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="n">column_name</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">column_name</span> <span class="ow">in</span> <span class="n">other_column_names</span><span class="p">)))</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span> <span class="k">if</span> <span class="n">other_column_names</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Diff found </span><span class="si">%d</span><span class="s1"> added, </span><span class="si">%d</span><span class="s1"> deleted, and </span><span class="si">%d</span><span class="s1"> modified records&#39;</span><span class="p">,</span>
+                 <span class="nb">len</span><span class="p">(</span><span class="n">added</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">deleted</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">modified</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">added</span><span class="p">,</span> <span class="n">deleted</span><span class="p">,</span> <span class="n">modified</span></div>
+
+
+<div class="viewcode-block" id="refresh_materialized_view"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.refresh_materialized_view">[docs]</a><span class="k">def</span> <span class="nf">refresh_materialized_view</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">view</span><span class="p">:</span> <span class="n">Table</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Execute :sql:`REFRESH MATERIALIZED VIEW CONCURRENTLY` for the given</span>
+<span class="sd">    `view`.</span>
+
+<span class="sd">    :param connection: A valid SQLAlchemy connection</span>
+<span class="sd">    :param view: The view to refresh</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Refreshing materialized view &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">view</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">preparer</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">dialect</span><span class="o">.</span><span class="n">identifier_preparer</span>
+    <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;REFRESH MATERIALIZED VIEW CONCURRENTLY </span><span class="si">{view}</span><span class="s1">&#39;</span>
+                       <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">view</span><span class="o">=</span><span class="n">preparer</span><span class="o">.</span><span class="n">format_table</span><span class="p">(</span><span class="n">view</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="refresh_and_diff_materialized_view"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.refresh_and_diff_materialized_view">[docs]</a><span class="k">def</span> <span class="nf">refresh_and_diff_materialized_view</span><span class="p">(</span>
+        <span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">view</span><span class="p">:</span> <span class="n">Table</span><span class="p">,</span> <span class="n">copy</span><span class="p">:</span> <span class="n">Table</span><span class="p">,</span>
+        <span class="n">result_columns</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Column</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+        <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Lock the given `view` with an advisory lock, create a temporary table</span>
+<span class="sd">    of the view, refresh the view and compute the difference.</span>
+
+<span class="sd">    :param connection: A valid SQLAlchemy connection</span>
+<span class="sd">    :param view: The view to refresh and diff</span>
+<span class="sd">    :param copy: A temporary table to create and diff</span>
+<span class="sd">    :param result_columns: The columns to return</span>
+<span class="sd">    :return: A 3-tuple containing three lists of tuples of the `result_columns`</span>
+<span class="sd">     of added, deleted and modified records due to the refresh.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">connection</span><span class="o">.</span><span class="n">begin</span><span class="p">():</span>
+        <span class="n">lock_table</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">view</span><span class="p">)</span>
+        <span class="n">create_temp_copy</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">view</span><span class="p">,</span> <span class="n">copy</span><span class="p">)</span>
+        <span class="n">refresh_materialized_view</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">view</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">diff_tables</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">view</span><span class="p">,</span> <span class="n">copy</span><span class="p">,</span> <span class="n">result_columns</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="delete_old_sessions"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.delete_old_sessions">[docs]</a><span class="k">def</span> <span class="nf">delete_old_sessions</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="n">timedelta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Delete old session from the ``radacct`` table.&quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Deleting sessions in table &quot;</span><span class="si">%s</span><span class="s1">&quot; older than &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span>
+                 <span class="n">radacct</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+    <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">radacct</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">and_</span><span class="p">(</span>
+        <span class="n">radacct</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">AcctUpdateTime</span> <span class="o">&lt;</span> <span class="n">utcnow</span><span class="p">()</span> <span class="o">-</span> <span class="n">interval</span>
+    <span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="delete_old_auth_attempts"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.delete_old_auth_attempts">[docs]</a><span class="k">def</span> <span class="nf">delete_old_auth_attempts</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="n">timedelta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Delete old authentication results from the ``radpostauth`` table.&quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Deleting auth attempts in table &quot;</span><span class="si">%s</span><span class="s1">&quot; older than &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span>
+                 <span class="n">radpostauth</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+    <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">radpostauth</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">and_</span><span class="p">(</span>
+        <span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">AuthDate</span> <span class="o">&lt;</span> <span class="n">utcnow</span><span class="p">()</span> <span class="o">-</span> <span class="n">interval</span>
+    <span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="get_groups"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.get_groups">[docs]</a><span class="k">def</span> <span class="nf">get_groups</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">mac</span><span class="p">:</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">EUI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span>
+        <span class="n">Tuple</span><span class="p">[</span><span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the groups of a user.</span>
+
+<span class="sd">    :param connection: A SQLAlchemy connection</span>
+<span class="sd">    :param mac: MAC address</span>
+<span class="sd">    :return: An iterator that yields (NAS-IP-Address, NAS-Port-Id, Group-Name)-</span>
+<span class="sd">     tuples</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Getting groups of MAC &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">mac</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">select</span><span class="p">([</span><span class="n">radusergroup</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">NASIPAddress</span><span class="p">,</span>
+                                         <span class="n">radusergroup</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">NASPortId</span><span class="p">,</span>
+                                         <span class="n">radusergroup</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">GroupName</span><span class="p">])</span>
+                                 <span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">radusergroup</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">UserName</span> <span class="o">==</span> <span class="n">mac</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_latest_auth_attempt"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.get_latest_auth_attempt">[docs]</a><span class="k">def</span> <span class="nf">get_latest_auth_attempt</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span>
+                            <span class="n">mac</span><span class="p">:</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">EUI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span>
+        <span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Groups</span><span class="p">,</span> <span class="n">Attributes</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the latest auth attempt of a MAC address that occurred within twice the</span>
+<span class="sd">    reauthentication interval.</span>
+
+<span class="sd">    :param connection: A SQLAlchemy connection</span>
+<span class="sd">    :param str mac: MAC address</span>
+<span class="sd">    :return: A (NAS-IP-Address, NAS-Port-Id, Packet-Type, Groups, Reply,</span>
+<span class="sd">     Auth-Date) tuple or None if no attempt was found. Groups is an tuple of</span>
+<span class="sd">     group names and Reply is a tuple of (Attribute, Value)-pairs that were sent</span>
+<span class="sd">     in Access-Accept responses.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Getting latest auth attempt for MAC &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">mac</span><span class="p">)</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">(</span><span class="n">runtime_checks</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">interval</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">HADES_REAUTHENTICATION_INTERVAL</span>
+    <span class="n">attempts</span> <span class="o">=</span> <span class="n">get_auth_attempts_of_mac</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">mac</span><span class="p">,</span> <span class="p">(</span><span class="n">interval</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">attempts</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="get_all_dhcp_hosts"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.get_all_dhcp_hosts">[docs]</a><span class="k">def</span> <span class="nf">get_all_dhcp_hosts</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span>
+        <span class="n">Tuple</span><span class="p">[</span><span class="n">netaddr</span><span class="o">.</span><span class="n">EUI</span><span class="p">,</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return all DHCP host configurations.</span>
+
+<span class="sd">    :param connection: A SQLAlchemy connection</span>
+<span class="sd">    :return: An iterator that yields (mac, ip)-tuples</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Getting all DHCP hosts&quot;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">select</span><span class="p">([</span><span class="n">dhcphost</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">MAC</span><span class="p">,</span> <span class="n">dhcphost</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_all_nas_clients"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.get_all_nas_clients">[docs]</a><span class="k">def</span> <span class="nf">get_all_nas_clients</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span>
+        <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return all NAS clients.</span>
+
+<span class="sd">    :param connection: A SQLAlchemy connection</span>
+<span class="sd">    :return: An iterator that yields (shortname, nasname, type, ports, secret,</span>
+<span class="sd">     server, community, description)-tuples</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="n">select</span><span class="p">([</span><span class="n">nas</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">ShortName</span><span class="p">,</span> <span class="n">nas</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">NASName</span><span class="p">,</span> <span class="n">nas</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span> <span class="n">nas</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">Ports</span><span class="p">,</span>
+                <span class="n">nas</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">Secret</span><span class="p">,</span> <span class="n">nas</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">Server</span><span class="p">,</span> <span class="n">nas</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">Community</span><span class="p">,</span> <span class="n">nas</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">Description</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_sessions_of_mac"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.get_sessions_of_mac">[docs]</a><span class="k">def</span> <span class="nf">get_sessions_of_mac</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">mac</span><span class="p">:</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">EUI</span><span class="p">,</span>
+                        <span class="n">when</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DatetimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="n">limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span>
+        <span class="n">Tuple</span><span class="p">[</span><span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return accounting sessions of a particular MAC address ordered by</span>
+<span class="sd">    Session-Start-Time descending.</span>
+
+<span class="sd">    :param connection: A SQLAlchemy connection</span>
+<span class="sd">    :param str mac: MAC address</span>
+<span class="sd">    :param when: Range in which Session-Start-Time must be within</span>
+<span class="sd">    :param limit: Maximum number of records</span>
+<span class="sd">    :return: An iterator that yields (NAS-IP-Address, NAS-Port-Id,</span>
+<span class="sd">     Session-Start-Time, Session-Stop-Time)-tuples ordered by Session-Start-Time</span>
+<span class="sd">     descending</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Getting all sessions for MAC &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">mac</span><span class="p">)</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">select</span><span class="p">([</span><span class="n">radacct</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">NASIPAddress</span><span class="p">,</span> <span class="n">radacct</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">NASPortId</span><span class="p">,</span>
+                <span class="n">radacct</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">AcctStartTime</span><span class="p">,</span>
+                <span class="n">radacct</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">AcctStopTime</span><span class="p">])</span>
+        <span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">and_</span><span class="p">(</span><span class="n">radacct</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">UserName</span> <span class="o">==</span> <span class="n">mac</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">radacct</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">AcctStartTime</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">when</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">query</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">radacct</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">AcctStartTime</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="s1">&#39;&lt;@&#39;</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">func</span><span class="o">.</span><span class="n">tstzrange</span><span class="p">(</span><span class="o">*</span><span class="n">when</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_auth_attempts_of_mac"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.get_auth_attempts_of_mac">[docs]</a><span class="k">def</span> <span class="nf">get_auth_attempts_of_mac</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">mac</span><span class="p">:</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">EUI</span><span class="p">,</span>
+                             <span class="n">when</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DatetimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span>
+        <span class="n">Tuple</span><span class="p">[</span><span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Groups</span><span class="p">,</span> <span class="n">Attributes</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return auth attempts of a particular MAC address order by Auth-Date</span>
+<span class="sd">    descending.</span>
+
+<span class="sd">    :param connection: A SQLAlchemy connection</span>
+<span class="sd">    :param mac: MAC address</span>
+<span class="sd">    :param when: Range in which Auth-Date must be within</span>
+<span class="sd">    :param limit: Maximum number of records</span>
+<span class="sd">    :return: An iterator that yields (NAS-IP-Address, NAS-Port-Id, Packet-Type,</span>
+<span class="sd">     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Getting all auth attempts of MAC </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">mac</span><span class="p">)</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">select</span><span class="p">([</span><span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">NASIPAddress</span><span class="p">,</span> <span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">NASPortId</span><span class="p">,</span>
+                <span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">PacketType</span><span class="p">,</span> <span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">Groups</span><span class="p">,</span>
+                <span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">Reply</span><span class="p">,</span> <span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">AuthDate</span><span class="p">])</span>
+        <span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">and_</span><span class="p">(</span><span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">UserName</span> <span class="o">==</span> <span class="n">mac</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">AuthDate</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">when</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">query</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">AuthDate</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="s1">&#39;&lt;@&#39;</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">func</span><span class="o">.</span><span class="n">tstzrange</span><span class="p">(</span><span class="o">*</span><span class="n">when</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_auth_attempts_at_port"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.get_auth_attempts_at_port">[docs]</a><span class="k">def</span> <span class="nf">get_auth_attempts_at_port</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span>
+                              <span class="n">nas_ip_address</span><span class="p">:</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">,</span>
+                              <span class="n">nas_port_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                              <span class="n">when</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DatetimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                              <span class="n">limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span>
+        <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Groups</span><span class="p">,</span> <span class="n">Attributes</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return auth attempts at a particular port of an NAS ordered by Auth-Date</span>
+<span class="sd">    descending.</span>
+
+<span class="sd">    :param connection: A SQLAlchemy connection</span>
+<span class="sd">    :param nas_ip_address: NAS IP address</span>
+<span class="sd">    :param nas_port_id: NAS Port ID</span>
+<span class="sd">    :param when: Range in which Auth-Date must be within</span>
+<span class="sd">    :param limit: Maximum number of records</span>
+<span class="sd">    :return: An iterator that yields (User-Name, Packet-Type, Groups, Reply,</span>
+<span class="sd">             Auth-Date)-tuples ordered by Auth-Date descending</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Getting all auth attempts at port %2$s of %1$s&#39;</span><span class="p">,</span>
+                 <span class="n">nas_ip_address</span><span class="p">,</span> <span class="n">nas_port_id</span><span class="p">)</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">select</span><span class="p">([</span><span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">UserName</span><span class="p">,</span> <span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">PacketType</span><span class="p">,</span>
+                <span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">Groups</span><span class="p">,</span> <span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">Reply</span><span class="p">,</span>
+                <span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">AuthDate</span><span class="p">])</span>
+        <span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">and_</span><span class="p">(</span><span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">NASIPAddress</span> <span class="o">==</span> <span class="n">nas_ip_address</span><span class="p">,</span>
+                    <span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">NASPortId</span> <span class="o">==</span> <span class="n">nas_port_id</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">AuthDate</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">when</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">query</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">radpostauth</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">AuthDate</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="s1">&#39;&lt;@&#39;</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">func</span><span class="o">.</span><span class="n">tstzrange</span><span class="p">(</span><span class="o">*</span><span class="n">when</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_all_alternative_dns_ips"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.get_all_alternative_dns_ips">[docs]</a><span class="k">def</span> <span class="nf">get_all_alternative_dns_ips</span><span class="p">(</span><span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span>
+        <span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return all IPs for alternative DNS configuration.</span>
+
+<span class="sd">    :param connection: A SQLAlchemy connection</span>
+<span class="sd">    :return: An iterator that yields ip addresses</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Getting all alternative DNS clients&quot;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">select</span><span class="p">([</span><span class="n">alternative_dns</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="nb">map</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">result</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_all_auth_dhcp_leases"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.get_all_auth_dhcp_leases">[docs]</a><span class="k">def</span> <span class="nf">get_all_auth_dhcp_leases</span><span class="p">(</span>
+    <span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span>
+    <span class="n">subnet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">netaddr</span><span class="o">.</span><span class="n">IPNetwork</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span>
+    <span class="n">Tuple</span><span class="p">[</span>
+        <span class="n">datetime</span><span class="p">,</span>
+        <span class="n">netaddr</span><span class="o">.</span><span class="n">EUI</span><span class="p">,</span>
+        <span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">,</span>
+        <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="p">]</span>
+<span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return all auth dhcp leases.</span>
+
+<span class="sd">    :param connection: A SQLAlchemy connection</span>
+<span class="sd">    :param subnet: Limit leases to subnet</span>
+<span class="sd">    :param limit: Maximum number of leases</span>
+<span class="sd">    :return: An iterator that yields (Expires-At, MAC, IP-Address, Hostname,</span>
+<span class="sd">        Client-ID)-tuples</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Getting all auth DHCP leases&quot;</span><span class="p">)</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span>
+        <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">ExpiresAt</span><span class="p">,</span>
+        <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">MAC</span><span class="p">,</span>
+        <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">,</span>
+        <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">Hostname</span><span class="p">,</span>
+        <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">ClientID</span><span class="p">,</span>
+    <span class="p">])</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">IPAddress</span><span class="o">.</span><span class="n">asc</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">subnet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">IPAddress</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="s1">&#39;&lt;&lt;=&#39;</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">subnet</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_auth_dhcp_lease_of_ip"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.get_auth_dhcp_lease_of_ip">[docs]</a><span class="k">def</span> <span class="nf">get_auth_dhcp_lease_of_ip</span><span class="p">(</span>
+    <span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span>
+    <span class="n">ip</span><span class="p">:</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">EUI</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get basic lease information for a given IP.</span>
+
+<span class="sd">    :param connection: A SQLAlchemy connection</span>
+<span class="sd">    :param ip: IP address</span>
+<span class="sd">    :return: An (Expiry-Time, MAC, Hostname, Client-ID)-tuple or None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Getting auth DHCP lease for IP </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ip</span><span class="p">)</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span>
+        <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">ExpiresAt</span><span class="p">,</span>
+        <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">MAC</span><span class="p">,</span>
+        <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">Hostname</span><span class="p">,</span>
+        <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">ClientID</span><span class="p">,</span>
+    <span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">IPAddress</span><span class="o">=</span><span class="n">ip</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_auth_dhcp_leases_of_mac"><a class="viewcode-back" href="../../../api/hades.common.html#hades.common.db.get_auth_dhcp_leases_of_mac">[docs]</a><span class="k">def</span> <span class="nf">get_auth_dhcp_leases_of_mac</span><span class="p">(</span>
+    <span class="n">connection</span><span class="p">:</span> <span class="n">Connection</span><span class="p">,</span>
+    <span class="n">mac</span><span class="p">:</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">EUI</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">,</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get basic information about all auth leases of a given MAC.</span>
+
+<span class="sd">    :param connection: A SQLAlchemy connection</span>
+<span class="sd">    :param mac: MAC address</span>
+<span class="sd">    :return: An iterator of (Expiry-Time, IP-Address, Hostname, Client-ID)</span>
+<span class="sd">        tuples ordered by Expiry-Time descending</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Getting auth DHCP leases for MAC </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">mac</span><span class="p">)</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span>
+        <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">ExpiresAt</span><span class="p">,</span>
+        <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">IPAddress</span><span class="p">,</span>
+        <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">Hostname</span><span class="p">,</span>
+        <span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">ClientID</span><span class="p">,</span>
+    <span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">MAC</span><span class="o">=</span><span class="n">mac</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">auth_dhcp_lease</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">ExpiresAt</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+            
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.common.db</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="../../../_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2015-2020, Sebastian Schrader, Stefan Haller. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>hades.portal package &#8212; Hades 0.4.0-180-g86b2a9b documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/guzzle.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="hades.deputy package" href="hades.deputy.html" />
+  
+   
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hades.deputy.html" title="hades.deputy package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="hades.html" accesskey="U">Code Documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.portal package</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../components.html">Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../networking.html">Networking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../replication.html">Replication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alternative-dns.html">Alternative DNS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">CLI Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="hades.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="hades.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hades.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hades.html#hades-constants-module">hades.constants module</a></li>
+</ul>
+</li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="../search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="../index.html">Docs</a></li>
+              
+                <li><a href="hades.html">Code Documentation</a></li>
+              
+              <li>hades.portal package</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <section id="module-hades.portal">
+<span id="hades-portal-package"></span><h1>hades.portal package<a class="headerlink" href="#module-hades.portal" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.portal.add_globals">
+<span class="sig-prename descclassname"><span class="pre">hades.portal.</span></span><span class="sig-name descname"><span class="pre">add_globals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/portal.html#add_globals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.portal.add_globals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the configure constants and the config object as global variable to
+the web portal's Jinja2 templates</p>
+</dd></dl>
+
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-hades.portal.session">
+<span id="hades-portal-session-module"></span><h2>hades.portal.session module<a class="headerlink" href="#module-hades.portal.session" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="hades.portal.session.NullSession">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hades.portal.session.</span></span><span class="sig-name descname"><span class="pre">NullSession</span></span><a class="reference internal" href="../_modules/hades/portal/session.html#NullSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.portal.session.NullSession" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://flask.palletsprojects.com/en/0.12.x/api/#flask.sessions.SessionMixin" title="(in Flask v0.12.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.sessions.SessionMixin</span></code></a></p>
+<p>A session similar to the Flask's <a class="reference external" href="https://flask.palletsprojects.com/en/0.12.x/api/#flask.sessions.NullSession" title="(in Flask v0.12.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.sessions.NullSession</span></code></a>, but
+with a different error message.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hades.portal.session.NullSessionInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hades.portal.session.</span></span><span class="sig-name descname"><span class="pre">NullSessionInterface</span></span><a class="reference internal" href="../_modules/hades/portal/session.html#NullSessionInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.portal.session.NullSessionInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://flask.palletsprojects.com/en/0.12.x/api/#flask.sessions.SessionInterface" title="(in Flask v0.12.x)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flask.sessions.SessionInterface</span></code></a></p>
+<p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">SessionInterface</span></code> for <a class="reference internal" href="#hades.portal.session.NullSession" title="hades.portal.session.NullSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullSession</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hades.portal.session.NullSessionInterface.open_session">
+<span class="sig-name descname"><span class="pre">open_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/portal/session.html#NullSessionInterface.open_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.portal.session.NullSessionInterface.open_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method has to be implemented and must either return <code class="docutils literal notranslate"><span class="pre">None</span></code>
+in case the loading failed because of a configuration error or an
+instance of a session object which implements a dictionary like
+interface + the methods and attributes on <code class="xref py py-class docutils literal notranslate"><span class="pre">SessionMixin</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hades.portal.session.NullSessionInterface.save_session">
+<span class="sig-name descname"><span class="pre">save_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/portal/session.html#NullSessionInterface.save_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.portal.session.NullSessionInterface.save_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is called for actual sessions returned by <a class="reference internal" href="#hades.portal.session.NullSessionInterface.open_session" title="hades.portal.session.NullSessionInterface.open_session"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_session()</span></code></a>
+at the end of the request.  This is still called during a request
+context so if you absolutely need access to the request you can do
+that.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-hades.portal.views">
+<span id="hades-portal-views-module"></span><h2>hades.portal.views module<a class="headerlink" href="#module-hades.portal.views" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.portal.views.get_locale">
+<span class="sig-prename descclassname"><span class="pre">hades.portal.views.</span></span><span class="sig-name descname"><span class="pre">get_locale</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/portal/views.html#get_locale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.portal.views.get_locale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.portal.views.handle_database_error">
+<span class="sig-prename descclassname"><span class="pre">hades.portal.views.</span></span><span class="sig-name descname"><span class="pre">handle_database_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/portal/views.html#handle_database_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.portal.views.handle_database_error" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.portal.views.index">
+<span class="sig-prename descclassname"><span class="pre">hades.portal.views.</span></span><span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/portal/views.html#index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.portal.views.index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.portal.views.init_engine">
+<span class="sig-prename descclassname"><span class="pre">hades.portal.views.</span></span><span class="sig-name descname"><span class="pre">init_engine</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/portal/views.html#init_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.portal.views.init_engine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+            
+  <div class="footer-relations">
+    
+      <div class="pull-left">
+        <a class="btn btn-default" href="hades.deputy.html" title="previous chapter (use the left arrow)">hades.deputy package</a>
+      </div>
+    
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hades.deputy.html" title="hades.deputy package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="hades.html" >Code Documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.portal package</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="../_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2015-2020, Sebastian Schrader, Stefan Haller. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

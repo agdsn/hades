@@ -1,0 +1,370 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>hades.bin package &#8212; Hades 0.4.0-180-g86b2a9b documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/guzzle.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="hades.common package" href="hades.common.html" />
+    <link rel="prev" title="hades.agent package" href="hades.agent.html" />
+  
+   
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hades.common.html" title="hades.common package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="hades.agent.html" title="hades.agent package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="hades.html" accesskey="U">Code Documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.bin package</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../components.html">Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../networking.html">Networking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../replication.html">Replication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alternative-dns.html">Alternative DNS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">CLI Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="hades.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="hades.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hades.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hades.html#hades-constants-module">hades.constants module</a></li>
+</ul>
+</li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="../search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="../index.html">Docs</a></li>
+              
+                <li><a href="hades.html">Code Documentation</a></li>
+              
+              <li>hades.bin package</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <section id="module-hades.bin">
+<span id="hades-bin-package"></span><h1>hades.bin package<a class="headerlink" href="#module-hades.bin" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-hades.bin.agent">
+<span id="hades-bin-agent-module"></span><h2>hades.bin.agent module<a class="headerlink" href="#module-hades.bin.agent" title="Permalink to this headline">¶</a></h2>
+<p>Hades frontend for the <code class="docutils literal notranslate"><span class="pre">celery</span></code> command.</p>
+<p>Loads the Hades configuration and transfers control to Celery.</p>
+<dl class="hades option">
+<dt class="sig sig-object hades">
+<span class="sig-name descname"><span class="pre">CeleryOption</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hades.bin.agent.Formatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hades.bin.agent.</span></span><span class="sig-name descname"><span class="pre">Formatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent_increment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_help_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/bin/agent.html#Formatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.agent.Formatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">argparse.HelpFormatter</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hades.bin.agent.Formatter.add_usage">
+<span class="sig-name descname"><span class="pre">add_usage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">usage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/bin/agent.html#Formatter.add_usage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.agent.Formatter.add_usage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.agent.create_parser">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.agent.</span></span><span class="sig-name descname"><span class="pre">create_parser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="hades.common.html#hades.common.cli.ArgumentParser" title="hades.common.cli.ArgumentParser"><span class="pre">hades.common.cli.ArgumentParser</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/agent.html#create_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.agent.create_parser" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.agent.main">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.agent.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/agent.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.agent.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-hades.bin.check_database">
+<span id="hades-bin-check-database-module"></span><h2>hades.bin.check_database module<a class="headerlink" href="#module-hades.bin.check_database" title="Permalink to this headline">¶</a></h2>
+<p>Check the status of the Hades database.</p>
+<p>Try to select data as the different hades users from the database to check if
+the database is running and accessible.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.check_database.check_database">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.check_database.</span></span><span class="sig-name descname"><span class="pre">check_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Engine" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Engine</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pwd.struct_passwd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/metadata.html#sqlalchemy.schema.Table" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.sql.schema.Table</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/bin/check_database.html#check_database"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.check_database.check_database" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check a set of tables as a user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>engine</strong> -- The SQLAlchemy engine</p></li>
+<li><p><strong>user</strong> -- The user to switch to</p></li>
+<li><p><strong>tables</strong> -- The tables to check</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>DBAPIError</strong> -- if errors occur.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.check_database.check_table">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.check_database.</span></span><span class="sig-name descname"><span class="pre">check_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/bin/check_database.html#check_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.check_database.check_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform <code class="code highlight sql docutils literal notranslate"><span class="k"><span class="pre">SELECT</span></span> <span class="k"><span class="pre">NULL</span></span></code> on a given table.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.check_database.create_parser">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.check_database.</span></span><span class="sig-name descname"><span class="pre">create_parser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="hades.common.html#hades.common.cli.ArgumentParser" title="hades.common.cli.ArgumentParser"><span class="pre">hades.common.cli.ArgumentParser</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/check_database.html#create_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.check_database.create_parser" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.check_database.main">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.check_database.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/check_database.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.check_database.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-hades.bin.deputy">
+<span id="hades-bin-deputy-module"></span><h2>hades.bin.deputy module<a class="headerlink" href="#module-hades.bin.deputy" title="Permalink to this headline">¶</a></h2>
+<p>Run the Hades DBus daemon for privileged operations.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.deputy.create_parser">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.deputy.</span></span><span class="sig-name descname"><span class="pre">create_parser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="hades.common.html#hades.common.cli.ArgumentParser" title="hades.common.cli.ArgumentParser"><span class="pre">hades.common.cli.ArgumentParser</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/deputy.html#create_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.deputy.create_parser" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.deputy.main">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.deputy.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/deputy.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.deputy.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-hades.bin.export_options">
+<span id="hades-bin-export-options-module"></span><h2>hades.bin.export_options module<a class="headerlink" href="#module-hades.bin.export_options" title="Permalink to this headline">¶</a></h2>
+<p>Export Hades options in a format suitable for various tools, such as shells.</p>
+<p>Exports the subset of Hades options, that can be represented in the target
+format in a format that can be sourced by the target tool. POSIX shells or
+systemd don't support arrays for example, whereas advanced shells like <code class="docutils literal notranslate"><span class="pre">bash</span></code>
+or <code class="docutils literal notranslate"><span class="pre">zsh</span></code> do.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.export_options.create_parser">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.export_options.</span></span><span class="sig-name descname"><span class="pre">create_parser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/bin/export_options.html#create_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.export_options.create_parser" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.export_options.main">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.export_options.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/bin/export_options.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.export_options.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-hades.bin.generate_config">
+<span id="hades-bin-generate-config-module"></span><h2>hades.bin.generate_config module<a class="headerlink" href="#module-hades.bin.generate_config" title="Permalink to this headline">¶</a></h2>
+<p>Generate configuration files from templates and directories.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.generate_config.create_parser">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.generate_config.</span></span><span class="sig-name descname"><span class="pre">create_parser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="hades.common.html#hades.common.cli.ArgumentParser" title="hades.common.cli.ArgumentParser"><span class="pre">hades.common.cli.ArgumentParser</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/generate_config.html#create_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.generate_config.create_parser" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.generate_config.group">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.generate_config.</span></span><span class="sig-name descname"><span class="pre">group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">grp.struct_group</span></span></span><a class="reference internal" href="../_modules/hades/bin/generate_config.html#group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.generate_config.group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.generate_config.main">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.generate_config.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/bin/generate_config.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.generate_config.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.generate_config.mode">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.generate_config.</span></span><span class="sig-name descname"><span class="pre">mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/generate_config.html#mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.generate_config.mode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.generate_config.relative_path">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.generate_config.</span></span><span class="sig-name descname"><span class="pre">relative_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PurePath" title="(in Python v3.10)"><span class="pre">pathlib.PurePath</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/generate_config.html#relative_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.generate_config.relative_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-hades.bin.portal">
+<span id="hades-bin-portal-module"></span><h2>hades.bin.portal module<a class="headerlink" href="#module-hades.bin.portal" title="Permalink to this headline">¶</a></h2>
+<p>Run the Hades captive-portal Flask WSGI application in debug mode if executed
+as a command-line application.</p>
+<p>Also export the app object for use by WSGI application servers, if imported as
+an ordinary Python module.</p>
+<dl class="hades option">
+<dt class="sig sig-object hades">
+<span class="sig-name descname"><span class="pre">FlaskOption</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.portal.configure_app">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.portal.</span></span><span class="sig-name descname"><span class="pre">configure_app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/bin/portal.html#configure_app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.portal.configure_app" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.portal.main">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.portal.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/portal.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.portal.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-hades.bin.su">
+<span id="hades-bin-su-module"></span><h2>hades.bin.su module<a class="headerlink" href="#module-hades.bin.su" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.su.main">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.su.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/bin/su.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.su.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-hades.bin.vrrp_notify">
+<span id="hades-bin-vrrp-notify-module"></span><h2>hades.bin.vrrp_notify module<a class="headerlink" href="#module-hades.bin.vrrp_notify" title="Permalink to this headline">¶</a></h2>
+<p>Keepalived notification receiver.</p>
+<p>Invoked by keepalived, if the state of VRRP instances changes.</p>
+<dl class="hades option">
+<dt class="sig sig-object hades">
+<span class="sig-name descname"><span class="pre">CeleryOption</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.vrrp_notify.create_parser">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.vrrp_notify.</span></span><span class="sig-name descname"><span class="pre">create_parser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="hades.common.html#hades.common.cli.ArgumentParser" title="hades.common.cli.ArgumentParser"><span class="pre">hades.common.cli.ArgumentParser</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/vrrp_notify.html#create_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.vrrp_notify.create_parser" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.vrrp_notify.main">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.vrrp_notify.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/vrrp_notify.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.vrrp_notify.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.vrrp_notify.notify_auth">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.vrrp_notify.</span></span><span class="sig-name descname"><span class="pre">notify_auth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/vrrp_notify.html#notify_auth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.vrrp_notify.notify_auth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.vrrp_notify.notify_root">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.vrrp_notify.</span></span><span class="sig-name descname"><span class="pre">notify_root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/vrrp_notify.html#notify_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.vrrp_notify.notify_root" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.bin.vrrp_notify.notify_unauth">
+<span class="sig-prename descclassname"><span class="pre">hades.bin.vrrp_notify.</span></span><span class="sig-name descname"><span class="pre">notify_unauth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/hades/bin/vrrp_notify.html#notify_unauth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.bin.vrrp_notify.notify_unauth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+            
+  <div class="footer-relations">
+    
+      <div class="pull-left">
+        <a class="btn btn-default" href="hades.agent.html" title="previous chapter (use the left arrow)">hades.agent package</a>
+      </div>
+    
+      <div class="pull-right">
+        <a class="btn btn-default" href="hades.common.html" title="next chapter (use the right arrow)">hades.common package</a>
+      </div>
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hades.common.html" title="hades.common package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="hades.agent.html" title="hades.agent package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="hades.html" >Code Documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.bin package</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="../_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2015-2020, Sebastian Schrader, Stefan Haller. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

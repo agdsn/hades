@@ -1,0 +1,690 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="../../../_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="../../../_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="../../../_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="../../../_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>hades.config.generate &#8212; Hades 0.4.0-180-g86b2a9b documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/guzzle.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  
+   
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.config.generate</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../components.html">Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../networking.html">Networking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../replication.html">Replication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../alternative-dns.html">Alternative DNS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">CLI Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/hades.html">Code Documentation</a></li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="../../../search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="../../../index.html">Docs</a></li>
+              
+                <li><a href="../../index.html">Module code</a></li>
+              
+              <li>hades.config.generate</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <h1>Source code for hades.config.generate</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">getpass</span>
+<span class="kn">import</span> <span class="nn">grp</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">stat</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">jinja2</span>
+<span class="kn">import</span> <span class="nn">netaddr</span>
+<span class="kn">from</span> <span class="nn">jinja2.exceptions</span> <span class="kn">import</span> <span class="n">FilterArgumentError</span>
+<span class="kn">from</span> <span class="nn">jinja2.filters</span> <span class="kn">import</span> <span class="n">environmentfilter</span>
+
+<span class="kn">from</span> <span class="nn">hades</span> <span class="kn">import</span> <span class="n">constants</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="template_filter"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.template_filter">[docs]</a><span class="k">def</span> <span class="nf">template_filter</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="n">template_filter</span><span class="o">.</span><span class="n">registered</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="k">return</span> <span class="n">f</span>
+
+    <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+<span class="n">template_filter</span><span class="o">.</span><span class="n">registered</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="do_unique"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.do_unique">[docs]</a><span class="nd">@template_filter</span><span class="p">(</span><span class="s1">&#39;unique&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">do_unique</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="do_intersection"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.do_intersection">[docs]</a><span class="nd">@template_filter</span><span class="p">(</span><span class="s1">&#39;intersection&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">do_intersection</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">b</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="do_difference"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.do_difference">[docs]</a><span class="nd">@template_filter</span><span class="p">(</span><span class="s1">&#39;difference&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">do_difference</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">b</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="do_symmetric_difference"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.do_symmetric_difference">[docs]</a><span class="nd">@template_filter</span><span class="p">(</span><span class="s1">&#39;symmetric_difference&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">do_symmetric_difference</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">symmetric_difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">b</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="do_union"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.do_union">[docs]</a><span class="nd">@template_filter</span><span class="p">(</span><span class="s1">&#39;union&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">do_union</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">b</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="do_min"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.do_min">[docs]</a><span class="nd">@template_filter</span><span class="p">(</span><span class="s1">&#39;min&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">do_min</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">a</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="do_max"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.do_max">[docs]</a><span class="nd">@template_filter</span><span class="p">(</span><span class="s1">&#39;max&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">do_max</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">a</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="do_sorted"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.do_sorted">[docs]</a><span class="nd">@template_filter</span><span class="p">(</span><span class="s1">&#39;sorted&#39;</span><span class="p">)</span>
+<span class="nd">@environmentfilter</span>
+<span class="k">def</span> <span class="nf">do_sorted</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">attribute</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="n">attribute</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FilterArgumentError</span><span class="p">(</span><span class="s2">&quot;Only one of attribute and item may be&quot;</span>
+                                  <span class="s2">&quot;specified&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">attribute</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">getattr</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="n">attribute</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">getitem</span><span class="p">,</span> <span class="n">argument</span><span class="o">=</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="do_zip"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.do_zip">[docs]</a><span class="nd">@template_filter</span><span class="p">(</span><span class="s1">&#39;zip&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">do_zip</span><span class="p">(</span><span class="o">*</span><span class="n">iterables</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">iterables</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="do_zip_longest"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.do_zip_longest">[docs]</a><span class="nd">@template_filter</span><span class="p">(</span><span class="s1">&#39;zip_longest&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">do_zip_longest</span><span class="p">(</span><span class="o">*</span><span class="n">iterables</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">zip_longest</span><span class="p">(</span><span class="o">*</span><span class="n">iterables</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="n">fillvalue</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="do_dirname"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.do_dirname">[docs]</a><span class="nd">@template_filter</span><span class="p">(</span><span class="s1">&#39;dirname&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">do_dirname</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">a</span><span class="p">)</span></div>
+
+
+<span class="n">PathArg</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">PurePath</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="yield_all_sources"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.yield_all_sources">[docs]</a><span class="k">def</span> <span class="nf">yield_all_sources</span><span class="p">(</span><span class="o">*</span><span class="n">search_path</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span>
+        <span class="n">Tuple</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Find all files in the directories on ``search_path``.</span>
+
+<span class="sd">    The algorithm is similar to systemd&#39;s unit search or the shell&#39;s ``PATH``</span>
+<span class="sd">    search algorithm.</span>
+
+<span class="sd">    The directories on the search path are recursively walked in parallel.</span>
+<span class="sd">    Directories at the beginning of ``search_path`` take precedence over later</span>
+<span class="sd">    directories, thus for files with the same name, the version in the</span>
+<span class="sd">    leftmost directory that contains the file is selected. The content of</span>
+<span class="sd">    directories is merged.</span>
+
+<span class="sd">    Symbolic links are never followed and the path of symbolic link is returned</span>
+<span class="sd">    instead of the path of its target.</span>
+
+<span class="sd">    Symbolic links to ``/dev/null`` are handled specially and denote a</span>
+<span class="sd">    *deletion marker*, that indicates that a file or directory should not be</span>
+<span class="sd">    included. For directories this means that no directories and their contents</span>
+<span class="sd">    to the right of the respective directory in the search path should be</span>
+<span class="sd">    included. Version of the directory and their contents that are on the search</span>
+<span class="sd">    path to the left of the deletion marker are still included.</span>
+
+<span class="sd">    The kind of paths that are returned depend on the kind of paths, that are</span>
+<span class="sd">    passed as ``search_path``. Relative search path components will yield</span>
+<span class="sd">    relative paths and absolute components absolute paths.</span>
+
+<span class="sd">    :param search_path: A list of paths to directories</span>
+<span class="sd">    :return: An iterator that yields pairs, where the first element is the</span>
+<span class="sd">     component of ``search_path``, where the file was found and the second</span>
+<span class="sd">     element is the path of the file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">logger</span><span class="o">.</span><span class="n">isEnabledFor</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Searching for all sources in </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                     <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">search_path</span><span class="p">)))</span>
+    <span class="c1"># Perform a bread-first search via a queue.</span>
+    <span class="c1"># The queue contains a sequence of (search-path, file) pairs for each</span>
+    <span class="c1"># version of a file on the search path</span>
+    <span class="n">queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="n">queue</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">search_path</span><span class="p">,</span> <span class="n">search_path</span><span class="p">)))</span>
+    <span class="k">while</span> <span class="n">queue</span><span class="p">:</span>
+        <span class="n">sources</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sources</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No search paths&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">relative_source</span> <span class="o">=</span> <span class="n">sources</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">sources</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># If the current file is a directory, we collect all versions of it in</span>
+        <span class="c1"># a list, for all other elements we break the loop and continue with the</span>
+        <span class="c1"># next element. If an error occurs we continue with the next version of</span>
+        <span class="c1"># the file instead.</span>
+        <span class="n">directories</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">base</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">readlink</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+                <span class="c1"># Check for deletion marker</span>
+                <span class="k">if</span> <span class="n">target</span> <span class="o">!=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">devnull</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">directories</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> is a symlink, while </span><span class="si">%s</span><span class="s2"> is a directory&quot;</span><span class="p">,</span>
+                                     <span class="n">source</span><span class="p">,</span> <span class="n">directories</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="k">continue</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Found symlink </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                                     <span class="n">relative_source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
+                        <span class="k">yield</span> <span class="n">base</span><span class="p">,</span> <span class="n">source</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Skipping </span><span class="si">%s</span><span class="s2"> due to deletion marker in </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                                  <span class="n">relative_source</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">source</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Found directory </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">relative_source</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
+                <span class="n">directories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="p">{</span>
+                        <span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">child</span>
+                        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">source</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span>
+                    <span class="p">})</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">source</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Found file </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">relative_source</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">directories</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> is not a directory, while </span><span class="si">%s</span><span class="s2"> is&quot;</span><span class="p">,</span>
+                                 <span class="n">source</span><span class="p">,</span> <span class="n">directories</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">continue</span>
+                <span class="k">yield</span> <span class="n">base</span><span class="p">,</span> <span class="n">source</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> must be a regular file, directory, or symlink&quot;</span><span class="p">,</span>
+                             <span class="n">source</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">directories</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">logger</span><span class="o">.</span><span class="n">isEnabledFor</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
+                <span class="n">dir_names</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">base</span><span class="p">)</span> <span class="k">for</span> <span class="n">base</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">children</span> <span class="ow">in</span> <span class="n">directories</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Descending into </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                             <span class="n">relative_source</span><span class="p">,</span> <span class="n">dir_names</span><span class="p">)</span>
+            <span class="c1"># Merge all names of children</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">(</span>
+                <span class="n">children</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">base</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">children</span> <span class="ow">in</span> <span class="n">directories</span>
+            <span class="p">)))</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+                <span class="n">queue</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">children</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">base</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">children</span> <span class="ow">in</span> <span class="n">directories</span>
+                    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">children</span>
+                <span class="p">))</span>
+            <span class="k">yield</span> <span class="n">directories</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">2</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="yield_all_versions"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.yield_all_versions">[docs]</a><span class="k">def</span> <span class="nf">yield_all_versions</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">PurePath</span><span class="p">,</span>
+                       <span class="o">*</span><span class="n">search_path</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span>
+        <span class="n">Tuple</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Find all versions of `name` on `search_path`.</span>
+
+<span class="sd">    The principle behind the search algorithm are the same as</span>
+<span class="sd">    :func:`yield_all_sources`. This function however will search for a single</span>
+<span class="sd">    file or directory named ``name`` and return all versions of ``name`` that</span>
+<span class="sd">    can be found on the ``search_path``. The version with the highest precedence</span>
+<span class="sd">    (i.e. from the leftmost component of ``search_path`` that contains a version</span>
+<span class="sd">    of ``name``) will be returned first.</span>
+
+<span class="sd">    :param name: The name of the file or directory</span>
+<span class="sd">    :param search_path: A list of of paths to directories</span>
+<span class="sd">    :return: An iterator that yields pairs, where the first element is the</span>
+<span class="sd">     component of ``search_path``, where the file was found and the second</span>
+<span class="sd">     element is the path of the file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">logger</span><span class="o">.</span><span class="n">isEnabledFor</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Searching for versions of </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
+                     <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">search_path</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">search_path</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Empty search path&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">search_path</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">directory</span>
+        <span class="c1"># Check for invalid components and /dev/null deletion markers in all</span>
+        <span class="c1"># components of the path</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">parts</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Intermediate components can&#39;t be symbolic &quot;</span>
+                                 <span class="s2">&quot;links&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">part</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">pardir</span> <span class="ow">or</span> <span class="n">part</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Illegal component </span><span class="si">{!r}</span><span class="s2"> at index </span><span class="si">{}</span><span class="s2"> of path </span><span class="si">{}</span><span class="s2">&quot;</span>
+                                 <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">/</span> <span class="n">part</span>
+            <span class="c1"># Abort search if deletion marker found</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span> <span class="ow">and</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">readlink</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">devnull</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Skipping </span><span class="si">%s</span><span class="s2"> due to deletion marker at </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                             <span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">filename</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">filename</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+                <span class="k">break</span>
+        <span class="c1"># Yield if no break occurred</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Found version of </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2"> at </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                         <span class="n">name</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">directory</span><span class="p">,</span> <span class="n">filename</span></div>
+
+
+<div class="viewcode-block" id="OverridableFileSystemLoader"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.OverridableFileSystemLoader">[docs]</a><span class="k">class</span> <span class="nc">OverridableFileSystemLoader</span><span class="p">(</span><span class="n">jinja2</span><span class="o">.</span><span class="n">BaseLoader</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A Jinja2 loader that loads templates with the :func:`yield_all_sources`</span>
+<span class="sd">    algorithm, if the template name is a relative.</span>
+
+<span class="sd">    The loader accepts :class:`pathlib.PurePath` objects in addition to strings</span>
+<span class="sd">    to identify templates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_paths</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">template_suffix</span><span class="o">=</span><span class="s1">&#39;.j2&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">search_paths</span> <span class="o">=</span> <span class="n">search_paths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">encoding</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template_suffix</span> <span class="o">=</span> <span class="n">template_suffix</span>
+
+<div class="viewcode-block" id="OverridableFileSystemLoader.get_source"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.OverridableFileSystemLoader.get_source">[docs]</a>    <span class="k">def</span> <span class="nf">get_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">environment</span><span class="p">:</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">,</span>
+                   <span class="n">template</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">template</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">base</span><span class="p">,</span> <span class="n">template</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">yield_all_versions</span><span class="p">(</span><span class="n">template</span><span class="p">,</span>
+                                                         <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">search_paths</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">TemplateNotFound</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">template</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">IsADirectoryError</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">TemplateNotFound</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">mtime</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span>
+
+        <span class="k">def</span> <span class="nf">has_changed</span><span class="p">():</span>
+            <span class="sd">&quot;&quot;&quot;Checks whether the template loaded via</span>
+<span class="sd">            :class:`OverridableFileSystemLoader` has changed.</span>
+
+<span class="sd">            This function won&#39;t detect new versions of the template in other</span>
+<span class="sd">            search paths with higher precedence or new deletion markers in other</span>
+<span class="sd">            search paths. We would additionally need a list of all parent</span>
+<span class="sd">            directories in the other search paths and check all of them.&quot;&quot;&quot;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">template</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span> <span class="o">==</span> <span class="n">mtime</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="n">contents</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">template</span><span class="p">),</span> <span class="n">has_changed</span></div>
+
+<div class="viewcode-block" id="OverridableFileSystemLoader.list_templates"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.OverridableFileSystemLoader.list_templates">[docs]</a>    <span class="k">def</span> <span class="nf">list_templates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">base</span><span class="p">))</span>
+                   <span class="k">for</span> <span class="n">base</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">yield_all_sources</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">search_paths</span><span class="p">)</span>
+                   <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
+                   <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_suffix</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="GeneratorError"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.GeneratorError">[docs]</a><span class="k">class</span> <span class="nc">GeneratorError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ConfigGenerator"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.ConfigGenerator">[docs]</a><span class="k">class</span> <span class="nc">ConfigGenerator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">DATETIME_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S%z&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Format string for producing RFC3339-compatible datetime strings&quot;&quot;&quot;</span>
+    <span class="n">TEMPLATE_SUFFIX</span> <span class="o">=</span> <span class="s2">&quot;.j2&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_dirs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PathArg</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">PathArg</span><span class="p">]],</span>
+                 <span class="n">config</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mo">0o0750</span><span class="p">,</span>
+                 <span class="n">group</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">grp</span><span class="o">.</span><span class="n">struct_group</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_user</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getuser</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">group</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IMODE</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+        <span class="c1"># The mode could be masked with much less characters.</span>
+        <span class="c1"># The verbosity of these statements is for clarity and documentation.</span>
+        <span class="c1"># Allow only read, write, sticky, and setgid for directories</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dir_mode</span> <span class="o">=</span> <span class="n">mode</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">stat</span><span class="o">.</span><span class="n">S_IRUSR</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IRGRP</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IROTH</span> <span class="o">|</span>
+                                <span class="n">stat</span><span class="o">.</span><span class="n">S_IWUSR</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IWGRP</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IWOTH</span> <span class="o">|</span>
+                                <span class="n">stat</span><span class="o">.</span><span class="n">S_ISVTX</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_ISGID</span><span class="p">)</span>
+        <span class="c1"># Set execution bits if corresponding read bits are set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dir_mode</span> <span class="o">|=</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IXUSR</span> <span class="k">if</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IRUSR</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dir_mode</span> <span class="o">|=</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IXGRP</span> <span class="k">if</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IRGRP</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dir_mode</span> <span class="o">|=</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IXOTH</span> <span class="k">if</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IROTH</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="c1"># Allow only read, write, and sticky for files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_mode</span> <span class="o">=</span> <span class="n">mode</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">stat</span><span class="o">.</span><span class="n">S_IRUSR</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IRGRP</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IROTH</span> <span class="o">|</span>
+                                 <span class="n">stat</span><span class="o">.</span><span class="n">S_IWUSR</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IWGRP</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IWOTH</span> <span class="o">|</span>
+                                 <span class="n">stat</span><span class="o">.</span><span class="n">S_ISVTX</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template_dirs</span><span class="p">,</span> <span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">PurePath</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="n">template_dirs</span> <span class="o">=</span> <span class="p">(</span><span class="n">template_dirs</span><span class="p">,</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template_dirs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">template_dir</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+                                   <span class="k">for</span> <span class="n">template_dir</span> <span class="ow">in</span> <span class="n">template_dirs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span>
+            <span class="n">loader</span><span class="o">=</span><span class="n">OverridableFileSystemLoader</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">template_dirs</span><span class="p">,</span>
+                <span class="n">template_suffix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">TEMPLATE_SUFFIX</span>
+            <span class="p">),</span>
+            <span class="n">auto_reload</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">autoescape</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep_trailing_newline</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">undefined</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">StrictUndefined</span><span class="p">,</span>
+            <span class="n">extensions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;jinja2.ext.do&#39;</span><span class="p">,</span> <span class="s1">&#39;jinja2.ext.loopcontrols&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;jinja2.ext.with_&#39;</span><span class="p">],</span>
+            <span class="n">trim_blocks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">lstrip_blocks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">globals</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s1">&#39;collections&#39;</span><span class="p">:</span> <span class="n">collections</span><span class="p">,</span>
+            <span class="s1">&#39;itertools&#39;</span><span class="p">:</span> <span class="n">itertools</span><span class="p">,</span>
+            <span class="s1">&#39;netaddr&#39;</span><span class="p">:</span> <span class="n">netaddr</span><span class="p">,</span>
+            <span class="s1">&#39;dirname&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span>
+            <span class="s1">&#39;constants&#39;</span><span class="p">:</span> <span class="n">constants</span><span class="p">,</span>
+        <span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">template_filter</span><span class="o">.</span><span class="n">registered</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_format_search_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_dirs</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_setgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chown</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">destination</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">gr_gid</span><span class="p">,</span>
+                     <span class="n">follow_symlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setstat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">destination</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setgroup</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ConfigGenerator.generate"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.ConfigGenerator.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">PathArg</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PathArg</span><span class="p">]):</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">PurePath</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="n">sources</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">yield_all_versions</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">template_dirs</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sources</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GeneratorError</span><span class="p">(</span><span class="s2">&quot;No file or directory named </span><span class="si">{}</span><span class="s2"> found &quot;</span>
+                                 <span class="s2">&quot;(search path: </span><span class="si">{}</span><span class="s2">)&quot;</span>
+                                 <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">),</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">_format_search_path</span><span class="p">()))</span> <span class="kn">from</span> <span class="bp">None</span>
+        <span class="n">base</span><span class="p">,</span> <span class="n">source</span> <span class="o">=</span> <span class="n">sources</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">GeneratorError</span><span class="p">(</span><span class="s2">&quot;Destination can&#39;t be stdout, if source &quot;</span>
+                                     <span class="s2">&quot;is a directory&quot;</span><span class="p">)</span>
+            <span class="n">destination</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
+            <span class="n">search_path</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">sources</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_do_generate_directory</span><span class="p">(</span><span class="n">search_path</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_do_generate_file</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ConfigGenerator.generate_directory"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.ConfigGenerator.generate_directory">[docs]</a>    <span class="k">def</span> <span class="nf">generate_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">PathArg</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">PathArg</span><span class="p">):</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">PurePath</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">GeneratorError</span><span class="p">(</span><span class="s2">&quot;Source </span><span class="si">{}</span><span class="s2"> must be a relative path&quot;</span>
+                                 <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+        <span class="n">sources</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">yield_all_versions</span><span class="p">(</span><span class="n">source</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sources</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GeneratorError</span><span class="p">(</span><span class="s2">&quot;No directory named </span><span class="si">{}</span><span class="s2"> found (search path </span><span class="si">{}</span><span class="s2">)&quot;</span>
+                                 <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_search_path</span><span class="p">()))</span>
+        <span class="n">destination</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_do_generate_directory</span><span class="p">(</span><span class="n">sources</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_do_generate_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                               <span class="n">destination</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">):</span>
+        <span class="n">destination_base</span> <span class="o">=</span> <span class="n">destination</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating </span><span class="si">%s</span><span class="s2"> from </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span>
+                    <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">sources</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">base</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">yield_all_sources</span><span class="p">(</span><span class="o">*</span><span class="n">sources</span><span class="p">):</span>
+            <span class="n">destination</span> <span class="o">=</span> <span class="n">destination_base</span> <span class="o">/</span> <span class="n">source</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_create_symlink</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">source</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">destination</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Clearing directory </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+                    <span class="c1"># Clear destination directory contents</span>
+                    <span class="k">if</span> <span class="n">destination</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">destination</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                        <span class="k">raise</span> <span class="n">GeneratorError</span><span class="p">(</span><span class="s2">&quot;Destination </span><span class="si">{}</span><span class="s2"> is not a directory&quot;</span>
+                                             <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">destination</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">destination</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating directory </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+                    <span class="n">destination</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir_mode</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copystat</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">destination</span><span class="p">),</span>
+                                <span class="n">follow_symlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_setstat</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dir_mode</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEMPLATE_SUFFIX</span><span class="p">:</span>
+                    <span class="n">destination</span> <span class="o">=</span> <span class="n">destination</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="n">destination</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_generate_template_to_file</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_copy_to_file</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ConfigGenerator.generate_file"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.generate.ConfigGenerator.generate_file">[docs]</a>    <span class="k">def</span> <span class="nf">generate_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">PathArg</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PathArg</span><span class="p">]):</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">PurePath</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">base</span><span class="p">,</span> <span class="n">source</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">yield_all_versions</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">template_dirs</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GeneratorError</span><span class="p">(</span><span class="s2">&quot;File </span><span class="si">{}</span><span class="s2"> not found (search path </span><span class="si">{}</span><span class="s2">)&quot;</span>
+                                 <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_search_path</span><span class="p">())</span>
+                                 <span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">source</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">source</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">GeneratorError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is not a file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+        <span class="n">destination</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_do_generate_file</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_do_generate_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+                          <span class="n">destination</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEMPLATE_SUFFIX</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_generate_template_to_stdout</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_copy_to_stdout</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">destination</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_create_symlink</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">source</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEMPLATE_SUFFIX</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">destination</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                    <span class="n">destination</span> <span class="o">=</span> <span class="n">destination</span> <span class="o">/</span> <span class="n">source</span><span class="o">.</span><span class="n">stem</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_generate_template_to_file</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">destination</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                    <span class="n">destination</span> <span class="o">=</span> <span class="n">destination</span> <span class="o">/</span> <span class="n">source</span><span class="o">.</span><span class="n">name</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_copy_to_file</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_symlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">):</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">readlink</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating symlink </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+        <span class="n">destination</span><span class="o">.</span><span class="n">symlink_to</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setgroup</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_copy_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Copying </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">destination</span><span class="p">),</span> <span class="n">follow_symlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setstat</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_mode</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_copy_to_stdout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Copying </span><span class="si">%s</span><span class="s2"> to stdout&quot;</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_copy_to_fd</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">fileno</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">_copy_to_fd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="n">fd</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">source</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">sendfile</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">fileno</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">O_WRONLY</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">O_CLOEXEC</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">O_EXCL</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">O_CREAT</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">flags</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_mode</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_generate_template_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+                                   <span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+                                   <span class="n">destination</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">):</span>
+        <span class="n">destination</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
+        <span class="c1"># Safely create file:</span>
+        <span class="c1"># 1. Create with O_CREAT | O_EXCL</span>
+        <span class="c1"># 2. Unlink if fails</span>
+        <span class="c1"># 3. Try again</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Creating </span><span class="si">%s</span><span class="s2"> from template </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_file</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+            <span class="n">destination</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="n">fd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_file</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setgroup</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">os</span><span class="o">.</span><span class="n">fdopen</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_generate_template_to_writer</span><span class="p">(</span>
+                <span class="n">base</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span>
+                <span class="n">destination_dir</span><span class="o">=</span><span class="n">destination</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
+                <span class="n">destination</span><span class="o">=</span><span class="n">destination</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_generate_template_to_stdout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+                                     <span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Instantiating template </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generate_template_to_writer</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_generate_template_to_writer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+                                     <span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+                                     <span class="n">writer</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_variables</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">TemplateNotFound</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GeneratorError</span><span class="p">(</span><span class="s2">&quot;Template </span><span class="si">{}</span><span class="s2"> not found (search path </span><span class="si">{}</span><span class="s2">)&quot;</span>
+                                 <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">_format_search_path</span><span class="p">())</span>
+                                 <span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">astimezone</span><span class="p">()</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Generated on </span><span class="si">{}</span><span class="s2"> from </span><span class="si">{}</span><span class="s2"> by </span><span class="si">{}</span><span class="s2">&quot;</span>
+                   <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DATETIME_FORMAT</span><span class="p">),</span> <span class="n">source</span><span class="p">,</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">_current_user</span><span class="p">))</span>
+        <span class="n">relative_source</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+        <span class="n">stream</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">stream</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_variables</span><span class="p">,</span>
+                                 <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span>
+                                 <span class="n">source_base</span><span class="o">=</span><span class="n">base</span><span class="p">,</span>
+                                 <span class="n">source</span><span class="o">=</span><span class="n">relative_source</span><span class="p">,</span>
+                                 <span class="n">source_dir</span><span class="o">=</span><span class="n">relative_source</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+            
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.config.generate</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="../../../_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2015-2020, Sebastian Schrader, Stefan Haller. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

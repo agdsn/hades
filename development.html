@@ -1,147 +1,249 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Development &mdash; Hades 0.1.0-177-g0b187d3 documentation</title>
-    
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1.0-177-g0b187d3',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Hades 0.1.0-177-g0b187d3 documentation" href="index.html" />
-    <link rel="prev" title="Configuration" href="configuration.html" />
-   
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>Development &#8212; Hades 0.4.0-180-g86b2a9b documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/guzzle.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Code Documentation" href="api/hades.html" />
+    <link rel="prev" title="CLI Utilities" href="cli.html" />
+  
+   
 
-  </head>
-  <body role="document">  
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api/hades.html" title="Code Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="cli.html" title="CLI Utilities"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Development</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="networking.html">Networking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replication.html">Replication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alternative-dns.html">Alternative DNS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI Utilities</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#docker-setup">Docker Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-the-documentation">Building the Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/hades.html">Code Documentation</a></li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="index.html">Docs</a></li>
+              
+              <li>Development</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
             
-  <div class="section" id="development">
-<h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="building-the-documentation">
+  <section id="development">
+<span id="id1"></span><h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
+<section id="docker-setup">
+<h2>Docker Setup<a class="headerlink" href="#docker-setup" title="Permalink to this headline">¶</a></h2>
+<p>Not everybody runs Debian on their systems.
+Additionally one might not want to pollute their system with all the
+dependencies and development tools, that are necessary to build and run Hades.
+Docker provides an easy way to isolate the development environment from your
+machine and to install the necessary requirements and tools.</p>
+<section id="building-running">
+<h3>Building &amp; Running<a class="headerlink" href="#building-running" title="Permalink to this headline">¶</a></h3>
+<p>Run the following command in the project root directory to build an image with
+<code class="docutils literal notranslate"><span class="pre">docker-compose</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker-compose build --build-arg=UID=$(id -u) --build-arg=GID=$(id -g) hades</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">UID</span></code> and <code class="docutils literal notranslate"><span class="pre">GID</span></code> build args ensure, that the IDs of the user on your
+machine match with the user and group created inside the container.</p>
+<p>After you've successfully created the image, you can run the container:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker-compose -up -d</span>
+</pre></div>
+</div>
+<p>This will start the container in background.
+Inside the container <code class="docutils literal notranslate"><span class="pre">systemd</span></code> is started.
+Running an init system like systemd in a container is not an usual setup, but
+Hades integrates well with systemd and should be also be tested on systemd.</p>
+<p>To enter the container run the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker-compose exec -u builder hades bash</span>
+</pre></div>
+</div>
+</section>
+<section id="use-in-production">
+<h3>Use in Production<a class="headerlink" href="#use-in-production" title="Permalink to this headline">¶</a></h3>
+<p>It probably doesn't make sense to run Hades inside Docker in production,
+because the <a class="reference internal" href="networking.html#networking"><span class="std std-ref">Networking</span></a> setup of Hades is much more involved than your
+typical Docker application, which only needs to expose a few ports.
+Hades requires Layer 2 connectivity, so you would need to pass interfaces into
+the container or bridge the container interfaces on the host.
+All of this is possible, the question is however if such a setup provides any
+benefit.</p>
+</section>
+</section>
+<section id="building-the-documentation">
 <h2>Building the Documentation<a class="headerlink" href="#building-the-documentation" title="Permalink to this headline">¶</a></h2>
-<p>The documentation for Hades is build with <cite>sphinx &lt;http://sphinx-doc.org&gt;</cite>.
+<p>The documentation for Hades is build with <a class="reference external" href="http://sphinx-doc.org">sphinx</a>.
 An html build is stored in the gh-pages branch in order to host the
-documentation using <cite>GitHub Pages &lt;https://pages.github.com/&gt;</cite>.</p>
+documentation using <a class="reference external" href="https://pages.github.com/">GitHub Pages</a>.
+Whatever python setup you chose, make sure that the extra requirements given
+in the <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> are installed (e.g. <code class="docutils literal notranslate"><span class="pre">sphinx</span></code> and relevant extensions).</p>
 <p>After cloning a repository for the first time, initialize the git submodules of
 this repository:</p>
-<div class="highlight-python"><div class="highlight"><pre>git submodules update --init
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git submodules update --init</span>
 </pre></div>
 </div>
-<p>To build the documentation, change into the <code class="docutils literal"><span class="pre">docs</span></code> directory and run:</p>
-<div class="highlight-python"><div class="highlight"><pre>make html
+<p>To build the documentation, change into the <code class="docutils literal notranslate"><span class="pre">docs</span></code> directory and run:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">make html</span>
 </pre></div>
 </div>
-<p>The documentation will built and stored in the <code class="docutils literal"><span class="pre">docs/build/html</span></code> directory.
+<p>The documentation will built and stored in the <code class="docutils literal notranslate"><span class="pre">docs/build/html</span></code> directory.
 This directory is actually a git submodule with a clone of the same repository,
-but on a different branch, namely the special <code class="docutils literal"><span class="pre">gh-pages</span></code> branch.
-This branch does not contain the project sources like <code class="docutils literal"><span class="pre">master</span></code> and is also
-completely independent from the <code class="docutils literal"><span class="pre">master</span></code> branch.
+but on a different branch, namely the special <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> branch.
+This branch does not contain the project sources like <code class="docutils literal notranslate"><span class="pre">master</span></code> and is also
+completely independent from the <code class="docutils literal notranslate"><span class="pre">master</span></code> branch.
 Never merge or rebase these branch with each other!</p>
 <p>You can view the documentation locally with your browser by opening the
-<code class="docutils literal"><span class="pre">index.html</span></code> file in the <code class="docutils literal"><span class="pre">docs/build/html</span></code> directory and if you are
+<code class="docutils literal notranslate"><span class="pre">index.html</span></code> file in the <code class="docutils literal notranslate"><span class="pre">docs/build/html</span></code> directory and if you are
 satisfied, you can publish it on <a class="reference external" href="https://agdsn.github.io/hades/">https://agdsn.github.io/hades/</a> by executing
-the following commands in <code class="docutils literal"><span class="pre">docs/build/html</span></code>:</p>
-<div class="highlight-python"><div class="highlight"><pre>git add .
-git commit
-git push origin gh-pages
+the following commands in <code class="docutils literal notranslate"><span class="pre">docs/build/html</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git add .</span>
+<span class="go">git commit</span>
+<span class="go">git push origin gh-pages</span>
 </pre></div>
 </div>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">Don&#8217;t mix up the root repository and its submodule in <code class="docutils literal"><span class="pre">docs/build/html</span></code> and
+<p class="admonition-title">Warning</p>
+<p>Don't mix up the root repository and its submodule in <code class="docutils literal notranslate"><span class="pre">docs/build/html</span></code> and
 be careful in which directory you are executing the git commands.</p>
 </div>
 <p>If you want you can then update the submodule relationship between root
 repository and the gh-pages submodule by executing the following commands in
 the <strong>root</strong> repository:</p>
-<div class="highlight-python"><div class="highlight"><pre>git add docs/build/html
-git commit
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">add</span> <span class="n">docs</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">html</span>
+<span class="n">git</span> <span class="n">commit</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Development</a><ul>
-<li><a class="reference internal" href="#building-the-documentation">Building the Documentation</a></li>
-</ul>
-</li>
-</ul>
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="configuration.html" title="previous chapter">Configuration</a></li>
-  </ul></li>
-</ul>
-</div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/development.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2015, Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN), Sebastian Schrader.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
-      
-      |
-      <a href="_sources/development.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
+            
+  <div class="footer-relations">
     
-
+      <div class="pull-left">
+        <a class="btn btn-default" href="cli.html" title="previous chapter (use the left arrow)">CLI Utilities</a>
+      </div>
     
+      <div class="pull-right">
+        <a class="btn btn-default" href="api/hades.html" title="next chapter (use the right arrow)">Code Documentation</a>
+      </div>
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api/hades.html" title="Code Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="cli.html" title="CLI Utilities"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Development</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2015-2020, Sebastian Schrader, Stefan Haller. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
   </body>
 </html>

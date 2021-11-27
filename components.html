@@ -1,108 +1,201 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Components &mdash; Hades 0.1.0-177-g0b187d3 documentation</title>
-    
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1.0-177-g0b187d3',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Hades 0.1.0-177-g0b187d3 documentation" href="index.html" />
-    <link rel="next" title="Networking" href="networking.html" />
-    <link rel="prev" title="Hades" href="index.html" />
-   
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>Components &#8212; Hades 0.4.0-180-g86b2a9b documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/guzzle.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Networking" href="networking.html" />
+    <link rel="prev" title="Overview" href="index.html" />
+  
+   
 
-  </head>
-  <body role="document">  
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="networking.html" title="Networking"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Overview"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Components</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Components</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#database-postgresql">Database (PostgreSQL)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#radius-freeradius">RADIUS (FreeRADIUS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#auth-dns-unbound">Auth DNS (unbound)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#auth-dhcp-dnsmasq">Auth DHCP (dnsmasq)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#unauth-dns-dnsmasq">Unauth DNS (dnsmasq)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#unauth-dhcp-dnsmasq">Unauth DHCP (dnsmasq)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#site-agent-celery">Site Agent (Celery)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#deputy-dbus">Deputy (DBus)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vrrp-keepalived">VRRP (keepalived)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="networking.html">Networking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replication.html">Replication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alternative-dns.html">Alternative DNS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/hades.html">Code Documentation</a></li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="index.html">Docs</a></li>
+              
+              <li>Components</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
             
-  <div class="section" id="components">
-<h1>Components<a class="headerlink" href="#components" title="Permalink to this headline">¶</a></h1>
+  <section id="components">
+<span id="id1"></span><h1>Components<a class="headerlink" href="#components" title="Permalink to this headline">¶</a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p>Hades consists of quite a number of different components:</p>
 <ul class="simple">
-<li>A database (PostgresSQL)</li>
-<li>A RADIUS server (freeRADIUS)</li>
-<li>A DNS resolver for authorized users (unbound)</li>
-<li>A DHCP server for authorized users (dnsmasq)</li>
-<li>A DNS resolver for unauthorized users (again dnsmasq, but a separate instance)</li>
-<li>A DHCP server for unauthorized users (again dnsmasq, but same instance as unauthorized DNS)</li>
-<li>An agent executing regular tasks and waiting for commands (Celery worker)</li>
-<li>A Flask web application providing a captive portal landing page</li>
-<li>An WSGI application server (uwsgi) hosting the Flask application</li>
-<li>A web server (nginx) forwarding requests to the application server</li>
-<li>A VRRP server (keepalived) providing automatic fail-over between multiple Hades installations</li>
+<li><p>A database (PostgresSQL)</p></li>
+<li><p>A RADIUS server (FreeRADIUS)</p></li>
+<li><p>A DNS resolver for authorized users (unbound)</p></li>
+<li><p>A DHCP server for authorized users (dnsmasq)</p></li>
+<li><p>A DNS resolver for unauthorized users (again dnsmasq, but a separate instance)</p></li>
+<li><p>A DHCP server for unauthorized users (again dnsmasq, but same instance as unauthorized DNS)</p></li>
+<li><p>A privileged daemon, called deputy, that provides a DBus API for local commands</p></li>
+<li><p>An agent executing regular tasks and waiting for commands (Celery worker)</p></li>
+<li><p>A Flask web application providing a captive portal landing page</p></li>
+<li><p>An WSGI application server (uwsgi) hosting the Flask application</p></li>
+<li><p>A web server (nginx) forwarding requests to the application server</p></li>
+<li><p>Multiple VRRP instances (keepalived) providing automatic fail-over between multiple Hades installations</p></li>
+<li><p>Systemd units and timers to orchestrate all the components</p></li>
 </ul>
 <p>All components are intended to be run on the same machine to a serve a set of
-users. This group of users form the called a site and the machine is called the
-site node. Multiple instances of Hades can be run for the same site, whereby
+users. This group of users constitute a <em>site</em> and the machine is called the
+<em>site node</em>. Multiple instances of Hades can be run for the same site, whereby
 one node is primary and other nodes serve as secondary backup nodes.</p>
-<div class="section" id="database-postgresql">
+</section>
+<section id="database-postgresql">
 <h2>Database (PostgreSQL)<a class="headerlink" href="#database-postgresql" title="Permalink to this headline">¶</a></h2>
-<p>PostgreSQL was chosen as the backend database, because it&#8217;s very mature
+<p><a class="reference external" href="https://www.postgresql.org/">PostgreSQL</a> was chosen as the backend database,
+because it's very mature
 database, all other components support it as a backend and its Foreign Data
 Wrapper combined with Materialized Views are a very simple and robust way to
 implement asynchronous replication.</p>
-</div>
-<div class="section" id="radius-freeradius">
-<h2>RADIUS (freeRADIUS)<a class="headerlink" href="#radius-freeradius" title="Permalink to this headline">¶</a></h2>
-<p>freeRADIUS is the de facto standard RADIUS open source server implementation.
-All other alternatives are less supported on different platforms and don&#8217;t
+</section>
+<section id="radius-freeradius">
+<h2>RADIUS (FreeRADIUS)<a class="headerlink" href="#radius-freeradius" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://freeradius.org/">FreeRADIUS</a> is the de facto standard RADIUS open
+source server implementation.
+All other alternatives are less supported on different platforms and don't
 offer nearly as much features.</p>
-<p>The generated configuration is for the 2.x line of freeRADIUS as the new 3.x
-has not been packaged yet in Debian, which is the target platform of Hades.</p>
-<p>Most modules and features of freeRADIUS have been disabled to only support
+<p>Most modules and features of FreeRADIUS have been disabled to only support
 RADIUS MAC Authentication (or MAC Authentication Bypass) via PAP, CHAP and
 EAP-MD5. The interoperability has only been verified with HP ProCurve switches,
 patches for different lines of hardware are welcome.</p>
-</div>
-<div class="section" id="auth-dns-unbound">
+</section>
+<section id="auth-dns-unbound">
 <h2>Auth DNS (unbound)<a class="headerlink" href="#auth-dns-unbound" title="Permalink to this headline">¶</a></h2>
-<p>DNS for authenticated users is provided by unbound.
-The unbound instance has DNSSEC-enabled.
+<p>DNS for authenticated users is provided by <a class="reference external" href="https://www.unbound.net/">unbound</a>.
+The unbound instance has DNSSEC enabled.
 In the default configuration unbound runs as a standalone, recursive resolver.</p>
 <p>dnsmasq could have been chosen as the resolver for authenticated as well, but it
 its not capable of recursively resolving names itself and always needs a set of
 upstream DNS servers to forward requests to.</p>
-</div>
-<div class="section" id="auth-dhcp-dnsmasq">
+<p>There are actually two separate unbound instances running, the <em>pristine</em>
+instance and the <em>alternative</em> instance. All DNS requests by authenticated users
+are normally handled by the <em>pristine</em> instance, but requests from IP addresses
+can be dispatched to the <em>alternative</em> instance using an <em>ipset</em>.</p>
+<p>See <a class="reference internal" href="alternative-dns.html"><span class="doc">Alternative DNS</span></a> for details.</p>
+</section>
+<section id="auth-dhcp-dnsmasq">
 <h2>Auth DHCP (dnsmasq)<a class="headerlink" href="#auth-dhcp-dnsmasq" title="Permalink to this headline">¶</a></h2>
-<p>Hades currently uses dnsmasq as the DHCP server for authenticated users.
+<p>Hades currently uses <a class="reference external" href="http://www.thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a>
+as the DHCP server for authenticated users.
 The well-known ISC DHCP server has not been chosen, because without patches, it
-doesn&#8217;t support reading static host reservations from a database.
+doesn't support reading static host reservations from a database.
 dnsmasq does not support reading from a database either, but can be instructed
 to reload its host reservations from disk without restarting.
 ISC dhcpd must always be restarted.</p>
-<p>There is a new DHCP server called kea also developed by ISC, which would be the
-perfect fit for Hades, as it will support reading host reservations from
+<p>dnsmasq's DHCP leases are stored in the local PostgreSQL database through the
+<code class="docutils literal notranslate"><span class="pre">--dhcp-script</span></code> mechanism of dnsmasq. dnsmasq
+The <a class="reference external" href="http://www.thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html">dnsmasq man page</a>
+describes the details.</p>
+<p>There is a new DHCP server called <em>kea</em> also developed by ISC, which would be
+the perfect fit for Hades, as it will support reading host reservations from
 a relational database.
-Unfortunately kea is still in development and this particular feature is not
-yet fully implemented.
-See <a class="reference external" href="https://kea.isc.org/wiki/HostReservationDesign">https://kea.isc.org/wiki/HostReservationDesign</a> for the current state of
-affairs.</p>
-</div>
-<div class="section" id="unauth-dns-dnsmasq">
+See <a class="reference external" href="https://kea.isc.org/wiki/HostReservationDesign">https://kea.isc.org/wiki/HostReservationDesign</a> for the details.</p>
+</section>
+<section id="unauth-dns-dnsmasq">
 <h2>Unauth DNS (dnsmasq)<a class="headerlink" href="#unauth-dns-dnsmasq" title="Permalink to this headline">¶</a></h2>
 <p>The DNS server for unauthenticated users is a vital part of the captive portal
 redirection.
@@ -111,94 +204,103 @@ dnsmasq is very well suited for this unusual configuration.</p>
 <p>There is a special entry for dns.msftncsi.com to assist with the Network
 Connectivity Status Indicator service used in Microsoft products, such as
 Windows.</p>
-</div>
-<div class="section" id="unauth-dhcp-dnsmasq">
+</section>
+<section id="unauth-dhcp-dnsmasq">
 <h2>Unauth DHCP (dnsmasq)<a class="headerlink" href="#unauth-dhcp-dnsmasq" title="Permalink to this headline">¶</a></h2>
 <p>The same dnsmasq process that provides unauth DNS provides unauth DHCP.
-In this network users are given very short leases (two minutes is the default
-values), so that they will renew their IP address very often and get an regular
+In this network users are given very short leases (two minutes is the default),
+so that they will renew their IP address very often and get a regular lease
 after transitioning back into the network for authenticated users very quickly.</p>
-</div>
-<div class="section" id="site-agent-celery">
+</section>
+<section id="site-agent-celery">
 <h2>Site Agent (Celery)<a class="headerlink" href="#site-agent-celery" title="Permalink to this headline">¶</a></h2>
-<p>Other internal services and applications might want to contact the site node to
-get a list of the latest authentication attempts at a particular switch port for
-example.
-Direct communication in a distributed system, such as Hades with potentially
-many site nodes is therefore facilitated with the use of a central message queue
-and the distributed task framework Celery.
-The central message queue or broker is <strong>not</strong> part of Hades.
-RabbitMQ or Redis is recommended.
-Please see the <cite>Celery Broker documentation &lt;https://celery.readthedocs.org/en/latest/getting-started/brokers/index.html&gt;</cite></p>
-</div>
-</div>
+<p>Other applications might want to interact with Hades site nodes to query
+information, such as the latest authentication attempts at a particular switch
+port for example.</p>
+<p>Direct communication in a distributed system, such as Hades with many nodes is
+notoriously difficult. There are potentially multiple sites with multiple
+site nodes and the nodes may fail or change roles at any time.</p>
+<p>To abstract all this complexity away from API users, communication between the
+site nodes and other applications is therefore facilitated with the use of a
+central RabbitMQ message queue and the distributed task framework Celery.
+Although Celery supports different broker backends,
+only RabbitMQ is supported by Hades at this point,
+because Hades uses advanced AMQP features, which are not available on simpler
+brokers, such as Redis.
+Please see the <a class="reference external" href="http://docs.celeryproject.org/">Celery documentation</a> for more
+information about Celery.</p>
+<p>The central message queue <strong>not</strong> part of Hades, you must provide your own,
+if you want to use the API.
+If you don't need the API, you can simply disable the <code class="docutils literal notranslate"><span class="pre">hades-agent</span></code> systemd
+service, it is not required for other functionality.</p>
+</section>
+<section id="deputy-dbus">
+<h2>Deputy (DBus)<a class="headerlink" href="#deputy-dbus" title="Permalink to this headline">¶</a></h2>
+<p>Hades makes heavy use of privilege separations and runs daemons as different
+users.
+For a few operations however root privileges are necessary.
+These operations are performed by a small DBus service.
+This service is available to the agent.</p>
+<p>The name is reference to the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Confused_deputy_problem">confused deputy problem</a>.</p>
+</section>
+<section id="vrrp-keepalived">
+<h2>VRRP (keepalived)<a class="headerlink" href="#vrrp-keepalived" title="Permalink to this headline">¶</a></h2>
+<p>Hades employs the Virtual Router Redundancy Protocol (VRRP) to allow multiple
+site node instances for a single sites via <a class="reference external" href="http://www.keepalived.org/">keepalived</a>.</p>
+<p>Even if there is only a single site node, keepalived is still required,
+because it is used to setup parts of the network configuration.
+You may try to run Hades without keepalived, but this is not recommended,
+because you would have to take of the proper network setup yourself.
+Furthermore you might later decide to deploy more than site node.</p>
+</section>
+</section>
 
 
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Components</a><ul>
-<li><a class="reference internal" href="#database-postgresql">Database (PostgreSQL)</a></li>
-<li><a class="reference internal" href="#radius-freeradius">RADIUS (freeRADIUS)</a></li>
-<li><a class="reference internal" href="#auth-dns-unbound">Auth DNS (unbound)</a></li>
-<li><a class="reference internal" href="#auth-dhcp-dnsmasq">Auth DHCP (dnsmasq)</a></li>
-<li><a class="reference internal" href="#unauth-dns-dnsmasq">Unauth DNS (dnsmasq)</a></li>
-<li><a class="reference internal" href="#unauth-dhcp-dnsmasq">Unauth DHCP (dnsmasq)</a></li>
-<li><a class="reference internal" href="#site-agent-celery">Site Agent (Celery)</a></li>
-</ul>
-</li>
-</ul>
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">Hades</a></li>
-      <li>Next: <a href="networking.html" title="next chapter">Networking</a></li>
-  </ul></li>
-</ul>
-</div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/components.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2015, Arbeitsgemeinschaft Dresdner Studentennetz (AG DSN), Sebastian Schrader.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
-      
-      |
-      <a href="_sources/components.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
+            
+  <div class="footer-relations">
     
-
+      <div class="pull-left">
+        <a class="btn btn-default" href="index.html" title="previous chapter (use the left arrow)">Overview</a>
+      </div>
     
+      <div class="pull-right">
+        <a class="btn btn-default" href="networking.html" title="next chapter (use the right arrow)">Networking</a>
+      </div>
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="networking.html" title="Networking"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Overview"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Components</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2015-2020, Sebastian Schrader, Stefan Haller. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
   </body>
 </html>

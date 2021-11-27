@@ -1,0 +1,806 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>hades.common package &#8212; Hades 0.4.0-180-g86b2a9b documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/guzzle.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="hades.config package" href="hades.config.html" />
+    <link rel="prev" title="hades.bin package" href="hades.bin.html" />
+  
+   
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hades.config.html" title="hades.config package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="hades.bin.html" title="hades.bin package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="hades.html" accesskey="U">Code Documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.common package</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../components.html">Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../networking.html">Networking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../replication.html">Replication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alternative-dns.html">Alternative DNS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">CLI Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="hades.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="hades.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hades.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hades.html#hades-constants-module">hades.constants module</a></li>
+</ul>
+</li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="../search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="../index.html">Docs</a></li>
+              
+                <li><a href="hades.html">Code Documentation</a></li>
+              
+              <li>hades.common package</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <section id="module-hades.common">
+<span id="hades-common-package"></span><h1>hades.common package<a class="headerlink" href="#module-hades.common" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-hades.common.cli">
+<span id="hades-common-cli-module"></span><h2>hades.common.cli module<a class="headerlink" href="#module-hades.common.cli" title="Permalink to this headline">¶</a></h2>
+<p>Functionality for the Hades command-line utilities in <a class="reference internal" href="hades.bin.html#module-hades.bin" title="hades.bin"><code class="xref py py-mod docutils literal notranslate"><span class="pre">hades.bin</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hades.common.cli.ArgumentParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hades.common.cli.</span></span><span class="sig-name descname"><span class="pre">ArgumentParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prog=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">usage=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epilog=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents=[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formatter_class=&lt;class</span> <span class="pre">'argparse.HelpFormatter'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_chars='-'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fromfile_prefix_chars=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">argument_default=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conflict_handler='error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_help=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_abbrev=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit_on_error=True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/cli.html#ArgumentParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.cli.ArgumentParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">argparse.ArgumentParser</span></code></a></p>
+<p>ArgumentParser subclass that exists with <a class="reference external" href="https://docs.python.org/3/library/os.html#os.EX_USAGE" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">os.EX_USAGE</span></code></a> exit code if
+parsing fails.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hades.common.cli.ArgumentParser.error">
+<span class="sig-name descname"><span class="pre">error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/cli.html#ArgumentParser.error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.cli.ArgumentParser.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints a usage message incorporating the message to stderr and
+exits.</p>
+<p>If you override this in a subclass, it should not return -- it
+should either exit or raise an exception.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hades.common.cli.VersionAction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hades.common.cli.</span></span><span class="sig-name descname"><span class="pre">VersionAction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option_strings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'==SUPPRESS=='</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'==SUPPRESS=='</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&quot;show</span> <span class="pre">program's</span> <span class="pre">version</span> <span class="pre">number,</span> <span class="pre">configure</span> <span class="pre">options,</span> <span class="pre">copyright</span> <span class="pre">notice</span> <span class="pre">and</span> <span class="pre">exit&quot;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/cli.html#VersionAction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.cli.VersionAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.Action" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">argparse.Action</span></code></a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.cli.reset_cli_logging">
+<span class="sig-prename descclassname"><span class="pre">hades.common.cli.</span></span><span class="sig-name descname"><span class="pre">reset_cli_logging</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/cli.html#reset_cli_logging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.cli.reset_cli_logging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset root logger configuration</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.cli.setup_cli_logging">
+<span class="sig-prename descclassname"><span class="pre">hades.common.cli.</span></span><span class="sig-name descname"><span class="pre">setup_cli_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/cli.html#setup_cli_logging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.cli.setup_cli_logging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup logging for CLI applications, that do not configure logging
+themselves.</p>
+<p>Set log level using command-line options parsed with <code class="xref py py-data docutils literal notranslate"><span class="pre">parser</span></code>, the
+<span class="target" id="index-0"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">HADES_CONFIG</span></code> environment variable or finally the default value
+<code class="xref py py-data docutils literal notranslate"><span class="pre">DEFAULT_VERBOSITY</span></code>-</p>
+<p>Flask and Celery are quite opinionated about logging, so this function
+should probably not be called in their launchers.
+:param program: The name of the program
+:param args: The parsed arguments of the program with <code class="xref py py-data docutils literal notranslate"><span class="pre">parser</span></code> or a
+subparser.</p>
+</dd></dl>
+
+</section>
+<section id="module-hades.common.db">
+<span id="hades-common-db-module"></span><h2>hades.common.db module<a class="headerlink" href="#module-hades.common.db" title="Permalink to this headline">¶</a></h2>
+<p>Database utilities</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hades.common.db.IPAddress">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">IPAddress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#IPAddress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.IPAddress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/custom_types.html#sqlalchemy.types.TypeDecorator" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.sql.type_api.TypeDecorator</span></code></a></p>
+<p>Custom SQLAlchemy type for IP addresses.</p>
+<p>Use the PostgreSQL <code class="docutils literal notranslate"><span class="pre">inet</span></code> type on the database side and
+<a class="reference external" href="https://netaddr.readthedocs.io/en/latest/api.html#netaddr.IPAddress" title="(in netaddr v0.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">netaddr.IPAddress</span></code></a> on the Python side.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hades.common.db.IPAddress.impl">
+<span class="sig-name descname"><span class="pre">impl</span></span><a class="headerlink" href="#hades.common.db.IPAddress.impl" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference external" href="https://docs.sqlalchemy.org/en/14/dialects/postgresql.html#sqlalchemy.dialects.postgresql.INET" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.dialects.postgresql.base.INET</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hades.common.db.IPAddress.process_bind_param">
+<span class="sig-name descname"><span class="pre">process_bind_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#IPAddress.process_bind_param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.IPAddress.process_bind_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive a bound parameter value to be converted.</p>
+<p>Subclasses override this method to return the
+value that should be passed along to the underlying
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeEngine</span></code> object, and from there to the
+DBAPI <code class="docutils literal notranslate"><span class="pre">execute()</span></code> method.</p>
+<p>The operation could be anything desired to perform custom
+behavior, such as transforming or serializing data.
+This could also be used as a hook for validating logic.</p>
+<p>This operation should be designed with the reverse operation
+in mind, which would be the process_result_value method of
+this class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> -- Data to operate upon, of any type expected by
+this method in the subclass.  Can be <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>dialect</strong> -- the <code class="xref py py-class docutils literal notranslate"><span class="pre">Dialect</span></code> in use.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hades.common.db.IPAddress.process_literal_param">
+<span class="sig-name descname"><span class="pre">process_literal_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hades.common.db.IPAddress.process_literal_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive a literal parameter value to be rendered inline within
+a statement.</p>
+<p>This method is used when the compiler renders a
+literal value without using binds, typically within DDL
+such as in the &quot;server default&quot; of a column or an expression
+within a CHECK constraint.</p>
+<p>The returned string will be rendered into the output string.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.9.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hades.common.db.IPAddress.process_result_value">
+<span class="sig-name descname"><span class="pre">process_result_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#IPAddress.process_result_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.IPAddress.process_result_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive a result-row column value to be converted.</p>
+<p>Subclasses should implement this method to operate on data
+fetched from the database.</p>
+<p>Subclasses override this method to return the
+value that should be passed back to the application,
+given a value that is already processed by
+the underlying <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeEngine</span></code> object, originally
+from the DBAPI cursor method <code class="docutils literal notranslate"><span class="pre">fetchone()</span></code> or similar.</p>
+<p>The operation could be anything desired to perform custom
+behavior, such as transforming or serializing data.
+This could also be used as a hook for validating logic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> -- Data to operate upon, of any type expected by
+this method in the subclass.  Can be <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>dialect</strong> -- the <code class="xref py py-class docutils literal notranslate"><span class="pre">Dialect</span></code> in use.</p></li>
+</ul>
+</dd>
+</dl>
+<p>This operation should be designed to be reversible by
+the &quot;process_bind_param&quot; method of this class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hades.common.db.IPAddress.python_type">
+<span class="sig-name descname"><span class="pre">python_type</span></span><a class="headerlink" href="#hades.common.db.IPAddress.python_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">netaddr.ip.IPAddress</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hades.common.db.MACAddress">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">MACAddress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#MACAddress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.MACAddress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/custom_types.html#sqlalchemy.types.TypeDecorator" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.sql.type_api.TypeDecorator</span></code></a></p>
+<p>Custom SQLAlchemy type for MAC addresses.</p>
+<p>Use the PostgreSQL <code class="docutils literal notranslate"><span class="pre">macaddr</span></code> type on the database side and
+<a class="reference external" href="https://netaddr.readthedocs.io/en/latest/api.html#netaddr.EUI" title="(in netaddr v0.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">netaddr.EUI</span></code></a> on the Python side.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hades.common.db.MACAddress.impl">
+<span class="sig-name descname"><span class="pre">impl</span></span><a class="headerlink" href="#hades.common.db.MACAddress.impl" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference external" href="https://docs.sqlalchemy.org/en/14/dialects/postgresql.html#sqlalchemy.dialects.postgresql.MACADDR" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.dialects.postgresql.base.MACADDR</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hades.common.db.MACAddress.process_bind_param">
+<span class="sig-name descname"><span class="pre">process_bind_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#MACAddress.process_bind_param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.MACAddress.process_bind_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive a bound parameter value to be converted.</p>
+<p>Subclasses override this method to return the
+value that should be passed along to the underlying
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeEngine</span></code> object, and from there to the
+DBAPI <code class="docutils literal notranslate"><span class="pre">execute()</span></code> method.</p>
+<p>The operation could be anything desired to perform custom
+behavior, such as transforming or serializing data.
+This could also be used as a hook for validating logic.</p>
+<p>This operation should be designed with the reverse operation
+in mind, which would be the process_result_value method of
+this class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> -- Data to operate upon, of any type expected by
+this method in the subclass.  Can be <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>dialect</strong> -- the <code class="xref py py-class docutils literal notranslate"><span class="pre">Dialect</span></code> in use.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hades.common.db.MACAddress.process_literal_param">
+<span class="sig-name descname"><span class="pre">process_literal_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hades.common.db.MACAddress.process_literal_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive a literal parameter value to be rendered inline within
+a statement.</p>
+<p>This method is used when the compiler renders a
+literal value without using binds, typically within DDL
+such as in the &quot;server default&quot; of a column or an expression
+within a CHECK constraint.</p>
+<p>The returned string will be rendered into the output string.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.9.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hades.common.db.MACAddress.process_result_value">
+<span class="sig-name descname"><span class="pre">process_result_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#MACAddress.process_result_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.MACAddress.process_result_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive a result-row column value to be converted.</p>
+<p>Subclasses should implement this method to operate on data
+fetched from the database.</p>
+<p>Subclasses override this method to return the
+value that should be passed back to the application,
+given a value that is already processed by
+the underlying <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeEngine</span></code> object, originally
+from the DBAPI cursor method <code class="docutils literal notranslate"><span class="pre">fetchone()</span></code> or similar.</p>
+<p>The operation could be anything desired to perform custom
+behavior, such as transforming or serializing data.
+This could also be used as a hook for validating logic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> -- Data to operate upon, of any type expected by
+this method in the subclass.  Can be <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>dialect</strong> -- the <code class="xref py py-class docutils literal notranslate"><span class="pre">Dialect</span></code> in use.</p></li>
+</ul>
+</dd>
+</dl>
+<p>This operation should be designed to be reversible by
+the &quot;process_bind_param&quot; method of this class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hades.common.db.MACAddress.python_type">
+<span class="sig-name descname"><span class="pre">python_type</span></span><a class="headerlink" href="#hades.common.db.MACAddress.python_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">netaddr.eui.EUI</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hades.common.db.TupleArray">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">TupleArray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#TupleArray"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.TupleArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.sqlalchemy.org/en/14/dialects/postgresql.html#sqlalchemy.dialects.postgresql.ARRAY" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.dialects.postgresql.array.ARRAY</span></code></a></p>
+<p>Convenience subclass for <code class="xref py py-class docutils literal notranslate"><span class="pre">ARRAY</span></code> for zero-indexed tuples.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hades.common.db.UTCTZInfoCursorFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">UTCTZInfoCursorFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#UTCTZInfoCursorFactory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.UTCTZInfoCursorFactory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://www.psycopg.org/docs/extensions.html#psycopg2.extensions.cursor" title="(in Psycopg v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">psycopg2.extensions.cursor</span></code></a></p>
+<p>A Cursor factory that sets the
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">psycopg2.extensions.cursor.tzinfo_factory</span></code> to
+<a class="reference internal" href="#hades.common.db.UTCTZInfoFactory" title="hades.common.db.UTCTZInfoFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">UTCTZInfoFactory</span></code></a>.</p>
+<p>The C implementation of the cursor class does not use the proper Python
+attribute lookup, therefore we have to set the instance variable rather
+than use a class attribute.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hades.common.db.UTCTZInfoFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">UTCTZInfoFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#UTCTZInfoFactory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.UTCTZInfoFactory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.tzinfo</span></code></a></p>
+<p>A tzinfo factory compatible with <a class="reference external" href="https://www.psycopg.org/docs/tz.html#psycopg2.tz.FixedOffsetTimezone" title="(in Psycopg v2.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">psycopg2.tz.FixedOffsetTimezone</span></code></a>,
+that checks if the provided UTC offset is zero and returns
+<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timezone.utc" title="(in Python v3.10)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datetime.timezone.utc</span></code></a>. If the offset is not zero an
+<a class="reference external" href="https://www.psycopg.org/docs/module.html#psycopg2.DataError" title="(in Psycopg v2.9)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">psycopg2.DataError</span></code></a> is raised.</p>
+<p>This class is implemented as a singleton that always returns the same
+instance.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.as_copy">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">as_copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/metadata.html#sqlalchemy.schema.Table" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.sql.schema.Table</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#as_copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.as_copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a copy of a table with a different name and the <code class="docutils literal notranslate"><span class="pre">temporary</span></code>
+info set.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.create_engine">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">create_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hades.config.html#hades.config.loader.Config" title="hades.config.loader.Config"><span class="pre">hades.config.loader.Config</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#create_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.create_engine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.create_temp_copy">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">create_temp_copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/metadata.html#sqlalchemy.schema.Table" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.sql.schema.Table</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/metadata.html#sqlalchemy.schema.Table" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.sql.schema.Table</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#create_temp_copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.create_temp_copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a temporary table as a copy of a source table that will be dropped
+at the end of the running transaction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> -- DB connection</p></li>
+<li><p><strong>source</strong> -- Source table</p></li>
+<li><p><strong>destination</strong> -- Destination table</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.delete_old_auth_attempts">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">delete_old_auth_attempts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.10)"><span class="pre">datetime.timedelta</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#delete_old_auth_attempts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.delete_old_auth_attempts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete old authentication results from the <code class="docutils literal notranslate"><span class="pre">radpostauth</span></code> table.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.delete_old_sessions">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">delete_old_sessions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.10)"><span class="pre">datetime.timedelta</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#delete_old_sessions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.delete_old_sessions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete old session from the <code class="docutils literal notranslate"><span class="pre">radacct</span></code> table.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.diff_tables">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">diff_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">master</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/metadata.html#sqlalchemy.schema.Table" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.sql.schema.Table</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/metadata.html#sqlalchemy.schema.Table" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.sql.schema.Table</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/metadata.html#sqlalchemy.schema.Column" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.sql.schema.Column</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hades/common/db.html#diff_tables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.diff_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the differences in the contents of two tables with identical
+columns.</p>
+<p>The master table must have at least one <code class="xref py py-class docutils literal notranslate"><span class="pre">PrimaryKeyConstraint</span></code> or
+<code class="xref py py-class docutils literal notranslate"><span class="pre">UniqueConstraint</span></code> with only non-null columns defined.</p>
+<p>If there are multiple constraints defined the constraints that contains the
+least number of columns are used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> -- DB connection</p></li>
+<li><p><strong>master</strong> -- Master table</p></li>
+<li><p><strong>copy</strong> -- Copy of master table</p></li>
+<li><p><strong>result_columns</strong> -- columns to return</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True, if the contents differ, otherwise False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.get_all_alternative_dns_ips">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">get_all_alternative_dns_ips</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">netaddr.ip.IPAddress</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hades/common/db.html#get_all_alternative_dns_ips"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.get_all_alternative_dns_ips" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all IPs for alternative DNS configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>connection</strong> -- A SQLAlchemy connection</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An iterator that yields ip addresses</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.get_all_auth_dhcp_leases">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">get_all_auth_dhcp_leases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">subnet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">netaddr.ip.IPNetwork</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">netaddr.eui.EUI</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">netaddr.ip.IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hades/common/db.html#get_all_auth_dhcp_leases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.get_all_auth_dhcp_leases" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all auth dhcp leases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> -- A SQLAlchemy connection</p></li>
+<li><p><strong>subnet</strong> -- Limit leases to subnet</p></li>
+<li><p><strong>limit</strong> -- Maximum number of leases</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An iterator that yields (Expires-At, MAC, IP-Address, Hostname,
+Client-ID)-tuples</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.get_all_dhcp_hosts">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">get_all_dhcp_hosts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">netaddr.eui.EUI</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">netaddr.ip.IPAddress</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hades/common/db.html#get_all_dhcp_hosts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.get_all_dhcp_hosts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all DHCP host configurations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>connection</strong> -- A SQLAlchemy connection</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An iterator that yields (mac, ip)-tuples</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.get_all_nas_clients">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">get_all_nas_clients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hades/common/db.html#get_all_nas_clients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.get_all_nas_clients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all NAS clients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>connection</strong> -- A SQLAlchemy connection</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An iterator that yields (shortname, nasname, type, ports, secret,
+server, community, description)-tuples</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.get_auth_attempts_at_port">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">get_auth_attempts_at_port</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">nas_ip_address</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">netaddr.ip.IPAddress</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nas_port_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">when</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hades/common/db.html#get_auth_attempts_at_port"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.get_auth_attempts_at_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return auth attempts at a particular port of an NAS ordered by Auth-Date
+descending.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> -- A SQLAlchemy connection</p></li>
+<li><p><strong>nas_ip_address</strong> -- NAS IP address</p></li>
+<li><p><strong>nas_port_id</strong> -- NAS Port ID</p></li>
+<li><p><strong>when</strong> -- Range in which Auth-Date must be within</p></li>
+<li><p><strong>limit</strong> -- Maximum number of records</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An iterator that yields (User-Name, Packet-Type, Groups, Reply,
+Auth-Date)-tuples ordered by Auth-Date descending</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.get_auth_attempts_of_mac">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">get_auth_attempts_of_mac</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">netaddr.eui.EUI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">when</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">netaddr.ip.IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hades/common/db.html#get_auth_attempts_of_mac"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.get_auth_attempts_of_mac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return auth attempts of a particular MAC address order by Auth-Date
+descending.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> -- A SQLAlchemy connection</p></li>
+<li><p><strong>mac</strong> -- MAC address</p></li>
+<li><p><strong>when</strong> -- Range in which Auth-Date must be within</p></li>
+<li><p><strong>limit</strong> -- Maximum number of records</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An iterator that yields (NAS-IP-Address, NAS-Port-Id, Packet-Type,
+Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.get_auth_dhcp_lease_of_ip">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">get_auth_dhcp_lease_of_ip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ip</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">netaddr.ip.IPAddress</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">netaddr.eui.EUI</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hades/common/db.html#get_auth_dhcp_lease_of_ip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.get_auth_dhcp_lease_of_ip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get basic lease information for a given IP.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> -- A SQLAlchemy connection</p></li>
+<li><p><strong>ip</strong> -- IP address</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An (Expiry-Time, MAC, Hostname, Client-ID)-tuple or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.get_auth_dhcp_leases_of_mac">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">get_auth_dhcp_leases_of_mac</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">netaddr.eui.EUI</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">netaddr.ip.IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hades/common/db.html#get_auth_dhcp_leases_of_mac"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.get_auth_dhcp_leases_of_mac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get basic information about all auth leases of a given MAC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> -- A SQLAlchemy connection</p></li>
+<li><p><strong>mac</strong> -- MAC address</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An iterator of (Expiry-Time, IP-Address, Hostname, Client-ID)
+tuples ordered by Expiry-Time descending</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.get_groups">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">get_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">netaddr.eui.EUI</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">netaddr.ip.IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hades/common/db.html#get_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.get_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the groups of a user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> -- A SQLAlchemy connection</p></li>
+<li><p><strong>mac</strong> -- MAC address</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An iterator that yields (NAS-IP-Address, NAS-Port-Id, Group-Name)-
+tuples</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.get_latest_auth_attempt">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">get_latest_auth_attempt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">netaddr.eui.EUI</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">netaddr.ip.IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hades/common/db.html#get_latest_auth_attempt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.get_latest_auth_attempt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the latest auth attempt of a MAC address that occurred within twice the
+reauthentication interval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> -- A SQLAlchemy connection</p></li>
+<li><p><strong>mac</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- MAC address</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A (NAS-IP-Address, NAS-Port-Id, Packet-Type, Groups, Reply,
+Auth-Date) tuple or None if no attempt was found. Groups is an tuple of
+group names and Reply is a tuple of (Attribute, Value)-pairs that were sent
+in Access-Accept responses.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.get_sessions_of_mac">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">get_sessions_of_mac</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">netaddr.eui.EUI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">when</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">netaddr.ip.IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hades/common/db.html#get_sessions_of_mac"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.get_sessions_of_mac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return accounting sessions of a particular MAC address ordered by
+Session-Start-Time descending.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> -- A SQLAlchemy connection</p></li>
+<li><p><strong>mac</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- MAC address</p></li>
+<li><p><strong>when</strong> -- Range in which Session-Start-Time must be within</p></li>
+<li><p><strong>limit</strong> -- Maximum number of records</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An iterator that yields (NAS-IP-Address, NAS-Port-Id,
+Session-Start-Time, Session-Stop-Time)-tuples ordered by Session-Start-Time
+descending</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.lock_table">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">lock_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/metadata.html#sqlalchemy.schema.Table" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.sql.schema.Table</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#lock_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.lock_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lock a table using a PostgreSQL advisory lock</p>
+<p>The OID of the table in the pg_class relation is used as lock id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> -- DB connection</p></li>
+<li><p><strong>target_table</strong> -- Table object</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.pg_utcnow">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">pg_utcnow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#pg_utcnow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.pg_utcnow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.refresh_and_diff_materialized_view">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">refresh_and_diff_materialized_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/metadata.html#sqlalchemy.schema.Table" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.sql.schema.Table</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/metadata.html#sqlalchemy.schema.Table" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.sql.schema.Table</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/metadata.html#sqlalchemy.schema.Column" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.sql.schema.Column</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hades/common/db.html#refresh_and_diff_materialized_view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.refresh_and_diff_materialized_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lock the given <cite>view</cite> with an advisory lock, create a temporary table
+of the view, refresh the view and compute the difference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> -- A valid SQLAlchemy connection</p></li>
+<li><p><strong>view</strong> -- The view to refresh and diff</p></li>
+<li><p><strong>copy</strong> -- A temporary table to create and diff</p></li>
+<li><p><strong>result_columns</strong> -- The columns to return</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-tuple containing three lists of tuples of the <cite>result_columns</cite>
+of added, deleted and modified records due to the refresh.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.db.refresh_materialized_view">
+<span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">refresh_materialized_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.engine.base.Connection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/metadata.html#sqlalchemy.schema.Table" title="(in SQLAlchemy v1.4)"><span class="pre">sqlalchemy.sql.schema.Table</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#refresh_materialized_view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.refresh_materialized_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute <code class="code highlight sql docutils literal notranslate"><span class="n"><span class="pre">REFRESH</span></span> <span class="n"><span class="pre">MATERIALIZED</span></span> <span class="k"><span class="pre">VIEW</span></span> <span class="n"><span class="pre">CONCURRENTLY</span></span></code> for the given
+<cite>view</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> -- A valid SQLAlchemy connection</p></li>
+<li><p><strong>view</strong> -- The view to refresh</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hades.common.db.utcnow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hades.common.db.</span></span><span class="sig-name descname"><span class="pre">utcnow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">clauses</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/db.html#utcnow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.db.utcnow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/functions.html#sqlalchemy.sql.functions.FunctionElement" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.sql.functions.FunctionElement</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hades.common.db.utcnow.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">DateTime()</span></em><a class="headerlink" href="#hades.common.db.utcnow.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-hades.common.dbus">
+<span id="hades-common-dbus-module"></span><h2>hades.common.dbus module<a class="headerlink" href="#module-hades.common.dbus" title="Permalink to this headline">¶</a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="hades.common.dbus.DBusError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hades.common.dbus.</span></span><span class="sig-name descname"><span class="pre">DBusError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">gi.repository.GLib.GError</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/dbus.html#DBusError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.dbus.DBusError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Indicates an error during a DBus operation.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="hades.common.dbus.DBusTimeout">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hades.common.dbus.</span></span><span class="sig-name descname"><span class="pre">DBusTimeout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">gi.repository.GLib.GError</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/dbus.html#DBusTimeout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.dbus.DBusTimeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hades.common.dbus.DBusError" title="hades.common.dbus.DBusError"><code class="xref py py-class docutils literal notranslate"><span class="pre">hades.common.dbus.DBusError</span></code></a></p>
+<p>Indicates a timeout during a DBus operation.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.dbus.handle_glib_error">
+<span class="sig-prename descclassname"><span class="pre">hades.common.dbus.</span></span><span class="sig-name descname"><span class="pre">handle_glib_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">gi.repository.GLib.GError</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/dbus.html#handle_glib_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.dbus.handle_glib_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert <code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Error</span></code> exceptions into <a class="reference internal" href="#hades.common.dbus.DBusError" title="hades.common.dbus.DBusError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DBusError</span></code></a>.</p>
+<p>If the error code indicates a timeout, return the specialized
+<a class="reference internal" href="#hades.common.dbus.DBusTimeout" title="hades.common.dbus.DBusTimeout"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DBusTimeout</span></code></a>. The original <code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Error</span></code> is set as the cause of
+the new exception.</p>
+</dd></dl>
+
+</section>
+<section id="module-hades.common.privileges">
+<span id="hades-common-privileges-module"></span><h2>hades.common.privileges module<a class="headerlink" href="#module-hades.common.privileges" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.privileges.drop_privileges">
+<span class="sig-prename descclassname"><span class="pre">hades.common.privileges.</span></span><span class="sig-name descname"><span class="pre">drop_privileges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passwd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/privileges.html#drop_privileges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.privileges.drop_privileges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Drop privileges completely</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hades.common.privileges.dropped_privileges">
+<span class="sig-prename descclassname"><span class="pre">hades.common.privileges.</span></span><span class="sig-name descname"><span class="pre">dropped_privileges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passwd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pwd.struct_passwd</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hades/common/privileges.html#dropped_privileges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hades.common.privileges.dropped_privileges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Context manager for temporarily switching real and effective UID and real
+and effective GID.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+            
+  <div class="footer-relations">
+    
+      <div class="pull-left">
+        <a class="btn btn-default" href="hades.bin.html" title="previous chapter (use the left arrow)">hades.bin package</a>
+      </div>
+    
+      <div class="pull-right">
+        <a class="btn btn-default" href="hades.config.html" title="next chapter (use the right arrow)">hades.config package</a>
+      </div>
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hades.config.html" title="hades.config package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="hades.bin.html" title="hades.bin package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="hades.html" >Code Documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.common package</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="../_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2015-2020, Sebastian Schrader, Stefan Haller. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

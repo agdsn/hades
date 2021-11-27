@@ -1,0 +1,277 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="../../../_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="../../../_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="../../../_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="../../../_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>hades.config.sphinx &#8212; Hades 0.4.0-180-g86b2a9b documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/guzzle.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  
+   
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.config.sphinx</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../components.html">Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../networking.html">Networking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../replication.html">Replication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../alternative-dns.html">Alternative DNS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">CLI Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/hades.html">Code Documentation</a></li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="../../../search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="../../../index.html">Docs</a></li>
+              
+                <li><a href="../../index.html">Module code</a></li>
+              
+              <li>hades.config.sphinx</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <h1>Source code for hades.config.sphinx</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Sphinx extension for Hades&#39;s options</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span> <span class="nn">sphinx.ext.autodoc</span>
+<span class="kn">from</span> <span class="nn">docutils.parsers.rst.roles</span> <span class="kn">import</span> <span class="n">CustomRole</span><span class="p">,</span> <span class="n">code_role</span>
+<span class="kn">from</span> <span class="nn">sphinx.application</span> <span class="kn">import</span> <span class="n">Sphinx</span>
+<span class="kn">from</span> <span class="nn">sphinx.directives</span> <span class="kn">import</span> <span class="n">ObjectDescription</span>
+<span class="kn">from</span> <span class="nn">sphinx.domains</span> <span class="kn">import</span> <span class="n">Domain</span><span class="p">,</span> <span class="n">ObjType</span>
+<span class="kn">from</span> <span class="nn">sphinx.roles</span> <span class="kn">import</span> <span class="n">XRefRole</span>
+<span class="kn">from</span> <span class="nn">sphinx.util.docfields</span> <span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">GroupedField</span>
+<span class="kn">from</span> <span class="nn">sphinx.util.docstrings</span> <span class="kn">import</span> <span class="n">prepare_docstring</span>
+
+<span class="kn">from</span> <span class="nn">hades.config.base</span> <span class="kn">import</span> <span class="n">Compute</span><span class="p">,</span> <span class="n">Option</span><span class="p">,</span> <span class="n">OptionMeta</span><span class="p">,</span> <span class="n">qualified_name</span>
+
+
+<div class="viewcode-block" id="OptionDirective"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.sphinx.OptionDirective">[docs]</a><span class="k">class</span> <span class="nc">OptionDirective</span><span class="p">(</span><span class="n">ObjectDescription</span><span class="p">):</span>
+    <span class="n">doc_field_types</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">Field</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Default&#39;</span><span class="p">),</span>
+        <span class="n">Field</span><span class="p">(</span><span class="s1">&#39;required&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Required&#39;</span><span class="p">),</span>
+        <span class="n">Field</span><span class="p">(</span><span class="s1">&#39;static-check&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Static Check&#39;</span><span class="p">),</span>
+        <span class="n">Field</span><span class="p">(</span><span class="s1">&#39;runtime-check&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Runtime Check&#39;</span><span class="p">),</span>
+        <span class="n">GroupedField</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Types&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+<div class="viewcode-block" id="OptionDirective.add_target_and_index"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.sphinx.OptionDirective.add_target_and_index">[docs]</a>    <span class="k">def</span> <span class="nf">add_target_and_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sig</span><span class="p">,</span> <span class="n">signode</span><span class="p">):</span>
+        <span class="n">targetname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objtype</span> <span class="o">+</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">targetname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">ids</span><span class="p">:</span>
+            <span class="n">signode</span><span class="p">[</span><span class="s1">&#39;names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">targetname</span><span class="p">)</span>
+            <span class="n">signode</span><span class="p">[</span><span class="s1">&#39;ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">targetname</span><span class="p">)</span>
+            <span class="n">signode</span><span class="p">[</span><span class="s1">&#39;first&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">note_explicit_target</span><span class="p">(</span><span class="n">signode</span><span class="p">)</span>
+            <span class="n">inv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">domaindata</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;objects&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">inv</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state_machine</span><span class="o">.</span><span class="n">reporter</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s1">&#39;duplicate option description of </span><span class="si">{}</span><span class="s1">, other instance in </span><span class="si">{}</span><span class="s1">&#39;</span>
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">doc2path</span><span class="p">(</span><span class="n">inv</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">0</span><span class="p">])),</span>
+                    <span class="n">line</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lineno</span><span class="p">)</span>
+            <span class="n">inv</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">docname</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">indexnode</span><span class="p">[</span><span class="s1">&#39;entries&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;pair: option; &#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
+                                              <span class="n">targetname</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="HadesDomain"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.sphinx.HadesDomain">[docs]</a><span class="k">class</span> <span class="nc">HadesDomain</span><span class="p">(</span><span class="n">Domain</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;hades&#39;</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;Hades&#39;</span>
+    <span class="n">object_types</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;option&#39;</span><span class="p">:</span> <span class="n">ObjType</span><span class="p">(</span><span class="s1">&#39;Option&#39;</span><span class="p">,</span> <span class="s1">&#39;option&#39;</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="n">directives</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;option&#39;</span><span class="p">:</span> <span class="n">OptionDirective</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">roles</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;option&#39;</span><span class="p">:</span> <span class="n">XRefRole</span><span class="p">(),</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="OptionDocumenter"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.sphinx.OptionDocumenter">[docs]</a><span class="k">class</span> <span class="nc">OptionDocumenter</span><span class="p">(</span><span class="n">sphinx</span><span class="o">.</span><span class="n">ext</span><span class="o">.</span><span class="n">autodoc</span><span class="o">.</span><span class="n">ClassDocumenter</span><span class="p">):</span>
+    <span class="n">priority</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">domain</span> <span class="o">=</span> <span class="n">HadesDomain</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">objtype</span> <span class="o">=</span> <span class="s1">&#39;option&#39;</span>
+
+<div class="viewcode-block" id="OptionDocumenter.can_document_member"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.sphinx.OptionDocumenter.can_document_member">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">can_document_member</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">member</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">membername</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">isattr</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                            <span class="n">parent</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">member</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">member</span><span class="p">,</span> <span class="n">Option</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OptionDocumenter.add_field"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.sphinx.OptionDocumenter.add_field">[docs]</a>    <span class="k">def</span> <span class="nf">add_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a field list item</span>
+
+<span class="sd">        :param name: Name of the field</span>
+<span class="sd">        :param body: Body of the field, multiple lines will be indented</span>
+<span class="sd">        :param sourcename: Source name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">prepare_docstring</span><span class="p">(</span><span class="n">body</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="s2">&quot;:</span><span class="si">{}</span><span class="s2">:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">sourcename</span><span class="p">)</span>
+        <span class="n">original_indent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="s1">&#39;   &#39;</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">=</span> <span class="n">original_indent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OptionDocumenter.generate"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.sphinx.OptionDocumenter.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">more_content</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">real_modname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">check_module</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">all_members</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_name</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">import_object</span><span class="p">()</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directive</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+        <span class="c1"># type: OptionMeta</span>
+        <span class="n">option</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span>
+        <span class="n">sourcename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sourcename</span><span class="p">()</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="s2">&quot;.. hades:option:: &quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_indent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_content</span><span class="p">(</span><span class="n">more_content</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="s2">&quot;:required: This option is **required**.&quot;</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">has_default</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="p">(</span>
+                <span class="n">option</span><span class="o">.</span><span class="n">default</span><span class="o">.</span><span class="vm">__doc__</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">Compute</span><span class="p">)</span> <span class="k">else</span>
+                <span class="s2">&quot;:python:`</span><span class="si">{!r}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+            <span class="p">),</span> <span class="n">sourcename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">types</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">types</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">type</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">types</span> <span class="o">=</span> <span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">type</span><span class="p">,)</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;:class:`</span><span class="si">{}</span><span class="s2">`&quot;</span>
+                           <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">qualified_name</span><span class="p">(</span><span class="n">t</span><span class="p">)),</span> <span class="n">sourcename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">static_check</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;Static Check&quot;</span><span class="p">,</span> <span class="n">option</span><span class="o">.</span><span class="n">static_check</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">,</span>
+                           <span class="n">sourcename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">runtime_check</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;Runtime Check&quot;</span><span class="p">,</span> <span class="n">option</span><span class="o">.</span><span class="n">runtime_check</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">,</span>
+                           <span class="n">sourcename</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directive</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">idx</span><span class="p">:]))</span></div></div>
+        <span class="c1">#print(self.directive.result[idx:])</span>
+
+
+<div class="viewcode-block" id="setup"><a class="viewcode-back" href="../../../api/hades.config.html#hades.config.sphinx.setup">[docs]</a><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">Sphinx</span><span class="p">):</span>
+    <span class="c1"># Define a custom role for highlighted inline code</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_role</span><span class="p">(</span><span class="s2">&quot;python&quot;</span><span class="p">,</span> <span class="n">CustomRole</span><span class="p">(</span>
+        <span class="s2">&quot;python&quot;</span><span class="p">,</span> <span class="n">code_role</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;highlight&#39;</span><span class="p">]}</span>
+    <span class="p">))</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_role</span><span class="p">(</span><span class="s2">&quot;sql&quot;</span><span class="p">,</span> <span class="n">CustomRole</span><span class="p">(</span>
+        <span class="s2">&quot;sql&quot;</span><span class="p">,</span> <span class="n">code_role</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;sql&#39;</span><span class="p">,</span> <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;highlight&#39;</span><span class="p">]}</span>
+    <span class="p">))</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_domain</span><span class="p">(</span><span class="n">HadesDomain</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_autodocumenter</span><span class="p">(</span><span class="n">OptionDocumenter</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;parallel_read_safe&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">}</span></div>
+</pre></div>
+
+          </div>
+            
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">hades.config.sphinx</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="../../../_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2015-2020, Sebastian Schrader, Stefan Haller. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

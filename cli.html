@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>CLI Utilities &#8212; Hades 0.4.0-180-g86b2a9b documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/guzzle.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Development" href="development.html" />
+    <link rel="prev" title="Alternative DNS" href="alternative-dns.html" />
+  
+   
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="development.html" title="Development"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="alternative-dns.html" title="Alternative DNS"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CLI Utilities</a></li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="networking.html">Networking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replication.html">Replication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alternative-dns.html">Alternative DNS</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CLI Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#hades-agent">hades-agent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hades-check-database">hades-check-database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hades-deputy">hades-deputy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hades-export-options">hades-export-options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hades-generate-config">hades-generate-config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hades-vrrp-notify">hades-vrrp-notify</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/hades.html">Code Documentation</a></li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="index.html">Docs</a></li>
+              
+              <li>CLI Utilities</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <section id="cli-utilities">
+<h1>CLI Utilities<a class="headerlink" href="#cli-utilities" title="Permalink to this headline">¶</a></h1>
+<section id="hades-agent">
+<h2>hades-agent<a class="headerlink" href="#hades-agent" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="hades-check-database">
+<h2>hades-check-database<a class="headerlink" href="#hades-check-database" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="hades-deputy">
+<h2>hades-deputy<a class="headerlink" href="#hades-deputy" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="hades-export-options">
+<h2>hades-export-options<a class="headerlink" href="#hades-export-options" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="hades-generate-config">
+<h2>hades-generate-config<a class="headerlink" href="#hades-generate-config" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="hades-vrrp-notify">
+<h2>hades-vrrp-notify<a class="headerlink" href="#hades-vrrp-notify" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+            
+  <div class="footer-relations">
+    
+      <div class="pull-left">
+        <a class="btn btn-default" href="alternative-dns.html" title="previous chapter (use the left arrow)">Alternative DNS</a>
+      </div>
+    
+      <div class="pull-right">
+        <a class="btn btn-default" href="development.html" title="next chapter (use the right arrow)">Development</a>
+      </div>
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="development.html" title="Development"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="alternative-dns.html" title="Alternative DNS"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Hades 0.4.0-180-g86b2a9b documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CLI Utilities</a></li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2015-2020, Sebastian Schrader, Stefan Haller. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>
