@@ -310,16 +310,17 @@ class has_keys(Check):
 
         for key in self.keys:
             if not isinstance(obj, collections.Mapping):
-                path = ''.join(map('[{!r}]'.format, checked))
-                raise OptionCheckError("must be a mapping type like dict",
-                                       option=self.option.name + path)
+                path = self.option.name + "".join(map("[{!r}]".format, checked))
+                raise OptionCheckError(
+                    "must be a mapping type like dict",
+                    option=path,
+                )
             checked.append(key)
             try:
                 obj = obj[key]
             except KeyError:
-                path = ''.join(map('[{!r}]'.format, checked))
-                raise OptionCheckError("Missing key",
-                                       option=self.option.name + path) from None
+                path = self.option.name + "".join(map("[{!r}]".format, checked))
+                raise OptionCheckError("Missing key", option=path) from None
 
 
 class user_mapping_for_user_exists(Check):

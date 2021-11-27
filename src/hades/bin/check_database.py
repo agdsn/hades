@@ -28,8 +28,11 @@ from hades.config.loader import load_config, print_config_error
 logger = logging.getLogger('hades.bin.check_database')
 
 
-def check_database(engine: Engine, user: pwd.struct_passwd,
-                   tables: Iterable[Table]):
+def check_database(
+        engine: Engine,
+        user: pwd.struct_passwd,
+        tables: Iterable[Table],
+):
     """Check a set of tables as a user.
 
     :param engine: The SQLAlchemy engine

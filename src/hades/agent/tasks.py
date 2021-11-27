@@ -171,9 +171,11 @@ def cleanup():
 
 
 @rpc_task()
-def get_sessions_of_mac(mac: str, when: Optional[TimestampRange] = None,
-                        limit: Optional[int] = 100) -> Optional[
-        List[Tuple[str, str, float, float]]]:
+def get_sessions_of_mac(
+    mac: str,
+    when: Optional[TimestampRange] = None,
+    limit: Optional[int] = 100,
+) -> Optional[List[Tuple[str, str, float, float]]]:
     """Get the session of a given MAC address ordered by ``Session-Start-Time``
 
     :param mac: The MAC address
@@ -196,9 +198,11 @@ def get_sessions_of_mac(mac: str, when: Optional[TimestampRange] = None,
 
 
 @rpc_task()
-def get_auth_attempts_of_mac(mac: str, when: Optional[TimestampRange] = None,
-                             limit: Optional[int] = 100) -> Optional[
-        List[Tuple[str, str, str, Groups, Attributes, float]]]:
+def get_auth_attempts_of_mac(
+    mac: str,
+    when: Optional[TimestampRange] = None,
+    limit: Optional[int] = 100,
+) -> Optional[List[Tuple[str, str, str, Groups, Attributes, float]]]:
     """Get the authentication attempts of a given MAC address ordered by
     ``Auth-Date``
 
@@ -224,10 +228,12 @@ def get_auth_attempts_of_mac(mac: str, when: Optional[TimestampRange] = None,
 
 
 @rpc_task()
-def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
-                              when: Optional[TimestampRange] = None,
-                              limit: Optional[int] = 100) -> Optional[
-        List[Tuple[str, str, Groups, Attributes, float]]]:
+def get_auth_attempts_at_port(
+    nas_ip_address: str,
+    nas_port_id: str,
+    when: Optional[TimestampRange] = None,
+    limit: Optional[int] = 100,
+) -> Optional[List[Tuple[str, str, Groups, Attributes, float]]]:
     """Get the authentication attempts at a given port ordered by
     ``Auth-Date``
 
@@ -254,8 +260,10 @@ def get_auth_attempts_at_port(nas_ip_address: str, nas_port_id: str,
                                          nas_port_id, when, limit)))
 
 
-def dict_from_attributes(obj: object,
-                         attributes: Sequence[str]) -> Dict[str, Any]:
+def dict_from_attributes(
+    obj: object,
+    attributes: Sequence[str],
+) -> Dict[str, Any]:
     """
     Get a given sequence of attributes from a given object and return the
     results as dictionary.
@@ -350,14 +358,14 @@ def get_distribution_metadata(
     :param distribution: A distribution object
     :return: A metadata dictionary
     """
+    requirements = map(pkg_resources.get_distribution, distribution.requires())
     return {
         'name':         distribution.project_name,
         'version':      distribution.version,
         'py_version':   distribution.py_version,
         'requirements': {
             requirement.project_name: get_distribution_metadata(requirement)
-            for requirement in map(pkg_resources.get_distribution,
-                                   distribution.requires())
+            for requirement in requirements
         },
     }
 
