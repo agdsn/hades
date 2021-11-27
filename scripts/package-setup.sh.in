@@ -46,6 +46,9 @@ readonly -A services=(
 if ! getent group '@SYSTEM_GROUP@' &>/dev/null; then
 	echo "Creating @SYSTEM_GROUP@ group ..."
 	addgroup --quiet --system '@SYSTEM_GROUP@'
+fi
+
+if [[ $(stat --format='%G' '@pkgsysconfdir@') != '@SYSTEM_GROUP@' ]]; then
 	chgrp -R '@SYSTEM_GROUP@' '@pkgsysconfdir@'
 fi
 
