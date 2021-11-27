@@ -414,7 +414,7 @@ def refresh_and_diff_materialized_view(
     :param copy: A temporary table to create and diff
     :param result_columns: The columns to return
     :return: A 3-tuple containing three lists of tuples of the `result_columns`
-     of added, deleted and modified records due to the refresh.
+        of added, deleted and modified records due to the refresh.
 
     """
     with connection.begin():
@@ -450,7 +450,7 @@ def get_groups(connection: Connection, mac: netaddr.EUI) -> Iterator[
     :param connection: A SQLAlchemy connection
     :param mac: MAC address
     :return: An iterator that yields (NAS-IP-Address, NAS-Port-Id, Group-Name)-
-     tuples
+        tuples
     """
     logger.debug('Getting groups of MAC "%s"', mac)
     results = connection.execute(select([radusergroup.c.NASIPAddress,
@@ -470,9 +470,9 @@ def get_latest_auth_attempt(connection: Connection,
     :param connection: A SQLAlchemy connection
     :param str mac: MAC address
     :return: A (NAS-IP-Address, NAS-Port-Id, Packet-Type, Groups, Reply,
-     Auth-Date) tuple or None if no attempt was found. Groups is an tuple of
-     group names and Reply is a tuple of (Attribute, Value)-pairs that were sent
-     in Access-Accept responses.
+        Auth-Date) tuple or None if no attempt was found. Groups is an tuple of
+        group names and Reply is a tuple of (Attribute, Value)-pairs that were
+        sent in Access-Accept responses.
     """
     logger.debug('Getting latest auth attempt for MAC "%s"', mac)
     config = get_config(runtime_checks=True)
@@ -504,7 +504,7 @@ def get_all_nas_clients(connection: Connection) -> Iterator[
 
     :param connection: A SQLAlchemy connection
     :return: An iterator that yields (shortname, nasname, type, ports, secret,
-     server, community, description)-tuples
+        server, community, description)-tuples
     """
     result = connection.execute(
         select([nas.c.ShortName, nas.c.NASName, nas.c.Type, nas.c.Ports,
@@ -526,8 +526,8 @@ def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
     :param when: Range in which Session-Start-Time must be within
     :param limit: Maximum number of records
     :return: An iterator that yields (NAS-IP-Address, NAS-Port-Id,
-     Session-Start-Time, Session-Stop-Time)-tuples ordered by Session-Start-Time
-     descending
+        Session-Start-Time, Session-Stop-Time)-tuples ordered by
+        Session-Start-Time descending
     """
     logger.debug('Getting all sessions for MAC "%s"', mac)
     query = (
@@ -557,7 +557,7 @@ def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
     :param when: Range in which Auth-Date must be within
     :param limit: Maximum number of records
     :return: An iterator that yields (NAS-IP-Address, NAS-Port-Id, Packet-Type,
-     Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
+        Groups, Reply, Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts of MAC %s', mac)
     query = (
@@ -590,7 +590,7 @@ def get_auth_attempts_at_port(connection: Connection,
     :param when: Range in which Auth-Date must be within
     :param limit: Maximum number of records
     :return: An iterator that yields (User-Name, Packet-Type, Groups, Reply,
-             Auth-Date)-tuples ordered by Auth-Date descending
+        Auth-Date)-tuples ordered by Auth-Date descending
     """
     logger.debug('Getting all auth attempts at port %2$s of %1$s',
                  nas_ip_address, nas_port_id)
