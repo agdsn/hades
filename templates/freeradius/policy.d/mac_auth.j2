@@ -1,4 +1,6 @@
 # {{ comment }}
+# taken from ./canonicalization
+mac-addr-regexp = '([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})'
 
 set_hades_user_name {
 	if(&User-Name && (&User-Name =~ /^${policy.mac-addr-regexp}$/i)) {
