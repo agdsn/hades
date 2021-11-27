@@ -10,11 +10,13 @@ services:
     image: hades
     hostname: hades
     container_name: hades
+    command: [sh, -c, 'mount -o remount,rw /sys/fs/cgroup && exec /lib/systemd/systemd "$$@"', systemd, --system]
     network_mode: bridge
     tmpfs:
       - "/tmp:exec"
       - /run
     cap_add:
+      - MKNOD
       - SYS_ADMIN
       - NET_ADMIN
     security_opt:
@@ -23,7 +25,6 @@ services:
     tty: false
     stop_signal: SIGRTMIN+3
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - "home:/build"
       - ./:/build/hades
 

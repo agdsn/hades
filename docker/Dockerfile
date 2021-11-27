@@ -126,7 +126,7 @@ RUN find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' \
 
 COPY ["build.sh", "/usr/local/bin"]
 
-VOLUME [ "/sys/fs/cgroup", "/build", "/build/hades"]
+VOLUME [ "/build", "/build/hades"]
 
 STOPSIGNAL SIGRTMIN+3
 
