@@ -104,8 +104,9 @@ def do_dirname(a):
 PathArg = Union[str, pathlib.PurePath]
 
 
-def yield_all_sources(*search_path: pathlib.Path) -> Iterator[
-        Tuple[pathlib.Path, pathlib.Path]]:
+def yield_all_sources(
+    *search_path: pathlib.Path,
+) -> Iterator[Tuple[pathlib.Path, pathlib.Path]]:
     """Find all files in the directories on ``search_path``.
 
     The algorithm is similar to systemd's unit search or the shell's ``PATH``
@@ -214,9 +215,10 @@ def yield_all_sources(*search_path: pathlib.Path) -> Iterator[
             yield directories[0][:2]
 
 
-def yield_all_versions(name: pathlib.PurePath,
-                       *search_path: pathlib.Path) -> Iterator[
-        Tuple[pathlib.Path, pathlib.Path]]:
+def yield_all_versions(
+    name: pathlib.PurePath,
+    *search_path: pathlib.Path,
+) -> Iterator[Tuple[pathlib.Path, pathlib.Path]]:
     """Find all versions of `name` on `search_path`.
 
     The principle behind the search algorithm are the same as
@@ -387,15 +389,17 @@ class ConfigGenerator(object):
         source = pathlib.PurePath(source)
         sources = tuple(yield_all_versions(source, *self.template_dirs))
         if not sources:
-            raise GeneratorError("No file or directory named {} found "
-                                 "(search path: {})"
-                                 .format(str(source),
-                                         self._format_search_path())) from None
+            raise GeneratorError(
+                "No file or directory named {} found (search path: {})".format(
+                    str(source), self._format_search_path()
+                )
+            ) from None
         base, source = sources[0]
         if source.is_dir():
             if destination is None:
-                raise GeneratorError("Destination can't be stdout, if source "
-                                     "is a directory")
+                raise GeneratorError(
+                    "Destination can't be stdout, if source is a directory"
+                )
             destination = pathlib.Path(destination)
             search_path = tuple(map(operator.itemgetter(1), sources))
             self._do_generate_directory(search_path, destination)

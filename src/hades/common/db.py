@@ -312,7 +312,9 @@ class UTCTZInfoFactory(tzinfo):
     """
     def __new__(cls, offset: int):
         if offset != 0:
-            raise psycopg2.DataError("UTC Offset is not zero: ".format(offset))
+            raise psycopg2.DataError(
+                "UTC Offset is not zero: {}".format(offset)
+            )
         return timezone.utc
 
 
@@ -379,9 +381,12 @@ def create_temp_copy(connection: Connection, source: Table, destination: Table):
     )
 
 
-def diff_tables(connection: Connection, master: Table, copy: Table,
-                result_columns: Iterable[Column]
-                ) -> Tuple[List[Tuple], List[Tuple], List[Tuple]]:
+def diff_tables(
+    connection: Connection,
+    master: Table,
+    copy: Table,
+    result_columns: Iterable[Column],
+) -> Tuple[List[Tuple], List[Tuple], List[Tuple]]:
     """
     Compute the differences in the contents of two tables with identical
     columns.
@@ -457,9 +462,11 @@ def refresh_materialized_view(connection: Connection, view: Table):
 
 
 def refresh_and_diff_materialized_view(
-        connection: Connection, view: Table, copy: Table,
-        result_columns: Iterable[Column]) -> Tuple[
-        List[Tuple], List[Tuple], List[Tuple]]:
+    connection: Connection,
+    view: Table,
+    copy: Table,
+    result_columns: Iterable[Column],
+) -> Tuple[List[Tuple], List[Tuple], List[Tuple]]:
     """Lock the given `view` with an advisory lock, create a temporary table
     of the view, refresh the view and compute the difference.
 
@@ -496,8 +503,10 @@ def delete_old_auth_attempts(connection: Connection, interval: timedelta):
     )))
 
 
-def get_groups(connection: Connection, mac: netaddr.EUI) -> Iterator[
-        Tuple[netaddr.IPAddress, str, str]]:
+def get_groups(
+    connection: Connection,
+    mac: netaddr.EUI,
+) -> Iterator[Tuple[netaddr.IPAddress, str, str]]:
     """
     Get the groups of a user.
 
@@ -514,9 +523,10 @@ def get_groups(connection: Connection, mac: netaddr.EUI) -> Iterator[
     return iter(results)
 
 
-def get_latest_auth_attempt(connection: Connection,
-                            mac: netaddr.EUI) -> Optional[Tuple[
-        netaddr.IPAddress, str, str, Groups, Attributes, datetime]]:
+def get_latest_auth_attempt(
+    connection: Connection,
+    mac: netaddr.EUI,
+) -> Optional[Tuple[netaddr.IPAddress, str, str, Groups, Attributes, datetime]]:
     """
     Get the latest auth attempt of a MAC address that occurred within twice the
     reauthentication interval.
@@ -560,8 +570,9 @@ def get_all_auth_dhcp_hosts(
     return iter(result)
 
 
-def get_all_nas_clients(connection: Connection) -> Iterator[
-        Tuple[str, str, str, int, str, str, str, str]]:
+def get_all_nas_clients(
+    connection: Connection,
+) -> Iterator[Tuple[str, str, str, int, str, str, str, str]]:
     """
     Return all NAS clients.
 
@@ -576,10 +587,12 @@ def get_all_nas_clients(connection: Connection) -> Iterator[
     return iter(result)
 
 
-def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
-                        when: Optional[DatetimeRange] = None,
-                        limit: Optional[int] = None) -> Iterator[
-        Tuple[netaddr.IPAddress, str, datetime, datetime]]:
+def get_sessions_of_mac(
+    connection: Connection,
+    mac: netaddr.EUI,
+    when: Optional[DatetimeRange] = None,
+    limit: Optional[int] = None,
+) -> Iterator[Tuple[netaddr.IPAddress, str, datetime, datetime]]:
     """
     Return accounting sessions of a particular MAC address ordered by
     Session-Start-Time descending.
@@ -607,10 +620,12 @@ def get_sessions_of_mac(connection: Connection, mac: netaddr.EUI,
     return iter(connection.execute(query))
 
 
-def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
-                             when: Optional[DatetimeRange] = None,
-                             limit: Optional[int] = None) -> Iterator[
-        Tuple[netaddr.IPAddress, str, str, Groups, Attributes, datetime]]:
+def get_auth_attempts_of_mac(
+    connection: Connection,
+    mac: netaddr.EUI,
+    when: Optional[DatetimeRange] = None,
+    limit: Optional[int] = None,
+) -> Iterator[Tuple[netaddr.IPAddress, str, str, Groups, Attributes, datetime]]:
     """
     Return auth attempts of a particular MAC address order by Auth-Date
     descending.
@@ -637,12 +652,13 @@ def get_auth_attempts_of_mac(connection: Connection, mac: netaddr.EUI,
     return iter(connection.execute(query))
 
 
-def get_auth_attempts_at_port(connection: Connection,
-                              nas_ip_address: netaddr.IPAddress,
-                              nas_port_id: str,
-                              when: Optional[DatetimeRange] = None,
-                              limit: Optional[int] = None) -> Iterator[
-        Tuple[str, str, Groups, Attributes, datetime]]:
+def get_auth_attempts_at_port(
+    connection: Connection,
+    nas_ip_address: netaddr.IPAddress,
+    nas_port_id: str,
+    when: Optional[DatetimeRange] = None,
+    limit: Optional[int] = None,
+) -> Iterator[Tuple[str, str, Groups, Attributes, datetime]]:
     """
     Return auth attempts at a particular port of an NAS ordered by Auth-Date
     descending.
@@ -672,8 +688,9 @@ def get_auth_attempts_at_port(connection: Connection,
     return iter(connection.execute(query))
 
 
-def get_all_alternative_dns_ips(connection: Connection) -> Iterator[
-        netaddr.IPAddress]:
+def get_all_alternative_dns_ips(
+    connection: Connection,
+) -> Iterator[netaddr.IPAddress]:
     """
     Return all IPs for alternative DNS configuration.
 
