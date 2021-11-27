@@ -7,8 +7,8 @@ readonly client_ip_address=141.30.227.13
 data() {
 	last_byte=$(printf '%02x' "$1")
 	psql foreign <<-EOF
-		TRUNCATE dhcphost;
-		INSERT INTO dhcphost VALUES ('de:ad:be:ef:00:${last_byte}', '${client_ip_address}')
+		TRUNCATE auth_dhcp_host;
+		INSERT INTO auth_dhcp_host VALUES ('de:ad:be:ef:00:${last_byte}', '${client_ip_address}')
 	EOF
 	refresh
 }
@@ -28,7 +28,7 @@ setup() {
 
 teardown() {
 	psql foreign <<-EOF
-		TRUNCATE dhcphost;
+		TRUNCATE auth_dhcp_host;
 		TRUNCATE alternative_dns;
 	EOF
 	refresh
@@ -36,7 +36,7 @@ teardown() {
 
 @test "check that fdw contains data" {
 	helper() {
-		psql --tuples-only hades <<<'SELECT * FROM foreign_dhcphost;'
+		psql --tuples-only hades <<<'SELECT * FROM foreign_auth_dhcp_host;'
 	}
 	run helper
 	grep "de:ad:be:ef:00:00 | ${client_ip_address}" <<<"$output"
@@ -48,7 +48,7 @@ teardown() {
 
 @test "check that refresh syncs the data" {
 	helper() {
-		psql --tuples-only hades <<<'SELECT * FROM dhcphost;'
+		psql --tuples-only hades <<<'SELECT * FROM auth_dhcp_host;'
 	}
 	run helper
 	grep "de:ad:be:ef:00:00 | ${client_ip_address}" <<<"$output"

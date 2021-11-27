@@ -32,8 +32,8 @@ setup() {
 	ns_exec test-relay ip address add "$relay_ip_address" dev eth1
 	dhcrelay
 	psql foreign <<-EOF
-		TRUNCATE dhcphost;
-		INSERT INTO dhcphost VALUES ('${client_mac_address}', '$(netaddr.ip "${client_ip_address}")');
+		TRUNCATE auth_dhcp_host;
+		INSERT INTO auth_dhcp_host VALUES ('${client_mac_address}', '$(netaddr.ip "${client_ip_address}")');
 	EOF
 	refresh
 }
@@ -50,7 +50,7 @@ teardown() {
 	teardown_namespace test-auth
 	teardown_namespace test-relay
 	psql foreign <<-EOF
-		TRUNCATE dhcphost;
+		TRUNCATE auth_dhcp_host;
 	EOF
 	refresh
 }

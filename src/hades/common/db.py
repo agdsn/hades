@@ -95,15 +95,15 @@ alternative_dns = Table(
 )
 temp_alternative_dns = as_copy(alternative_dns, 'temp_alternative_dns')
 
-dhcphost = Table(
-    "dhcphost",
+auth_dhcp_host = Table(
+    "auth_dhcp_host",
     metadata,
     Column('MAC', MACAddress, nullable=False),
     Column('IPAddress', IPAddress, nullable=False),
     UniqueConstraint('MAC'),
     UniqueConstraint('IPAddress'),
 )
-temp_dhcphost = as_copy(dhcphost, 'temp_dhcphost')
+temp_auth_dhcp_host = as_copy(auth_dhcp_host, 'temp_auth_dhcp_host')
 
 auth_dhcp_lease = Table(
     "auth_dhcp_lease",
@@ -547,8 +547,9 @@ def get_latest_auth_attempt(
         return None
 
 
-def get_all_dhcp_hosts(connection: Connection) -> Iterator[
-        Tuple[netaddr.EUI, netaddr.IPAddress]]:
+def get_all_auth_dhcp_hosts(
+    connection: Connection,
+) -> Iterator[Tuple[netaddr.EUI, netaddr.IPAddress]]:
     """
     Return all DHCP host configurations.
 
@@ -556,7 +557,14 @@ def get_all_dhcp_hosts(connection: Connection) -> Iterator[
     :return: An iterator that yields (mac, ip)-tuples
     """
     logger.debug("Getting all DHCP hosts")
-    result = connection.execute(select([dhcphost.c.MAC, dhcphost.c.IPAddress]))
+    result = connection.execute(
+        select(
+            [
+                auth_dhcp_host.c.MAC,
+                auth_dhcp_host.c.IPAddress,
+            ]
+        )
+    )
     return iter(result)
 
 
