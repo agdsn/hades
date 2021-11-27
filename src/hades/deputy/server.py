@@ -84,8 +84,8 @@ def generate_dhcp_host_reservations(
         yield "{0},id:*,{1}\n".format(mac, ip)
 
 
-def generate_dhcp_hosts_file(
-        hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress]]
+def generate_auth_dhcp_hosts_file(
+    hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress]],
 ) -> None:
     """Generate the dnsmasq hosts file for authenticated users"""
     file_name = constants.AUTH_DHCP_HOSTS_FILE
@@ -248,28 +248,34 @@ class HadesDeputyService(object):
                 db.refresh_materialized_view(connection, db.radusergroup)
             if force:
                 with connection.begin():
-                    db.refresh_materialized_view(connection, db.dhcphost)
+                    db.refresh_materialized_view(connection, db.auth_dhcp_host)
                     db.refresh_materialized_view(connection, db.nas)
                     db.refresh_materialized_view(connection, db.alternative_dns)
                 logger.info("Forcing reload of DHCP hosts, NAS clients and "
                             "alternative DNS clients")
-                reload_dhcp_host = True
+                reload_auth_dhcp_host = True
                 reload_nas = True
                 reload_alternative_dns = True
-                hosts = db.get_all_dhcp_hosts(connection)
+                hosts = db.get_all_auth_dhcp_hosts(connection)
                 clients = db.get_all_nas_clients(connection)
                 ips = db.get_all_alternative_dns_ips(connection)
             else:
-                dhcphost_diff = db.refresh_and_diff_materialized_view(
-                    connection, db.dhcphost, db.temp_dhcphost, [null()])
-                if dhcphost_diff != ([], [], []):
-                    logger.info('DHCP host reservations changed '
-                                '(%d added, %d deleted, %d modified).',
-                                *map(len, dhcphost_diff))
-                    hosts = db.get_all_dhcp_hosts(connection)
-                    reload_dhcp_host = True
+                auth_dhcp_host_diff = db.refresh_and_diff_materialized_view(
+                    connection,
+                    db.auth_dhcp_host,
+                    db.temp_auth_dhcp_host,
+                    [null()],
+                )
+                if auth_dhcp_host_diff != ([], [], []):
+                    logger.info(
+                        "Auth DHCP host reservations changed "
+                        "(%d added, %d deleted, %d modified).",
+                        *map(len, auth_dhcp_host_diff)
+                    )
+                    hosts = db.get_all_auth_dhcp_hosts(connection)
+                    reload_auth_dhcp_host = True
                 else:
-                    reload_dhcp_host = False
+                    reload_auth_dhcp_host = False
 
                 nas_diff = db.refresh_and_diff_materialized_view(
                     connection, db.nas, db.temp_nas, [null()])
@@ -296,8 +302,8 @@ class HadesDeputyService(object):
                 else:
                     reload_alternative_dns = False
 
-        if reload_dhcp_host:
-            generate_dhcp_hosts_file(hosts)
+        if reload_auth_dhcp_host:
+            generate_auth_dhcp_hosts_file(hosts)
             reload_systemd_unit(self.bus, 'hades-auth-dhcp.service')
         if reload_nas:
             generate_radius_clients_file(clients)

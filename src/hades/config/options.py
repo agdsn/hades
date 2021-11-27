@@ -221,28 +221,28 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_OPTIONS(Option):
     type = collections.Mapping
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING(Option):
-    """Whether the ``IPAddress`` column of the foreign ``dhcphost`` table has a
+class HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_IPADDRESS_STRING(Option):
+    """Whether the ``IPAddress`` column of the foreign ``auth_dhcp_host`` table
+    has a string type"""
+    type = bool
+    default = False
+
+
+class HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_MAC_STRING(Option):
+    """Whether the ``MAC`` column of the foreign ``auth_dhcp_host`` table has a
     string type"""
     type = bool
     default = False
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING(Option):
-    """Whether the ``MAC`` column of the foreign ``dhcphost`` table has a string
-    type"""
-    type = bool
-    default = False
-
-
-class HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS(Option):
-    """Foreign data wrapper options for the ``dhcphost`` table
+class HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_OPTIONS(Option):
+    """Foreign data wrapper options for the ``auth_dhcp_host`` table
 
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
     ignored.
     """
     default = {
-        'table_name': 'dhcphost',
+        "table_name": "auth_dhcp_host",
     }
     type = collections.Mapping
 
