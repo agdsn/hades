@@ -28,10 +28,6 @@ engine = None
 TimestampRange = Tuple[Union[None, int, float], Union[None, int, float]]
 
 
-if not is_config_loaded() and not app.configured:
-    raise RuntimeError("Please load a config before importing this module")
-
-
 # noinspection PyUnusedLocal
 @worker_process_init.connect
 def setup_engine(sender, *args, **kwargs):
