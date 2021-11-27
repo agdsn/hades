@@ -13,10 +13,13 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     apt-get update && apt-get install -y \
     bash-completion \
     bats \
+    black \
     bridge-utils \
     build-essential \
     curl \
     dbus \
+    dctrl-tools \
+    debian-goodies \
     devscripts \
     dhcpcd5 \
     dh-exec \
@@ -24,17 +27,20 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     dns-root-data \
     dnsmasq \
     dnsutils \
+    elfutils \
     equivs \
     fakeroot \
     freeradius \
     freeradius-postgresql \
     freeradius-utils \
     gdb \
+    gdebi-core \
     git \
     git-buildpackage \
     ifupdown \
     ipset \
     iptables \
+    iputils-ping \
     isc-dhcp-relay \
     keepalived \
     less \
@@ -42,9 +48,11 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     lintian \
     nginx \
     packaging-dev \
+    piuparts \
     policykit-1 \
     postgresql \
     postgresql-contrib \
+    pylint3 \
     pypy \
     pypy-dev \
     pypy-ipaddress \
@@ -62,6 +70,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     python3-all \
     python3-all-dev \
     python3-babel \
+    python3-cairo \
     python3-celery \
     python3-flask \
     python3-flask-babel \
@@ -77,17 +86,22 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     python3-pyroute2 \
     python3-pysnmp4 \
     python3-pytest \
+    python3-pytest-mock \
     python3-pytest-runner \
     python3-sqlalchemy \
     python3-setuptools \
     python3-systemd \
     python3-venv \
     rabbitmq-server \
+    reprotest \
+    shellcheck \
+    socat \
     strace \
     sudo \
     systemd \
     systemd-coredump \
     tcpdump \
+    tmux \
     unbound \
     unzip \
     uwsgi \
