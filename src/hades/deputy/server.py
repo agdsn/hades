@@ -72,20 +72,23 @@ def restart_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
 
 
 def generate_dhcp_host_reservations(
-        hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress]]
+    hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress, Optional[str]]],
 ) -> Iterable[str]:
     """Generate lines suitable for dnsmasq's ``--dhcp-hostsfile=`` option.
 
     :param hosts: The MAC address-IP address pairs of the hosts
     """
-    for mac, ip in hosts:
+    for mac, ip, hostname in hosts:
         mac = netaddr.EUI(mac)
         mac.dialect = netaddr.mac_unix_expanded
-        yield "{0},id:*,{1}\n".format(mac, ip)
+        if hostname is not None:
+            yield "{0},id:*,{1},{2}\n".format(mac, ip, hostname)
+        else:
+            yield "{0},id:*,{1}\n".format(mac, ip)
 
 
 def generate_auth_dhcp_hosts_file(
-    hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress]],
+    hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress, Optional[str]]],
 ) -> None:
     """Generate the dnsmasq hosts file for authenticated users"""
     file_name = constants.AUTH_DHCP_HOSTS_FILE

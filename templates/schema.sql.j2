@@ -133,6 +133,25 @@ COMMENT ON FUNCTION decode_quoted_printable(string text) IS 'Decode quoted-print
 
 
 --
+-- Name: safe_hostname(text); Type: FUNCTION; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+CREATE FUNCTION safe_hostname(inp text) RETURNS text
+    LANGUAGE plpgsql IMMUTABLE STRICT
+    AS $$
+BEGIN
+    IF inp ~ '\A[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?\Z' THEN
+        RETURN inp;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$$;
+
+
+ALTER FUNCTION public.safe_hostname(inp text) OWNER TO "{{ constants.DATABASE_USER }}";
+
+--
 -- Name: safe_inet_cast(text); Type: FUNCTION; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
@@ -249,10 +268,11 @@ CREATE FOREIGN TABLE foreign_auth_dhcp_host (
     "MAC" macaddr /* NOT NULL */,
     {% endif %}
     {% if HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_IPADDRESS_STRING %}
-    "IPAddress" text /* NOT NULL */
+    "IPAddress" text /* NOT NULL */,
     {% else %}
-    "IPAddress" inet /* NOT NULL */
+    "IPAddress" inet /* NOT NULL */,
     {% endif %}
+    "Hostname" text
 )
 SERVER {{ server_name }}
 OPTIONS (
@@ -278,15 +298,16 @@ ALTER FOREIGN TABLE foreign_auth_dhcp_host OWNER TO "{{ constants.DATABASE_USER 
 
 CREATE MATERIALIZED VIEW auth_dhcp_host AS
  SELECT indexed."MAC",
-    indexed."IPAddress"
-   FROM ( SELECT row_number() OVER "MAC_window" AS "MAC_index",
-            row_number() OVER "IPAddress_window" AS "IPAddress_index",
+    indexed."IPAddress",
+    indexed."Hostname"
+   FROM ( SELECT row_number() OVER "IPAddress_window" AS "IPAddress_index",
             {{ foreign_auth_dhcp_host_mac }} AS "MAC",
             {{ foreign_auth_dhcp_host_ipaddress }} AS "IPAddress",
+            CASE WHEN row_number() OVER "Hostname_window" = 1 THEN safe_hostname(foreign_auth_dhcp_host."Hostname") ELSE NULL END AS "Hostname"
            FROM foreign_auth_dhcp_host
           WHERE (({{ foreign_auth_dhcp_host_mac }} IS NOT NULL) AND ({{ foreign_auth_dhcp_host_ipaddress }} IS NOT NULL))
-          WINDOW "MAC_window" AS (PARTITION BY {{ foreign_auth_dhcp_host_mac }}), "IPAddress_window" AS (PARTITION BY {{ foreign_auth_dhcp_host_ipaddress }})) indexed
-  WHERE ((indexed."MAC_index" = 1) AND (indexed."IPAddress_index" = 1))
+          WINDOW "Hostname_window" AS (PARTITION BY safe_hostname(foreign_auth_dhcp_host."Hostname")), "IPAddress_window" AS (PARTITION BY {{ foreign_auth_dhcp_host_ipaddress }})) indexed
+  WHERE (indexed."IPAddress_index" = 1)
   WITH DATA;
 
 
