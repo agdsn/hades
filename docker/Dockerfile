@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM debian:buster
 MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
 ARG BUILDER_UID=1000
@@ -5,7 +6,10 @@ ARG BUILDER_GID=1000
 ENV LANG=C.UTF-8 container=docker
 COPY etc/ /etc/
 
-RUN export DEBIAN_FRONTEND="noninteractive" && \
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+
+RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
+    export DEBIAN_FRONTEND="noninteractive" && \
     apt-get update && apt-get install -y \
     bash-completion \
     bats \
