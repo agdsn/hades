@@ -57,10 +57,11 @@ CREATE TABLE auth_dhcp_host (
     "MAC" macaddr NOT NULL,
     {% endif %}
     {% if HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_IPADDRESS_STRING %}
-    "IPAddress" text NOT NULL
+    "IPAddress" text NOT NULL,
     {% else %}
-    "IPAddress" inet NOT NULL
+    "IPAddress" inet NOT NULL,
     {% endif %}
+    "Hostname" text
 );
 
 

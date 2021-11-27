@@ -100,6 +100,7 @@ auth_dhcp_host = Table(
     metadata,
     Column('MAC', MACAddress, nullable=False),
     Column('IPAddress', IPAddress, nullable=False),
+    Column('Hostname', Text, nullable=True),
     UniqueConstraint('MAC'),
     UniqueConstraint('IPAddress'),
 )
@@ -549,12 +550,12 @@ def get_latest_auth_attempt(
 
 def get_all_auth_dhcp_hosts(
     connection: Connection,
-) -> Iterator[Tuple[netaddr.EUI, netaddr.IPAddress]]:
+) -> Iterator[Tuple[netaddr.EUI, netaddr.IPAddress, Optional[str]]]:
     """
     Return all DHCP host configurations.
 
     :param connection: A SQLAlchemy connection
-    :return: An iterator that yields (mac, ip)-tuples
+    :return: An iterator that yields (mac, ip, hostname)-tuples
     """
     logger.debug("Getting all DHCP hosts")
     result = connection.execute(
@@ -562,6 +563,7 @@ def get_all_auth_dhcp_hosts(
             [
                 auth_dhcp_host.c.MAC,
                 auth_dhcp_host.c.IPAddress,
+                auth_dhcp_host.c.Hostname,
             ]
         )
     )
