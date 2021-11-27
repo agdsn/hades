@@ -327,7 +327,7 @@ units = (
     'hades.service',
 )
 """The Hades systemd units that should be reported by the
-:func:`get_get_systemd_status` task."""
+:func:`get_systemd_status` task."""
 
 
 @rpc_task()
@@ -368,7 +368,7 @@ platform_attributes = (
     'release', 'system', 'version', 'uname',
 )
 """The attributes of the Python platform, that should be return by the
-:func:`get_get_system_information` task."""
+:func:`get_system_information` task."""
 
 task_attributes = (
     'name', 'max_retries', 'default_retry_delay', 'rate_limit', 'time_limit',
@@ -376,7 +376,7 @@ task_attributes = (
     'serializer', 'acks_late', 'track_started', 'expires',
 )
 """The attributes of the Celery tasks, that should be returned by the
-:func:`get_get_system_information` task."""
+:func:`get_system_information` task."""
 
 
 @rpc_task()
