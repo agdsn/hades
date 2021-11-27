@@ -11,6 +11,7 @@ import pkg_resources
 from celery.signals import worker_process_init
 from celery.utils.log import get_task_logger
 from pydbus import SystemBus
+from sqlalchemy.engine import Engine
 
 from hades.agent import app
 from hades.common.db import (
@@ -23,7 +24,7 @@ from hades.config.loader import get_config, is_config_loaded
 from hades.deputy.client import signal_cleanup, signal_refresh
 
 logger = get_task_logger(__name__)
-engine = None
+engine: Optional[Engine] = None
 
 TimestampRange = Tuple[Union[None, int, float], Union[None, int, float]]
 
