@@ -36,7 +36,7 @@ static_ipaddress {
 {% block vrrp_scripts %}
 vrrp_script check_services {
 {% block vrrp_script_check_services %}
-    script "{{ constants.pkglibexecdir }}/check-services.sh" "{{ instance }}"
+    script "{{ constants.pkglibexecdir }}/check-services.sh {{ instance }}"
     interval 2
     fall 3
     rise 3
