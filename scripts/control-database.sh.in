@@ -123,7 +123,7 @@ do_reload() {
 
 do_clear() {
 	if @PG_CTL@ status &>/dev/null; then
-		error "Error: can't clear running PostgreSQL cluster"
+		error "Error: can't clear running PostgreSQL cluster. Please stop the 'hades-database' service first."
 		return 3
 	fi
 	clear_pgdata
