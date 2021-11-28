@@ -6,14 +6,15 @@ from datetime import datetime, timezone
 from itertools import starmap
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
+import celery
 import netaddr
 import pkg_resources
 from celery.signals import worker_process_init
+from celery.utils.functional import head_from_fun
 from celery.utils.log import get_task_logger
 from pydbus import SystemBus
 from sqlalchemy.engine import Engine
 
-from hades.agent import app
 from hades.common.db import (
     Attributes, DatetimeRange, Groups, create_engine,
     get_all_auth_dhcp_leases as do_get_all_auth_dhcp_leases,
@@ -23,7 +24,7 @@ from hades.common.db import (
     get_auth_dhcp_leases_of_mac as do_get_auth_dhcp_leases_of_mac,
     get_sessions_of_mac as do_get_sessions_of_mac,
 )
-from hades.config.loader import get_config, is_config_loaded
+from hades.config.loader import get_config
 from hades.deputy.client import (
     signal_cleanup,
     signal_auth_dhcp_lease_release,
@@ -52,6 +53,33 @@ class ArgumentError(Exception):
         self.message = message
 
 
+class Task(celery.Task):
+    @classmethod
+    def wrap(cls, f: types.FunctionType, kwargs):
+        name = kwargs.pop("name")
+        bind = kwargs.get("bind", False)
+        task = type(
+            name,
+            (cls,),
+            {
+                'name': name,
+                'run': f,
+                '_decorated': True,
+                '__doc__': f.__doc__,
+                '__module__': f.__module__,
+                '__annotations__': f.__annotations__,
+                '__header__': staticmethod(head_from_fun(f, bound=bind)),
+                '__wrapped__': f,
+            })
+        task.__qualname__ = f.__qualname__
+        return task()
+
+
+class RPCTask(Task):
+    acks_late = True
+    throws = (ArgumentError,)
+
+
 def rpc_task(*args, **kwargs):
     """
     A convenience decorator that invokes :func:`celery.Celery.task`, but sets
@@ -62,15 +90,13 @@ def rpc_task(*args, **kwargs):
     ============= =========================================
     ``acks_late`` :python:`True`
     ``throws``    :python:`(ArgumentError,)`
-    ``name``      :python:`'hades.agent.rpc.' + f.__name__`
+    ``name``      :python:`f"hades.agent.rpc.{f.__name__}"`
     ============= =========================================
     """
-    kwargs.setdefault('acks_late', True)
-    kwargs.setdefault('throws', (ArgumentError,))
 
     def wrapper(f: types.FunctionType):
-        kwargs.setdefault('name', 'hades.agent.rpc.' + f.__name__)
-        return app.task(*args, **kwargs)(f)
+        kwargs.setdefault("name", f"hades.agent.rpc.{f.__name__}")
+        return RPCTask.wrap(f, kwargs)
 
     return wrapper
 
@@ -458,8 +484,8 @@ task_attributes = (
 :func:`get_system_information` task."""
 
 
-@rpc_task()
-def get_system_information() -> Dict[str, Any]:
+@rpc_task(bind=True)
+def get_system_information(task: RPCTask) -> Dict[str, Any]:
     """Return information about the Python platform, the Hades distribution and
     its dependencies and the Celery tasks of the agent."""
     hades = pkg_resources.get_distribution("hades")
@@ -469,10 +495,10 @@ def get_system_information() -> Dict[str, Any]:
             attr: getattr(platform, attr)() for attr in platform_attributes
         },
         'celery':       {
-            'application_name': app.main,
+            'application_name': task.app.main,
             'tasks':            {
                 name: dict_from_attributes(task, task_attributes)
-                for name, task in app.tasks.items()
+                for name, task in task.app.tasks.items()
             }
         }
     }
