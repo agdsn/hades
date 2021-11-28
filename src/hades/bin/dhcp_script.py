@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, TypeVar
 
 import netaddr
+from sqlalchemy import text
 from sqlalchemy.engine.base import Connection
 from sqlalchemy.engine.result import RowProxy
 
@@ -260,6 +261,8 @@ def perform_lease_update(
     new: Dict[str, Any],
 ):
     changes = {k: v for k, v in new.items() if old[k] != v}
+    if not changes:
+        return
     query = auth_dhcp_lease.update(values=changes).where(
         auth_dhcp_lease.c.IPAddress == ip
     )
@@ -277,6 +280,8 @@ def perform_lease_update(
 
 def add_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
     values = obtain_lease_info(args, environ, environb, missing_as_none=True)
+    values = {k: (v if v is not None else text('DEFAULT'))
+              for k, v in values.items()}
     ip, mac = values["IPAddress"], values["MAC"]
     logger.debug(
         "Inserting new lease for IP %s and MAC %s",
@@ -314,6 +319,7 @@ def delete_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
 def update_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
     connection = load_config_and_connect(args)
     values = obtain_lease_info(args, environ, environb, missing_as_none=False)
+    values.setdefault('UpdatedAt', text('DEFAULT'))
     ip, mac = values["IPAddress"], values["MAC"]
     logger.debug("Updating lease for IP %s and MAC %s", ip, mac)
     with connection.begin():
