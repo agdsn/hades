@@ -1,4 +1,13 @@
-"""Hades agent celery app"""
-from celery import Celery
+"""Hades AMQP API agent"""
 
-app = Celery("hades.agent")
+import celery
+
+from . import tasks
+
+
+def create_app() -> celery.Celery:
+    app = celery.Celery(__package__)
+    for obj in tasks.__dict__.values():
+        if isinstance(obj, tasks.Task):
+            app.register_task(obj)
+    return app

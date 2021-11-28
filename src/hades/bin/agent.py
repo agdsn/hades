@@ -5,10 +5,14 @@ Loads the Hades configuration and transfers control to Celery.
 """
 import argparse
 import inspect
+import logging
 import os
 import sys
 
-from hades.agent import app
+import celery.apps.worker
+
+from hades import constants
+from hades.agent import create_app
 from hades.common.cli import (
     ArgumentParser, parser as common_parser, reset_cli_logging,
     setup_cli_logging,
@@ -35,33 +39,41 @@ def create_parser() -> ArgumentParser:
         celery as is. You may not provide the -A/--app argument.
         """
     )
-    parser = ArgumentParser(description=description,
-                            formatter_class=Formatter,
-                            parents=[common_parser])
-    parser.add_argument('-A', '--app', dest='app', help=argparse.SUPPRESS)
-    parser.add_argument('command')
+    parser = ArgumentParser(
+        description=description,
+        formatter_class=Formatter,
+        parents=[common_parser],
+    )
+    parser.add_argument(
+        "--pid-file",
+        type=str,
+        default=f"{constants.pkgrunstatedir}/agent/agent.pid",
+    )
     return parser
 
 
 def main() -> int:
     parser = create_parser()
-    args, argv = parser.parse_known_args()
+    args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
     try:
         config = load_config(args.config)
     except ConfigError as e:
         print_config_error(e)
         return os.EX_CONFIG
-    reset_cli_logging()
+    app = create_app()
     app.config_from_object(config.of_type(CeleryOption))
-    if args.app:
-        parser.error("You may not provide the -A/--app worker argument")
-    argv.insert(0, parser.prog)
-    argv.insert(1, args.command)
-    argv.extend(['-A', 'hades.bin.agent:app'])
-    if args.command == 'worker':
-        argv.extend(['-n', config.HADES_CELERY_WORKER_HOSTNAME])
-    return app.start(argv)
+    log_level = logging.root.level
+    reset_cli_logging()
+    worker: celery.apps.worker.Worker = app.Worker(
+        app=app,
+        hostname=config.HADES_CELERY_WORKER_HOSTNAME,
+        statedb=config.HADES_CELERY_STATE_DB,
+        pidfile=args.pid_file,
+        loglevel=log_level
+    )
+    worker.start()
+    return worker.exitcode
 
 
 if __name__ == '__main__':

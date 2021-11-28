@@ -11,7 +11,7 @@ from contextlib import closing
 
 import kombu
 
-from hades.agent import app
+from hades.agent import create_app
 from hades.common.cli import ArgumentParser, parser as common_parser
 from hades.config.base import ConfigError
 from hades.config.loader import get_config, load_config, print_config_error
@@ -28,6 +28,8 @@ def notify_auth(state, priority) -> int:
 # noinspection PyUnusedLocal
 def notify_root(state, priority) -> int:
     config = get_config(runtime_checks=True)
+    app = create_app()
+    app.config_from_object(config)
     queue_name = config.HADES_CELERY_NODE_QUEUE
     exchange_name = config.HADES_CELERY_RPC_EXCHANGE
     exchange_type = config.HADES_CELERY_RPC_EXCHANGE_TYPE
@@ -88,7 +90,6 @@ def main() -> int:
     except ConfigError as e:
         print_config_error(e)
         return os.EX_CONFIG
-    app.config_from_object(config)
     if args.name == 'hades-auth':
         return notify_auth(args.state, args.priority)
     elif args.name == 'hades-root':

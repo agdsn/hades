@@ -946,6 +946,12 @@ class HADES_CELERY_NODE_ROUTING_KEY(Option):
     type = str
 
 
+class HADES_CELERY_STATE_DB(Option):
+    """Path of Celery node state database"""
+    type = str
+    default = "{}/agent/state.db".format(constants.pkgrunstatedir)
+
+
 class CeleryOption(Option, abstract=True):
     pass
 
@@ -1080,9 +1086,7 @@ class CELERY_RESULT_EXCHANGE(CeleryOption):
 
 
 class CELERY_IMPORTS(CeleryOption):
-    default = (
-        'hades.agent.tasks',
-    )
+    default = ()
     type = collections.abc.Sequence
 
 
