@@ -17,7 +17,7 @@ import string
 import subprocess
 import textwrap
 from functools import partial
-from typing import Iterable, Tuple
+from typing import Iterable, Tuple, Optional
 
 import netaddr
 import pkg_resources
