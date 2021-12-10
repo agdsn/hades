@@ -317,9 +317,16 @@ class HadesDeputyService(object):
 
 def run_event_loop():
     """Run the DBus :class:`HadesDeputyService` on the GLib event loop."""
-    bus = SystemBus()
-    logger.debug('Publishing interface %s on DBus', constants.DEPUTY_DBUS_NAME)
-    config = get_config()
-    bus.publish(constants.DEPUTY_DBUS_NAME, HadesDeputyService(bus, config))
-    loop = GLib.MainLoop()
-    loop.run()
+    with contextlib.ExitStack() as stack:
+        bus: Bus = stack.enter_context(SystemBus())
+        logger.debug(
+            "Publishing interface %s on DBus", constants.DEPUTY_DBUS_NAME
+        )
+        config = get_config()
+        stack.enter_context(
+            bus.publish(
+                constants.DEPUTY_DBUS_NAME, HadesDeputyService(bus, config)
+            )
+        )
+        loop = GLib.MainLoop()
+        loop.run()
