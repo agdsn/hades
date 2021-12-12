@@ -4,6 +4,7 @@ celery~=4.4.7
 Flask-Babel~=2.0.0
 Flask~=2.0.2
 Jinja2~=3.0.3
+kombu~=4.2.1
 netaddr~=0.7.19
 psycopg2-binary~=2.9.2
 pydbus~=0.6.0
