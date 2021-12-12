@@ -12,6 +12,7 @@ import logging
 import os
 import pwd
 import re
+import signal
 import stat
 import string
 import subprocess
@@ -33,6 +34,7 @@ from hades.common import db
 from hades.common.db import get_auth_dhcp_lease_of_ip
 from hades.common.dbus import handle_glib_error
 from hades.common.privileges import dropped_privileges
+from hades.common.signals import install_handler
 from hades.config.loader import Config, get_config
 from hades.deputy.dhcp import release_dhcp_lease
 
@@ -360,4 +362,10 @@ def run_event_loop():
             )
         )
         loop = GLib.MainLoop()
+        stack.enter_context(
+            install_handler(
+                (signal.SIGHUP, signal.SIGINT, signal.SIGTERM),
+                lambda _sig, _frame: loop.quit(),
+            )
+        )
         loop.run()
