@@ -15,6 +15,8 @@ from io import FileIO
 from collections.abc import Container
 from typing import Dict, Generator, List, Optional, Tuple, TypeVar
 
+from hades.common.signals import install_handler
+
 logger = logging.getLogger(__name__)
 SIZEOF_INT = ctypes.sizeof(ctypes.c_int)
 memfd_create = ctypes.cdll.LoadLibrary("libc.so.6").memfd_create
@@ -438,24 +440,10 @@ class Server(socketserver.UnixStreamServer):
         logger.error("Received signal %d. Shutting down.", signo)
         threading.Thread(name='shutdown', target=self.shutdown).start()
 
-    # noinspection PyNestedDecorators
-    @contextlib.contextmanager
-    @classmethod
-    def _install_handler(cls, signum: signal.Signals):
-        previous = signal.signal(signum, cls._handle_shutdown_signal)
-        yield
-        signal.signal(signum, previous)
-
-    # noinspection PyNestedDecorators
-    @contextlib.contextmanager
-    @classmethod
-    def _install_handlers(cls):
-        with contextlib.ExitStack() as stack:
-            for signum in (signal.SIGHUP, signal.SIGINT, signal.SIGTERM):
-                stack.enter_context(cls._install_handler(signum))
-            yield
-
     def serve_forever(self, poll_interval=0.5):
         logger.info("Starting server loop")
-        with self._install_handlers():
+        with install_handler(
+            (signal.SIGHUP, signal.SIGINT, signal.SIGTERM),
+            self._handle_shutdown_signal
+        ):
             super().serve_forever(poll_interval)
