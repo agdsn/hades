@@ -4,12 +4,10 @@ Provides the client-side API for the deputy daemon.
 import logging
 
 import netaddr
-# noinspection PyPackageRequirements
-from gi.repository import GLib
 from pydbus import SystemBus
 
 from hades import constants
-from hades.common.dbus import handle_glib_error
+from hades.common.glib import typed_glib_error
 
 logger = logging.Logger(__name__)
 
@@ -18,26 +16,22 @@ def signal_refresh(timeout: int = 1) -> None:
     """Signal the deputy to perform a refresh."""
     logger.debug("Signaling refresh on DBus: %s.%s",
                  constants.DEPUTY_DBUS_NAME, 'Refresh')
-    try:
+    with typed_glib_error():
         bus = SystemBus()
         deputy = bus.get(constants.DEPUTY_DBUS_NAME, timeout=timeout)
         deputy_interface = deputy[constants.DEPUTY_DBUS_NAME]
         deputy_interface.Refresh(timeout=timeout)
-    except GLib.Error as e:
-        handle_glib_error(e)
 
 
 def signal_cleanup(timeout: int = 1) -> None:
     """Signal the deputy to perform a cleanup."""
     logger.debug("Signaling cleanup on DBus: %s.%s",
                  constants.DEPUTY_DBUS_NAME, 'Cleanup')
-    try:
+    with typed_glib_error():
         bus = SystemBus()
         deputy = bus.get(constants.DEPUTY_DBUS_NAME, timeout=timeout)
         deputy_interface = deputy[constants.DEPUTY_DBUS_NAME]
         deputy_interface.Cleanup(timeout=timeout)
-    except GLib.Error as e:
-        handle_glib_error(e)
 
 
 def signal_auth_dhcp_lease_release(
@@ -53,10 +47,8 @@ def signal_auth_dhcp_lease_release(
         constants.DEPUTY_DBUS_NAME,
         "Refresh",
     )
-    try:
+    with typed_glib_error():
         bus = SystemBus()
         deputy = bus.get(constants.DEPUTY_DBUS_NAME, timeout=timeout)
         deputy_interface = deputy[constants.DEPUTY_DBUS_NAME]
         deputy_interface.ReleaseAuthDhcpLease(str(client_ip), timeout=timeout)
-    except GLib.Error as e:
-        handle_glib_error(e)

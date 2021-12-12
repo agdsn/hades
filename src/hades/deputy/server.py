@@ -22,7 +22,6 @@ from typing import Iterable, Optional, Tuple
 
 import netaddr
 import pkg_resources
-# noinspection PyPackageRequirements
 from gi.repository import GLib
 from pydbus import SystemBus
 from pydbus.bus import Bus
@@ -32,7 +31,7 @@ from sqlalchemy.pool import StaticPool
 from hades import constants
 from hades.common import db
 from hades.common.db import get_auth_dhcp_lease_of_ip
-from hades.common.dbus import handle_glib_error
+from hades.common.glib import typed_glib_error
 from hades.common.privileges import dropped_privileges
 from hades.common.signals import install_handler
 from hades.config.loader import Config, get_config
@@ -49,12 +48,10 @@ def reload_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
     :param timeout: Timeout in milliseconds
     """
     logger.debug("Instructing systemd to reload unit %s", unit)
-    try:
+    with typed_glib_error():
         systemd = bus.get('org.freedesktop.systemd1', timeout=timeout)
         manager_interface = systemd['org.freedesktop.systemd1.Manager']
         manager_interface.ReloadUnit(unit, 'fail', timeout=timeout)
-    except GLib.Error as e:
-        handle_glib_error(e)
 
 
 def restart_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
@@ -65,12 +62,10 @@ def restart_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
     :param timeout: Timeout in milliseconds
     """
     logger.debug("Instructing systemd to restart unit %s", unit)
-    try:
+    with typed_glib_error():
         systemd = bus.get('org.freedesktop.systemd1', timeout=timeout)
         manager_interface = systemd['org.freedesktop.systemd1.Manager']
         manager_interface.RestartUnit(unit, 'fail', timeout=timeout)
-    except GLib.Error as e:
-        handle_glib_error(e)
 
 
 def generate_dhcp_host_reservations(
