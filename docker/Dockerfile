@@ -1,8 +1,6 @@
 # syntax=docker/dockerfile:1
 FROM debian:buster
 MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
-ARG BUILDER_UID=1000
-ARG BUILDER_GID=1000
 ENV LANG=C.UTF-8 container=docker
 COPY etc/ /etc/
 
@@ -131,14 +129,14 @@ RUN find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' \
         ! -name systemd-logind.service \
         -printf '%f\0' | sort --unique --zero-terminated | xargs --null --no-run-if-empty --verbose systemctl mask \
     && find -L /etc/init.d -type f -perm /u+x,g+x,o+x ! -name rc ! -name rcS -printf '%f\0' | xargs --null --no-run-if-empty --max-args=1 -I'{}' --verbose update-rc.d -f '{}' remove \
-    && { addgroup --system --gid $BUILDER_GID builder || true; } \
-    && adduser --system --home /build --shell /bin/bash --uid $BUILDER_UID --gid $BUILDER_GID builder \
     && sed -i -re 's/^#?(ForwardTo[^=]+)=.*$/\1=no/' /etc/systemd/journald.conf
 
-COPY ["build.sh", "/usr/local/bin"]
+COPY ["build.sh", "entrypoint.sh", "/usr/local/bin"]
 
 VOLUME [ "/build", "/build/hades"]
 
 STOPSIGNAL SIGRTMIN+3
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 CMD ["/lib/systemd/systemd", "--system"]
