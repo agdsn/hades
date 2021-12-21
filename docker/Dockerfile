@@ -23,6 +23,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     debian-goodies \
     devscripts \
     dh-exec \
+    dh-python \
     dh-virtualenv \
     dhcpcd5 \
     dns-root-data \
