@@ -67,6 +67,8 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     pypy-ipaddress \
     pypy-pytest \
     pypy-setuptools \
+    pypy3 \
+    pypy3-dev \
     python-all \
     python-all-dev \
     python-ipaddr \
