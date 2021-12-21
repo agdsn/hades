@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM debian:buster
+FROM debian:bullseye
 MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
 ENV LANG=C.UTF-8 container=docker
 COPY etc/ /etc/
@@ -60,23 +60,9 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     pydocstyle \
     pyflakes3 \
     pylama \
-    pylint3 \
-    pypy \
-    pypy-dev \
-    pypy-ipaddress \
-    pypy-pytest \
-    pypy-setuptools \
+    pylint \
     pypy3 \
     pypy3-dev \
-    python-all \
-    python-all-dev \
-    python-ipaddr \
-    python-ipaddress \
-    python-mock \
-    python-netaddr \
-    python-pytest \
-    python-pytest-runner \
-    python-setuptools \
     python3-all \
     python3-all-dev \
     python3-babel \
