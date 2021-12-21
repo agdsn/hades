@@ -118,6 +118,10 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     uwsgi \
     uwsgi-plugin-python3 \
     vim-nox \
+    zsh \
+    && curl -L \
+    'https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc' -o /etc/zsh/zshrc \
+    'https://git.grml.org/f/grml-etc-core/etc/skel/.zshrc' -o /etc/skel/.zshrc \
     && true
 
 RUN find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' \
