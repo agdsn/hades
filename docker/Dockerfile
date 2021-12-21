@@ -21,9 +21,9 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     dctrl-tools \
     debian-goodies \
     devscripts \
-    dhcpcd5 \
     dh-exec \
     dh-virtualenv \
+    dhcpcd5 \
     dns-root-data \
     dnsmasq \
     dnsutils \
@@ -88,8 +88,8 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     python3-pytest \
     python3-pytest-mock \
     python3-pytest-runner \
-    python3-sqlalchemy \
     python3-setuptools \
+    python3-sqlalchemy \
     python3-systemd \
     python3-venv \
     rabbitmq-server \
