@@ -11,6 +11,7 @@ RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloa
 RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
     export DEBIAN_FRONTEND="noninteractive" && \
     apt-get update && apt-get install -y \
+    bandit \
     bash-completion \
     bats \
     black \
@@ -30,6 +31,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     elfutils \
     equivs \
     fakeroot \
+    flake8 \
     freeradius \
     freeradius-postgresql \
     freeradius-utils \
@@ -42,16 +44,22 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     iptables \
     iputils-ping \
     isc-dhcp-relay \
+    isort \
     keepalived \
     less \
     libxml2-utils \
     lintian \
+    mypy \
     nginx \
     packaging-dev \
     piuparts \
     policykit-1 \
     postgresql \
     postgresql-contrib \
+    pycodestyle \
+    pydocstyle \
+    pyflakes3 \
+    pylama \
     pylint3 \
     pypy \
     pypy-dev \
@@ -93,6 +101,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     python3-systemd \
     python3-venv \
     rabbitmq-server \
+    radon \
     reprotest \
     shellcheck \
     socat \
