@@ -119,8 +119,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     uwsgi \
     uwsgi-plugin-python3 \
     vim-nox \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && true
 
 RUN find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' \
         ! -name '*dbus*' \
