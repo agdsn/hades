@@ -122,7 +122,7 @@ RUN find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' \
     && find -L /etc/init.d -type f -perm /u+x,g+x,o+x ! -name rc ! -name rcS -printf '%f\0' | xargs --null --no-run-if-empty --max-args=1 -I'{}' --verbose update-rc.d -f '{}' remove \
     && sed -i -re 's/^#?(ForwardTo[^=]+)=.*$/\1=no/' /etc/systemd/journald.conf
 
-COPY ["build.sh", "entrypoint.sh", "/usr/local/bin"]
+COPY ["build.sh", "entrypoint.sh", "/usr/local/bin/"]
 
 VOLUME [ "/build", "/build/hades"]
 
