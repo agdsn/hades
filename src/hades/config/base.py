@@ -1,5 +1,6 @@
 import functools
 import re
+from typing import Any
 
 option_name_regex = re.compile(r'\A[A-Z][A-Z0-9_]*\Z', re.ASCII)
 
@@ -92,10 +93,10 @@ class OptionMeta(type):
 class Option(object, metaclass=OptionMeta, abstract=True):
     has_default = False
     required = False
-    default = None
-    type = None
-    runtime_check = None
-    static_check = None
+    default: Any = None
+    type: Any = None
+    runtime_check: Any = None
+    static_check: Any = None
 
 
 class ConfigError(Exception):
