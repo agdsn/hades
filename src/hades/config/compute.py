@@ -6,7 +6,7 @@ from hades.config.base import (
 
 
 class equal_to(Compute):
-    def __init__(self, other: Union[str, type(Option)]):
+    def __init__(self, other: Union[str, type[Option]]):
         super().__init__()
         self.other_name = coerce(other)
         if not isinstance(self.other_name, str):
@@ -35,8 +35,8 @@ class deferred_format(Compute):
     specific names that are available in the format string.
     """
 
-    def __init__(self, fmt_string, *args: Union[str, type(Option)],
-                 **kwargs: Union[str, type(Option)]):
+    def __init__(self, fmt_string, *a: Union[str, type[Option]],
+                 **kw: Union[str, type[Option]]):
         """
         :param fmt_string:
         :param args:
@@ -45,8 +45,8 @@ class deferred_format(Compute):
         """
         super().__init__()
         self.fmt_string = fmt_string
-        self.args = tuple(coerce(arg) for arg in args)
-        self.kwargs = {k: coerce(v) for k, v in kwargs}
+        self.args = tuple(coerce(arg) for arg in a)
+        self.kwargs = {k: coerce(v) for k, v in kw.items()}
 
         args, kwargs = "", ""
         if self.args:
