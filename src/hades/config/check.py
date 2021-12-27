@@ -2,13 +2,14 @@
 Checks for configuration option values
 """
 import collections
+import collections.abc
 import grp
 import os
 import pwd
 import re
 import socket
 import textwrap
-from typing import Sequence, Type, Union
+from typing import Type, Union
 
 import netaddr
 from pyroute2.iproute import IPRoute
@@ -127,9 +128,9 @@ class mapping(Check):
 
 
 class type_is(Check):
-    def __init__(self, types: Union[Type, Sequence[Type]]):
+    def __init__(self, types: Union[Type, collections.abc.Sequence[Type]]):
         super().__init__()
-        if isinstance(types, collections.Sequence):
+        if isinstance(types, collections.abc.Sequence):
             self.types = tuple(types)
         else:
             self.types = (types,)
