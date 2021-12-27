@@ -1,4 +1,5 @@
 import collections
+import collections.abc
 import re
 import urllib.parse
 from datetime import timedelta
@@ -33,7 +34,7 @@ class HADES_SITE_NODE_ID(Option):
 
 class HADES_MAIL_DESTINATION_ADDRESSES(Option):
     """Automatic notification mails will be send to this address."""
-    type = collections.Sequence
+    type = collections.abc.Sequence
     static_check = check.satisfy_all(
         check.not_empty,
         check.sequence(check.type_is(str))
@@ -66,7 +67,7 @@ class HADES_RETENTION_INTERVAL(Option):
 
 class HADES_CONTACT_ADDRESSES(Option):
     """Contact addresses displayed on the captive portal page"""
-    type = collections.Mapping
+    type = collections.abc.Mapping
     required = True
 
 
@@ -77,7 +78,7 @@ class HADES_USER_NETWORKS(Option):
     Dictionary of networks. Keys are unique identifiers of the network,
     values are :class:`netaddr.IPNetwork` objects
     """
-    type = collections.Mapping
+    type = collections.abc.Mapping
     required = True
     static_check = check.satisfy_all(
         check.not_empty,
@@ -90,7 +91,7 @@ class HADES_CUSTOM_IPTABLES_INPUT_RULES(Option):
 
     A list of valid ``iptables-restore`` rule lines with leading ``-A INPUT``.
     """
-    type = collections.Sequence
+    type = collections.abc.Sequence
     default = []
 
 
@@ -142,7 +143,7 @@ class HADES_POSTGRESQL_LISTEN(Option):
     default = (
         netaddr.IPNetwork('127.0.0.1/8'),
     )
-    type = collections.Sequence
+    type = collections.abc.Sequence
     static_check = check.sequence(check.network_ip)
     runtime_check = check.sequence(check.address_exists)
 
@@ -165,7 +166,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS(Option):
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
     ignored.
     """
-    type = collections.Mapping
+    type = collections.abc.Mapping
     default = {}
 
 
@@ -199,7 +200,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
     ignored.
     """
     default = {}
-    type = collections.Mapping
+    type = collections.abc.Mapping
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING(Option):
@@ -218,7 +219,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_OPTIONS(Option):
     default = {
         'table_name': 'alternative_dns',
     }
-    type = collections.Mapping
+    type = collections.abc.Mapping
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_IPADDRESS_STRING(Option):
@@ -244,7 +245,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_OPTIONS(Option):
     default = {
         "table_name": "auth_dhcp_host",
     }
-    type = collections.Mapping
+    type = collections.abc.Mapping
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS(Option):
@@ -256,7 +257,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS(Option):
     default = {
         'table_name': 'nas',
     }
-    type = collections.Mapping
+    type = collections.abc.Mapping
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING(Option):
@@ -275,7 +276,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS(Option):
     default = {
         'table_name': 'radcheck',
     }
-    type = collections.Mapping
+    type = collections.abc.Mapping
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS(Option):
@@ -287,7 +288,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS(Option):
     default = {
         'table_name': 'radgroupcheck',
     }
-    type = collections.Mapping
+    type = collections.abc.Mapping
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS(Option):
@@ -299,7 +300,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS(Option):
     default = {
         'table_name': 'radgroupreply',
     }
-    type = collections.Mapping
+    type = collections.abc.Mapping
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING(Option):
@@ -318,7 +319,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS(Option):
     default = {
         'table_name': 'radreply',
     }
-    type = collections.Mapping
+    type = collections.abc.Mapping
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING(Option):
@@ -337,7 +338,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS(Option):
     default = {
         'table_name': 'radusergroup',
     }
-    type = collections.Mapping
+    type = collections.abc.Mapping
 
 
 class HADES_POSTGRESQL_USER_MAPPINGS(Option):
@@ -348,7 +349,7 @@ class HADES_POSTGRESQL_USER_MAPPINGS(Option):
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
     ignored.
     """
-    type = collections.Mapping
+    type = collections.abc.Mapping
     static_check = check.user_mapping_for_user_exists(constants.DATABASE_USER)
 
 
@@ -448,7 +449,7 @@ class HADES_AUTH_LISTEN(Option):
     default = (
         netaddr.IPNetwork('10.66.67.10/24'),
     )
-    type = collections.Sequence
+    type = collections.abc.Sequence
     static_check = check.satisfy_all(
         check.not_empty,
         check.sequence(check.network_ip),
@@ -491,13 +492,13 @@ class HADES_AUTH_NEXT_HOP(Option):
 
 class HADES_AUTH_ALLOWED_TCP_PORTS(Option):
     """Allowed TCP destination ports for unauthenticated users"""
-    type = collections.Sequence
+    type = collections.abc.Sequence
     default = (53, 80, 443, 9053)
 
 
 class HADES_AUTH_ALLOWED_UDP_PORTS(Option):
     """Allowed UDP destination ports for unauthenticated users"""
-    type = collections.Sequence
+    type = collections.abc.Sequence
     default = (53, 67, 9053)
 
 
@@ -510,7 +511,7 @@ class HADES_AUTH_DNS_ALTERNATIVE_IPSET(Option):
 class HADES_AUTH_DNS_ALTERNATIVE_ZONES(Option):
     """DNS zones that are transparently spoofed if alternative DNS is
     enabled."""
-    type = collections.Mapping
+    type = collections.abc.Mapping
     default = {}
 
 
@@ -555,7 +556,7 @@ class HADES_UNAUTH_LISTEN(Option):
     default = (
         netaddr.IPNetwork('10.66.0.1/19'),
     )
-    type = collections.Sequence
+    type = collections.abc.Sequence
     static_check = check.satisfy_all(
         check.not_empty,
         check.sequence(check.network_ip)
@@ -565,13 +566,13 @@ class HADES_UNAUTH_LISTEN(Option):
 
 class HADES_UNAUTH_ALLOWED_TCP_PORTS(Option):
     """Allowed TCP destination ports for unauthenticated users"""
-    type = collections.Sequence
+    type = collections.abc.Sequence
     default = (53, 80, 443)
 
 
 class HADES_UNAUTH_ALLOWED_UDP_PORTS(Option):
     """Allowed UDP destination ports for unauthenticated users"""
-    type = collections.Sequence
+    type = collections.abc.Sequence
     default = (53, 67)
 
 
@@ -580,7 +581,7 @@ class HADES_UNAUTH_CAPTURED_TCP_PORTS(Option):
     All traffic destined to these TCP ports is transparently redirected
     (captured) to the unauth listen address of the site node
     """
-    type = collections.Sequence
+    type = collections.abc.Sequence
     default = (53, 80, 443)
 
 
@@ -589,7 +590,7 @@ class HADES_UNAUTH_CAPTURED_UDP_PORTS(Option):
     All traffic destined to these UDP ports is transparently redirected
     (captured) to the unauth listen address of the site node
     """
-    type = collections.Sequence
+    type = collections.abc.Sequence
     default = (53,)
 
 
@@ -605,7 +606,7 @@ class HADES_UNAUTH_WHITELIST_DNS(Option):
     """List of DNS names which are whitelisted for unauthenticated users.
     """
     default = ()
-    type = collections.Sequence
+    type = collections.abc.Sequence
 
 
 class HADES_UNAUTH_WHITELIST_IPSET(Option):
@@ -627,7 +628,7 @@ class HADES_RADIUS_LISTEN(Option):
     default = (
         netaddr.IPNetwork('10.66.68.10/24'),
     )
-    type = collections.Sequence
+    type = collections.abc.Sequence
     static_check = check.satisfy_all(
         check.not_empty,
         check.sequence(check.network_ip)
@@ -673,7 +674,7 @@ class HADES_RADIUS_DATABASE_FAIL_REPLY_ATTRIBUTES(Option):
     The attribute value must be specified in proper FreeRADIUS syntax. That
     means that string replies should be enclosed in single quotes.
     """
-    type = collections.Mapping
+    type = collections.abc.Mapping
     default = {
         'Reply-Message': "'database_down'",
     }
@@ -1019,7 +1020,7 @@ class CELERY_QUEUES(CeleryOption):
             ), auto_delete=True, durable=False),
         )
 
-    type = collections.Sequence
+    type = collections.abc.Sequence
 
 
 class CELERYD_PREFETCH_MULTIPLIER(CeleryOption):
@@ -1049,7 +1050,7 @@ class CELERY_DEFAULT_EXCHANGE(CeleryOption):
 
 class CELERY_ACCEPT_CONTENT(CeleryOption):
     default = ['json']
-    type = collections.Sequence
+    type = collections.abc.Sequence
 
 
 class CELERY_EVENT_SERIALIZER(CeleryOption):
@@ -1081,7 +1082,7 @@ class CELERY_IMPORTS(CeleryOption):
     default = (
         'hades.agent.tasks',
     )
-    type = collections.Sequence
+    type = collections.abc.Sequence
 
 
 class CELERY_TASK_RESULT_EXPIRES(CeleryOption):

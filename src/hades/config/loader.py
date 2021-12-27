@@ -1,4 +1,4 @@
-import collections
+import collections.abc
 import importlib.abc
 import importlib.machinery
 import importlib.util
@@ -55,7 +55,7 @@ class AttributeAccessibleDict(dict):
         return attributes
 
 
-class Config(collections.Mapping):
+class Config(collections.abc.Mapping):
     """
     Config object that allows dict-style and attribute-style access to an
     underlying dictionary and optionally verifies the options that are accessed.
@@ -131,7 +131,7 @@ class CallableEvaluator(AttributeAccessibleDict):
     __slots__ = ('_stack',)
 
     def __init__(self,
-                 config: Union[collections.Mapping, Iterable[Tuple[Any, Any]]]):
+                 config: Union[collections.abc.Mapping, Iterable[Tuple[Any, Any]]]):
         super().__init__(config)
         object.__setattr__(self, '_stack', [])
 
