@@ -165,8 +165,12 @@ class satisfy_all(Check):
     def __init__(self, *checks: Check):
         super().__init__()
         self.checks = checks
+        assert all(c.__doc__ is not None for c in checks)
         self.__doc__ = "Must satisfy all of the following:\n\n{}".format(
-            textwrap.indent("\n".join([c.__doc__ for c in checks]), "- "),
+            textwrap.indent(
+                "\n".join([c.__doc__ for c in checks if c.__doc__]),
+                "- "
+            ),
         )
 
     def __get__(self, instance, owner):

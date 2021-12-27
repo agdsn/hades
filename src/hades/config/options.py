@@ -3,6 +3,7 @@ import collections.abc
 import re
 import urllib.parse
 from datetime import timedelta
+from typing import Optional
 
 import kombu
 import kombu.common
@@ -92,7 +93,7 @@ class HADES_CUSTOM_IPTABLES_INPUT_RULES(Option):
     A list of valid ``iptables-restore`` rule lines with leading ``-A INPUT``.
     """
     type = collections.abc.Sequence
-    default = []
+    default: collections.abc.Sequence = []
 
 
 #############################
@@ -167,7 +168,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS(Option):
     ignored.
     """
     type = collections.abc.Mapping
-    default = {}
+    default: collections.abc.Mapping = {}
 
 
 class HADES_POSTGRESQL_FOREIGN_SERVER_TYPE(Option):
@@ -177,7 +178,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_TYPE(Option):
     If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
     type = (str, type(None))
-    default = None
+    default: Optional[str] = None
 
 
 class HADES_POSTGRESQL_FOREIGN_SERVER_VERSION(Option):
@@ -188,7 +189,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_VERSION(Option):
     ignored.
     """
     type = (str, type(None))
-    default = None
+    default: Optional[str] = None
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
@@ -199,7 +200,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
     ignored.
     """
-    default = {}
+    default: collections.abc.Mapping = {}
     type = collections.abc.Mapping
 
 
@@ -512,7 +513,7 @@ class HADES_AUTH_DNS_ALTERNATIVE_ZONES(Option):
     """DNS zones that are transparently spoofed if alternative DNS is
     enabled."""
     type = collections.abc.Mapping
-    default = {}
+    default: collections.abc.Mapping = {}
 
 
 #################################

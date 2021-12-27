@@ -40,7 +40,7 @@ class OptionMeta(type):
     setting the abstract keyword argument are added to the :attr:`.options`
     dictionary.
     """
-    options = {}
+    options: dict[str, Any] = {}
 
     def __new__(mcs, name, bases, attributes, abstract=False):
         if name in mcs.options:
