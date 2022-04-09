@@ -23,16 +23,16 @@ expires_at="$(( ${now} + ${time_remaining} ))"
 user_classes=(foo bar)
 
 setup() {
-	psql_query hades -c 'TRUNCATE lease;'
+	psql_query hades -c 'TRUNCATE auth_dhcp_lease;'
 }
 
 teardown() {
-	psql_query hades -c 'TRUNCATE lease;'
+	psql_query hades -c 'TRUNCATE auth_dhcp_lease;'
 }
 
 insert_lease() {
 	psql_query hades <<-EOF
-		INSERT INTO lease (
+		INSERT INTO auth_dhcp_lease (
 		"MAC", "IPAddress", "Hostname", "Domain", "SuppliedHostname",
 		"ExpiresAt", "RelayIPAddress", "Tags", "ClientID", "CircuitID",
 		"SubscriberID", "RemoteID", "VendorClass", "RequestedOptions",
@@ -85,7 +85,7 @@ set_user_classes() {
 }
 
 lease_count() {
-	psql_query hades -c 'SELECT COUNT(*) FROM "lease"'
+	psql_query hades -c 'SELECT COUNT(*) FROM "auth_dhcp_lease"'
 }
 
 
@@ -114,7 +114,7 @@ assert_simple_fields() {
 	local -r vendor_class="$1"; shift
 
 	local -a result=()
-	psql_mapfile result hades -c 'SELECT "MAC", "IPAddress", "Hostname", "Domain", "SuppliedHostname", EXTRACT(EPOCH FROM "ExpiresAt"), "RelayIPAddress", "ClientID", "CircuitID", "SubscriberID", "RemoteID", "VendorClass" FROM lease LIMIT 1'
+	psql_mapfile result hades -c 'SELECT "MAC", "IPAddress", "Hostname", "Domain", "SuppliedHostname", EXTRACT(EPOCH FROM "ExpiresAt"), "RelayIPAddress", "ClientID", "CircuitID", "SubscriberID", "RemoteID", "VendorClass" FROM auth_dhcp_lease LIMIT 1'
 	echo "${result[@]}"
 
 	assert_equals "${result[0]}"  "${mac_address}"
@@ -135,7 +135,7 @@ assert_requested_options() {
 	local -rn _expected="$1"
 	local -a _got=()
 
-	psql_mapfile _got hades -c 'SELECT unnest("RequestedOptions") FROM "lease"'
+	psql_mapfile _got hades -c 'SELECT unnest("RequestedOptions") FROM "auth_dhcp_lease"'
 	assert_array_equals _expected _got
 }
 
@@ -143,7 +143,7 @@ assert_tags() {
 	local -rn _expected="$1"
 	local -a _got=()
 
-	psql_mapfile _got hades -c 'SELECT unnest("Tags") FROM "lease"'
+	psql_mapfile _got hades -c 'SELECT unnest("Tags") FROM "auth_dhcp_lease"'
 	assert_array_equals _expected _got
 }
 
@@ -151,7 +151,7 @@ assert_user_classes() {
 	local -rn _expected="$1"
 	local -a _got=()
 
-	psql_mapfile _got hades -c 'SELECT unnest("UserClasses") FROM "lease"'
+	psql_mapfile _got hades -c 'SELECT unnest("UserClasses") FROM "auth_dhcp_lease"'
 	assert_array_equals _expected _got
 }
 
