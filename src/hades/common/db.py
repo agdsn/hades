@@ -351,7 +351,37 @@ def create_engine(config: Config, **kwargs):
     kwargs.setdefault('connect_args', {}).update(
         options="-c TimeZone=UTC", cursor_factory=UTCTZInfoCursorFactory
     )
+    clean_up_pyroute2_registrations()
     return sqa_create_engine(config.SQLALCHEMY_DATABASE_URI, **kwargs)
+
+
+def clean_up_pyroute2_registrations():
+    """Manually remove `pyroute2` registrations to `psycopg2.extensions.adapters`.
+
+    a certain version of pyroute2 pollutes the psycopg2 adapters at import time.
+    In particular, lists were forcefully rendered as strings, breaking `ARRAY[]` usage.
+    We ensure the module is imported and throw out the aforementioned adapters.
+    """
+    # noinspection PyUnresolvedReferences
+    import pyroute2  # noqa
+    import psycopg2
+    adapters = psycopg2.extensions.adapters
+    bad_keys = [
+        (type_, interface) for (type_, interface), adapter in adapters.items()
+        if getattr(adapter, '__module__', '').startswith('pyroute2')
+    ]
+    logger.debug(
+        "Had to delete %d global psycopg2 adapter registrations: %r",
+        len(bad_keys),
+        {k: adapters[k] for k in bad_keys},
+    )
+
+    for key in bad_keys:
+        if key[0] == list:
+            # restore the original `List` adapter, which we need
+            adapters[key] = psycopg2._psycopg.List
+        else:
+            del adapters[key]
 
 
 def lock_table(connection: Connection, target_table: Table):
