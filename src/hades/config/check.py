@@ -1,7 +1,6 @@
 """
 Checks for configuration option values
 """
-import collections
 import collections.abc
 import grp
 import os
@@ -314,7 +313,7 @@ class has_keys(Check):
         checked = []
 
         for key in self.keys:
-            if not isinstance(obj, collections.Mapping):
+            if not isinstance(obj, collections.abc.Mapping):
                 path = self.option.name + "".join(map("[{!r}]".format, checked))
                 raise OptionCheckError(
                     "must be a mapping type like dict",
