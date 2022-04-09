@@ -7,6 +7,7 @@ import os
 import pwd
 import sys
 from contextlib import closing
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, TypeVar
 
@@ -155,8 +156,23 @@ def obtain_tuple(
     return value
 
 
+@dataclass
+class LeaseArguments:
+    mac: netaddr.EUI
+    ip: netaddr.IPAddress
+    hostname: Optional[str]
+
+    @classmethod
+    def from_anonymous_args(cls, args):
+        return cls(
+            mac=args.mac,
+            ip=args.ip,
+            hostname=args.hostname,
+        )
+
+
 def obtain_lease_info(
-    args,
+    args: LeaseArguments,
     environ: Dict[str, str],
     environb: Dict[bytes, bytes],
     *,
@@ -279,7 +295,11 @@ def perform_lease_update(
 
 
 def add_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
-    values = obtain_lease_info(args, environ, environb, missing_as_none=True)
+    values = obtain_lease_info(
+        LeaseArguments.from_anonymous_args(args),
+        environ, environb,
+        missing_as_none=True
+    )
     values = {k: (v if v is not None else text('DEFAULT'))
               for k, v in values.items()}
     ip, mac = values["IPAddress"], values["MAC"]
@@ -300,7 +320,11 @@ def add_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
 
 
 def delete_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
-    values = obtain_lease_info(args, environ, environb, missing_as_none=False)
+    values = obtain_lease_info(
+        LeaseArguments.from_anonymous_args(args),
+        environ, environb,
+        missing_as_none=False
+    )
     ip, mac = values["IPAddress"], values["MAC"]
     logger.debug("Deleting lease for IP %s and MAC %s", ip, mac)
     connection = load_config_and_connect(args)
@@ -318,7 +342,11 @@ def delete_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
 
 def update_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
     connection = load_config_and_connect(args)
-    values = obtain_lease_info(args, environ, environb, missing_as_none=False)
+    values = obtain_lease_info(
+        LeaseArguments.from_anonymous_args(args),
+        environ, environb,
+        missing_as_none=False
+    )
     values.setdefault('UpdatedAt', text('DEFAULT'))
     ip, mac = values["IPAddress"], values["MAC"]
     logger.debug("Updating lease for IP %s and MAC %s", ip, mac)
