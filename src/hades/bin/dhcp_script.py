@@ -33,9 +33,9 @@ from hades.config.loader import load_config
 logger = logging.getLogger(__name__)
 
 
-def load_config_and_connect(args) -> Connection:
+def load_config_and_connect(filename: str) -> Connection:
     """Load config and return a database connection"""
-    config = load_config(args.config)
+    config = load_config(filename)
     engine = create_engine(config, isolation_level="SERIALIZABLE")
     connection = engine.connect()
     return connection
@@ -78,7 +78,7 @@ def generate_leasefile_lines(
 # noinspection PyUnusedLocal
 def print_leases(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
     """Print all leases in dnsmasq leasefile format"""
-    connection = load_config_and_connect(args)
+    connection = load_config_and_connect(args.config)
     with connection.begin():
         leases = get_all_auth_dhcp_leases(connection)
     sys.stdout.writelines(generate_leasefile_lines(leases))
@@ -308,7 +308,7 @@ def add_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
         ip,
         mac,
     )
-    connection = load_config_and_connect(args)
+    connection = load_config_and_connect(args.config)
     with connection.begin():
         # TODO: Use INSERT ON CONFLICT UPDATE on newer SQLAlchemy (>= 1.1)
         old_values = query_lease_for_update(connection, ip)
@@ -327,7 +327,7 @@ def delete_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
     )
     ip, mac = values["IPAddress"], values["MAC"]
     logger.debug("Deleting lease for IP %s and MAC %s", ip, mac)
-    connection = load_config_and_connect(args)
+    connection = load_config_and_connect(args.config)
     query = auth_dhcp_lease.delete().where(auth_dhcp_lease.c.IPAddress == ip)
     with connection.begin():
         result = connection.execute(query)
@@ -341,7 +341,7 @@ def delete_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
 
 
 def update_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
-    connection = load_config_and_connect(args)
+    connection = load_config_and_connect(args.config)
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
         environ, environb,
