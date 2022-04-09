@@ -9,7 +9,7 @@ import pwd
 import re
 import socket
 import textwrap
-from typing import Type, Union
+from typing import Type, Union, Sequence
 
 import netaddr
 from pyroute2.iproute import IPRoute
@@ -128,7 +128,7 @@ class mapping(Check):
 
 
 class type_is(Check):
-    def __init__(self, types: Union[Type, collections.abc.Sequence[Type]]):
+    def __init__(self, types: Union[Type, Sequence[Type]]):
         super().__init__()
         if isinstance(types, collections.abc.Sequence):
             self.types = tuple(types)
