@@ -730,6 +730,35 @@ CREATE MATERIALIZED VIEW radusergroup AS
 ALTER TABLE radusergroup OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
+-- Name: unauth_dhcp_lease; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+CREATE TABLE unauth_dhcp_lease (
+    "MAC" macaddr NOT NULL,
+    "IPAddress" inet NOT NULL,
+    "Hostname" text,
+    "Domain" text,
+    "SuppliedHostname" text,
+    "ExpiresAt" timestamp with time zone NOT NULL,
+    "CreatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "RelayIPAddress" inet,
+    "Tags" text[] NOT NULL,
+    "ClientID" bytea,
+    "CircuitID" bytea,
+    "SubscriberID" bytea,
+    "RemoteID" bytea,
+    "VendorClass" text,
+    "RequestedOptions" integer[] NOT NULL,
+    "UserClasses" text[] NOT NULL,
+    CONSTRAINT "unauth_dhcp_lease_Tags" CHECK ((COALESCE(array_ndims("Tags"), 1) = 1)),
+    CONSTRAINT "unauth_dhcp_lease_RequestedOptions" CHECK ((COALESCE(array_ndims("RequestedOptions"), 1) = 1)),
+    CONSTRAINT "unauth_dhcp_lease_UserClasses" CHECK ((COALESCE(array_ndims("UserClasses"), 1) = 1))
+);
+
+
+ALTER TABLE unauth_dhcp_lease OWNER TO "{{ constants.DATABASE_USER }}";
+
+--
 -- Name: radacct RadAcctId; Type: DEFAULT; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
@@ -773,6 +802,14 @@ ALTER TABLE ONLY radacct
 
 ALTER TABLE ONLY radpostauth
     ADD CONSTRAINT radpostauth_pkey PRIMARY KEY ("Id");
+
+
+--
+-- Name: unauth_dhcp_lease unauth_dhcp_lease_pkey; Type: CONSTRAINT; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+ALTER TABLE ONLY unauth_dhcp_lease
+    ADD CONSTRAINT unauth_dhcp_lease_pkey PRIMARY KEY ("IPAddress");
 
 
 --
@@ -955,6 +992,14 @@ GRANT SELECT ON TABLE radreply TO "{{ constants.RADIUS_USER }}";
 
 GRANT SELECT ON TABLE radusergroup TO "{{ constants.PORTAL_USER }}";
 GRANT SELECT ON TABLE radusergroup TO "{{ constants.RADIUS_USER }}";
+
+
+--
+-- Name: unauth_dhcp_lease; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT ON TABLE unauth_dhcp_lease TO "{{ constants.AGENT_USER }}";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE unauth_dhcp_lease TO "{{ constants.AUTH_DHCP_USER }}";
 
 
 --
