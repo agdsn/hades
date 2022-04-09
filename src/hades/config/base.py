@@ -1,6 +1,6 @@
 import functools
 import re
-from typing import Any
+from typing import Any, Dict
 
 option_name_regex = re.compile(r'\A[A-Z][A-Z0-9_]*\Z', re.ASCII)
 
@@ -40,7 +40,7 @@ class OptionMeta(type):
     setting the abstract keyword argument are added to the :attr:`.options`
     dictionary.
     """
-    options: dict[str, Any] = {}
+    options: Dict[str, Any] = {}
 
     def __new__(mcs, name, bases, attributes, abstract=False):
         if name in mcs.options:
