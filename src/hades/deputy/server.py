@@ -30,7 +30,11 @@ from sqlalchemy.pool import StaticPool
 
 from hades import constants
 from hades.common import db
-from hades.common.db import get_auth_dhcp_lease_of_ip
+from hades.common.db import (
+    auth_dhcp_lease,
+    get_dhcp_lease_of_ip,
+    unauth_dhcp_lease,
+)
 from hades.common.glib import typed_glib_error
 from hades.common.privileges import dropped_privileges
 from hades.common.signals import install_handler
@@ -322,25 +326,45 @@ class HadesDeputyService(object):
             db.delete_old_auth_attempts(connection, interval)
         return "OK"
 
-    def ReleaseAuthDhcpLease(self, client_ip: str) -> str:
+    def _release_dhcp_lease(
+        self, table, server_ip: netaddr.IPAddress, client_ip: str
+    ) -> str:
         """
-        Release a DHCP lease
+        Release an auth or unauth DHCP lease
         :return:
         """
-        logger.info("Releasing DHCP lease for client %s", client_ip)
         try:
             client_ip = netaddr.IPAddress(client_ip)
         except ValueError:
             return "ERROR: Illegal IP address %s" % client_ip
         with contextlib.closing(self.engine.connect()) as connection:
-            lease_info = get_auth_dhcp_lease_of_ip(connection, client_ip)
+            lease_info = get_dhcp_lease_of_ip(table, connection, client_ip)
             if lease_info is None:
                 logger.warning("No lease for %s found", client_ip)
                 return "OK"
             expiry_time, mac, hostname, client_id = lease_info
-            server_ip = self.config.HADES_AUTH_LISTEN[0]
             release_dhcp_lease(server_ip, client_ip, mac, client_id)
         return "OK"
+
+    def ReleaseAuthDhcpLease(self, client_ip: str) -> str:
+        """
+        Release an auth DHCP lease
+        :return:
+        """
+        logger.info("Releasing auth DHCP lease for client %s", client_ip)
+        return self._release_dhcp_lease(
+            auth_dhcp_lease, self.config.HADES_AUTH_LISTEN[0], client_ip
+        )
+
+    def ReleaseUnauthDhcpLease(self, client_ip: str) -> str:
+        """
+        Release an auth DHCP lease
+        :return:
+        """
+        logger.info("Releasing unauth DHCP lease for client %s", client_ip)
+        return self._release_dhcp_lease(
+            unauth_dhcp_lease, self.config.HADES_UNAUTH_LISTEN[0], client_ip
+        )
 
 
 def run_event_loop():

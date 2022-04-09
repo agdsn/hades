@@ -29,6 +29,7 @@ from hades.deputy.client import (
     signal_cleanup,
     signal_auth_dhcp_lease_release,
     signal_refresh,
+    signal_unauth_dhcp_lease_release,
 )
 
 logger = get_task_logger(__name__)
@@ -222,6 +223,12 @@ def cleanup():
 def release_auth_dhcp_lease(ip: str):
     ip = check_ip_address("ip", ip)
     signal_auth_dhcp_lease_release(ip)
+
+
+@rpc_task()
+def release_unauth_dhcp_lease(ip: str):
+    ip = check_ip_address("ip", ip)
+    signal_unauth_dhcp_lease_release(ip)
 
 
 @rpc_task()
