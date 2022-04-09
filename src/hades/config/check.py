@@ -9,7 +9,7 @@ import pwd
 import re
 import socket
 import textwrap
-from typing import Type, Union, Sequence
+from typing import Sequence, Type, Union
 
 import netaddr
 from pyroute2.iproute import IPRoute
