@@ -75,7 +75,12 @@ def generate_leasefile_lines(
 
 
 # noinspection PyUnusedLocal
-def print_leases(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
+def print_leases(
+        args,
+        environ: Dict[str, str],
+        environb: Dict[bytes, bytes],
+        engine: Engine,
+) -> int:
     """Print all leases in dnsmasq leasefile format"""
     connection = engine_from_config(args.config).connect()
     with connection.begin():
@@ -293,7 +298,12 @@ def perform_lease_update(
     return result
 
 
-def add_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
+def add_lease(
+        args,
+        environ: Dict[str, str],
+        environb: Dict[bytes, bytes],
+        engine: Engine,
+) -> int:
     connection = engine_from_config(args.config).connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
@@ -318,7 +328,12 @@ def add_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
             perform_lease_update(connection, ip, mac, old_values, values)
 
 
-def delete_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
+def delete_lease(
+        args,
+        environ: Dict[str, str],
+        environb: Dict[bytes, bytes],
+        engine: Engine,
+) -> int:
     connection = engine_from_config(args.config).connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
@@ -339,7 +354,12 @@ def delete_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
         )
 
 
-def update_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
+def update_lease(
+        args,
+        environ: Dict[str, str],
+        environb: Dict[bytes, bytes],
+        engine: Engine,
+) -> int:
     connection = engine_from_config(args.config).connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
@@ -359,7 +379,12 @@ def update_lease(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
 
 
 # noinspection PyUnusedLocal
-def do_nothing(args, environ: Dict[str, str], environb: Dict[bytes, bytes]):
+def do_nothing(
+        args,
+        environ: Dict[str, str],
+        environb: Dict[bytes, bytes],
+        engine: Engine,
+) -> int:
     logger.warning("Unknown command %s", args.original_command)
     return 0
 
@@ -433,7 +458,7 @@ def main(
         drop_privileges(passwd, group)
     parser = create_parser(standalone=standalone)
 
-    # type: Dict[str, Callable[[Any, Dict[str, str], Dict[bytes, bytes]], int]]
+    # type: Dict[str, Callable[[Any, Dict[str, str], Dict[bytes, bytes], Engine], int]]
     funcs = {
         "init": print_leases,
         "add": add_lease,
@@ -445,7 +470,8 @@ def main(
     args = parser.parse_args(argv[1:])
     setup_cli_logging(parser.prog, args)
     try:
-        return funcs[args.command](args, environ, environb)
+        engine = engine_from_config(args.config)
+        return funcs[args.command](args, environ, environb, engine)
     except ValueError as e:
         logger.fatal(str(e), exc_info=e)
         return os.EX_USAGE
