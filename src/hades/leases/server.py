@@ -2,6 +2,7 @@ import array
 import contextlib
 import ctypes
 import fcntl
+import io
 import logging
 import mmap
 import os
@@ -329,7 +330,7 @@ class Server(socketserver.UnixStreamServer):
                     )
             # Ensure that file descriptors get closed on error
             for fd in fds:
-                stack.callback(os.close, fd)
+                stack.callback(_try_close, fd)
             if truncated:
                 raise ProtocolError(
                     "Received truncated file descriptor. "
@@ -348,7 +349,12 @@ class Server(socketserver.UnixStreamServer):
                     os.close(fd)
                     continue
                 # noinspection PyTypeChecker
-                stream: FileIO = os.fdopen(fd, mode, buffering=0, closefd=True)
+                try:
+                    stream: FileIO = os.fdopen(fd, mode, buffering=0, closefd=True)
+                except io.UnsupportedOperation as e:
+                    raise RuntimeError(
+                        f"Unable to open fd {fd} ({(len(streams))} already parsed, {mode=})"
+                    ) from e
                 streams.append(stream)
             stack.pop_all()
             return streams
@@ -474,3 +480,10 @@ def ensure_stream_byte_writable(stream, stream_desc: str):
             f"Stream {stream_desc} is not byte-writable ({stream.mode=})"
         )
     return stream
+
+
+def _try_close(fd):
+    try:
+        os.close(fd)
+    except OSError:
+        pass
