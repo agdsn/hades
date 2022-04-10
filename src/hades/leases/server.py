@@ -289,15 +289,9 @@ class Server(socketserver.UnixStreamServer):
                 raise ProtocolError(
                     "Expected to receive exactly 3 file descriptors"
                 )
-            stdin = streams[0]
-            if not stdin.mode.startswith('rb'):
-                raise ProtocolError()
-            stdout = streams[1]
-            if not stdout.mode.startswith('wb'):
-                raise ProtocolError()
-            stderr = streams[2]
-            if not stderr.mode.startswith('wb'):
-                raise ProtocolError()
+            stdin = ensure_mode_startswith(streams[0], 'rb', 'stdin')
+            stdout = ensure_mode_startswith(streams[1], 'wb', 'stdout')
+            stderr = ensure_mode_startswith(streams[2], 'wb', 'stderr')
             # Clear the stack
             stack.pop_all()
             return (stdin, stdout, stderr), argv, environ
@@ -449,3 +443,12 @@ class Server(socketserver.UnixStreamServer):
             self._handle_shutdown_signal
         ):
             super().serve_forever(poll_interval)
+
+
+def ensure_mode_startswith(stream, expected_mode: str, stream_desc: str):
+    if not stream.mode.startswith(expected_mode):
+        raise ProtocolError(
+            f"Unexpected mode for {stream_desc}: {stream.mode}"
+            f" (should start with {expected_mode!r})"
+        )
+    return stream
