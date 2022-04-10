@@ -117,7 +117,9 @@ int main(int argc, char *argv[]) {
 
     if (connect(fd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
         fprintf(
-            stderr, "connect() to %s failed: %s\n", addr.sun_path,
+            stderr,
+            "connect() to %s failed: %s.\nHave you forgotten to start the lease server?\n",
+            addr.sun_path,
             strerror(errno)
         );
         return EX_OSERR;

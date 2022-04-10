@@ -235,7 +235,8 @@ def print_config_error(e: ConfigError):
             message = 'File "{}", line {}\n{}'.format(filename, lineno,
                                                       format_cause())
         if logger.getEffectiveLevel() > logging.INFO:
-            logger.critical("Error while loading config file %s: %s",
+            logger.critical("Error while loading config file %s: %s.\n"
+                            "Have you forgotten to run this script as a suitable hades user?",
                             root_config, message)
             logger.critical("Hint: Increase verbosity for a full traceback.")
         else:
