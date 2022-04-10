@@ -14,26 +14,30 @@ from hades.config import check, compute
 from hades.config.base import Compute, Option
 
 
+class HadesOption(Option, abstract=True):
+    pass
+
+
 ###################
 # General options #
 ###################
 
 
-class HADES_SITE_NAME(Option):
+class HADES_SITE_NAME(HadesOption):
     """Name of the site"""
     type = str
     required = True
     static_check = check.match(r'\A[a-z][a-z0-9-]*\Z', re.ASCII)
 
 
-class HADES_SITE_NODE_ID(Option):
+class HADES_SITE_NODE_ID(HadesOption):
     """ID of the site node"""
     type = str
     required = True
     static_check = check.match(r'\A[a-z][a-z0-9-]*\Z', re.ASCII)
 
 
-class HADES_MAIL_DESTINATION_ADDRESSES(Option):
+class HADES_MAIL_DESTINATION_ADDRESSES(HadesOption):
     """Automatic notification mails will be send to this address."""
     type = collections.abc.Sequence
     static_check = check.satisfy_all(
@@ -42,37 +46,37 @@ class HADES_MAIL_DESTINATION_ADDRESSES(Option):
     )
 
 
-class HADES_MAIL_SENDER_ADDRESS(Option):
+class HADES_MAIL_SENDER_ADDRESS(HadesOption):
     """Automatic notification mails will use this address as sender."""
     type = str
 
 
-class HADES_MAIL_SMTP_SERVER(Option):
+class HADES_MAIL_SMTP_SERVER(HadesOption):
     """Name or IP address of SMTP relay server."""
     type = str
 
 
-class HADES_REAUTHENTICATION_INTERVAL(Option):
+class HADES_REAUTHENTICATION_INTERVAL(HadesOption):
     """RADIUS periodic reauthentication interval"""
     default = timedelta(seconds=300)
     type = timedelta
     static_check = check.greater_than(timedelta(0))
 
 
-class HADES_RETENTION_INTERVAL(Option):
+class HADES_RETENTION_INTERVAL(HadesOption):
     """RADIUS postauth and accounting data retention interval"""
     default = timedelta(days=1)
     type = timedelta
     static_check = check.greater_than(timedelta(0))
 
 
-class HADES_CONTACT_ADDRESSES(Option):
+class HADES_CONTACT_ADDRESSES(HadesOption):
     """Contact addresses displayed on the captive portal page"""
     type = collections.abc.Mapping
     required = True
 
 
-class HADES_USER_NETWORKS(Option):
+class HADES_USER_NETWORKS(HadesOption):
     """
     Public networks of authenticated users.
 
@@ -87,7 +91,7 @@ class HADES_USER_NETWORKS(Option):
     )
 
 
-class HADES_CUSTOM_IPTABLES_INPUT_RULES(Option):
+class HADES_CUSTOM_IPTABLES_INPUT_RULES(HadesOption):
     """Additional iptables rules for ``INPUT`` chain.
 
     A list of valid ``iptables-restore`` rule lines with leading ``-A INPUT``.
@@ -101,25 +105,25 @@ class HADES_CUSTOM_IPTABLES_INPUT_RULES(Option):
 #############################
 
 
-class HADES_NETNS_MAIN_AUTH_LISTEN(Option):
+class HADES_NETNS_MAIN_AUTH_LISTEN(HadesOption):
     default = netaddr.IPNetwork('172.18.0.0/31')
     static_check = check.network_ip
     runtime_check = check.address_exists
 
 
-class HADES_NETNS_AUTH_LISTEN(Option):
+class HADES_NETNS_AUTH_LISTEN(HadesOption):
     default = netaddr.IPNetwork('172.18.0.1/31')
     static_check = check.network_ip
     runtime_check = check.address_exists
 
 
-class HADES_NETNS_MAIN_UNAUTH_LISTEN(Option):
+class HADES_NETNS_MAIN_UNAUTH_LISTEN(HadesOption):
     default = netaddr.IPNetwork('172.18.0.2/31')
     static_check = check.network_ip
     runtime_check = check.address_exists
 
 
-class HADES_NETNS_UNAUTH_LISTEN(Option):
+class HADES_NETNS_UNAUTH_LISTEN(HadesOption):
     default = netaddr.IPNetwork('172.18.0.3/31')
     static_check = check.network_ip
     runtime_check = check.address_exists
@@ -130,14 +134,14 @@ class HADES_NETNS_UNAUTH_LISTEN(Option):
 ######################
 
 
-class HADES_POSTGRESQL_PORT(Option):
+class HADES_POSTGRESQL_PORT(HadesOption):
     """Port and socket name of the PostgresSQL database"""
     default = 5432
     type = int
     static_check = check.between(1, 65535)
 
 
-class HADES_POSTGRESQL_LISTEN(Option):
+class HADES_POSTGRESQL_LISTEN(HadesOption):
     """
     A list of addresses PostgreSQL should listen on.
     """
@@ -149,7 +153,7 @@ class HADES_POSTGRESQL_LISTEN(Option):
     runtime_check = check.sequence(check.address_exists)
 
 
-class HADES_POSTGRESQL_FOREIGN_SERVER_FDW(Option):
+class HADES_POSTGRESQL_FOREIGN_SERVER_FDW(HadesOption):
     """
     Name of the foreign data wrapper extensions that should be used.
 
@@ -160,7 +164,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_FDW(Option):
     type = str
 
 
-class HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS(Option):
+class HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS(HadesOption):
     """
     Foreign data wrapper specific server options
 
@@ -171,7 +175,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_OPTIONS(Option):
     default: collections.abc.Mapping = {}
 
 
-class HADES_POSTGRESQL_FOREIGN_SERVER_TYPE(Option):
+class HADES_POSTGRESQL_FOREIGN_SERVER_TYPE(HadesOption):
     """
     Foreign data wrapper specific server type
 
@@ -181,7 +185,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_TYPE(Option):
     default: Optional[str] = None
 
 
-class HADES_POSTGRESQL_FOREIGN_SERVER_VERSION(Option):
+class HADES_POSTGRESQL_FOREIGN_SERVER_VERSION(HadesOption):
     """
     Foreign data wrapper specific server version
 
@@ -192,7 +196,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_VERSION(Option):
     default: Optional[str] = None
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(HadesOption):
     """
     Foreign data wrapper options that are set on each foreign table.
     The options can be overridden with table specific options.
@@ -204,14 +208,14 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(Option):
     type = collections.abc.Mapping
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_IPADDRESS_STRING(HadesOption):
     """Whether the ``IPAddress`` column of the foreign ``alternative_dns`` table
     has a string type"""
     type = bool
     default = False
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_OPTIONS(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_OPTIONS(HadesOption):
     """Foreign data wrapper options for the ``alternative_dns`` table
 
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
@@ -223,21 +227,21 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_OPTIONS(Option):
     type = collections.abc.Mapping
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_IPADDRESS_STRING(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_IPADDRESS_STRING(HadesOption):
     """Whether the ``IPAddress`` column of the foreign ``auth_dhcp_host`` table
     has a string type"""
     type = bool
     default = False
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_MAC_STRING(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_MAC_STRING(HadesOption):
     """Whether the ``MAC`` column of the foreign ``auth_dhcp_host`` table has a
     string type"""
     type = bool
     default = False
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_OPTIONS(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_OPTIONS(HadesOption):
     """Foreign data wrapper options for the ``auth_dhcp_host`` table
 
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
@@ -249,7 +253,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_OPTIONS(Option):
     type = collections.abc.Mapping
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS(HadesOption):
     """Foreign data wrapper options for the ``nas`` table
 
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
@@ -261,14 +265,14 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS(Option):
     type = collections.abc.Mapping
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_NASIPADDRESS_STRING(HadesOption):
     """Whether the ``NASIPAddress`` column of the foreign ``radcheck`` table has
     a string type."""
     type = bool
     default = False
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS(HadesOption):
     """Foreign data wrapper options for the ``radcheck`` table
 
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
@@ -280,7 +284,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS(Option):
     type = collections.abc.Mapping
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS(HadesOption):
     """Foreign data wrapper options for the ``radgroupcheck`` table
 
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
@@ -292,7 +296,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS(Option):
     type = collections.abc.Mapping
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS(HadesOption):
     """Foreign data wrapper options for the ``radgroupreply`` table
 
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
@@ -304,14 +308,14 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPREPLY_OPTIONS(Option):
     type = collections.abc.Mapping
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_NASIPADDRESS_STRING(HadesOption):
     """Whether the ``NASIPAddress`` column of the foreign ``radgroupcheck``
     table has a string type"""
     type = bool
     default = False
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS(HadesOption):
     """Foreign data wrapper options for the ``radreply`` table
 
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
@@ -323,14 +327,14 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADREPLY_OPTIONS(Option):
     type = collections.abc.Mapping
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_NASIPADDRESS_STRING(HadesOption):
     """Whether the ``NASIPAddress`` column of the foreign ``radgroupcheck``
     table has a string type"""
     type = bool
     default = False
 
 
-class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS(Option):
+class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS(HadesOption):
     """Foreign data wrapper options for the ``radusergroup`` table
 
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
@@ -342,7 +346,7 @@ class HADES_POSTGRESQL_FOREIGN_TABLE_RADUSERGROUP_OPTIONS(Option):
     type = collections.abc.Mapping
 
 
-class HADES_POSTGRESQL_USER_MAPPINGS(Option):
+class HADES_POSTGRESQL_USER_MAPPINGS(HadesOption):
     """
     User mappings from local database users to users on the foreign database
     server
@@ -359,38 +363,38 @@ class HADES_POSTGRESQL_USER_MAPPINGS(Option):
 ########################
 
 
-class HADES_PORTAL_DOMAIN(Option):
+class HADES_PORTAL_DOMAIN(HadesOption):
     """Fully qualified domain name of the captive portal"""
     default = 'captive-portal.agdsn.de'
     type = str
 
 
-class HADES_PORTAL_URL(Option):
+class HADES_PORTAL_URL(HadesOption):
     """URL of the landing page of the captive portal"""
     default = compute.deferred_format("http://{}/", HADES_PORTAL_DOMAIN)
     type = str
 
 
-class HADES_PORTAL_NGINX_WORKERS(Option):
+class HADES_PORTAL_NGINX_WORKERS(HadesOption):
     """Number of nginx worker processes"""
     default = 4
     type = int
     static_check = check.greater_than(0)
 
 
-class HADES_PORTAL_SSL_CERTIFICATE(Option):
+class HADES_PORTAL_SSL_CERTIFICATE(HadesOption):
     """Path to the SSL certificate of the captive portal"""
     default = '/etc/ssl/certs/ssl-cert-snakeoil.pem'
     runtime_check = check.file_exists
 
 
-class HADES_PORTAL_SSL_CERTIFICATE_KEY(Option):
+class HADES_PORTAL_SSL_CERTIFICATE_KEY(HadesOption):
     """Path to the SSL certificate key of the captive portal"""
     default = '/etc/ssl/private/ssl-cert-snakeoil.key'
     runtime_check = check.file_exists
 
 
-class HADES_PORTAL_UWSGI_WORKERS(Option):
+class HADES_PORTAL_UWSGI_WORKERS(HadesOption):
     """Number of uWSGI worker processes"""
     default = 4
     type = int
@@ -402,20 +406,20 @@ class HADES_PORTAL_UWSGI_WORKERS(Option):
 ###############################
 
 
-class HADES_AUTH_DHCP_DOMAIN(Option):
+class HADES_AUTH_DHCP_DOMAIN(HadesOption):
     """DNS domain of authenticated users"""
     default = 'users.agdsn.de'
     type = str
 
 
-class HADES_AUTH_DHCP_LEASE_LIFETIME(Option):
+class HADES_AUTH_DHCP_LEASE_LIFETIME(HadesOption):
     """DHCP lease lifetime for authenticated users"""
     default = timedelta(hours=24)
     type = timedelta
     static_check = check.greater_than(timedelta(0))
 
 
-class HADES_AUTH_DHCP_LEASE_RENEW_TIMER(Option):
+class HADES_AUTH_DHCP_LEASE_RENEW_TIMER(HadesOption):
     """DHCP lease renew timer for authenticated users"""
     type = timedelta
     static_check = check.greater_than(timedelta(0))
@@ -428,7 +432,7 @@ class HADES_AUTH_DHCP_LEASE_RENEW_TIMER(Option):
         return 0.5 * config.HADES_AUTH_DHCP_LEASE_LIFETIME
 
 
-class HADES_AUTH_DHCP_LEASE_REBIND_TIMER(Option):
+class HADES_AUTH_DHCP_LEASE_REBIND_TIMER(HadesOption):
     """DHCP lease rebind timer for authenticated users"""
     type = timedelta
     static_check = check.greater_than(timedelta(0))
@@ -441,7 +445,7 @@ class HADES_AUTH_DHCP_LEASE_REBIND_TIMER(Option):
         return 0.875 * config.HADES_AUTH_DHCP_LEASE_LIFETIME
 
 
-class HADES_AUTH_LISTEN(Option):
+class HADES_AUTH_LISTEN(HadesOption):
     """
     Sequence of IPs and networks to listen on for requests from authenticated
     users.
@@ -460,7 +464,7 @@ class HADES_AUTH_LISTEN(Option):
     runtime_check = check.sequence(check.address_exists)
 
 
-class HADES_AUTH_INTERFACE(Option):
+class HADES_AUTH_INTERFACE(HadesOption):
     """
     Interface where requests of authenticated users arrive.
 
@@ -476,14 +480,14 @@ class HADES_AUTH_INTERFACE(Option):
     runtime_check = check.interface_exists
 
 
-class HADES_AUTH_BRIDGE(Option):
+class HADES_AUTH_BRIDGE(HadesOption):
     """Name of the auth bridge interface"""
     type = str
     default = "br-auth"
     static_check = check.match(r"\A[A-Za-z0-9_-]{1,15}\Z", re.ASCII)
 
 
-class HADES_AUTH_NEXT_HOP(Option):
+class HADES_AUTH_NEXT_HOP(HadesOption):
     """
     The next hop, where packets to user networks (e.g. DHCP replies, DNS
     replies) should be forwarded to.
@@ -493,25 +497,25 @@ class HADES_AUTH_NEXT_HOP(Option):
     static_check = check.network_ip
 
 
-class HADES_AUTH_ALLOWED_TCP_PORTS(Option):
+class HADES_AUTH_ALLOWED_TCP_PORTS(HadesOption):
     """Allowed TCP destination ports for unauthenticated users"""
     type = collections.abc.Sequence
     default = (53, 80, 443, 9053)
 
 
-class HADES_AUTH_ALLOWED_UDP_PORTS(Option):
+class HADES_AUTH_ALLOWED_UDP_PORTS(HadesOption):
     """Allowed UDP destination ports for unauthenticated users"""
     type = collections.abc.Sequence
     default = (53, 67, 9053)
 
 
-class HADES_AUTH_DNS_ALTERNATIVE_IPSET(Option):
+class HADES_AUTH_DNS_ALTERNATIVE_IPSET(HadesOption):
     """Name of ipset for alternative DNS resolving."""
     type = str
     default = "hades_alternative_dns"
 
 
-class HADES_AUTH_DNS_ALTERNATIVE_ZONES(Option):
+class HADES_AUTH_DNS_ALTERNATIVE_ZONES(HadesOption):
     """DNS zones that are transparently spoofed if alternative DNS is
     enabled."""
     type = collections.abc.Mapping
@@ -523,7 +527,7 @@ class HADES_AUTH_DNS_ALTERNATIVE_ZONES(Option):
 #################################
 
 
-class HADES_UNAUTH_DHCP_LEASE_TIME(Option):
+class HADES_UNAUTH_DHCP_LEASE_TIME(HadesOption):
     """
     DHCP lease time for unauth users
 
@@ -535,21 +539,21 @@ class HADES_UNAUTH_DHCP_LEASE_TIME(Option):
     static_check = check.greater_than(timedelta(0))
 
 
-class HADES_UNAUTH_INTERFACE(Option):
+class HADES_UNAUTH_INTERFACE(HadesOption):
     """Interface attached to the unauth VLAN"""
     type = str
     required = True
     runtime_check = check.interface_exists
 
 
-class HADES_UNAUTH_BRIDGE(Option):
+class HADES_UNAUTH_BRIDGE(HadesOption):
     """Name of the unauth bridge interface"""
     type = str
     default = "br-unauth"
     static_check = check.match(r"\A[A-Za-z0-9_-]{1,15}\Z", re.ASCII)
 
 
-class HADES_UNAUTH_LISTEN(Option):
+class HADES_UNAUTH_LISTEN(HadesOption):
     """
     Sequence of IPs and networks to listen for unauthenticated users.
 
@@ -567,19 +571,19 @@ class HADES_UNAUTH_LISTEN(Option):
     runtime_check = check.sequence(check.address_exists)
 
 
-class HADES_UNAUTH_ALLOWED_TCP_PORTS(Option):
+class HADES_UNAUTH_ALLOWED_TCP_PORTS(HadesOption):
     """Allowed TCP destination ports for unauthenticated users"""
     type = collections.abc.Sequence
     default = (53, 80, 443)
 
 
-class HADES_UNAUTH_ALLOWED_UDP_PORTS(Option):
+class HADES_UNAUTH_ALLOWED_UDP_PORTS(HadesOption):
     """Allowed UDP destination ports for unauthenticated users"""
     type = collections.abc.Sequence
     default = (53, 67)
 
 
-class HADES_UNAUTH_CAPTURED_TCP_PORTS(Option):
+class HADES_UNAUTH_CAPTURED_TCP_PORTS(HadesOption):
     """
     All traffic destined to these TCP ports is transparently redirected
     (captured) to the unauth listen address of the site node
@@ -588,7 +592,7 @@ class HADES_UNAUTH_CAPTURED_TCP_PORTS(Option):
     default = (53, 80, 443)
 
 
-class HADES_UNAUTH_CAPTURED_UDP_PORTS(Option):
+class HADES_UNAUTH_CAPTURED_UDP_PORTS(HadesOption):
     """
     All traffic destined to these UDP ports is transparently redirected
     (captured) to the unauth listen address of the site node
@@ -597,7 +601,7 @@ class HADES_UNAUTH_CAPTURED_UDP_PORTS(Option):
     default = (53,)
 
 
-class HADES_UNAUTH_DHCP_RANGE(Option):
+class HADES_UNAUTH_DHCP_RANGE(HadesOption):
     """DHCP range for the unauth VLAN. Must be contained within the
     :hades:option:`HADES_UNAUTH_LISTEN` network."""
     default = netaddr.IPRange('10.66.0.10', '10.66.31.254')
@@ -605,14 +609,14 @@ class HADES_UNAUTH_DHCP_RANGE(Option):
     static_check = check.ip_range_in_networks(HADES_UNAUTH_LISTEN)
 
 
-class HADES_UNAUTH_WHITELIST_DNS(Option):
+class HADES_UNAUTH_WHITELIST_DNS(HadesOption):
     """List of DNS names which are whitelisted for unauthenticated users.
     """
     default = ()
     type = collections.abc.Sequence
 
 
-class HADES_UNAUTH_WHITELIST_IPSET(Option):
+class HADES_UNAUTH_WHITELIST_IPSET(HadesOption):
     """Name of ipset for whitelisted IPs.
     """
     default = "hades_unauth_whitelist"
@@ -624,7 +628,7 @@ class HADES_UNAUTH_WHITELIST_IPSET(Option):
 ##################
 
 
-class HADES_RADIUS_LISTEN(Option):
+class HADES_RADIUS_LISTEN(HadesOption):
     """
     Sequence of IPs and networks the RADIUS server is listening on.
     """
@@ -639,37 +643,37 @@ class HADES_RADIUS_LISTEN(Option):
     runtime_check = check.sequence(check.address_exists)
 
 
-class HADES_RADIUS_INTERFACE(Option):
+class HADES_RADIUS_INTERFACE(HadesOption):
     """Interface the RADIUS server is listening on"""
     type = str
     required = True
     runtime_check = check.interface_exists
 
 
-class HADES_RADIUS_AUTHENTICATION_PORT(Option):
+class HADES_RADIUS_AUTHENTICATION_PORT(HadesOption):
     """RADIUS authentication port"""
     type = int
     default = 1812
 
 
-class HADES_RADIUS_ACCOUNTING_PORT(Option):
+class HADES_RADIUS_ACCOUNTING_PORT(HadesOption):
     """RADIUS accounting port"""
     type = int
     default = 1813
 
 
-class HADES_RADIUS_LOCALHOST_SECRET(Option):
+class HADES_RADIUS_LOCALHOST_SECRET(HadesOption):
     """Shared secret for the localhost RADIUS client"""
     type = str
 
 
-class HADES_RADIUS_DATABASE_FAIL_ACCEPT(Option):
+class HADES_RADIUS_DATABASE_FAIL_ACCEPT(HadesOption):
     """Send ``Access-Accept`` packets if the RADIUS ``sql`` module fails"""
     type = bool
     default = True
 
 
-class HADES_RADIUS_DATABASE_FAIL_REPLY_ATTRIBUTES(Option):
+class HADES_RADIUS_DATABASE_FAIL_REPLY_ATTRIBUTES(HadesOption):
     """
     Reply attributes that will be set in ``Access-Accept`` packets if the RADIUS
     ``sql`` module fails.
@@ -683,7 +687,7 @@ class HADES_RADIUS_DATABASE_FAIL_REPLY_ATTRIBUTES(Option):
     }
 
 
-class HADES_RADIUS_UNKNOWN_USER(Option):
+class HADES_RADIUS_UNKNOWN_USER(HadesOption):
     """The ``User-Name``, that is used as fallback if the MAC address was not
     found in the database."""
     type = str
@@ -695,7 +699,7 @@ class HADES_RADIUS_UNKNOWN_USER(Option):
 ##########################
 
 
-class HADES_GRATUITOUS_ARP_INTERVAL(Option):
+class HADES_GRATUITOUS_ARP_INTERVAL(HadesOption):
     """
     Period in which gratuitous ARP requests are broadcasted to notify
 
@@ -712,7 +716,7 @@ class HADES_GRATUITOUS_ARP_INTERVAL(Option):
 ################
 
 
-class HADES_PRIORITY(Option):
+class HADES_PRIORITY(HadesOption):
     """
     Priority of the site node instance.
 
@@ -723,47 +727,47 @@ class HADES_PRIORITY(Option):
     static_check = check.between(1, 254)
 
 
-class HADES_INITIAL_MASTER(Option):
+class HADES_INITIAL_MASTER(HadesOption):
     """Flag that indicates if the site node instance starts in master state"""
     type = bool
     default = False
 
 
-class HADES_VRRP_INTERFACE(Option):
+class HADES_VRRP_INTERFACE(HadesOption):
     """Interface for VRRP communication"""
     type = str
     runtime_check = check.interface_exists
 
 
-class HADES_VRRP_BRIDGE(Option):
+class HADES_VRRP_BRIDGE(HadesOption):
     """Interface name for VRRP bridge (created if necessary)"""
     type = str
     default = 'br-vrrp'
     static_check = check.not_empty
 
 
-class HADES_VRRP_LISTEN_AUTH(Option):
+class HADES_VRRP_LISTEN_AUTH(HadesOption):
     """IP and network for VRRP communication (auth instance)"""
     type = netaddr.IPNetwork
     static_check = check.network_ip
     runtime_check = check.address_exists
 
 
-class HADES_VRRP_LISTEN_ROOT(Option):
+class HADES_VRRP_LISTEN_ROOT(HadesOption):
     """IP and network for VRRP communication (root instance)"""
     type = netaddr.IPNetwork
     static_check = check.network_ip
     runtime_check = check.address_exists
 
 
-class HADES_VRRP_LISTEN_UNAUTH(Option):
+class HADES_VRRP_LISTEN_UNAUTH(HadesOption):
     """IP and network for VRRP communication (unauth instance)"""
     type = netaddr.IPNetwork
     static_check = check.network_ip
     runtime_check = check.address_exists
 
 
-class HADES_VRRP_PASSWORD(Option):
+class HADES_VRRP_PASSWORD(HadesOption):
     """
     Shared secret to authenticate VRRP messages between site node instances.
     """
@@ -771,35 +775,35 @@ class HADES_VRRP_PASSWORD(Option):
     type = str
 
 
-class HADES_VRRP_VIRTUAL_ROUTER_ID_AUTH(Option):
+class HADES_VRRP_VIRTUAL_ROUTER_ID_AUTH(HadesOption):
     """Virtual router ID used by Hades (auth instance)"""
     type = int
     default = 66
     static_check = check.between(0, 255)
 
 
-class HADES_VRRP_VIRTUAL_ROUTER_ID_ROOT(Option):
+class HADES_VRRP_VIRTUAL_ROUTER_ID_ROOT(HadesOption):
     """Virtual router ID used by Hades (root instance)"""
     type = int
     default = 67
     static_check = check.between(0, 255)
 
 
-class HADES_VRRP_VIRTUAL_ROUTER_ID_UNAUTH(Option):
+class HADES_VRRP_VIRTUAL_ROUTER_ID_UNAUTH(HadesOption):
     """Virtual router ID used by Hades (unauth instance)"""
     type = int
     default = 68
     static_check = check.between(0, 255)
 
 
-class HADES_VRRP_ADVERTISEMENT_INTERVAL(Option):
+class HADES_VRRP_ADVERTISEMENT_INTERVAL(HadesOption):
     """Interval between VRRP advertisements"""
     type = timedelta
     default = timedelta(seconds=5)
     static_check = check.greater_than(timedelta(0))
 
 
-class HADES_VRRP_PREEMPTION_DELAY(Option):
+class HADES_VRRP_PREEMPTION_DELAY(HadesOption):
     """
     Delay before a *MASTER* transitions to *BACKUP* when a node with a higher
     priority comes online
@@ -814,13 +818,13 @@ class HADES_VRRP_PREEMPTION_DELAY(Option):
 ################
 
 
-class HADES_CREATE_DUMMY_INTERFACES(Option):
+class HADES_CREATE_DUMMY_INTERFACES(HadesOption):
     """Create dummy interfaces if interfaces do not exist"""
     type = bool
     default = False
 
 
-class HADES_LOCAL_MASTER_DATABASE(Option):
+class HADES_LOCAL_MASTER_DATABASE(HadesOption):
     """
     Create and use a local “foreign” database.
     """
@@ -828,7 +832,7 @@ class HADES_LOCAL_MASTER_DATABASE(Option):
     default = False
 
 
-class HADES_BRIDGE_SERVICE_INTERFACES(Option):
+class HADES_BRIDGE_SERVICE_INTERFACES(HadesOption):
     """
     Link the service interface of the auth and unauth network namespaces through
     bridges and veth interfaces rather than moving the interface directly into
@@ -908,7 +912,7 @@ class SQLALCHEMY_DATABASE_URI(FlaskOption):
 ##################
 
 
-class HADES_CELERY_WORKER_HOSTNAME(Option):
+class HADES_CELERY_WORKER_HOSTNAME(HadesOption):
     """
     Hostname of the hades-agent Celery worker.
     """
@@ -917,44 +921,44 @@ class HADES_CELERY_WORKER_HOSTNAME(Option):
     type = str
 
 
-class HADES_CELERY_RPC_EXCHANGE(Option):
+class HADES_CELERY_RPC_EXCHANGE(HadesOption):
     default = 'hades.agent.rpc'
     type = str
 
 
-class HADES_CELERY_RPC_EXCHANGE_TYPE(Option):
+class HADES_CELERY_RPC_EXCHANGE_TYPE(HadesOption):
     default = 'topic'
     type = str
 
 
-class HADES_CELERY_NOTIFY_EXCHANGE(Option):
+class HADES_CELERY_NOTIFY_EXCHANGE(HadesOption):
     default = 'hades.agent.notify'
     type = str
 
 
-class HADES_CELERY_NOTIFY_EXCHANGE_TYPE(Option):
+class HADES_CELERY_NOTIFY_EXCHANGE_TYPE(HadesOption):
     default = 'topic'
     type = str
 
 
-class HADES_CELERY_NODE_QUEUE(Option):
+class HADES_CELERY_NODE_QUEUE(HadesOption):
     default = compute.deferred_format('hades.{}.{}', HADES_SITE_NAME,
                                       HADES_SITE_NODE_ID)
     type = str
 
 
-class HADES_CELERY_SITE_ROUTING_KEY(Option):
+class HADES_CELERY_SITE_ROUTING_KEY(HadesOption):
     default = compute.equal_to(HADES_SITE_NAME)
     type = str
 
 
-class HADES_CELERY_NODE_ROUTING_KEY(Option):
+class HADES_CELERY_NODE_ROUTING_KEY(HadesOption):
     default = compute.deferred_format('{}.{}', HADES_SITE_NAME,
                                       HADES_SITE_NODE_ID)
     type = str
 
 
-class HADES_CELERY_STATE_DB(Option):
+class HADES_CELERY_STATE_DB(HadesOption):
     """Path of Celery node state database"""
     type = str
     default = "{}/agent/state.db".format(constants.pkgrunstatedir)
