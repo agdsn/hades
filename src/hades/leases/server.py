@@ -226,6 +226,7 @@ class Server(socketserver.UnixStreamServer):
         available = 0
         # Initialize parser
         buffer = self.buffer
+        buffer.seek(0, os.SEEK_SET)
         parser = self.parse_request(buffer, 0)
         needed = next(parser)
         with contextlib.ExitStack() as stack:
