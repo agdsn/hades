@@ -17,7 +17,7 @@ from collections.abc import Container
 from itertools import chain, repeat
 from typing import Dict, Generator, List, Optional, Sequence, Tuple, TypeVar, TextIO
 
-from hades.bin.dhcp_script import main, Context
+from hades.bin.dhcp_script import Context, create_parser, dispatch_commands
 from hades.common.signals import install_handler
 
 logger = logging.getLogger(__name__)
@@ -182,6 +182,7 @@ class Server(socketserver.UnixStreamServer):
     max_packet_size = mmap.PAGESIZE - 1
 
     def __init__(self, sock, engine):
+        self.parser = create_parser(standalone=False)
         self.engine = engine
         server_address = sock.getsockname()
         super().__init__(
@@ -468,14 +469,15 @@ class Server(socketserver.UnixStreamServer):
             stdin: TextIO, stdout: TextIO, stderr: TextIO,
             args: Sequence[bytes], env: Dict[bytes, bytes]
     ) -> int:
-        return main(
-            argv=[decode(a) for a in args],
+        decoded_args = [decode(a) for a in args]
+        parsed_args = self.parser.parse_args(decoded_args[1:])
+        return dispatch_commands(
+            args=parsed_args,
             context=Context(
                 stdin=stdin, stdout=stdout, stderr=stderr,
                 environ={decode(k): decode(v) for k, v in env.items()},
                 environb=env,
             ),
-            standalone=False,
             engine=self.engine,
         )
 
