@@ -24,7 +24,15 @@ logger = logging.Logger(__name__)
 
 def main():
     parser = ArgumentParser(
-        description='Provides a DBus API to perform privileged operations',
+        description="Listens for commands as output by `hades-dhcp-script`.",
+        epilog=f"""\
+            This server listens on {constants.AUTH_DHCP_SCRIPT_SOCKET} for commands
+            communicating lease events.
+            For detailed information about the functionality see `hades-dhcp-script --help`.
+            It is the server component for what could have been a single python program,
+            however because of performance reasons, it was necessary to circumvent the need
+            for a complete python interpreter startup every time such a notification happens.\
+        """,
         parents=[common_parser],
     )
     args = parser.parse_args()
