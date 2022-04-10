@@ -86,6 +86,7 @@ def print_leases(
     with connection.begin():
         leases = get_all_auth_dhcp_leases(connection)
     sys.stdout.writelines(generate_leasefile_lines(leases))
+    return os.EX_OK
 
 
 def get_env_safe(environ: Dict[str, str], name: str) -> Optional[str]:
@@ -326,6 +327,7 @@ def add_lease(
         else:
             logger.warning("Lease for IP %s and MAC %s already exists", ip, mac)
             perform_lease_update(connection, ip, mac, old_values, values)
+    return os.EX_OK
 
 
 def delete_lease(
@@ -352,6 +354,7 @@ def delete_lease(
             ip,
             mac,
         )
+    return os.EX_OK
 
 
 def update_lease(
@@ -376,6 +379,7 @@ def update_lease(
             connection.execute(auth_dhcp_lease.insert(values=values))
         else:
             perform_lease_update(connection, ip, mac, old_values, values)
+    return os.EX_OK
 
 
 # noinspection PyUnusedLocal
@@ -386,7 +390,7 @@ def do_nothing(
         engine: Engine,
 ) -> int:
     logger.warning("Unknown command %s", args.original_command)
-    return 0
+    return os.EX_OK
 
 
 def add_lease_command(sub_parsers, action, action_help):
