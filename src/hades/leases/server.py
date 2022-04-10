@@ -15,7 +15,7 @@ import threading
 from io import FileIO
 
 from collections.abc import Container
-from typing import Dict, Generator, List, Optional, Sequence, Tuple, TypeVar
+from typing import Dict, Generator, List, Optional, Sequence, Tuple, TypeVar, TextIO
 
 from hades.bin.dhcp_script import main
 from hades.common.signals import install_handler
@@ -221,8 +221,8 @@ class Server(socketserver.UnixStreamServer):
     def _receive(
             self,
             request: socket.socket,
-    ) -> Tuple[Tuple[FileIO, FileIO, FileIO], List[bytes], Dict[bytes, bytes]]:
-        streams: List[FileIO] = []
+    ) -> Tuple[Tuple[TextIO, TextIO, TextIO], List[bytes], Dict[bytes, bytes]]:
+        streams: List[TextIO] = []
         # Offset of the buffer relative to the input stream
         offset = 0
         # Number of filled bytes in the buffer
@@ -293,9 +293,9 @@ class Server(socketserver.UnixStreamServer):
                 raise ProtocolError(
                     "Expected to receive exactly 3 file descriptors"
                 )
-            stdin = ensure_stream_byte_readable(streams[0], 'stdin')
-            stdout = ensure_stream_byte_writable(streams[1], 'stdout')
-            stderr = ensure_stream_byte_writable(streams[2], 'stderr')
+            stdin = ensure_stream_readable(streams[0], 'stdin')
+            stdout = ensure_stream_writable(streams[1], 'stdout')
+            stderr = ensure_stream_writable(streams[2], 'stderr')
             # Clear the stack
             stack.pop_all()
             return (stdin, stdout, stderr), argv, environ
@@ -340,9 +340,9 @@ class Server(socketserver.UnixStreamServer):
             for fd in fds:
                 flags = fcntl.fcntl(fd, fcntl.F_GETFL)
                 if flags & os.O_ACCMODE == os.O_RDONLY:
-                    mode = "rb"
+                    mode = "r"
                 elif flags & os.O_ACCMODE == os.O_WRONLY:
-                    mode = "wb"
+                    mode = "w"
                 elif flags & os.O_ACCMODE == os.O_RDWR:
                     # the stdout/stderr buffers can possibly be in RW mode,
                     # however the buffer used by `sys.stdout` is usually opened in
@@ -357,7 +357,7 @@ class Server(socketserver.UnixStreamServer):
                     continue
                 # noinspection PyTypeChecker
                 try:
-                    stream: FileIO = os.fdopen(fd, mode, buffering=0, closefd=True)
+                    stream: TextIO = os.fdopen(fd, mode, closefd=True)
                 except io.UnsupportedOperation as e:
                     raise RuntimeError(
                         f"Unable to open fd {fd} ({(len(streams))} already parsed, {mode=})"
@@ -462,7 +462,7 @@ class Server(socketserver.UnixStreamServer):
 
     @staticmethod
     def _process(
-            stdin: FileIO, stdout: FileIO, stderr: FileIO,
+            stdin: TextIO, stdout: TextIO, stderr: TextIO,
             args: Sequence[bytes], env: Dict[bytes, bytes]
     ) -> int:
         # TODO delegate stdout, stderr, etc. to dhcp_script
@@ -472,19 +472,19 @@ class Server(socketserver.UnixStreamServer):
         )
 
 
-def ensure_stream_byte_readable(stream, stream_desc: str):
-    if 'r' not in stream.mode or 'b' not in stream.mode:
+def ensure_stream_readable(stream, stream_desc: str):
+    if 'r' not in stream.mode:
         raise ProtocolError(
-            f"stream {stream_desc} is not byte-readable ({stream.mode=})"
+            f"stream {stream_desc} is not readable ({stream.mode=})"
         )
     return stream
 
 
-def ensure_stream_byte_writable(stream, stream_desc: str):
+def ensure_stream_writable(stream, stream_desc: str):
     is_writable = bool({'w', '+'} & set(stream.mode))
-    if not is_writable or 'b' not in stream.mode:
+    if not is_writable:
         raise ProtocolError(
-            f"Stream {stream_desc} is not byte-writable ({stream.mode=})"
+            f"Stream {stream_desc} is not writable ({stream.mode=})"
         )
     return stream
 
