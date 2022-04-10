@@ -344,7 +344,14 @@ class Server(socketserver.UnixStreamServer):
                 elif flags & os.O_ACCMODE == os.O_WRONLY:
                     mode = "wb"
                 elif flags & os.O_ACCMODE == os.O_RDWR:
-                    mode = "rb+"
+                    # the stdout/stderr buffers can possibly be in RW mode,
+                    # however the buffer used by `sys.stdout` is usually opened in
+                    # write-only mode by python.
+                    # in fact, opening this in `r+` (i.e. read-write mode) and using buffering
+                    # causes open() to refuse operation because the buffer is not seekable.
+                    # See https://bugs.python.org/issue20074#msg207012 and the related discussion
+                    # for some details on the core developers' philosophy on this.
+                    mode = "wb"
                 else:
                     os.close(fd)
                     continue
