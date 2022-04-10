@@ -356,6 +356,7 @@ class Server(socketserver.UnixStreamServer):
                     mode = fd_mode or "w"
                 else:
                     os.close(fd)
+                    logger.warning("Unknown fd ACCMODE %x for fd %d", flags & os.O_ACCMODE, fd)
                     continue
                 # noinspection PyTypeChecker
                 try:
@@ -502,8 +503,8 @@ def ensure_stream_writable(stream, stream_desc: str):
 def _try_close(fd):
     try:
         os.close(fd)
-    except OSError:
-        pass
+    except OSError as e:
+        logger.error("Problem closing file descriptor", exc_info=e)
 
 
 def zip_left(left, right, rfill=None):
