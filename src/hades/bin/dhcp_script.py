@@ -9,7 +9,8 @@ import sys
 from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, TypeVar, Sequence
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, TypeVar, Sequence, TextIO, \
+    Mapping
 
 import netaddr
 from sqlalchemy import text
@@ -411,7 +412,12 @@ def create_parser(standalone: bool = True) -> ArgumentParser:
     return parser
 
 
-def main(argv: Sequence[str], standalone: bool = True):
+def main(
+        argv: Sequence[str],
+        stdin: TextIO, stdout: TextIO, stderr: TextIO,
+        environ: Mapping[str, str], environb: Mapping[bytes, bytes],
+        standalone: bool = True
+):
     if standalone:
         logger.warning("Running in standalone mode. This is meant for development purposes only.")
     # When dnsmasq starts, it calls init before dropping privileges
@@ -441,11 +447,15 @@ def main(argv: Sequence[str], standalone: bool = True):
     args = parser.parse_args(argv[1:])
     setup_cli_logging(parser.prog, args)
     try:
-        return funcs[args.command](args, os.environ, os.environb)
+        return funcs[args.command](args, environ, environb)
     except ValueError as e:
         logger.fatal(str(e), exc_info=e)
         return os.EX_USAGE
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    sys.exit(main(
+        sys.argv,
+        sys.stdin, sys.stdout, sys.stderr,
+        os.environ, os.environb,
+    ))

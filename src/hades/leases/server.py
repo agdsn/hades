@@ -465,11 +465,18 @@ class Server(socketserver.UnixStreamServer):
             stdin: TextIO, stdout: TextIO, stderr: TextIO,
             args: Sequence[bytes], env: Dict[bytes, bytes]
     ) -> int:
-        # TODO delegate stdout, stderr, etc. to dhcp_script
         return main(
-            argv=[a.decode() for a in args],
+            argv=[decode(a) for a in args],
+            stdin=stdin, stdout=stdout, stderr=stderr,
+            environ={decode(k): decode(v) for k, v in env.items()},
+            environb=env,
             standalone=False,
         )
+
+
+def decode(x: bytes) -> str:
+    """Decode a string like done in `os._createenviron` (hard-coding utf-8)"""
+    return x.decode("utf-8", errors="surrogateescape")
 
 
 def ensure_stream_readable(stream, stream_desc: str):
