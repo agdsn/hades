@@ -412,6 +412,8 @@ def create_parser() -> ArgumentParser:
 
 
 def main():
+    if 'serverless' in sys.argv[0]:
+        logger.warning("Running in serverless mode. This is meant for development purposes only.")
     # When dnsmasq starts, it calls init before dropping privileges
     if os.geteuid() == 0:
         try:
