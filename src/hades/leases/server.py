@@ -17,7 +17,7 @@ from collections.abc import Container
 from itertools import chain, repeat
 from typing import Dict, Generator, List, Optional, Sequence, Tuple, TypeVar, TextIO
 
-from hades.bin.dhcp_script import main
+from hades.bin.dhcp_script import main, Context
 from hades.common.signals import install_handler
 
 logger = logging.getLogger(__name__)
@@ -470,9 +470,11 @@ class Server(socketserver.UnixStreamServer):
     ) -> int:
         return main(
             argv=[decode(a) for a in args],
-            stdin=stdin, stdout=stdout, stderr=stderr,
-            environ={decode(k): decode(v) for k, v in env.items()},
-            environb=env,
+            context=Context(
+                stdin=stdin, stdout=stdout, stderr=stderr,
+                environ={decode(k): decode(v) for k, v in env.items()},
+                environb=env,
+            ),
             standalone=False,
             engine=self.engine,
         )
