@@ -9,12 +9,14 @@ import signal
 import socket
 import socketserver
 import struct
+import sys
 import threading
 from io import FileIO
 
 from collections.abc import Container
-from typing import Dict, Generator, List, Optional, Tuple, TypeVar
+from typing import Dict, Generator, List, Optional, Sequence, Tuple, TypeVar
 
+from hades.bin.dhcp_script import main
 from hades.common.signals import install_handler
 
 logger = logging.getLogger(__name__)
@@ -209,11 +211,11 @@ class Server(socketserver.UnixStreamServer):
         (stdin, stdout, stderr), args, env = self._receive(request)
         status = os.EX_SOFTWARE
         try:
-            status = self._process()
+            status = self._process(stdin, stdout, stderr, args, env)
         finally:
             stdout.flush()
             stderr.flush()
-            self._send(status)
+            request.send(status.to_bytes(1, sys.byteorder))
 
     def _receive(
             self,
@@ -445,6 +447,14 @@ class Server(socketserver.UnixStreamServer):
         ):
             super().serve_forever(poll_interval)
 
+    @staticmethod
+    def _process(
+            stdin: FileIO, stdout: FileIO, stderr: FileIO,
+            args: Sequence[bytes], env: Dict[bytes, bytes]
+    ) -> int:
+        # TODO delegate stdout, stderr, etc. to dhcp_script
+        return main(
+        )
 
 
 def ensure_stream_byte_readable(stream, stream_desc: str):
