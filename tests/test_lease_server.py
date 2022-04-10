@@ -13,7 +13,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 
 from hades.leases.server import (
-    BufferTooSmallError, BaseParseError, ParseError, Parser, Server, UnexpectedEOFError,
+    BufferTooSmallError, BaseParseError, ParseError, Parser, Server, UnexpectedEOFError, zip_left,
 )
 
 T = TypeVar('T')
@@ -295,3 +295,16 @@ def test_parse_overflow_envc(
     with pytest.raises(UnexpectedEOFError) as e:
         driver(buffer, size, Server.parse_request)
     assert e.value.element == "environ[0]"
+
+
+def test_zip_left():
+    assert list(zip_left("abc", "a", rfill="X")) == [
+        ("a", "a"),
+        ("b", "X"),
+        ("c", "X"),
+    ]
+    assert list(zip_left("abc", "abcde", rfill="X")) == [
+        ("a", "a"),
+        ("b", "b"),
+        ("c", "c"),
+    ]

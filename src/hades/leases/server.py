@@ -12,9 +12,9 @@ import socketserver
 import struct
 import sys
 import threading
-from io import FileIO
 
 from collections.abc import Container
+from itertools import chain, repeat
 from typing import Dict, Generator, List, Optional, Sequence, Tuple, TypeVar, TextIO
 
 from hades.bin.dhcp_script import main
@@ -258,7 +258,7 @@ class Server(socketserver.UnixStreamServer):
 
                 streams.extend(
                     stack.enter_context(stream)
-                    for stream in self.parse_ancillary_data(ancdata)
+                    for stream in self.parse_ancillary_data(ancdata, ["r", "w", "w"])
                 )
 
                 if msg_flags & socket.MSG_CTRUNC:
@@ -303,12 +303,14 @@ class Server(socketserver.UnixStreamServer):
     @staticmethod
     def parse_ancillary_data(
             ancdata: Container[Tuple[int, int, bytes]],
-    ) -> List[FileIO]:
+            expected_fd_modes: Sequence[str],
+    ) -> List[TextIO]:
         """
         Open streams for file descriptors received via :func:`socket.recvmsg`
         ancillary data.
 
         :param ancdata:
+        :param expected_fd_modes: a sequence of modes in which the fds should be opened
         :return:
         """
         fds = array.array("i")
@@ -337,7 +339,7 @@ class Server(socketserver.UnixStreamServer):
                     "SCM_RIGHTS control message data must be an multiple of "
                     "sizeof(int) = {}".format(fds.itemsize)
                 )
-            for fd in fds:
+            for fd, fd_mode in zip_left(fds, expected_fd_modes):
                 flags = fcntl.fcntl(fd, fcntl.F_GETFL)
                 if flags & os.O_ACCMODE == os.O_RDONLY:
                     mode = "r"
@@ -351,7 +353,7 @@ class Server(socketserver.UnixStreamServer):
                     # causes open() to refuse operation because the buffer is not seekable.
                     # See https://bugs.python.org/issue20074#msg207012 and the related discussion
                     # for some details on the core developers' philosophy on this.
-                    mode = "wb"
+                    mode = fd_mode or "w"
                 else:
                     os.close(fd)
                     continue
@@ -502,3 +504,7 @@ def _try_close(fd):
         os.close(fd)
     except OSError:
         pass
+
+
+def zip_left(left, right, rfill=None):
+    return zip(left, chain(right, repeat(rfill)))
