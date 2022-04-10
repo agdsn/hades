@@ -19,7 +19,6 @@ from hades.common.cli import (
 )
 from hades.config.base import ConfigError
 from hades.config.loader import load_config, print_config_error
-from hades.config.options import CeleryOption
 
 
 class Formatter(argparse.HelpFormatter):
@@ -61,8 +60,7 @@ def main() -> int:
     except ConfigError as e:
         print_config_error(e)
         return os.EX_CONFIG
-    app = create_app()
-    app.config_from_object(config.of_type(CeleryOption))
+    app = create_app(config)
     log_level = logging.root.level
     reset_cli_logging()
     worker: celery.apps.worker.Worker = app.Worker(

@@ -28,8 +28,7 @@ def notify_auth(state, priority) -> int:
 # noinspection PyUnusedLocal
 def notify_root(state, priority) -> int:
     config = get_config(runtime_checks=True)
-    app = create_app()
-    app.config_from_object(config)
+    app = create_app(config)
     queue_name = config.HADES_CELERY_NODE_QUEUE
     exchange_name = config.HADES_CELERY_RPC_EXCHANGE
     exchange_type = config.HADES_CELERY_RPC_EXCHANGE_TYPE
