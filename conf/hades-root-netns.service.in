@@ -1,6 +1,7 @@
 [Unit]
 Description=Hades root network namespace
 Documentation=https://github.com/systemd/systemd/issues/2741#issuecomment-336736214
+PartOf=hades.service
 RefuseManualStart=yes
 StopWhenUnneeded=true
 
