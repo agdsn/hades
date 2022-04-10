@@ -1,3 +1,4 @@
+from __future__ import annotations
 import argparse
 import codecs
 import grp
@@ -77,8 +78,7 @@ def generate_leasefile_lines(
 # noinspection PyUnusedLocal
 def print_leases(
         args,
-        environ: Dict[str, str],
-        environb: Dict[bytes, bytes],
+        context: Context,
         engine: Engine,
 ) -> int:
     """Print all leases in dnsmasq leasefile format"""
@@ -178,8 +178,7 @@ class LeaseArguments:
 
 def obtain_lease_info(
     args: LeaseArguments,
-    environ: Dict[str, str],
-    environb: Dict[bytes, bytes],
+    context: Context,
     *,
     missing_as_none: bool,
 ) -> Dict[str, Any]:
@@ -194,8 +193,8 @@ def obtain_lease_info(
     environment variable should result in the corresponding key being present
     with value of None in the resulting dict or if the key should be absent.
     """
-    expires_at = obtain_and_convert(environ, "DNSMASQ_LEASE_EXPIRES", int)
-    time_remaining = obtain_and_convert(environ, "DNSMASQ_TIME_REMAINING", int)
+    expires_at = obtain_and_convert(context.environ, "DNSMASQ_LEASE_EXPIRES", int)
+    time_remaining = obtain_and_convert(context.environ, "DNSMASQ_TIME_REMAINING", int)
     if time_remaining is None:
         time_remaining = 0
     if expires_at is None:
@@ -206,14 +205,14 @@ def obtain_lease_info(
             tzinfo=timezone.utc
         )
 
-    client_id = environb.get(b"DNSMASQ_CLIENT_ID")
+    client_id = context.environb.get(b"DNSMASQ_CLIENT_ID")
     if client_id is not None:
         try:
             client_id = codecs.decode(client_id.replace(b":", b""), "hex")
         except ValueError as e:
             raise ValueError(
                 "Environment variable DNSMASQ_CLIENT_ID contains "
-                "illegal value {}".format(environ.get("DNSMASQ_CLIENT_ID"))
+                f"illegal value {context.environ.get('DNSMASQ_CLIENT_ID')}"
             ) from e
 
     values = {
@@ -228,29 +227,29 @@ def obtain_lease_info(
             values[key] = value
 
     hostname = args.hostname
-    if hostname is not None or "DNSMASQ_OLD_HOSTNAME" in environ:
+    if hostname is not None or "DNSMASQ_OLD_HOSTNAME" in context.environ:
         values["Hostname"] = hostname
 
     set_value(
-        "SuppliedHostname", get_env_safe(environ, "DNSMASQ_SUPPLIED_HOSTNAME")
+        "SuppliedHostname", get_env_safe(context.environ, "DNSMASQ_SUPPLIED_HOSTNAME")
     )
-    set_value("Tags", obtain_tuple(environ, "DNSMASQ_TAGS", " "))
-    set_value("Domain", get_env_safe(environ, "DNSMASQ_DOMAIN"))
-    set_value("CircuitID", environb.get(b"DNSMASQ_CIRCUIT_ID"))
-    set_value("SubscriberID", environb.get(b"DNSMASQ_SUBSCRIBER_ID"))
-    set_value("RemoteID", environb.get(b"DNSMASQ_REMOTE_ID"))
-    set_value("VendorClass", get_env_safe(environ, "DNSMASQ_VENDOR_CLASS"))
+    set_value("Tags", obtain_tuple(context.environ, "DNSMASQ_TAGS", " "))
+    set_value("Domain", get_env_safe(context.environ, "DNSMASQ_DOMAIN"))
+    set_value("CircuitID", context.environb.get(b"DNSMASQ_CIRCUIT_ID"))
+    set_value("SubscriberID", context.environb.get(b"DNSMASQ_SUBSCRIBER_ID"))
+    set_value("RemoteID", context.environb.get(b"DNSMASQ_REMOTE_ID"))
+    set_value("VendorClass", get_env_safe(context.environ, "DNSMASQ_VENDOR_CLASS"))
 
-    user_classes = tuple(obtain_user_classes(environ))
+    user_classes = tuple(obtain_user_classes(context.environ))
     user_classes = user_classes if user_classes != () else None
     set_value("UserClasses", user_classes)
     set_value(
         "RelayIPAddress",
-        obtain_and_convert(environ, "DNSMASQ_RELAY_ADDRESS", netaddr.IPAddress),
+        obtain_and_convert(context.environ, "DNSMASQ_RELAY_ADDRESS", netaddr.IPAddress),
     )
     set_value(
         "RequestedOptions",
-        obtain_tuple(environ, "DNSMASQ_REQUESTED_OPTIONS", ",", int),
+        obtain_tuple(context.environ, "DNSMASQ_REQUESTED_OPTIONS", ",", int),
     )
 
     return values
@@ -301,14 +300,13 @@ def perform_lease_update(
 
 def add_lease(
         args,
-        environ: Dict[str, str],
-        environb: Dict[bytes, bytes],
+        context: Context,
         engine: Engine,
 ) -> int:
     connection = engine.connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
-        environ, environb,
+        context,
         missing_as_none=True
     )
     values = {k: (v if v is not None else text('DEFAULT'))
@@ -332,14 +330,13 @@ def add_lease(
 
 def delete_lease(
         args,
-        environ: Dict[str, str],
-        environb: Dict[bytes, bytes],
+        context: Context,
         engine: Engine,
 ) -> int:
     connection = engine.connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
-        environ, environb,
+        context,
         missing_as_none=False
     )
     ip, mac = values["IPAddress"], values["MAC"]
@@ -359,14 +356,13 @@ def delete_lease(
 
 def update_lease(
         args,
-        environ: Dict[str, str],
-        environb: Dict[bytes, bytes],
+        context: Context,
         engine: Engine,
 ) -> int:
     connection = engine.connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
-        environ, environb,
+        context,
         missing_as_none=False
     )
     values.setdefault('UpdatedAt', text('DEFAULT'))
@@ -385,8 +381,7 @@ def update_lease(
 # noinspection PyUnusedLocal
 def do_nothing(
         args,
-        environ: Dict[str, str],
-        environb: Dict[bytes, bytes],
+        context: Context,
         engine: Engine,
 ) -> int:
     logger.warning("Unknown command %s", args.original_command)
@@ -439,10 +434,19 @@ def create_parser(standalone: bool = True) -> ArgumentParser:
     return parser
 
 
+@dataclass
+class Context:
+    """Information relevant to the communication of the program"""
+    stdin: TextIO
+    stdout: TextIO
+    stderr: TextIO
+    environ: Mapping[str, str]
+    environb: Mapping[bytes, bytes]
+
+
 def main(
         argv: Sequence[str],
-        stdin: TextIO, stdout: TextIO, stderr: TextIO,
-        environ: Mapping[str, str], environb: Mapping[bytes, bytes],
+        context: Context,
         standalone: bool = True,
         engine: Engine = None,
 ):
@@ -463,7 +467,7 @@ def main(
         drop_privileges(passwd, group)
     parser = create_parser(standalone=standalone)
 
-    # type: Dict[str, Callable[[Any, Dict[str, str], Dict[bytes, bytes], Engine], int]]
+    # type: Dict[str, Callable[[Any, Context, Engine], int]]
     funcs = {
         "init": print_leases,
         "add": add_lease,
@@ -476,15 +480,18 @@ def main(
     setup_cli_logging(parser.prog, args)
     try:
         engine = engine or engine_from_config(args.config)
-        return funcs[args.command](args, environ, environb, engine)
+        return funcs[args.command](args, context, engine)
     except ValueError as e:
         logger.fatal(str(e), exc_info=e)
         return os.EX_USAGE
 
 
 if __name__ == "__main__":
-    sys.exit(main(
-        sys.argv,
-        sys.stdin, sys.stdout, sys.stderr,
-        os.environ, os.environb,
-    ))
+    context = Context(
+        stdin=sys.stdin,
+        stdout=sys.stdout,
+        stderr=sys.stderr,
+        environ=os.environ,
+        environb=os.environb,
+    )
+    sys.exit(main(sys.argv, context))
