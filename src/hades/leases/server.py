@@ -289,9 +289,9 @@ class Server(socketserver.UnixStreamServer):
                 raise ProtocolError(
                     "Expected to receive exactly 3 file descriptors"
                 )
-            stdin = ensure_mode_startswith(streams[0], 'rb', 'stdin')
-            stdout = ensure_mode_startswith(streams[1], 'wb', 'stdout')
-            stderr = ensure_mode_startswith(streams[2], 'wb', 'stderr')
+            stdin = ensure_stream_byte_readable(streams[0], 'stdin')
+            stdout = ensure_stream_byte_writable(streams[1], 'stdout')
+            stderr = ensure_stream_byte_writable(streams[2], 'stderr')
             # Clear the stack
             stack.pop_all()
             return (stdin, stdout, stderr), argv, environ
@@ -445,10 +445,19 @@ class Server(socketserver.UnixStreamServer):
             super().serve_forever(poll_interval)
 
 
-def ensure_mode_startswith(stream, expected_mode: str, stream_desc: str):
-    if not stream.mode.startswith(expected_mode):
+
+def ensure_stream_byte_readable(stream, stream_desc: str):
+    if 'r' not in stream.mode or 'b' not in stream.mode:
         raise ProtocolError(
-            f"Unexpected mode for {stream_desc}: {stream.mode}"
-            f" (should start with {expected_mode!r})"
+            f"stream {stream_desc} is not byte-readable ({stream.mode=})"
+        )
+    return stream
+
+
+def ensure_stream_byte_writable(stream, stream_desc: str):
+    is_writable = bool({'w', '+'} & set(stream.mode))
+    if not is_writable or 'b' not in stream.mode:
+        raise ProtocolError(
+            f"Stream {stream_desc} is not byte-writable ({stream.mode=})"
         )
     return stream
