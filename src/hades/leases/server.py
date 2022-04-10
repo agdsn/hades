@@ -460,8 +460,8 @@ class Server(socketserver.UnixStreamServer):
         ):
             super().serve_forever(poll_interval)
 
-    @staticmethod
     def _process(
+            self,
             stdin: TextIO, stdout: TextIO, stderr: TextIO,
             args: Sequence[bytes], env: Dict[bytes, bytes]
     ) -> int:
@@ -471,6 +471,7 @@ class Server(socketserver.UnixStreamServer):
             environ={decode(k): decode(v) for k, v in env.items()},
             environb=env,
             standalone=False,
+            engine=self.engine,
         )
 
 
