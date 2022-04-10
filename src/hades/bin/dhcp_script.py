@@ -449,14 +449,9 @@ class Context:
     environb: Mapping[bytes, bytes]
 
 
-def main(
-        argv: Sequence[str],
-        context: Context,
-        standalone: bool = True,
-        engine: Engine = None,
-):
-    if standalone:
-        logger.warning("Running in standalone mode. This is meant for development purposes only.")
+def main():
+    import sys
+    logger.warning("Running in standalone mode. This is meant for development purposes only.")
     # When dnsmasq starts, it calls init before dropping privileges
     if os.geteuid() == 0:
         try:
@@ -470,8 +465,30 @@ def main(
             logger.critical("No such group: {:d}".format(passwd.pw_gid))
             return os.EX_NOUSER
         drop_privileges(passwd, group)
-    parser = create_parser(standalone=standalone)
+    parser = create_parser(standalone=True)
+    args = parser.parse_args()
+    setup_cli_logging(parser.prog, args)
+    engine = engine_from_config(args.config)
 
+    return dispatch_commands(
+        args,
+        Context(
+            stdin=sys.stdin,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+            environ=os.environ,
+            environb=os.environb,
+        ),
+        engine,
+    )
+
+
+def dispatch_commands(
+        args,
+        context: Context,
+        engine: Engine,
+) -> int:
+    """"""
     # type: Dict[str, Callable[[Any, Context, Engine], int]]
     funcs = {
         "init": print_leases,
@@ -480,11 +497,7 @@ def main(
         "old": update_lease,
         "no-op": do_nothing,
     }
-
-    args = parser.parse_args(argv[1:])
-    setup_cli_logging(parser.prog, args)
     try:
-        engine = engine or engine_from_config(args.config)
         return funcs[args.command](args, context, engine)
     except ValueError as e:
         logger.fatal(str(e), exc_info=e)
@@ -492,12 +505,5 @@ def main(
 
 
 if __name__ == "__main__":
-    import sys  # importing late to avoid unintended usages of `sys` instead of `context`
-    context = Context(
-        stdin=sys.stdin,
-        stdout=sys.stdout,
-        stderr=sys.stderr,
-        environ=os.environ,
-        environb=os.environb,
-    )
-    sys.exit(main(sys.argv, context))
+    import sys
+    sys.exit(main())
