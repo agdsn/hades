@@ -89,7 +89,7 @@ def print_leases(
     return os.EX_OK
 
 
-def get_env_safe(environ: Dict[str, str], name: str) -> Optional[str]:
+def get_env_safe(environ: Mapping[str, str], name: str) -> Optional[str]:
     """
     Try to get a string value from the environment and replace illegal
     characters using backslashreplace.
@@ -111,7 +111,7 @@ T = TypeVar("T")
 
 
 def obtain_and_convert(
-    environ: Dict[str, str],
+    environ: Mapping[str, str],
     name: str,
     func: Callable[[Any], T],
 ) -> Optional[T]:
@@ -132,7 +132,7 @@ def obtain_and_convert(
         ) from e
 
 
-def obtain_user_classes(environ: Dict[str, str]) -> str:
+def obtain_user_classes(environ: Mapping[str, str]) -> str:
     """Gather all user classes from environment variables."""
     for number in itertools.count():
         user_class = get_env_safe(environ, "DNSMASQ_USER_CLASS" + str(number))
@@ -142,7 +142,7 @@ def obtain_user_classes(environ: Dict[str, str]) -> str:
 
 
 def obtain_tuple(
-    environ: Dict[str, str],
+    environ: Mapping[str, str],
     name: str,
     sep: str,
     func: Callable[[Any], T] = lambda x: x,
