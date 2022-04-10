@@ -82,7 +82,7 @@ def print_leases(
         engine: Engine,
 ) -> int:
     """Print all leases in dnsmasq leasefile format"""
-    connection = engine_from_config(args.config).connect()
+    connection = engine.connect()
     with connection.begin():
         leases = get_all_auth_dhcp_leases(connection)
     sys.stdout.writelines(generate_leasefile_lines(leases))
@@ -304,7 +304,7 @@ def add_lease(
         environb: Dict[bytes, bytes],
         engine: Engine,
 ) -> int:
-    connection = engine_from_config(args.config).connect()
+    connection = engine.connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
         environ, environb,
@@ -334,7 +334,7 @@ def delete_lease(
         environb: Dict[bytes, bytes],
         engine: Engine,
 ) -> int:
-    connection = engine_from_config(args.config).connect()
+    connection = engine.connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
         environ, environb,
@@ -360,7 +360,7 @@ def update_lease(
         environb: Dict[bytes, bytes],
         engine: Engine,
 ) -> int:
-    connection = engine_from_config(args.config).connect()
+    connection = engine.connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
         environ, environb,
@@ -439,7 +439,8 @@ def main(
         argv: Sequence[str],
         stdin: TextIO, stdout: TextIO, stderr: TextIO,
         environ: Mapping[str, str], environb: Mapping[bytes, bytes],
-        standalone: bool = True
+        standalone: bool = True,
+        engine: Engine = None,
 ):
     if standalone:
         logger.warning("Running in standalone mode. This is meant for development purposes only.")
@@ -470,7 +471,7 @@ def main(
     args = parser.parse_args(argv[1:])
     setup_cli_logging(parser.prog, args)
     try:
-        engine = engine_from_config(args.config)
+        engine = engine or engine_from_config(args.config)
         return funcs[args.command](args, environ, environb, engine)
     except ValueError as e:
         logger.fatal(str(e), exc_info=e)
