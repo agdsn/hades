@@ -415,10 +415,16 @@ def create_parser(standalone: bool = True) -> ArgumentParser:
             commands.type = type_func
             return super().parse_known_args(args, namespace)
 
+        def exit(self, *a, **kw):
+            if standalone:
+                return super().exit(*a, **kw)
+            logger.warning("Unexpected call to argparsers exit(args=%r, kwargs=%r)", a, kw)
+
     parser = Parser(
         description="dnsmasq leasefile dhcp-script to store leases in the "
         "Hades database",
-        parents=[parent_parser] if not standalone else [],
+        parents=[parent_parser] if standalone else [],
+        exit_on_error=standalone,
     )
     commands = parser.add_subparsers(metavar="COMMAND", dest="command")
     commands.required = True
