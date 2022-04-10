@@ -6,7 +6,6 @@ import itertools
 import logging
 import os
 import pwd
-import sys
 from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -85,7 +84,7 @@ def print_leases(
     connection = engine.connect()
     with connection.begin():
         leases = get_all_auth_dhcp_leases(connection)
-    sys.stdout.writelines(generate_leasefile_lines(leases))
+    context.stdout.writelines(generate_leasefile_lines(leases))
     return os.EX_OK
 
 
@@ -487,6 +486,7 @@ def main(
 
 
 if __name__ == "__main__":
+    import sys  # importing late to avoid unintended usages of `sys` instead of `context`
     context = Context(
         stdin=sys.stdin,
         stdout=sys.stdout,
