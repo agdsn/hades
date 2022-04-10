@@ -38,7 +38,7 @@ static void print_usage(void) {
         "socket set via the " SOCKET_OPTION " environment\n"
         "variable (defaults to " AUTH_DHCP_SCRIPT_SOCKET ").\n"
         "\n"
-        "See the -6, --dhcp-script options of dnsmasq for details.",
+        "See the -6, --dhcp-script options of dnsmasq for details.\n",
         stderr
     );
 }
