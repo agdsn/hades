@@ -454,6 +454,8 @@ class Server(socketserver.UnixStreamServer):
     ) -> int:
         # TODO delegate stdout, stderr, etc. to dhcp_script
         return main(
+            argv=[a.decode() for a in args],
+            standalone=False,
         )
 
 

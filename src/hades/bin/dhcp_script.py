@@ -9,7 +9,7 @@ import sys
 from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, TypeVar
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, TypeVar, Sequence
 
 import netaddr
 from sqlalchemy import text
@@ -373,7 +373,7 @@ def add_lease_command(sub_parsers, action, action_help):
     return sub_parser
 
 
-def create_parser() -> ArgumentParser:
+def create_parser(standalone: bool = True) -> ArgumentParser:
     class Parser(ArgumentParser):
         def parse_known_args(self, args=None, namespace=None):
             if namespace is None:
@@ -396,7 +396,7 @@ def create_parser() -> ArgumentParser:
     parser = Parser(
         description="dnsmasq leasefile dhcp-script to store leases in the "
         "Hades database",
-        parents=[parent_parser],
+        parents=[parent_parser] if not standalone else [],
     )
     commands = parser.add_subparsers(metavar="COMMAND", dest="command")
     commands.required = True
@@ -411,9 +411,9 @@ def create_parser() -> ArgumentParser:
     return parser
 
 
-def main():
-    if 'serverless' in sys.argv[0]:
-        logger.warning("Running in serverless mode. This is meant for development purposes only.")
+def main(argv: Sequence[str], standalone: bool = True):
+    if standalone:
+        logger.warning("Running in standalone mode. This is meant for development purposes only.")
     # When dnsmasq starts, it calls init before dropping privileges
     if os.geteuid() == 0:
         try:
@@ -427,7 +427,7 @@ def main():
             logger.critical("No such group: {:d}".format(passwd.pw_gid))
             return os.EX_NOUSER
         drop_privileges(passwd, group)
-    parser = create_parser()
+    parser = create_parser(standalone=standalone)
 
     # type: Dict[str, Callable[[Any, Dict[str, str], Dict[bytes, bytes]], int]]
     funcs = {
@@ -438,7 +438,7 @@ def main():
         "no-op": do_nothing,
     }
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv[1:])
     setup_cli_logging(parser.prog, args)
     try:
         return funcs[args.command](args, os.environ, os.environb)
@@ -448,4 +448,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv))
