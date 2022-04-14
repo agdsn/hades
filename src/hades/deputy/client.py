@@ -9,7 +9,7 @@ from pydbus import SystemBus
 from hades import constants
 from hades.common.glib import typed_glib_error
 
-logger = logging.Logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def signal_refresh(timeout: int = 1) -> None:

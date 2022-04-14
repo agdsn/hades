@@ -19,7 +19,7 @@ from hades.config.loader import load_config, print_config_error
 from hades.leases.server import Server
 
 
-logger = logging.Logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def main():
