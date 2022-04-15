@@ -253,6 +253,8 @@ CONFIGURE_FILES = \
     conf/hades-agent.service \
     conf/hades-auth-alternative-dns.service \
     conf/hades-auth-dhcp.service \
+    conf/hades-auth-dhcp-leases.service \
+    conf/hades-auth-dhcp-leases.socket \
     conf/hades-auth-netns.service \
     conf/hades-auth-pristine-dns.service \
     conf/hades-auth-vrrp.service \
