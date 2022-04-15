@@ -77,8 +77,7 @@ def print_leases(
         engine: Engine,
 ) -> int:
     """Print all leases in dnsmasq leasefile format"""
-    connection = engine.connect()
-    with connection.begin():
+    with engine.connect() as connection, connection.begin():
         leases = get_all_dhcp_leases(context.dhcp_lease_table, connection)
     context.stdout.writelines(generate_leasefile_lines(leases))
     return os.EX_OK
@@ -300,7 +299,6 @@ def add_lease(
         context: Context,
         engine: Engine,
 ) -> int:
-    connection = engine.connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
         context,
@@ -314,7 +312,7 @@ def add_lease(
         ip,
         mac,
     )
-    with connection.begin():
+    with engine.connect() as connection, connection.begin():
         lease_table = context.dhcp_lease_table
         # TODO: Use INSERT ON CONFLICT UPDATE on newer SQLAlchemy (>= 1.1)
         old_values = query_lease_for_update(connection, lease_table, ip)
@@ -331,7 +329,6 @@ def delete_lease(
         context: Context,
         engine: Engine,
 ) -> int:
-    connection = engine.connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
         context,
@@ -341,7 +338,7 @@ def delete_lease(
     logger.debug("Deleting lease for IP %s and MAC %s", ip, mac)
     lease_table = context.dhcp_lease_table
     query = lease_table.delete().where(lease_table.c.IPAddress == ip)
-    with connection.begin():
+    with engine.connect() as connection, connection.begin():
         result = connection.execute(query)
     if result.rowcount != 1:
         logger.warning(
@@ -358,7 +355,6 @@ def update_lease(
         context: Context,
         engine: Engine,
 ) -> int:
-    connection = engine.connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
         context,
@@ -367,7 +363,7 @@ def update_lease(
     values.setdefault('UpdatedAt', text('DEFAULT'))
     ip, mac = values["IPAddress"], values["MAC"]
     logger.debug("Updating lease for IP %s and MAC %s", ip, mac)
-    with connection.begin():
+    with engine.connect() as connection, connection.begin():
         # TODO: Use INSERT ON CONFLICT UPDATE on newer SQLAlchemy (>= 1.1)
         lease_table = context.dhcp_lease_table
         old_values = query_lease_for_update(connection, lease_table, ip)
