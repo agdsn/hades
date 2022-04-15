@@ -1,4 +1,5 @@
 *.busconfig
 *.dbus-service
 *.service
+*.socket
 *.tmpfile

@@ -1,0 +1,28 @@
+[Unit]
+Description=Hades auth DHCP lease management (accepting commands from `hades-dhcp-script`)
+Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+After=hades-database.service
+# db required for startup because we need a connection from the get-go
+Requires=hades-database.service
+# we could have bound to hades-auth-dhcp.service, but it might be useful
+# to just be able to stop the dnsmasq and leave this server running,
+# so it's more lenient to only propagate a stop on `hades.service`.
+BindsTo=hades.service
+JoinsNamespaceOf=hades-auth-netns.service
+
+[Service]
+Type=simple
+SyslogIdentifier=hades-auth-dhcp-leases
+EnvironmentFile=@systemdenvfile@
+ExecStart=@bindir@/hades-lease-server
+Restart=always
+RestartSec=5
+User=@AUTH_DHCP_USER@
+
+PrivateNetwork=yes
+
+RuntimeDirectory=hades/auth-dhcp
+RuntimeDirectoryMode=2750
+RuntimeDirectoryPreserve=yes

@@ -4,6 +4,11 @@ Documentation=https://agdsn.github.io/hades/
 PartOf=hades.service
 ReloadPropagatedFrom=hades.service
 Before=hades.service
+# The socket is strictly required for startup because dnsmasq needs to call
+# `hades-dhcp-script init` initially
+After=hades-auth-dhcp-leases.socket
+Requires=hades-auth-dhcp-leases.socket
+BindsTo=hades-auth-dhcp-leases.socket
 After=hades-auth-netns.service
 BindsTo=hades-auth-netns.service
 JoinsNamespaceOf=hades-auth-netns.service
