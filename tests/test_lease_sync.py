@@ -6,6 +6,7 @@ from netaddr import EUI, IPAddress
 
 from hades.bin.dhcp_script import perform_lease_update, obtain_lease_info, \
     LeaseArguments
+from hades.common.db import auth_dhcp_lease
 
 r"""
 This tests the functionality that is responsible to persist the `dnsmasq`
@@ -85,6 +86,7 @@ def test_trivial_lease_update_does_nothing(conn_mock):
     }
     result = perform_lease_update(
         conn_mock,
+        dhcp_lease_table=auth_dhcp_lease,
         ip=netaddr.IPAddress('141.30.1.1'),
         mac=netaddr.EUI('00:de:ad:be:ef:00'),
         old=values,
