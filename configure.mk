@@ -150,6 +150,7 @@ $(call add_substitution, PORTAL_UWSGI_SOCKET, $(pkgrunstatedir)/unauth-portal/uw
 $(call add_substitution, RADIUS_CLIENTS_FILE, $(pkglocalstatedir)/radius/clients.conf)
 $(call add_substitution, RADIUS_PID_FILE, $(pkgrunstatedir)/radius/radiusd.pid)
 $(call add_substitution, UNAUTH_DHCP_LEASE_FILE, $(pkgrunstatedir)/unauth-dns/dnsmasq-dhcp.leases)
+$(call add_substitution, UNAUTH_DHCP_SCRIPT_SOCKET, $(pkgrunstatedir)/unauth-dhcp/script.sock)
 $(call add_substitution, UNAUTH_DNS_PID_FILE, $(pkgrunstatedir)/unauth-dns/dnsmasq.pid)
 
 # ----- #
@@ -267,6 +268,8 @@ CONFIGURE_FILES = \
     conf/hades-refresh.service \
     conf/hades-root-vrrp.service \
     conf/hades-root-netns.service \
+    conf/hades-unauth-dhcp-leases.service \
+    conf/hades-unauth-dhcp-leases.socket \
     conf/hades-unauth-dns.service \
     conf/hades-unauth-http.service \
     conf/hades-unauth-netns.service \
