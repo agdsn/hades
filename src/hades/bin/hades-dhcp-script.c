@@ -60,8 +60,9 @@ static void print_usage(void) {
         "Sends its command-line arguments, environment variables starting\n"
         "with DNSMASQ_ and the stdin/stdout file descriptors to the UNIX\n"
         "socket set via the " SOCKET_OPTION " environment\n"
-        "variable (defaults to " AUTH_DHCP_SCRIPT_SOCKET ").\n"
+        "variable (see `systemctl list-units hades-\\*.socket` for running lease-server sockets).\n"
         "\n"
+        "Use the `init` command to print out the current state of leases.\n"
         "See the -6, --dhcp-script options of dnsmasq for details.\n",
         stderr
     );
@@ -113,14 +114,20 @@ int main(int argc, char *argv[]) {
         return EX_OK;
     }
 
-    const char *path = AUTH_DHCP_SCRIPT_SOCKET;
-
+    const char *path = NULL;
     // Find socket path and count environment variables
     int envc;
     for (envc = 0; environ[envc]; envc++) {
         if (strncmp(SOCKET_OPTION_EQ, environ[envc], strlen(SOCKET_OPTION_EQ)) == 0) {
             path = environ[envc] + strlen(SOCKET_OPTION_EQ);
         }
+    }
+    if (!path) {
+        fprintf(
+            stderr, "You need to set the " SOCKET_OPTION " environment variable!\n"
+            "Check `systemctl list-units hades-\\*.socket` for running lease-server sockets.\n"
+        );
+        return EX_USAGE;
     }
 
     struct sockaddr_un addr = { .sun_family = AF_UNIX };

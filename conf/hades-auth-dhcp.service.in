@@ -18,6 +18,7 @@ Type=dbus
 BusName=@AUTH_DHCP_DBUS_NAME@
 SyslogIdentifier=hades-auth-dhcp
 EnvironmentFile=@systemdenvfile@
+Environment=HADES_DHCP_SCRIPT_SOCKET=@HADES_AUTH_DHCP_SCRIPT_SOCKET@
 ExecStartPre=@bindir@/hades-generate-config --group=@AUTH_DHCP_GROUP@ auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
 ExecStartPre=@DNSMASQ@ --test -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf $AUTH_DNSMASQ_OPTS
 ExecStart=@DNSMASQ@ -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf $AUTH_DNSMASQ_OPTS
