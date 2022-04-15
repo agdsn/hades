@@ -381,18 +381,22 @@ class NoStdoutOutputRun(BaseRun, abc.ABC):
 class PrematureExitRun(NoStdoutOutputRun, abc.ABC):
     @property
     def expected_stderr(self) -> bytes:
-        return inspect.cleandoc(
-            f"""
+        return (
+            inspect.cleandoc(
+                """
             hades-dhcp-script ARGS...
             
             Sends its command-line arguments, environment variables starting
             with DNSMASQ_ and the stdin/stdout file descriptors to the UNIX
             socket set via the HADES_DHCP_SCRIPT_SOCKET environment
-            variable (defaults to {constants.AUTH_DHCP_SCRIPT_SOCKET}).
+            variable (see `systemctl list-units hades-\\*.socket` for running lease-server sockets).
 
+            Use the `init` command to print out the current state of leases.
             See the -6, --dhcp-script options of dnsmasq for details.
             """
-        ).encode("ascii")
+            ).encode("ascii")
+            + b"\n"
+        )
 
     def test_messages(self, messages: Optional[List[RECVMSG]]):
         assert messages is None
