@@ -266,7 +266,7 @@ class BaseRun(abc.ABC):
     def environ(self, server: socket.socket) -> Dict[bytes, bytes]:
         path = os.fsencode(server.getsockname())
         return collections.OrderedDict((
-            (b"HADES_AUTH_DHCP_SCRIPT_SOCKET", path),
+            (b"HADES_DHCP_SCRIPT_SOCKET", path),
         ))
 
     @pytest.fixture(scope="class")
@@ -387,7 +387,7 @@ class PrematureExitRun(NoStdoutOutputRun, abc.ABC):
             
             Sends its command-line arguments, environment variables starting
             with DNSMASQ_ and the stdin/stdout file descriptors to the UNIX
-            socket set via the HADES_AUTH_DHCP_SCRIPT_SOCKET environment
+            socket set via the HADES_DHCP_SCRIPT_SOCKET environment
             variable (defaults to {constants.AUTH_DHCP_SCRIPT_SOCKET}).
 
             See the -6, --dhcp-script options of dnsmasq for details.
@@ -596,7 +596,7 @@ class TestSuccess(ConnectedRun, SuccessfulRun, NoStdoutOutputRun):
             (b"DNSMASQ_PREFIX_ENV", b"2"),
             (b"DNSMASQ_PREFIX_WITH_WHITESPACE", b" \twith\t whitespace\t "),
             (b"DNSMASQ_CHARACTERS", bytes(range(0x01, 0x100))),
-            (b"HADES_AUTH_DHCP_SCRIPT_SOCKET", path),
+            (b"HADES_DHCP_SCRIPT_SOCKET", path),
         ))
 
 
