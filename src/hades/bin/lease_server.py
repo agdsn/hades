@@ -7,7 +7,7 @@ import sys
 from typing import List
 
 from sqlalchemy.exc import DBAPIError
-from systemd.daemon import listen_fds, is_socket_unix
+from systemd.daemon import listen_fds, is_socket_unix, notify
 
 from hades import constants
 from hades.common import db
@@ -82,6 +82,9 @@ def main():
         return os.EX_TEMPFAIL
 
     server = Server(sock, engine)
+    # if the status notification could not be sent (i.e. if this script is run directly as opposed
+    # to being run by systemd), this just returns `False` and can be ignored
+    notify("READY=1")
     server.serve_forever()
     return os.EX_OK
 

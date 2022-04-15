@@ -13,7 +13,7 @@ BindsTo=hades.service
 JoinsNamespaceOf=hades-auth-netns.service
 
 [Service]
-Type=simple
+Type=notify
 SyslogIdentifier=hades-auth-dhcp-leases
 EnvironmentFile=@systemdenvfile@
 ExecStart=@bindir@/hades-lease-server
