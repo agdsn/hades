@@ -4,6 +4,7 @@ import logging
 import os
 import socket
 import sys
+from typing import List
 
 from sqlalchemy.exc import DBAPIError
 from systemd.daemon import listen_fds, is_socket_unix
@@ -42,7 +43,8 @@ def main():
     except ConfigError as e:
         print_config_error(e)
         return os.EX_CONFIG
-    fds = listen_fds()
+    fds: List[int] = listen_fds()
+    sock: socket.socket
     if len(fds) == 0:
         logger.info(
             "Opening UNIX socket at %s.", SCRIPT_SOCKET,
@@ -55,13 +57,15 @@ def main():
         sock.bind(SCRIPT_SOCKET)
         sock.listen(Server.request_queue_size)
     elif len(fds) == 1:
-        logger.info("Using systemd activation socket")
-        sock = fds[0]
+        [fd] = fds
+        logger.info("Using systemd activation socket (fd/%d)", fd)
+        sock = socket.fromfd(fd, socket.AF_UNIX, socket.SOCK_STREAM)
         if not is_socket_unix(sock, socket.SOCK_STREAM):
             logger.critical(
                 "Passed socket is not an AF_UNIX SOCK_STREAM socket"
             )
             return os.EX_USAGE
+        sock.listen(Server.request_queue_size)
     else:
         logger.critical(
             "More than one (%d) socket passed via socket activation", len(fds),
