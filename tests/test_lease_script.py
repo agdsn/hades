@@ -56,18 +56,21 @@ def socket_path() -> bytes:
     return os.fsencode(tempfile.mktemp(prefix="hades-", suffix=".sock"))
 
 
-def read_int_sysctl(variable: str) -> int:
-    with (pathlib.PosixPath("/proc/sys") / variable).open("rb", 0) as f:
-        return int(f.read())
+def read_int_sysctl(variable: str) -> Optional[int]:
+    try:
+        with (pathlib.PosixPath("/proc/sys") / variable).open("rb", 0) as f:
+            return int(f.read())
+    except FileNotFoundError:
+        return None
 
 
 @pytest.fixture(scope="session")
-def optmem_max() -> int:
+def optmem_max() -> Optional[int]:
     return read_int_sysctl("net/core/optmem_max")
 
 
 @pytest.fixture(scope="session")
-def wmem_default() -> int:
+def wmem_default() -> Optional[int]:
     return read_int_sysctl("net/core/wmem_default")
 
 
@@ -95,6 +98,8 @@ def server(socket_path) -> socket.socket:
 def test_short_write_possible(wmem_default):
     """On Linux only the sender can influence the size of a Unix stream socket
     buffer."""
+    if not wmem_default:
+        pytest.skip("`wmem_default` not available")
     got = os.sysconf("SC_ARG_MAX")
     expected = wmem_default + mmap.PAGESIZE
     assert got > expected, "Cannot test short writes"
@@ -300,7 +305,10 @@ class BaseRun(abc.ABC):
             uid: int,
             gid: int,
     ) -> Result:
-
+        if not wmem_default or not optmem_max:
+            pytest.skip(
+                "could not read relevant kernel parameters (wmem_default/optmem_max)"
+            )
         return trio.run(
             run_with_trio,
             executable,
@@ -586,6 +594,8 @@ class TestSuccess(ConnectedRun, SuccessfulRun, NoStdoutOutputRun):
         executable: pathlib.PosixPath,
         wmem_default: int,
     ) -> List[bytes]:
+        if not wmem_default:
+            pytest.skip("could not read wmem_default")
         random_args = random.randbytes(2 * wmem_default).split(b"\x00")
         return [
             bytes(executable),
