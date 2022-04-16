@@ -478,7 +478,7 @@ class HADES_AUTH_BRIDGE(Option):
     """Name of the auth bridge interface"""
     type = str
     default = "br-auth"
-    static_check = check.match('\A[A-Za-z0-9_-]{1,15}\Z', re.ASCII)
+    static_check = check.match(r"\A[A-Za-z0-9_-]{1,15}\Z", re.ASCII)
 
 
 class HADES_AUTH_NEXT_HOP(Option):
@@ -544,7 +544,7 @@ class HADES_UNAUTH_BRIDGE(Option):
     """Name of the unauth bridge interface"""
     type = str
     default = "br-unauth"
-    static_check = check.match('\A[A-Za-z0-9_-]{1,15}\Z', re.ASCII)
+    static_check = check.match(r"\A[A-Za-z0-9_-]{1,15}\Z", re.ASCII)
 
 
 class HADES_UNAUTH_LISTEN(Option):
