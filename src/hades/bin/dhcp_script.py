@@ -20,6 +20,7 @@ from sqlalchemy.engine.result import RowProxy
 from hades import constants
 from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
 from hades.common.db import (
+    auth_dhcp_lease,
     create_engine,
     get_all_dhcp_leases,
 )
@@ -444,16 +445,16 @@ class Context:
     stderr: TextIO
     environ: Mapping[str, str]
     environb: Mapping[bytes, bytes]
-
-    from hades.common.db import auth_dhcp_lease
     #: Can be either :ref:`hades.db.unauth_dhcp_leases` or :ref:`hades.db.auth_dhcp_leases`
-    # TODO don't hardcode
-    dhcp_lease_table = auth_dhcp_lease
+    dhcp_lease_table: Table
 
 
 def main():
     import sys
-    logger.warning("Running in standalone mode. This is meant for development purposes only.")
+    logger.warning(
+        "Running in standalone mode."
+        " This is meant for development purposes, and only works with `auth-dhcp` leases."
+    )
     # When dnsmasq starts, it calls init before dropping privileges
     if os.geteuid() == 0:
         try:
@@ -480,6 +481,8 @@ def main():
             stderr=sys.stderr,
             environ=os.environ,
             environb=os.environb,
+            # this is hardcoded because we don't really care about standalone mode anyway.
+            dhcp_lease_table=auth_dhcp_lease,
         ),
         engine,
     )

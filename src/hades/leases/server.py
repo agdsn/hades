@@ -219,9 +219,10 @@ class Server(socketserver.UnixStreamServer):
     """
     max_packet_size = mmap.PAGESIZE - 1
 
-    def __init__(self, sock, engine):
+    def __init__(self, sock, engine, dhcp_lease_table):
         self.parser = create_parser(standalone=False)
         self.engine = engine
+        self.dhcp_lease_table = dhcp_lease_table
         server_address = sock.getsockname()
         super().__init__(
             server_address, self._request_handler, bind_and_activate=False,
@@ -537,6 +538,7 @@ class Server(socketserver.UnixStreamServer):
                 stdin=stdin, stdout=stdout, stderr=stderr,
                 environ={decode(k): decode(v) for k, v in env.items()},
                 environb=env,
+                dhcp_lease_table=self.dhcp_lease_table,
             ),
             engine=self.engine,
         )
