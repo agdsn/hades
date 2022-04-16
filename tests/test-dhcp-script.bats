@@ -73,6 +73,7 @@ setup_env_from_fixtures() {
 	env[DNSMASQ_VENDOR_CLASS]="${vendor_class}"
 	env[DNSMASQ_REQUESTED_OPTIONS]="$(join ',' "${requested_options[@]}")"
 	set_user_classes env "${user_classes[@]}"
+	set_dhcp_script_socket env
 }
 
 set_user_classes() {
@@ -82,6 +83,11 @@ set_user_classes() {
 		env["DNSMASQ_USER_CLASS$i"]="$1"
 		shift
 	done
+}
+
+set_dhcp_script_socket() {
+	[[ $1 != env ]] && local -n env="$1"
+	env[HADES_DHCP_SCRIPT_SOCKET]="/run/hades/auth-dhcp/script.sock"
 }
 
 lease_count() {
@@ -173,9 +179,10 @@ assert_user_classes() {
 
 @test "check the output of init" {
 	insert_lease
-	printf "%s\n" $(define_user_classes "${user_classes[@]}")
+	printf "%s\n" "$(set_user_classes "${user_classes[@]}")"
 
 	local -A env=()
+	set_dhcp_script_socket env
 	run execute_auth_script env init
 
 	echo "$output"
@@ -192,6 +199,7 @@ assert_user_classes() {
 		[DNSMASQ_RELAY_ADDRESS]="${relay_ip_address}"
 		[DNSMASQ_CLIENT_ID]="${client_id}"
 	)
+  set_dhcp_script_socket env
 
 	run execute_auth_script env del "${mac_address}" "${ip_address}" "${hostname}"
 
