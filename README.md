@@ -55,3 +55,19 @@ touch /build/hades/setup.py
 ```
 and then rebuild.
 </details>
+
+Misc
+====
+<details><summary>Drawing a systemd unit dependency graph</summary>
+
+Inside the docker container:
+```shell
+sydstemd-analyze dot --to-pattern='hades*' > hades.dot
+```
+
+Then on your system (assuming it has `dot` installed):
+```shell
+dot -Tsvg <(<hades.dot | grep -v 'target') > hades.svg
+xdg-open hades.svg
+```
+</details>
