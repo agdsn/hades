@@ -118,6 +118,9 @@ refresh() {
 	systemctl start --wait hades-refresh.service
 }
 
+python() {
+  python3 "$@"
+}
 netaddr.broadcast() {
 	python -c "import sys, netaddr; print(netaddr.IPNetwork(sys.argv[1]).broadcast)" "$1"
 }
