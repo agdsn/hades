@@ -17,10 +17,13 @@ from sqlalchemy.engine import Engine
 from hades.common.db import (
     Attributes, DatetimeRange, Groups, create_engine,
     get_all_auth_dhcp_leases as do_get_all_auth_dhcp_leases,
+    get_all_unauth_dhcp_leases as do_get_all_unauth_dhcp_leases,
     get_auth_attempts_at_port as do_get_auth_attempts_at_port,
     get_auth_attempts_of_mac as do_get_auth_attempts_of_mac,
     get_auth_dhcp_lease_of_ip as do_get_auth_dhcp_lease_of_ip,
+    get_unauth_dhcp_lease_of_ip as do_get_unauth_dhcp_lease_of_ip,
     get_auth_dhcp_leases_of_mac as do_get_auth_dhcp_leases_of_mac,
+    get_unauth_dhcp_leases_of_mac as do_get_unauth_dhcp_leases_of_mac,
     get_sessions_of_mac as do_get_sessions_of_mac,
 )
 from hades.config import get_config
@@ -336,6 +339,28 @@ def get_auth_dhcp_leases(
 
 
 @rpc_task()
+def get_unauth_dhcp_leases(
+    subnet: Optional[str] = None,
+    limit: Optional[int] = 100,
+) -> Optional[List[Tuple[float, str, str, Optional[str]]]]:
+    if subnet is not None:
+        subnet = check_ip_network("subnet", subnet)
+    if limit is not None:
+        limit = check_positive_int("limit", limit)
+    with engine.connect() as connection:
+        leases = do_get_all_unauth_dhcp_leases(connection, subnet, limit)
+    return [
+        (
+            expires_at.timestamp(),
+            str(mac),
+            str(ip),
+            hostname,
+        )
+        for expires_at, mac, ip, hostname in leases
+    ]
+
+
+@rpc_task()
 def get_auth_dhcp_leases_of_ip(
     ip: str,
 ) -> Optional[Tuple[float, str, Optional[str], Optional[str]]]:
@@ -350,15 +375,51 @@ def get_auth_dhcp_leases_of_ip(
 
 
 @rpc_task()
+def get_unauth_dhcp_leases_of_ip(
+    ip: str,
+) -> Optional[Tuple[float, str, Optional[str], Optional[str]]]:
+    ip = check_ip_address("ip", ip)
+    with engine.connect() as connection:
+        result = do_get_unauth_dhcp_lease_of_ip(connection, ip)
+    if result is None:
+        return None
+    expires_at, mac, hostname, client_id = result
+    return expires_at.timestamp(), str(mac), hostname, client_id
+
+
+@rpc_task()
 def get_auth_dhcp_leases_of_mac(
     mac: str,
 ) -> Optional[List[Tuple[float, str, Optional[str]]]]:
     mac = check_mac("mac", mac)
     with contextlib.closing(engine.connect()) as connection:
-        return list(starmap(
-            lambda expires_at, ip, hostname:
-                (expires_at.timestamp(), str(ip), hostname),
-            do_get_auth_dhcp_leases_of_mac(connection, mac)))
+        return list(
+            starmap(
+                lambda expires_at, ip, hostname: (
+                    expires_at.timestamp(),
+                    str(ip),
+                    hostname,
+                ),
+                do_get_auth_dhcp_leases_of_mac(connection, mac),
+            )
+        )
+
+
+@rpc_task()
+def get_unauth_dhcp_leases_of_mac(
+    mac: str,
+) -> Optional[List[Tuple[float, str, Optional[str]]]]:
+    mac = check_mac("mac", mac)
+    with engine.connect() as connection:
+        leases = do_get_unauth_dhcp_leases_of_mac(connection, mac)
+    return [
+        (
+            expires_at.timestamp(),
+            str(ip),
+            hostname,
+        )
+        for expires_at, ip, hostname in leases
+    ]
 
 
 def dict_from_attributes(
