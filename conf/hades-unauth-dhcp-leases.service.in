@@ -3,6 +3,9 @@ Description=Hades unauth DHCP lease management (accepting commands from `hades-d
 Documentation=https://agdsn.github.io/hades/
 PartOf=hades.service
 ReloadPropagatedFrom=hades.service
+# After= is implicitly added, however that doesn't ensure that thes unit is started
+# exclusively by the socket (which needs to be accessible as an fd for the operation of this unit).
+BindsTo=hades-unauth-dhcp-leases.socket
 After=hades-database.service
 # db required for startup because we need a connection from the get-go
 Requires=hades-database.service
