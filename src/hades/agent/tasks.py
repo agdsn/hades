@@ -295,7 +295,7 @@ def get_auth_attempts_at_port(
     nas_port_id: str,
     when: Optional[TimestampRange] = None,
     limit: Optional[int] = 100,
-) -> Optional[List[Tuple[str, str, Groups, Attributes, float]]]:
+) -> List[Tuple[str, str, Groups, Attributes, float]]:
     """Get the authentication attempts at a given port ordered by
     ``Auth-Date``
 
@@ -326,7 +326,15 @@ def get_auth_attempts_at_port(
 def get_auth_dhcp_leases(
     subnet: Optional[str] = None,
     limit: Optional[int] = 100,
-) -> Optional[List[Tuple[float, str, str, Optional[str]]]]:
+) -> List[Tuple[float, str, str, Optional[str]]]:
+    """Return all auth leases.
+
+    :param subnet: Limit leases to subnet
+    :param limit: Maximum number of leases
+    :return: A list of (Expires-At, MAC, IP-Address, Hostname,
+        Client-ID)-tuples
+    :raises ArgumentError: if illegal arguments are provided
+    """
     if subnet is not None:
         subnet = check_ip_network("subnet", subnet)
     if limit is not None:
@@ -342,7 +350,15 @@ def get_auth_dhcp_leases(
 def get_unauth_dhcp_leases(
     subnet: Optional[str] = None,
     limit: Optional[int] = 100,
-) -> Optional[List[Tuple[float, str, str, Optional[str]]]]:
+) -> List[Tuple[float, str, str, Optional[str]]]:
+    """Return all unauth leases.
+
+    :param subnet: Limit leases to subnet
+    :param limit: Maximum number of leases
+    :return: A list of (Expires-At, MAC, IP-Address, Hostname,
+        Client-ID)-tuples
+    :raises ArgumentError: if illegal arguments are provided
+    """
     if subnet is not None:
         subnet = check_ip_network("subnet", subnet)
     if limit is not None:
@@ -364,6 +380,13 @@ def get_unauth_dhcp_leases(
 def get_auth_dhcp_leases_of_ip(
     ip: str,
 ) -> Optional[Tuple[float, str, Optional[str], Optional[str]]]:
+    """Get basic auth lease information for a given IP.
+
+    :param ip: IP address
+    :return: An iterator of (Expiry-Time, MAC, Hostname, Client-ID)-tuples or
+        None
+    :raises ArgumentError: if illegal arguments are provided
+    """
     ip = check_ip_address("ip", ip)
     with contextlib.closing(engine.connect()) as connection:
         result = do_get_auth_dhcp_lease_of_ip(connection, ip)
@@ -378,6 +401,13 @@ def get_auth_dhcp_leases_of_ip(
 def get_unauth_dhcp_leases_of_ip(
     ip: str,
 ) -> Optional[Tuple[float, str, Optional[str], Optional[str]]]:
+    """Get basic unauth lease information for a given IP.
+
+    :param ip: IP address
+    :return: An iterator of (Expiry-Time, MAC, Hostname, Client-ID)-tuples or
+        None
+    :raises ArgumentError: if illegal arguments are provided
+    """
     ip = check_ip_address("ip", ip)
     with engine.connect() as connection:
         result = do_get_unauth_dhcp_lease_of_ip(connection, ip)
@@ -390,7 +420,14 @@ def get_unauth_dhcp_leases_of_ip(
 @rpc_task()
 def get_auth_dhcp_leases_of_mac(
     mac: str,
-) -> Optional[List[Tuple[float, str, Optional[str]]]]:
+) -> List[Tuple[float, str, Optional[str]]]:
+    """Get basic information about all auth leases of a given MAC.
+
+    :param mac: MAC address
+    :return: A list of (Expiry-Time, IP-Address, Hostname,
+        Client-ID)-tuples ordered by Expiry-Time descending
+    :raises ArgumentError: if illegal arguments are provided
+    """
     mac = check_mac("mac", mac)
     with contextlib.closing(engine.connect()) as connection:
         return list(
@@ -408,7 +445,14 @@ def get_auth_dhcp_leases_of_mac(
 @rpc_task()
 def get_unauth_dhcp_leases_of_mac(
     mac: str,
-) -> Optional[List[Tuple[float, str, Optional[str]]]]:
+) -> List[Tuple[float, str, Optional[str]]]:
+    """Get basic information about all unauth leases of a given MAC.
+
+    :param mac: MAC address
+    :return: A list of (Expiry-Time, IP-Address, Hostname,
+        Client-ID)-tuples ordered by Expiry-Time descending
+    :raises ArgumentError: if illegal arguments are provided
+    """
     mac = check_mac("mac", mac)
     with engine.connect() as connection:
         leases = do_get_unauth_dhcp_leases_of_mac(connection, mac)
