@@ -219,7 +219,7 @@ async def run_with_trio(
     messages = None
     sent = None
     with trio.move_on_after(TIMEOUT):
-        process = await trio.open_process(
+        process = await trio.lowlevel.open_process(
             argv,
             executable=executable,
             env=environ,
