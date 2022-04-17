@@ -159,7 +159,7 @@ class develop(old_develop):
         super().install_for_development()
         for executable in self.distribution.executables:
             self.copy_file(
-                os.path.join(self.build_platlib, executable.sources),
+                os.path.join(self.build_dir, executable.name),
                 os.path.join(self.install_dir, executable.name),
                 link='sym',
             )
