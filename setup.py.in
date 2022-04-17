@@ -4,6 +4,7 @@ from distutils.command.build import build
 from distutils.command.install import install
 from distutils.core import Command
 import os
+import pathlib
 import stat
 
 from setuptools import (
@@ -158,11 +159,15 @@ class develop(old_develop):
         self.run_command('build_exe')
         super().install_for_development()
         for executable in self.distribution.executables:
-            self.copy_file(
-                os.path.join(self.build_dir, executable.name),
-                os.path.join(self.install_dir, executable.name),
-                link='sym',
-            )
+            src = pathlib.PosixPath(self.build_dir, executable.name)
+            dest = pathlib.PosixPath(self.install_dir, executable.name)
+            if dest.is_symlink() and dest.readlink() == src:
+                continue
+            elif dest.exists():
+                log.info("Unlinking %s", dest)
+                if not self.dry_run:
+                    dest.unlink()
+            self.copy_file(src, dest, link='sym')
 
 
 setup(name='@PACKAGE_NAME@',
