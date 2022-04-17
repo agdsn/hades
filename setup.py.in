@@ -141,6 +141,18 @@ install.sub_commands.append(("install_exe", lambda _: True))
 class develop(old_develop):
     __doc__ = old_develop.__doc__
 
+    # noinspection PyAttributeOutsideInit
+    def initialize_options(self):
+        super().initialize_options()
+        self.build_dir = None
+
+    def finalize_options(self):
+        super().finalize_options()
+        self.set_undefined_options(
+            'build',
+            ('build_platlib', 'build_dir'),
+        )
+
     def install_for_development(self):
         # Make sure executables have been built.
         self.run_command('build_exe')
