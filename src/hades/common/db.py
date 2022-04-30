@@ -11,7 +11,6 @@ from typing import (
     Tuple,
     TypeVar,
     Generic,
-    NamedTuple,
 )
 
 import netaddr
@@ -987,3 +986,45 @@ def get_unauth_dhcp_leases_of_mac(
     """
     logger.debug("Getting unauth DHCP leases for MAC %s", mac)
     return get_dhcp_leases_of_mac(unauth_dhcp_lease, connection, mac)
+
+
+@dataclass(frozen=True)
+class LeaseInfo:
+    __slots__ = ("ip", "mac")
+    ip: netaddr.IPAddress
+    mac: netaddr.EUI
+
+    def __str__(self):
+        return f"{self.ip} / {self.mac}"
+
+
+def get_all_invalid_auth_dhcp_leases(
+    connection: Connection,
+) -> Iterator[LeaseInfo]:
+    """
+    Get all auth DHCP leases which do not belong to a host reservation
+    as given in ``auth_dhcp_lease``.
+
+    :param connection: A SQLAlchemy connection
+    :return: an iterator of (IPAddress, MAC) tuples.
+    """
+    logger.debug("Getting invalid auth DHCP leases")
+    query = (
+        select(
+            [
+                auth_dhcp_lease.c.IPAddress,
+                auth_dhcp_lease.c.MAC,
+            ]
+        )
+        .select_from(
+            auth_dhcp_lease.outerjoin(
+                auth_dhcp_host,
+                and_(
+                    auth_dhcp_lease.c.MAC == auth_dhcp_host.c.MAC,
+                    auth_dhcp_lease.c.IPAddress == auth_dhcp_host.c.IPAddress,
+                ),
+            )
+        )
+        .where(auth_dhcp_host.c.MAC.is_(None))
+    )
+    return (LeaseInfo(ip, mac) for ip, mac in connection.execute(query))

@@ -21,7 +21,7 @@ import subprocess
 import tempfile
 import textwrap
 from functools import partial
-from typing import Iterable, Optional, Tuple, Union, overload, Iterator
+from typing import Iterable, Optional, Tuple, Union, overload, Iterator, List
 
 import netaddr
 from gi.repository import GLib
@@ -37,7 +37,7 @@ from hades.common.db import (
     auth_dhcp_lease,
     get_dhcp_lease_of_ip,
     unauth_dhcp_lease,
-    ObjectsDiff,
+    ObjectsDiff, LeaseInfo,
 )
 from hades.common.glib import typed_glib_error
 from hades.common.privileges import dropped_privileges
@@ -350,11 +350,15 @@ class HadesDeputyService(object):
           of the ``nas`` table has changed.
         * The alternative DNS ipset is regenerated regardless of whether the content
           of the ``alternative_dns`` table has changed.
+        * Instead of invalidating leases which were modified in the `auth_dhcp_hosts`
+          reservation table, we invalidate every lease in `auth_dhcp_leases`
+          which does not belong to a host reservation.
 
         :param force: Whether to use the forced refresh.
         """
         reload_auth_dhcp_host: bool  # if set, we want `hosts: List`
         hosts: Optional[Iterator[...]]  # set iff `reload_auth_dhcp_host`
+        auth_leases_to_invalidate: List[LeaseInfo] = []
 
         reload_nas: bool  # if set, we want `clients: List`
         clients: Optional[Iterator[...]]  # set iff `reload_nas`
@@ -380,6 +384,9 @@ class HadesDeputyService(object):
                 reload_auth_dhcp_host = True
                 reload_nas = True
                 reload_alternative_dns = True
+                auth_leases_to_invalidate = list(
+                    db.get_all_invalid_auth_dhcp_leases(connection)
+                )
                 hosts = db.get_all_auth_dhcp_hosts(connection)
                 clients = db.get_all_nas_clients(connection)
                 ips = db.get_all_alternative_dns_ips(connection)
@@ -407,6 +414,11 @@ class HadesDeputyService(object):
                         f"{auth_dhcp_host_diff:l}",
                     )
                     hosts = db.get_all_auth_dhcp_hosts(connection)
+                    auth_leases_to_invalidate = [
+                        LeaseInfo(old_ip, old_mac)
+                        for old_ip, old_mac, _, _
+                        in auth_dhcp_host_diff.deleted + auth_dhcp_host_diff.modified
+                    ]
                     reload_auth_dhcp_host = True
                 else:
                     reload_auth_dhcp_host = False
@@ -438,10 +450,20 @@ class HadesDeputyService(object):
                 else:
                     reload_alternative_dns = False
 
+        if auth_leases_to_invalidate:
+            logger.info(
+                "Releasing %d invalid leases",
+                len(auth_leases_to_invalidate),
+            )
+            server_ip = self.config.HADES_AUTH_LISTEN[0].ip
+            for lease in auth_leases_to_invalidate:
+                logger.debug("Releasing lease %s", lease)
+                # potential optimization: batched packet sending
+                release_dhcp_lease(server_ip, lease.ip, lease.mac)
         if reload_auth_dhcp_host:
             assert hosts is not None
             generate_auth_dhcp_hosts_file(hosts)
-            reload_systemd_unit(self.bus, 'hades-auth-dhcp.service')
+            reload_systemd_unit(self.bus, "hades-auth-dhcp.service")
         if reload_nas:
             assert clients is not None
             generate_radius_clients_file(clients)
