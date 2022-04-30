@@ -25,6 +25,7 @@ from typing import Iterable, Optional, Tuple, Union, overload
 
 import netaddr
 from gi.repository import GLib
+from netaddr import EUI, IPAddress
 from pydbus import SystemBus
 from pydbus.bus import Bus
 from sqlalchemy import null
@@ -36,6 +37,7 @@ from hades.common.db import (
     auth_dhcp_lease,
     get_dhcp_lease_of_ip,
     unauth_dhcp_lease,
+    ObjectsDiff,
 )
 from hades.common.glib import typed_glib_error
 from hades.common.privileges import dropped_privileges
@@ -362,11 +364,18 @@ class HadesDeputyService(object):
                 clients = db.get_all_nas_clients(connection)
                 ips = db.get_all_alternative_dns_ips(connection)
             else:
-                auth_dhcp_host_diff = db.refresh_and_diff_materialized_view(
+                auth_dhcp_host_diff: ObjectsDiff[
+                    Tuple[IPAddress, EUI, IPAddress, EUI]
+                ] = db.refresh_and_diff_materialized_view(
                     connection,
                     db.auth_dhcp_host,
                     db.temp_auth_dhcp_host,
-                    [null()],
+                    [
+                        db.temp_auth_dhcp_host.c.IPAddress,  # old ip
+                        db.temp_auth_dhcp_host.c.MAC,  # old mac
+                        db.auth_dhcp_host.c.IPAddress,  # new ip
+                        db.auth_dhcp_host.c.MAC,  # new mac
+                    ],
                 )
                 if auth_dhcp_host_diff:
                     logger.info(
