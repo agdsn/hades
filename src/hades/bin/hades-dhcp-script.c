@@ -18,11 +18,6 @@
 
 extern char **environ;
 
-union int_union {
-    int i;
-    unsigned char u8[sizeof(int)];
-};
-
 #define DNSMASQ_PREFIX "DNSMASQ_"
 #define SOCKET_OPTION "HADES_AUTH_DHCP_SCRIPT_SOCKET"
 #define SOCKET_OPTION_EQ SOCKET_OPTION "="
