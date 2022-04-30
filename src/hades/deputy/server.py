@@ -490,7 +490,7 @@ class HadesDeputyService(object):
         """
         logger.info("Releasing auth DHCP lease for client %s", client_ip)
         return self._release_dhcp_lease(
-            auth_dhcp_lease, self.config.HADES_AUTH_LISTEN[0], client_ip
+            auth_dhcp_lease, self.config.HADES_AUTH_LISTEN[0].ip, client_ip
         )
 
     def ReleaseUnauthDhcpLease(self, client_ip: str) -> str:
@@ -501,7 +501,7 @@ class HadesDeputyService(object):
         """
         logger.info("Releasing unauth DHCP lease for client %s", client_ip)
         return self._release_dhcp_lease(
-            unauth_dhcp_lease, self.config.HADES_UNAUTH_LISTEN[0], client_ip
+            unauth_dhcp_lease, self.config.HADES_UNAUTH_LISTEN[0].ip, client_ip
         )
 
 
