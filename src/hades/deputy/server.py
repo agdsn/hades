@@ -7,6 +7,7 @@ other processes etc. need certain privileges. The Deputy service runs as *root*
 and provides a very simple service over DBus.
 """
 import contextlib
+import importlib.resources
 import io
 import logging
 import os
@@ -21,7 +22,6 @@ from functools import partial
 from typing import Iterable, Optional, Tuple
 
 import netaddr
-import pkg_resources
 from gi.repository import GLib
 from pydbus import SystemBus
 from pydbus.bus import Bus
@@ -212,8 +212,7 @@ class HadesDeputyService(object):
     and always queries the database itself, so that this service can't be
     misused.
     """
-    dbus = pkg_resources.resource_string(
-        __package__, 'interface.xml').decode('utf-8')
+    dbus = importlib.resources.read_text(__package__, "interface.xml")
     """DBus object introspection specification"""
 
     def __init__(self, bus: Bus, config: Config):
