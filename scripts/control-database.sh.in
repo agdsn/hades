@@ -18,7 +18,7 @@ Commands:
   clear                 Clear the database
 
 Options
-  -h --help             Print this message"
+  -h, --help            Print this message"
 }
 
 clear_pgdata() {
