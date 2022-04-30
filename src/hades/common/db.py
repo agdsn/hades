@@ -4,6 +4,7 @@ import operator
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone, tzinfo
 from typing import (
+    Collection,
     Iterable,
     Iterator,
     List,
@@ -468,6 +469,7 @@ def diff_tables(
     master: Table,
     copy: Table,
     result_columns: Iterable[Column],
+    unique_columns: Optional[Collection[Column]] = None,
 ) -> ObjectsDiff[Tuple]:
     """
     Compute the differences in the contents of two tables with identical
@@ -483,12 +485,14 @@ def diff_tables(
     :param master: Master table
     :param copy: Copy of master table
     :param result_columns: columns to return
+    :param unique_columns: The columns on which to base the diff. If not specified,
+        will try to make a meaningful decision based on existing table constraints.
     :return: True, if the contents differ, otherwise False
     """
     logger.debug('Calculating diff between "%s" and "%s"',
                  master.name, copy.name)
     result_columns = tuple(result_columns)
-    unique_columns = min(
+    unique_columns = unique_columns or min(
         (constraint.columns
          for constraint in master.constraints
          if isinstance(constraint, (UniqueConstraint, PrimaryKeyConstraint)) and
@@ -548,6 +552,7 @@ def refresh_and_diff_materialized_view(
     view: Table,
     copy: Table,
     result_columns: Iterable[Column],
+    unique_columns: Optional[Collection[Column]] = None,
 ) -> ObjectsDiff[Tuple]:
     """Lock the given `view` with an advisory lock, create a temporary table
     of the view, refresh the view and compute the difference.
@@ -556,6 +561,8 @@ def refresh_and_diff_materialized_view(
     :param view: The view to refresh and diff
     :param copy: A temporary table to create and diff
     :param result_columns: The columns to return
+    :param unique_columns: The columns on which to base the diff. If not specified,
+        will try to make a meaningful decision based on existing table constraints.
     :return: A 3-tuple containing three lists of tuples of the `result_columns`
         of added, deleted and modified records due to the refresh.
 
@@ -564,7 +571,7 @@ def refresh_and_diff_materialized_view(
         lock_table(connection, view)
         create_temp_copy(connection, view, copy)
         refresh_materialized_view(connection, view)
-        return diff_tables(connection, view, copy, result_columns)
+        return diff_tables(connection, view, copy, result_columns, unique_columns)
 
 
 def delete_old_sessions(connection: Connection, interval: timedelta):

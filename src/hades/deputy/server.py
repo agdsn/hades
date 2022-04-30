@@ -403,6 +403,7 @@ class HadesDeputyService(object):
                         db.auth_dhcp_host.c.IPAddress,  # new ip
                         db.auth_dhcp_host.c.MAC,  # new mac
                     ],
+                    unique_columns=(db.auth_dhcp_host.c.MAC, db.auth_dhcp_host.c.IPAddress),
                 )
                 if auth_dhcp_host_diff:
                     logger.info(
