@@ -9,7 +9,6 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 import celery
 import netaddr
 import pkg_resources
-from celery.signals import worker_process_init
 from celery.utils.functional import head_from_fun
 from celery.utils.log import get_task_logger
 from pydbus import SystemBus
@@ -39,7 +38,6 @@ TimestampRange = Tuple[Union[None, int, float], Union[None, int, float]]
 
 
 # noinspection PyUnusedLocal
-@worker_process_init.connect
 def setup_engine(sender, *args, **kwargs):
     global engine
     config = get_config()
