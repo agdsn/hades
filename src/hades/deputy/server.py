@@ -368,11 +368,14 @@ class HadesDeputyService(object):
                     db.temp_auth_dhcp_host,
                     [null()],
                 )
-                if auth_dhcp_host_diff != ([], [], []):
+                if auth_dhcp_host_diff:
                     logger.info(
-                        "Auth DHCP host reservations changed "
-                        "(%d added, %d deleted, %d modified).",
-                        *map(len, auth_dhcp_host_diff)
+                        "Auth DHCP host reservations changed (%s).",
+                        auth_dhcp_host_diff,
+                    )
+                    logger.debug(
+                        "Full host reservations diff:\n%s",
+                        f"{auth_dhcp_host_diff:l}",
                     )
                     hosts = db.get_all_auth_dhcp_hosts(connection)
                     reload_auth_dhcp_host = True
@@ -382,10 +385,11 @@ class HadesDeputyService(object):
                 nas_diff = db.refresh_and_diff_materialized_view(
                     connection, db.nas, db.temp_nas, [null()])
 
-                if nas_diff != ([], [], []):
-                    logger.info('RADIUS clients changed '
-                                '(%d added, %d deleted, %d modified).',
-                                *map(len, nas_diff))
+                if nas_diff:
+                    logger.info(
+                        "RADIUS clients changed (%s).",
+                        nas_diff,
+                    )
                     clients = db.get_all_nas_clients(connection)
                     reload_nas = True
                 else:
@@ -395,10 +399,11 @@ class HadesDeputyService(object):
                     connection, db.alternative_dns, db.temp_alternative_dns,
                     [null()])
 
-                if alternative_dns_diff != ([], [], []):
-                    logger.info('Alternative auth DNS clients changed '
-                                '(%d added, %d deleted, %d modified).',
-                                *map(len, alternative_dns_diff))
+                if alternative_dns_diff:
+                    logger.info(
+                        "Alternative auth DNS clients changed (%s).",
+                        alternative_dns_diff,
+                    )
                     ips = db.get_all_alternative_dns_ips(connection)
                     reload_alternative_dns = True
                 else:

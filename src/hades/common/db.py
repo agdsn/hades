@@ -1,8 +1,18 @@
 """Database utilities"""
 import logging
 import operator
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone, tzinfo
-from typing import Iterable, Iterator, List, Optional, Tuple
+from typing import (
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Generic,
+    NamedTuple,
+)
 
 import netaddr
 import psycopg2.extensions
@@ -426,12 +436,40 @@ def create_temp_copy(connection: Connection, source: Table, destination: Table):
     )
 
 
+T = TypeVar("T")
+
+
+@dataclass
+class ObjectsDiff(Generic[T]):
+    __slots__ = ("added", "deleted", "modified")
+    added: List[T]
+    deleted: List[T]
+    modified: List[T]
+
+    def __str__(self):
+        return f"{len(self.added)} added, {len(self.deleted)} deleted, {len(self.modified)} modified"
+
+    def __format__(self, spec):
+        if spec == "l":
+            return "\n".join(
+                [
+                    *(f"A {x}" for x in self.added),
+                    *(f"D {x}" for x in self.deleted),
+                    *(f"M {x}" for x in self.modified),
+                ]
+            )
+        return str(self)
+
+    def __bool__(self):
+        return any((self.added, self.deleted, self.modified))
+
+
 def diff_tables(
     connection: Connection,
     master: Table,
     copy: Table,
     result_columns: Iterable[Column],
-) -> Tuple[List[Tuple], List[Tuple], List[Tuple]]:
+) -> ObjectsDiff[Tuple]:
     """
     Compute the differences in the contents of two tables with identical
     columns.
@@ -490,7 +528,7 @@ def diff_tables(
     ).fetchall() if other_column_names else []
     logger.debug('Diff found %d added, %d deleted, and %d modified records',
                  len(added), len(deleted), len(modified))
-    return added, deleted, modified
+    return ObjectsDiff(added, deleted, modified)
 
 
 def refresh_materialized_view(connection: Connection, view: Table):
@@ -511,7 +549,7 @@ def refresh_and_diff_materialized_view(
     view: Table,
     copy: Table,
     result_columns: Iterable[Column],
-) -> Tuple[List[Tuple], List[Tuple], List[Tuple]]:
+) -> ObjectsDiff[Tuple]:
     """Lock the given `view` with an advisory lock, create a temporary table
     of the view, refresh the view and compute the difference.
 
