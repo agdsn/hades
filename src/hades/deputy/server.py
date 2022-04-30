@@ -339,8 +339,19 @@ class HadesDeputyService(object):
     def Refresh(self, force: bool) -> str:
         """Refresh the materialized views.
 
-        If necessary depended config files are regenerate and the corresponding
-        services are reloaded.
+        If necessary depended config files are regenerated and the corresponding services are reloaded.
+
+        The forced refresh is a little more aggressive in what it consolidates
+        to achieve eventual consistency:
+
+        * The host reservation file is regenerated regardless of whether the content
+          of the ``auth_dhcp_host`` table has changed.
+        * The radius config is regenerated regardless of whether the content
+          of the ``nas`` table has changed.
+        * The alternative DNS ipset is regenerated regardless of whether the content
+          of the ``alternative_dns`` table has changed.
+
+        :param force: Whether to use the forced refresh.
         """
         reload_auth_dhcp_host: bool  # if set, we want `hosts: List`
         hosts: Optional[Iterator[...]]  # set iff `reload_auth_dhcp_host`
