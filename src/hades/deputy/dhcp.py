@@ -1,12 +1,12 @@
 import ctypes
 import secrets
 import socket
-from contextlib import closing
+from contextlib import closing, contextmanager, nullcontext
 from typing import Optional
 
 import logging
 import netaddr
-
+from pyroute2.netns import pushns, popns
 
 logger = logging.getLogger(__name__)
 
@@ -122,6 +122,15 @@ class in_pktinfo(ctypes.Structure):
     )
 
 
+@contextmanager
+def netns(ns: str):
+    pushns(ns)
+    try:
+        yield
+    finally:
+        popns()
+
+
 def send_dhcp_packet(
         server_ip: netaddr.IPAddress, packet: bytearray,
         from_interface: Optional[str] = None,
@@ -160,6 +169,7 @@ def release_dhcp_lease(
         client_id: Optional[bytes] = None,
         from_interface: Optional[str] = None,
         from_ip: Optional[netaddr.IPAddress] = None,
+        ns: Optional[str] = 'auth',
 ):
     """
     Send a DHCPRELEASE packet to the given server_ip for lease of given
@@ -173,6 +183,14 @@ def release_dhcp_lease(
     :param client_id: Client identifier (optional)
     :param from_interface: Interface to send the packet from (optional)
     :param from_ip: IP address to send the packet from (optional)
+    :param ns: the netns you want to enter before sending the packet
     """
     packet = make_release_packet(server_ip, client_ip, client_mac, client_id)
-    send_dhcp_packet(server_ip, packet, from_interface, from_ip)
+    # We need to send the packet while in the `auth` netns, because that's where the DNSMasq listens on
+    # (specifically,`eth2`).  Although `eth2` is available in the `root` netns as `auth-eth2@…`,
+    # there is no route to the IP the dnsmasq listens on (or at least, its existence is not guaranteed).
+    #
+    # fun fact: this may have caused multiple DHCPRELEASEs to target the production hades instance
+    # because that's just where the `default` route directs you if you're in the office. Oops.
+    with netns(ns) if ns else nullcontext:
+        send_dhcp_packet(server_ip, packet, from_interface, from_ip)
