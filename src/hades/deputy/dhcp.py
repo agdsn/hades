@@ -65,7 +65,7 @@ def make_release_packet(
     :return: A DHCP packet
     """
     if server_ip.version != 4 or client_ip.version != 4:
-        raise ValueError("Illegal IP version")
+        raise ValueError(f"Illegal IP version in ips {server_ip}, {client_ip}")
     buf = bytearray(ctypes.sizeof(DHCPPacket))
     client_mac_packed = client_mac.packed
     packet = DHCPPacket.from_buffer(buf)
