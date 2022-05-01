@@ -1,0 +1,120 @@
+#!/usr/bin/env bats
+
+load common
+
+readonly old_hostname="Old and busted"
+readonly new_hostname="New hotness"
+readonly old_ip=141.30.228.30
+readonly new_ip=141.30.228.31
+readonly old_mac=00:de:ad:be:ef:00
+readonly new_mac=00:de:ad:be:ef:ff
+
+
+insert_auth_dhcp_host() {
+	eval "local -A reservation=${1#*=}"
+	psql foreign <<-EOF
+		TRUNCATE auth_dhcp_host;
+		INSERT INTO auth_dhcp_host ("MAC", "IPAddress", "Hostname")
+		VALUES ('$(mac_sextuple "${reservation[mac]}" :)', inet '${reservation[ip]}', '${reservation[hostname]}')
+	EOF
+}
+
+setup() {
+	declare -Ar host_reservation=(
+		[mac]=$(mac_sextuple ${old_mac} :)
+		[ip]=${old_ip}
+		[hostname]=${old_hostname}
+	)
+	insert_auth_dhcp_host "$(declare -p host_reservation)"
+	psql hades <<-EOF
+		truncate auth_dhcp_lease;
+		insert into auth_dhcp_lease ("MAC", "IPAddress", "ExpiresAt")
+		values ('$(mac_sextuple ${old_mac} :)', inet '${old_ip}', '2222-01-01');
+		refresh materialized view auth_dhcp_host;
+	EOF
+	systemctl restart hades-auth-dhcp
+	suspend_timers
+}
+
+teardown() {
+	sleep 2  # as to not anger the systemd timeouts (cleaner solution would be to deconfigure)
+	resume_timers
+}
+
+get_leases_csv() {
+	psql hades -q <<-EOF
+		\t on
+		\pset format csv
+		SELECT "IPAddress", "MAC" FROM auth_dhcp_lease
+	EOF
+}
+
+assert_leases() {
+	local -r expected="$1"; shift
+	local -r time_before=$(date +%s)
+	local -r leases=$(get_leases_csv)
+	while (( ($(date +%s) - time_before) < 5 ))
+	do
+		if [[ "$leases" == "$expected" ]]; then
+			return 0;
+		fi;
+		sleep 0.5;
+	done;
+	echo "$leases"
+	return 1;
+}
+
+@test "check that a refresh does not change a valid lease" {
+	refresh
+	assert_leases "${old_ip},${old_mac}"
+}
+
+@test "check that a forced refresh does not change a valid lease" {
+	forced_refresh
+	assert_leases "${old_ip},${old_mac}"
+}
+
+@test "check that deleting the reservation removes the lease" {
+	psql foreign -c 'TRUNCATE auth_dhcp_host'
+	refresh
+	assert_leases ""
+}
+
+@test "check that changing the hostname does not remove the lease" {
+	declare -Ar reservation=(
+		[mac]=${old_mac}
+		[ip]=${old_ip}
+		[hostname]=${new_hostname}
+	)
+	insert_auth_dhcp_host "$(declare -p reservation)"
+	refresh
+	assert_leases "${old_ip},${old_mac}"
+}
+
+@test "check that changing the IP removes the lease" {
+	declare -Ar reservation=(
+		[mac]=${old_mac}
+		[ip]=${new_ip}
+		[hostname]=${new_hostname}
+	)
+	insert_auth_dhcp_host "$(declare -p reservation)"
+	refresh
+	assert_leases ""
+}
+
+@test "check that completely changing the reservation removes the lease" {
+	declare -Ar reservation=(
+		[mac]=${new_mac}
+	)
+}
+
+@test "check that a forced refresh deletes an unknown lease" {
+	declare -Ar reservation=(
+		[mac]=${new_mac}
+		[ip]=${new_ip}
+		[hostname]=${new_hostname}
+	)
+	insert_auth_dhcp_host "$(declare -p reservation)"
+	forced_refresh
+	assert_leases ""
+}

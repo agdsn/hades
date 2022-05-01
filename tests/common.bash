@@ -118,6 +118,18 @@ refresh() {
 	systemctl start --wait hades-refresh.service
 }
 
+forced_refresh() {
+  systemctl start --wait hades-forced-refresh.service
+}
+
+suspend_timers() {
+  systemctl stop hades-\*.timer
+}
+
+resume_timers() {
+  systemctl start --all hades-\*.timer
+}
+
 python() {
   python3 "$@"
 }
