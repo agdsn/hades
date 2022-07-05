@@ -79,10 +79,12 @@ dnsmasq's DHCP leases are stored in the local PostgreSQL database through the
 The `dnsmasq man page <http://www.thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html>`_
 describes the details.
 
-There is a new DHCP server called *kea* also developed by ISC, which would be
-the perfect fit for Hades, as it will support reading host reservations from
-a relational database.
-See https://kea.isc.org/wiki/HostReservationDesign for the details.
+.. note ::
+
+   There is a new DHCP server called *kea* also developed by ISC, which would be
+   the perfect fit for Hades, as it will support reading host reservations from
+   a relational database.
+   See https://kea.isc.org/wiki/HostReservationDesign for the details.
 
 Unauth DNS (dnsmasq)
 ====================
