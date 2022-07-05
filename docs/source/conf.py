@@ -87,14 +87,17 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
+# see https://docs.readthedocs.io/en/stable/guides/intersphinx.html
+# you can check which items are exposed using `python -m sphinx.ext.intersphinx $URL/objects.inv`
+# (if the documentation has been built with sphinx).
 intersphinx_mapping = {
     'python':     ('https://docs.python.org/3/', None),
     'netaddr':    ('https://netaddr.readthedocs.io/en/latest/', None),
-    'flask':      ('http://flask.pocoo.org/docs/0.12/', None),
-    'jinja2':     ('http://jinja.pocoo.org/docs/2.10/', None),
-    'celery':     ('http://docs.celeryproject.org/en/latest/', None),
-    'psycopg2':   ('http://initd.org/psycopg/docs/', None),
-    'sqlalchemy': ('http://docs.sqlalchemy.org/en/latest/', None),
+    'flask':      ('https://flask.palletsprojects.com/en/1.1.x/', None),
+    'jinja2':     ('https://jinja.palletsprojects.com/en/2.11.x/', None),
+    'celery':     ('https://docs.celeryq.dev/en/stable/', None),
+    'psycopg2':   ('https://www.psycopg.org/docs/', None),
+    'sqlalchemy': ('https://docs.sqlalchemy.org/en/13/', None),
 }
 
 
