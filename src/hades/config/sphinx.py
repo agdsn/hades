@@ -5,6 +5,7 @@ from typing import Any
 
 import sphinx.ext.autodoc
 from docutils.parsers.rst.roles import CustomRole, code_role
+from sphinx.addnodes import desc_signature, desc_addname
 from sphinx.application import Sphinx
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
@@ -19,7 +20,7 @@ from hades.config.base import Compute, Option, OptionMeta, qualified_name
 logger = logging.getLogger(__name__)
 
 
-class OptionDirective(ObjectDescription):
+class OptionDirective(ObjectDescription[str]):
     doc_field_types = [
         Field('default', label='Default'),
         Field('required', label='Required'),
@@ -28,14 +29,27 @@ class OptionDirective(ObjectDescription):
         GroupedField('type', label='Types'),
     ]
 
-    def add_target_and_index(self, name, sig, signode):
+    def handle_signature(self, sig: str, signode: desc_signature) -> str:
+        """Parse the signature string.
+
+        In this case the “signature” just consists of the option name.
+
+        :param sig: The text coming directly after the directive: `.. option :: <sig>`
+        :param signode: The docutils node which has been prepared for us
+        """
+        return sig
+
+    def add_target_and_index(self, name: str, sig: str, signode: desc_signature) -> None:
         targetname = self.objtype + name
         if targetname not in self.state.document.ids:
             signode['names'].append(targetname)
             signode['ids'].append(targetname)
             signode['first'] = (not self.names)
             self.state.document.note_explicit_target(signode)
-            inv = self.env.domaindata[self.domain]['objects']
+            signode += desc_addname(name, name)
+
+            domaindata = self.env.domaindata[self.domain]
+            inv = domaindata.setdefault('objects', {})
             if name in inv:
                 self.state_machine.reporter.warning(
                     'duplicate option description of {}, other instance in {}'
@@ -43,8 +57,14 @@ class OptionDirective(ObjectDescription):
                     line=self.lineno)
             inv[name] = self.env.docname
 
-            self.indexnode['entries'].append(('pair: option; ' + name, name,
-                                              targetname, '', None))
+            # see https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#directive-index
+            self.indexnode['entries'].append((
+                'pair',  # entrytype
+                f"option; {name}",  # entryname
+                targetname,  # target
+                '',  # ignored
+                None,  # key
+            ))
 
 
 class HadesDomain(Domain):
