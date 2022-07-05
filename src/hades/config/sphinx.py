@@ -9,10 +9,14 @@ from sphinx.application import Sphinx
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
+from sphinx.util import logging
 from sphinx.util.docfields import Field, GroupedField
 from sphinx.util.docstrings import prepare_docstring
 
 from hades.config.base import Compute, Option, OptionMeta, qualified_name
+
+
+logger = logging.getLogger(__name__)
 
 
 class OptionDirective(ObjectDescription):
@@ -122,8 +126,7 @@ class OptionDocumenter(sphinx.ext.autodoc.ClassDocumenter):
         if option.runtime_check is not None:
             self.add_field("Runtime Check", option.runtime_check.__doc__,
                            sourcename)
-        print('\n'.join(self.directive.result[idx:]))
-        #print(self.directive.result[idx:])
+        logger.verbose('\n'.join(self.directive.result[idx:]))
 
 
 def setup(app: Sphinx):
