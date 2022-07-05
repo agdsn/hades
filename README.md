@@ -9,7 +9,7 @@ Building
 ========
 Enter the `hades` docker container:
 ```shell
-docker exec --user=builder --workdir=/build/hades hades bash
+docker compose exec --user=builder --workdir=/build/hades hades bash
 ````
 
 <details><summary>Building arpreq</summary>
