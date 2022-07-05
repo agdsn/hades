@@ -420,6 +420,7 @@ class HADES_AUTH_DHCP_LEASE_RENEW_TIMER(Option):
     type = timedelta
     static_check = check.greater_than(timedelta(0))
 
+    # noinspection PyNestedDecorators
     @Compute.decorate
     @staticmethod
     def default(config):
@@ -432,6 +433,7 @@ class HADES_AUTH_DHCP_LEASE_REBIND_TIMER(Option):
     type = timedelta
     static_check = check.greater_than(timedelta(0))
 
+    # noinspection PyNestedDecorators
     @Compute.decorate
     @staticmethod
     def default(config):
@@ -875,6 +877,7 @@ class BABEL_DEFAULT_TIMEZONE(FlaskOption):
 
 
 class SQLALCHEMY_DATABASE_URI(FlaskOption):
+    # noinspection PyNestedDecorators
     @Compute.decorate
     @staticmethod
     def default(config):
@@ -983,6 +986,7 @@ class CELERY_DEFAULT_DELIVERY_MODE(CeleryOption):
 
 
 class CELERY_QUEUES(CeleryOption):
+    # noinspection PyNestedDecorators
     @Compute.decorate
     @staticmethod
     def default(config):
