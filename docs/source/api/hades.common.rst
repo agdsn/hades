@@ -25,10 +25,10 @@ hades\.common\.db module
     :undoc-members:
     :show-inheritance:
 
-hades\.common\.dbus module
+hades\.common\.glib module
 --------------------------
 
-.. automodule:: hades.common.dbus
+.. automodule:: hades.common.glib
     :members:
     :undoc-members:
     :show-inheritance:
