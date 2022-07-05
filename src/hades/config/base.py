@@ -168,8 +168,7 @@ class OptionDescriptor:
                 return super().__get__(instance, owner)
 
         descriptor = wrapper()
-        if inner_doc:
-            descriptor.__doc__ = inner_doc
+        descriptor.__doc__ = inner_doc
         return descriptor
 
     def __init__(self):

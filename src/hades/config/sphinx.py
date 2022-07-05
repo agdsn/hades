@@ -106,11 +106,14 @@ class OptionDocumenter(sphinx.ext.autodoc.ClassDocumenter):
             self.add_line(":required: This option is **required**.", sourcename)
             self.add_line("", sourcename)
         if option.has_default:
-            self.add_field("default", (
-                option.default.__doc__
-                if isinstance(option.default, Compute) else
-                ":python:`{!r}`".format(option.default)
-            ), sourcename)
+            if isinstance(option.default, Compute):
+                default_desc = option.default.__doc__
+                if not default_desc:
+                    logger.warning("Undocumented default function in %s", name)
+                    default_desc = "*(undocumented)*"
+            else:
+                default_desc = f":python:`{option.default!r}`"
+            self.add_field("default", default_desc, sourcename)
         if option.type is None:
             types = ()
         elif isinstance(option.type, tuple):
