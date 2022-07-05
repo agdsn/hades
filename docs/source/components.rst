@@ -121,7 +121,7 @@ Although Celery supports different broker backends,
 only RabbitMQ is supported by Hades at this point,
 because Hades uses advanced AMQP features, which are not available on simpler
 brokers, such as Redis.
-Please see the `Celery documentation <http://docs.celeryproject.org/>`_ for more
+Please see the :doc:`Celery documentation <celery:index>` for more
 information about Celery.
 
 The central message queue **not** part of Hades, you must provide your own,

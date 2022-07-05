@@ -54,7 +54,7 @@ benefit.
 
 Building the Documentation
 ==========================
-The documentation for Hades is build with `sphinx <http://sphinx-doc.org>`_.
+The documentation for Hades is build with :ref:`sphinx <sphinx:tutorial>`.
 An html build is stored in the gh-pages branch in order to host the
 documentation using `GitHub Pages <https://pages.github.com/>`_.
 Whatever python setup you chose, make sure that the extra requirements given 

@@ -98,6 +98,7 @@ intersphinx_mapping = {
     'celery':     ('https://docs.celeryq.dev/en/stable/', None),
     'psycopg2':   ('https://www.psycopg.org/docs/', None),
     'sqlalchemy': ('https://docs.sqlalchemy.org/en/13/', None),
+    "sphinx":     ("https://www.sphinx-doc.org/en/master/", None),
 }
 
 

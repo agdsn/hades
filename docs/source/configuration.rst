@@ -107,7 +107,7 @@ the system's runtime directory, ``/run/hades`` by default.
 The configuration files are generated from Jinja2 templates.
 For information about the syntax of Jinja2 templates,
 see the
-`Jinja2 documentation <http://jinja.pocoo.org/docs/latest/templates/>`_.
+:doc:`Jinja2 documentation <jinja2:intro>`.
 
 Manual Generation
 -----------------
