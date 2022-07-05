@@ -134,6 +134,14 @@ def setup(app: Sphinx):
     app.add_role("sql", CustomRole(
         "sql", code_role, {'language': 'sql', 'class': ['highlight']}
     ))
+    # These roles are used in the Celery documentation, which bleeds down onto our `RPCTask` definitions,
+    # because binding the celery app registers attributes on the `Task` classes via `setattr`.
+    # This causes sphinx to treat these attributes – and their documentation – as vendor-defined, and not third-party,
+    # and so they are included in the list of members whose documentation should be emitted.
+    # As a workaround, we treat :setting:`…` and :sig:`…` roles as code, effectively silencing the warning.
+    app.add_role("setting", CustomRole("setting", code_role, {}))
+    app.add_role("sig", CustomRole("setting", code_role, {}))
+
     app.add_domain(HadesDomain)
     app.add_autodocumenter(OptionDocumenter)
     return {
