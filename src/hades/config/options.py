@@ -881,6 +881,11 @@ class SQLALCHEMY_DATABASE_URI(FlaskOption):
     @Compute.decorate
     @staticmethod
     def default(config):
+        """A URI targeting the default postgresql socket in the pkgrunstatedir.
+
+        The port is set to :hades:option:`HADES_POSTGRESQL_PORT`
+        and the user is the default database user.
+        """
         if 'postgresql' not in urllib.parse.uses_netloc:
             urllib.parse.uses_netloc.append('postgresql')
         if 'postgresql' not in urllib.parse.uses_query:
