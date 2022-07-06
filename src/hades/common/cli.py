@@ -1,9 +1,11 @@
 """Functionality for the Hades command-line utilities in :mod:`hades.bin`."""
 import argparse
+import functools
 import logging.handlers
 import os
 import sys
 import textwrap
+import typing
 from gettext import gettext as _
 
 from hades import constants
@@ -101,15 +103,32 @@ def setup_cli_logging(program, args):
     :param args: The parsed arguments of the program with :data:`parser` or a
     subparser.
     """
+    # Collect log messages until after we have finished setting up, so that we
+    # can log them properly
+    messages: list[typing.Callable[[], None]] = []
     reset_cli_logging()
     if args.verbosity is None:
         verbosity = os.environ.get('HADES_VERBOSITY', DEFAULT_VERBOSITY)
         try:
             verbosity = int(verbosity)
-        except ValueError:
+        except ValueError as e:
             verbosity = DEFAULT_VERBOSITY
+            messages.append(
+                functools.partial(
+                    logging.root.critical,
+                    "Illegal logging level %s",
+                    exc_info=e,
+                )
+            )
     else:
         verbosity = args.verbosity
+    if verbosity < 0:
+        messages.append(
+            functools.partial(
+                logging.root.critical,
+                "Verbosity may not be negative"
+            )
+        )
     effective_verbosity = max(0, min(len(VERBOSITY_LEVELS) - 1, verbosity))
     level = VERBOSITY_LEVELS[effective_verbosity]
     if level <= logging.DEBUG:
@@ -128,6 +147,9 @@ def setup_cli_logging(program, args):
     else:
         handlers = [stderr_handler]
     logging.basicConfig(level=level, style='%', format=fmt, handlers=handlers)
+    # Log collected messages
+    for message in messages:
+        message()
 
 
 def reset_cli_logging():
