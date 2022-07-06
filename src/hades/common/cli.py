@@ -40,9 +40,9 @@ class VersionAction(argparse.Action):
         parser.exit()
 
 
-VERBOSITY_LEVELS = [
+VERBOSITY_LEVELS = (
     logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG, logging.NOTSET
-]
+)
 DEFAULT_VERBOSITY = 1
 
 parser = ArgumentParser(add_help=False)
