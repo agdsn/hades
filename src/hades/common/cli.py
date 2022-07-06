@@ -47,8 +47,14 @@ DEFAULT_VERBOSITY = 1
 
 parser = ArgumentParser(add_help=False)
 parser.add_argument('-c', '--config', default=None, help="Path to config file")
-parser.add_argument('-v', '--verbose', dest='verbosity',
-                    default=None, action='count', help='Be more verbose')
+parser.add_argument(
+    "-v",
+    "--verbose",
+    dest="verbosity",
+    default=DEFAULT_VERBOSITY,
+    action="count",
+    help="Be more verbose",
+)
 parser.add_argument('-q', '--quiet', dest='verbosity',
                     action='store_const', const=0, help='Be quiet')
 parser.add_argument(
