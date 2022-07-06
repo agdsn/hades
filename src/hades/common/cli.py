@@ -94,11 +94,27 @@ def setup_cli_logging(program, args):
     themselves.
 
     Set log level using command-line options parsed with :data:`parser`, the
-    :std:envvar:`HADES_CONFIG` environment variable or finally the default value
-    :data:`DEFAULT_VERBOSITY`-
+    :std:envvar:`HADES_VERBOSITY` environment variable or finally the default
+    value :data:`DEFAULT_VERBOSITY`.
 
-    Flask and Celery are quite opinionated about logging, so this function
-    should probably not be called in their launchers.
+    Messages are logged to stderr by default, but can also be logged to syslog.
+
+    The possible log level settings are:
+
+    - :data:`logging.ERROR` is the minimum log level.
+    - :data:`logging.CRITICAL` will always also be logged to STDERR even if
+      logging to syslog.
+    - :data:`logging.WARNING` is the default logging level, but can be
+      suppressed with ``-q``/``--quiet`` or ``HADES_VERBOSITY=0``.
+    - Each ``-v``/``--verbose`` increases the verbosity by one level.
+
+    When the log level is lower than or equal to :data:`logging.DEBUG` also the
+    time, the log level and the filename are logged in addition to log message.
+
+    Flask and Celery have their own opinionated logging mechanisms. Logging
+    should probably be reset via :func:`reset_cli_logging` before handing over
+    control to them.
+
     :param program: The name of the program
     :param args: The parsed arguments of the program with :data:`parser` or a
     subparser.
