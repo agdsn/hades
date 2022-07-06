@@ -42,7 +42,7 @@ Build-Depends:
  unbound,
  uwsgi,
  uwsgi-plugin-python3,
-X-Python3-Version: >= 3.5
+X-Python3-Version: >= 3.9
 Standards-Version: 3.9.8
 
 Package: hades

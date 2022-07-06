@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Type
 
 from hades.config.base import (
     Compute, ConfigOptionError, MissingOptionError, Option, coerce, option_reference,
@@ -6,7 +6,7 @@ from hades.config.base import (
 
 
 class equal_to(Compute):
-    def __init__(self, other: Union[str, type[Option]]):
+    def __init__(self, other: Union[str, Type[Option]]):
         super().__init__()
         self.other_name = coerce(other)
         if not isinstance(self.other_name, str):
@@ -35,8 +35,8 @@ class deferred_format(Compute):
     specific names that are available in the format string.
     """
 
-    def __init__(self, fmt_string, *a: Union[str, type[Option]],
-                 **kw: Union[str, type[Option]]):
+    def __init__(self, fmt_string, *a: Union[str, Type[Option]],
+                 **kw: Union[str, Type[Option]]):
         """
         :param fmt_string:
         :param args:

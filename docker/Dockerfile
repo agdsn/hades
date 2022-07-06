@@ -1,16 +1,16 @@
 # syntax=docker/dockerfile:1
-FROM debian:buster
+FROM debian:bullseye
 MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
-ARG BUILDER_UID=1000
-ARG BUILDER_GID=1000
 ENV LANG=C.UTF-8 container=docker
 COPY etc/ /etc/
 
-RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
-
 RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
-    export DEBIAN_FRONTEND="noninteractive" && \
-    apt-get update && apt-get install -y \
+    export DEBIAN_FRONTEND="noninteractive" \
+    && rm -f /etc/apt/apt.conf.d/docker-clean \
+    && echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache \
+    && apt-get update \
+    && apt-get install -y \
+    bandit \
     bash-completion \
     bats \
     black \
@@ -21,15 +21,17 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     dctrl-tools \
     debian-goodies \
     devscripts \
-    dhcpcd5 \
     dh-exec \
+    dh-python \
     dh-virtualenv \
+    dhcpcd5 \
     dns-root-data \
     dnsmasq \
     dnsutils \
     elfutils \
     equivs \
     fakeroot \
+    flake8 \
     freeradius \
     freeradius-postgresql \
     freeradius-utils \
@@ -42,31 +44,25 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     iptables \
     iputils-ping \
     isc-dhcp-relay \
+    isort \
     keepalived \
     less \
     libxml2-utils \
     lintian \
+    mypy \
     nginx \
     packaging-dev \
     piuparts \
     policykit-1 \
     postgresql \
     postgresql-contrib \
-    pylint3 \
-    pypy \
-    pypy-dev \
-    pypy-ipaddress \
-    pypy-pytest \
-    pypy-setuptools \
-    python-all \
-    python-all-dev \
-    python-ipaddr \
-    python-ipaddress \
-    python-mock \
-    python-netaddr \
-    python-pytest \
-    python-pytest-runner \
-    python-setuptools \
+    pycodestyle \
+    pydocstyle \
+    pyflakes3 \
+    pylama \
+    pylint \
+    pypy3 \
+    pypy3-dev \
     python3-all \
     python3-all-dev \
     python3-babel \
@@ -88,11 +84,12 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     python3-pytest \
     python3-pytest-mock \
     python3-pytest-runner \
-    python3-sqlalchemy \
     python3-setuptools \
+    python3-sqlalchemy \
     python3-systemd \
     python3-venv \
     rabbitmq-server \
+    radon \
     reprotest \
     shellcheck \
     socat \
@@ -107,8 +104,11 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     uwsgi \
     uwsgi-plugin-python3 \
     vim-nox \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    zsh \
+    && curl -L \
+    'https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc' -o /etc/zsh/zshrc \
+    'https://git.grml.org/f/grml-etc-core/etc/skel/.zshrc' -o /etc/skel/.zshrc \
+    && true
 
 RUN find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' \
         ! -name '*dbus*' \
@@ -120,14 +120,14 @@ RUN find -L /etc/systemd/system /lib/systemd/system -type f -path '*.wants/*' \
         ! -name systemd-logind.service \
         -printf '%f\0' | sort --unique --zero-terminated | xargs --null --no-run-if-empty --verbose systemctl mask \
     && find -L /etc/init.d -type f -perm /u+x,g+x,o+x ! -name rc ! -name rcS -printf '%f\0' | xargs --null --no-run-if-empty --max-args=1 -I'{}' --verbose update-rc.d -f '{}' remove \
-    && { addgroup --system --gid $BUILDER_GID builder || true; } \
-    && adduser --system --home /build --shell /bin/bash --uid $BUILDER_UID --gid $BUILDER_GID builder \
     && sed -i -re 's/^#?(ForwardTo[^=]+)=.*$/\1=no/' /etc/systemd/journald.conf
 
-COPY ["build.sh", "/usr/local/bin"]
+COPY ["build.sh", "entrypoint.sh", "/usr/local/bin/"]
 
 VOLUME [ "/build", "/build/hades"]
 
 STOPSIGNAL SIGRTMIN+3
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 CMD ["/lib/systemd/systemd", "--system"]
