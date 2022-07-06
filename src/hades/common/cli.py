@@ -40,6 +40,9 @@ class VersionAction(argparse.Action):
         parser.exit()
 
 
+VERBOSITY_LEVELS = [logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG]
+DEFAULT_VERBOSITY = 1
+
 parser = ArgumentParser(add_help=False)
 parser.add_argument('-c', '--config', default=None, help="Path to config file")
 parser.add_argument('-v', '--verbose', dest='verbosity',
@@ -73,8 +76,6 @@ parser.add_argument('--syslog', nargs='?', const='/dev/log', metavar='SOCKET',
                     help="Log to syslog instead of stderr. A path to the log "
                          "socket may be provided, defaults to /dev/log "
                          "otherwise")
-VERBOSITY_LEVELS = [logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG]
-DEFAULT_VERBOSITY = 1
 
 
 def setup_cli_logging(program, args):
