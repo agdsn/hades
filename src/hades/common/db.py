@@ -7,10 +7,10 @@ from typing import Iterable, Iterator, List, Optional, Tuple
 import netaddr
 import psycopg2.extensions
 from sqlalchemy import (
-    BigInteger, CheckConstraint, Column, DateTime, Integer, MetaData,
-    PrimaryKeyConstraint, String, Table, Text, TypeDecorator, UniqueConstraint,
-    and_, column, create_engine as sqa_create_engine, func, null, or_, select,
-    table,
+    BigInteger, CheckConstraint, Column, DateTime, Integer, LargeBinary,
+    MetaData, PrimaryKeyConstraint, String, Table, Text, TypeDecorator,
+    UniqueConstraint, and_, column, create_engine as sqa_create_engine, func,
+    null, or_, select, table, literal,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, INET, MACADDR
 from sqlalchemy.engine.base import Connection
@@ -27,13 +27,25 @@ Attributes = Tuple[Tuple[str, str], ...]
 DatetimeRange = Tuple[Optional[datetime], Optional[datetime]]
 
 
-def as_copy(original_table: Table, new_name: str):
-    """Create a copy of a table with a different name and the ``temporary``
-    info set."""
-    return Table(new_name, original_table.metadata,
-                 *(Column(col.name, col.type)
-                   for col in original_table.columns),
-                 info={'temporary': True})
+def as_copy(
+    original_table: Table,
+    new_name: str,
+    temporary: bool = True,
+) -> Table:
+    """Create a copy of a table definition with a different name
+
+    :param original_table: The table to copy
+    :param new_name: Name of the new table
+    :param temporary: Should the new table be marked as ``temporary``
+    :return: A new table
+    """
+    new_table = original_table.tometadata(
+        original_table.metadata,
+        name=new_name,
+    )
+    if temporary:
+        new_table.info["temporary"] = True
+    return new_table
 
 
 class MACAddress(TypeDecorator):
@@ -95,15 +107,71 @@ alternative_dns = Table(
 )
 temp_alternative_dns = as_copy(alternative_dns, 'temp_alternative_dns')
 
-dhcphost = Table(
-    "dhcphost",
+auth_dhcp_host = Table(
+    "auth_dhcp_host",
     metadata,
     Column('MAC', MACAddress, nullable=False),
     Column('IPAddress', IPAddress, nullable=False),
+    Column('Hostname', Text, nullable=True),
     UniqueConstraint('MAC'),
     UniqueConstraint('IPAddress'),
 )
-temp_dhcphost = as_copy(dhcphost, 'temp_dhcphost')
+temp_auth_dhcp_host = as_copy(auth_dhcp_host, 'temp_auth_dhcp_host')
+
+auth_dhcp_lease = Table(
+    "auth_dhcp_lease",
+    metadata,
+    Column("MAC", MACAddress, nullable=False),
+    Column("IPAddress", IPAddress, nullable=False, primary_key=True),
+    Column("Hostname", Text),
+    Column("Domain", Text),
+    Column("SuppliedHostname", Text),
+    Column("ExpiresAt", DateTime(timezone=True), nullable=False),
+    Column(
+        "CreatedAt",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+    Column(
+        "UpdatedAt",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+    Column("RelayIPAddress", IPAddress),
+    Column(
+        "Tags",
+        TupleArray(Text, dimensions=1),
+        nullable=False,
+        server_default=literal((), type_=TupleArray(Text, dimensions=1)),
+    ),
+    Column("Domain", Text),
+    Column("ClientID", LargeBinary),
+    Column("CircuitID", LargeBinary),
+    Column("SubscriberID", LargeBinary),
+    Column("RemoteID", LargeBinary),
+    Column("VendorClass", Text),
+    Column(
+        "RequestedOptions",
+        TupleArray(Integer, dimensions=1),
+        nullable=False,
+        server_default=literal((), type_=TupleArray(Text, dimensions=1)),
+    ),
+    Column(
+        "UserClasses",
+        TupleArray(Text, dimensions=1),
+        nullable=False,
+        server_default=literal((), type_=TupleArray(Text, dimensions=1)),
+    ),
+    CheckConstraint(func.coalesce(func.array_ndims("Tags"), 1) == 1),
+    CheckConstraint(
+        func.coalesce(func.array_ndims("RequestedOptions"), 1) == 1,
+    ),
+    CheckConstraint(func.coalesce(func.array_ndims("UserClasses"), 1) == 1),
+)
+
+unauth_dhcp_lease = as_copy(auth_dhcp_lease, "unauth_dhcp_lease", False)
 
 nas = Table(
     "nas",
@@ -283,7 +351,37 @@ def create_engine(config: Config, **kwargs):
     kwargs.setdefault('connect_args', {}).update(
         options="-c TimeZone=UTC", cursor_factory=UTCTZInfoCursorFactory
     )
+    clean_up_pyroute2_registrations()
     return sqa_create_engine(config.SQLALCHEMY_DATABASE_URI, **kwargs)
+
+
+def clean_up_pyroute2_registrations():
+    """Manually remove `pyroute2` registrations to `psycopg2.extensions.adapters`.
+
+    a certain version of pyroute2 pollutes the psycopg2 adapters at import time.
+    In particular, lists were forcefully rendered as strings, breaking `ARRAY[]` usage.
+    We ensure the module is imported and throw out the aforementioned adapters.
+    """
+    # noinspection PyUnresolvedReferences
+    import pyroute2  # noqa
+    import psycopg2
+    adapters = psycopg2.extensions.adapters
+    bad_keys = [
+        (type_, interface) for (type_, interface), adapter in adapters.items()
+        if getattr(adapter, '__module__', '').startswith('pyroute2')
+    ]
+    logger.debug(
+        "Had to delete %d global psycopg2 adapter registrations: %r",
+        len(bad_keys),
+        {k: adapters[k] for k in bad_keys},
+    )
+
+    for key in bad_keys:
+        if key[0] == list:
+            # restore the original `List` adapter, which we need
+            adapters[key] = psycopg2._psycopg.List
+        else:
+            del adapters[key]
 
 
 def lock_table(connection: Connection, target_table: Table):
@@ -494,16 +592,25 @@ def get_latest_auth_attempt(
         return None
 
 
-def get_all_dhcp_hosts(connection: Connection) -> Iterator[
-        Tuple[netaddr.EUI, netaddr.IPAddress]]:
+def get_all_auth_dhcp_hosts(
+    connection: Connection,
+) -> Iterator[Tuple[netaddr.EUI, netaddr.IPAddress, Optional[str]]]:
     """
     Return all DHCP host configurations.
 
     :param connection: A SQLAlchemy connection
-    :return: An iterator that yields (mac, ip)-tuples
+    :return: An iterator that yields (mac, ip, hostname)-tuples
     """
     logger.debug("Getting all DHCP hosts")
-    result = connection.execute(select([dhcphost.c.MAC, dhcphost.c.IPAddress]))
+    result = connection.execute(
+        select(
+            [
+                auth_dhcp_host.c.MAC,
+                auth_dhcp_host.c.IPAddress,
+                auth_dhcp_host.c.Hostname,
+            ]
+        )
+    )
     return iter(result)
 
 
@@ -637,3 +744,207 @@ def get_all_alternative_dns_ips(
     logger.debug("Getting all alternative DNS clients")
     result = connection.execute(select([alternative_dns.c.IPAddress]))
     return map(operator.itemgetter(0), result)
+
+
+def get_all_dhcp_leases(
+    dhcp_lease_table: Table,
+    connection: Connection,
+    subnet: Optional[netaddr.IPNetwork] = None,
+    limit: Optional[int] = None,
+) -> Iterator[
+    Tuple[
+        datetime,
+        netaddr.EUI,
+        netaddr.IPAddress,
+        Optional[str],
+        Optional[str],
+    ]
+]:
+    """
+    Return all dhcp leases.
+
+    :param dhcp_lease_table: DHCP lease table
+    :param connection: A SQLAlchemy connection
+    :param subnet: Limit leases to subnet
+    :param limit: Maximum number of leases
+    :return: An iterator that yields (Expires-At, MAC, IP-Address, Hostname,
+        Client-ID)-tuples
+    """
+    query = select(
+        [
+            dhcp_lease_table.c.ExpiresAt,
+            dhcp_lease_table.c.MAC,
+            dhcp_lease_table.c.IPAddress,
+            dhcp_lease_table.c.Hostname,
+            dhcp_lease_table.c.ClientID,
+        ]
+    ).order_by(dhcp_lease_table.c.IPAddress.asc())
+    if subnet is not None:
+        query = query.where(dhcp_lease_table.c.IPAddress.op('<<=') <= subnet)
+    if limit is not None:
+        query = query.limit(limit)
+    return iter(connection.execute(query))
+
+
+def get_dhcp_lease_of_ip(
+    dhcp_lease_table: Table,
+    connection: Connection,
+    ip: netaddr.IPAddress,
+) -> Optional[Tuple[datetime, netaddr.EUI, Optional[str], Optional[str]]]:
+    """
+    Get basic lease information for a given IP.
+
+    :param dhcp_lease_table: DHCP lease table
+    :param connection: A SQLAlchemy connection
+    :param ip: IP address
+    :return: An (Expiry-Time, MAC, Hostname, Client-ID)-tuple or None
+    """
+    query = select(
+        [
+            dhcp_lease_table.c.ExpiresAt,
+            dhcp_lease_table.c.MAC,
+            dhcp_lease_table.c.Hostname,
+            dhcp_lease_table.c.ClientID,
+        ]
+    ).where(IPAddress=ip)
+    return connection.execute(query).first()
+
+
+def get_dhcp_leases_of_mac(
+    dhcp_lease_table: Table,
+    connection: Connection,
+    mac: netaddr.EUI,
+) -> Iterator[Tuple[datetime, netaddr.IPAddress, Optional[str], Optional[str]]]:
+    """
+    Get basic information about all leases of a given MAC.
+
+    :param dhcp_lease_table: DHCP lease table
+    :param connection: A SQLAlchemy connection
+    :param mac: MAC address
+    :return: An iterator of (Expiry-Time, IP-Address, Hostname,
+        Client-ID)-tuples ordered by Expiry-Time descending
+    """
+    query = select(
+        [
+            dhcp_lease_table.c.ExpiresAt,
+            dhcp_lease_table.c.IPAddress,
+            dhcp_lease_table.c.Hostname,
+            dhcp_lease_table.c.ClientID,
+        ]
+    ).where(MAC=mac).order_by(dhcp_lease_table.c.ExpiresAt.desc())
+    return iter(connection.execute(query))
+
+
+def get_all_auth_dhcp_leases(
+    connection: Connection,
+    subnet: Optional[netaddr.IPNetwork] = None,
+    limit: Optional[int] = None,
+) -> Iterator[
+    Tuple[
+        datetime,
+        netaddr.EUI,
+        netaddr.IPAddress,
+        Optional[str],
+        Optional[str],
+    ]
+]:
+    """
+    Return all auth leases.
+
+    :param connection: A SQLAlchemy connection
+    :param subnet: Limit leases to subnet
+    :param limit: Maximum number of leases
+    :return: An iterator that yields (Expires-At, MAC, IP-Address, Hostname,
+        Client-ID)-tuples
+    """
+    logger.debug("Getting all auth DHCP leases")
+    return get_all_dhcp_leases(auth_dhcp_lease, connection, subnet, limit)
+
+
+def get_auth_dhcp_lease_of_ip(
+    connection: Connection,
+    ip: netaddr.IPAddress,
+) -> Optional[Tuple[datetime, netaddr.EUI, Optional[str], Optional[str]]]:
+    """
+    Get basic auth lease information for a given IP.
+
+    :param connection: A SQLAlchemy connection
+    :param ip: IP address
+    :return: An iterator of (Expiry-Time, MAC, Hostname, Client-ID)-tuples or
+        None
+    """
+    logger.debug("Getting auth DHCP lease for IP %s", ip)
+    return get_dhcp_lease_of_ip(auth_dhcp_lease, connection, ip)
+
+
+def get_auth_dhcp_leases_of_mac(
+    connection: Connection,
+    mac: netaddr.EUI,
+) -> Iterator[Tuple[datetime, netaddr.IPAddress, Optional[str], Optional[str]]]:
+    """
+    Get basic information about all auth leases of a given MAC.
+
+    :param connection: A SQLAlchemy connection
+    :param mac: MAC address
+    :return: An iterator of (Expiry-Time, IP-Address, Hostname,
+        Client-ID)-tuples ordered by Expiry-Time descending
+    """
+    logger.debug("Getting auth DHCP leases for MAC %s", mac)
+    return get_dhcp_leases_of_mac(auth_dhcp_lease, connection, mac)
+
+
+def get_all_unauth_dhcp_leases(
+    connection: Connection,
+    subnet: Optional[netaddr.IPNetwork] = None,
+    limit: Optional[int] = None,
+) -> Iterator[
+    Tuple[
+        datetime,
+        netaddr.EUI,
+        netaddr.IPAddress,
+        Optional[str],
+        Optional[str],
+    ]
+]:
+    """
+    Return all unauth leases
+
+    :param connection: A SQLAlchemy connection
+    :param subnet: Limit leases to subnet
+    :param limit: Maximum number of leases
+    :return: An iterator that yields (Expires-At, MAC, IP-Address, Hostname,
+        Client-ID)-tuples
+    """
+    logger.debug("Getting all unauth DHCP leases")
+    return get_all_dhcp_leases(unauth_dhcp_lease, connection, subnet, limit)
+
+
+def get_unauth_dhcp_lease_of_ip(
+    connection: Connection,
+    ip: netaddr.IPAddress,
+) -> Optional[Tuple[datetime, netaddr.EUI, Optional[str], Optional[str]]]:
+    """
+    Get basic unauth lease information for a given IP.
+
+    :param connection: A SQLAlchemy connection
+    :param ip: IP address
+    :return: An (Expiry-Time, MAC, Hostname, Client-ID)-tuple or None
+    """
+    logger.debug("Getting unauth DHCP lease for IP %s", ip)
+    return get_dhcp_lease_of_ip(unauth_dhcp_lease, connection, ip)
+
+
+def get_unauth_dhcp_leases_of_mac(
+    connection: Connection,
+    mac: netaddr.EUI,
+) -> Iterator[Tuple[datetime, netaddr.IPAddress, Optional[str], Optional[str]]]:
+    """
+    Get basic information about all unauth leases of a given MAC.
+
+    :param connection: A SQLAlchemy connection
+    :param mac: MAC address
+    :return: An iterator of (Expiry-Time, IP-Address, Hostname, Client-ID)
+        tuples ordered by Expiry-Time descending
+    """
+    logger.debug("Getting unauth DHCP leases for MAC %s", mac)
+    return get_dhcp_leases_of_mac(unauth_dhcp_lease, connection, mac)

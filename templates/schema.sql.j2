@@ -10,7 +10,7 @@
 {% set foreign_server_version = None %}
 {% set foreign_table_global_options = {} %}
 {% set foreign_table_alternative_dns_options = {'table_name': 'alternative_dns'} %}
-{% set foreign_table_dhcphost_options = {'table_name': 'dhcphost'} %}
+{% set foreign_table_auth_dhcp_host_options = {'table_name': 'auth_dhcp_host'} %}
 {% set foreign_table_nas_options = {'table_name': 'nas'} %}
 {% set foreign_table_radcheck_options = {'table_name': 'radcheck'} %}
 {% set foreign_table_radgroupcheck_options = {'table_name': 'radgroupcheck'} %}
@@ -25,7 +25,7 @@
 {% set foreign_server_version = HADES_POSTGRESQL_FOREIGN_SERVER_VERSION if HADES_POSTGRESQL_FOREIGN_SERVER_VERSION is defined else None %}
 {% set foreign_table_global_options = HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS %}
 {% set foreign_table_alternative_dns_options = HADES_POSTGRESQL_FOREIGN_TABLE_ALTERNATIVE_DNS_OPTIONS %}
-{% set foreign_table_dhcphost_options = HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_OPTIONS %}
+{% set foreign_table_auth_dhcp_host_options = HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_OPTIONS %}
 {% set foreign_table_nas_options = HADES_POSTGRESQL_FOREIGN_TABLE_NAS_OPTIONS %}
 {% set foreign_table_radcheck_options = HADES_POSTGRESQL_FOREIGN_TABLE_RADCHECK_OPTIONS %}
 {% set foreign_table_radgroupcheck_options = HADES_POSTGRESQL_FOREIGN_TABLE_RADGROUPCHECK_OPTIONS %}
@@ -131,6 +131,25 @@ ALTER FUNCTION public.decode_quoted_printable(string text) OWNER TO "{{ constant
 
 COMMENT ON FUNCTION decode_quoted_printable(string text) IS 'Decode quoted-printable encoded string (some bytes may be encoded with an equal sign (=) followed by two hexadecimal characters)';
 
+
+--
+-- Name: safe_hostname(text); Type: FUNCTION; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+CREATE FUNCTION safe_hostname(inp text) RETURNS text
+    LANGUAGE plpgsql IMMUTABLE STRICT
+    AS $$
+BEGIN
+    IF inp ~ '\A[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?\Z' THEN
+        RETURN inp;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$$;
+
+
+ALTER FUNCTION public.safe_hostname(inp text) OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
 -- Name: safe_inet_cast(text); Type: FUNCTION; Schema: public; Owner: {{ constants.DATABASE_USER }}
@@ -239,58 +258,60 @@ CREATE MATERIALIZED VIEW alternative_dns AS
 ALTER TABLE alternative_dns OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: foreign_dhcphost; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
+-- Name: foreign_auth_dhcp_host; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE FOREIGN TABLE foreign_dhcphost (
-    {% if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
+CREATE FOREIGN TABLE foreign_auth_dhcp_host (
+    {% if HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_MAC_STRING %}
     "MAC" text /* NOT NULL */,
     {% else %}
     "MAC" macaddr /* NOT NULL */,
     {% endif %}
-    {% if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
-    "IPAddress" text /* NOT NULL */
+    {% if HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_IPADDRESS_STRING %}
+    "IPAddress" text /* NOT NULL */,
     {% else %}
-    "IPAddress" inet /* NOT NULL */
+    "IPAddress" inet /* NOT NULL */,
     {% endif %}
+    "Hostname" text
 )
 SERVER {{ server_name }}
 OPTIONS (
-    {{ table_options(foreign_table_dhcphost_options) }}
+    {{ table_options(foreign_table_auth_dhcp_host_options) }}
 );
 
 
-ALTER FOREIGN TABLE foreign_dhcphost OWNER TO "{{ constants.DATABASE_USER }}";
+ALTER FOREIGN TABLE foreign_auth_dhcp_host OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
--- Name: dhcphost; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
+-- Name: auth_dhcp_host; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
-{% if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_MAC_STRING %}
-{% set foreign_dhcphost_mac = 'safe_macaddr_cast(foreign_dhcphost."MAC"::text)' %}
+{% if HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_MAC_STRING %}
+{% set foreign_auth_dhcp_host_mac = 'safe_macaddr_cast(foreign_auth_dhcp_host."MAC"::text)' %}
 {% else %}
-{% set foreign_dhcphost_mac = 'foreign_dhcphost."MAC"' %}
+{% set foreign_auth_dhcp_host_mac = 'foreign_auth_dhcp_host."MAC"' %}
 {% endif %}
-{% if HADES_POSTGRESQL_FOREIGN_TABLE_DHCPHOST_IPADDRESS_STRING %}
-{% set foreign_dhcphost_ipaddress = 'safe_inet_cast(foreign_dhcphost."IPAddress"::text)' %}
+{% if HADES_POSTGRESQL_FOREIGN_TABLE_AUTH_DHCP_HOST_IPADDRESS_STRING %}
+{% set foreign_auth_dhcp_host_ipaddress = 'safe_inet_cast(foreign_auth_dhcp_host."IPAddress"::text)' %}
 {% else %}
-{% set foreign_dhcphost_ipaddress = 'foreign_dhcphost."IPAddress"' %}
+{% set foreign_auth_dhcp_host_ipaddress = 'foreign_auth_dhcp_host."IPAddress"' %}
 {% endif %}
 
-CREATE MATERIALIZED VIEW dhcphost AS
+CREATE MATERIALIZED VIEW auth_dhcp_host AS
  SELECT indexed."MAC",
-    indexed."IPAddress"
-   FROM ( SELECT row_number() OVER "MAC_window" AS "MAC_index",
-            row_number() OVER "IPAddress_window" AS "IPAddress_index",
-            {{ foreign_dhcphost_mac }} AS "MAC",
-            {{ foreign_dhcphost_ipaddress }} AS "IPAddress"
-           FROM foreign_dhcphost
-          WHERE (({{ foreign_dhcphost_mac }} IS NOT NULL) AND ({{ foreign_dhcphost_ipaddress }} IS NOT NULL))
-          WINDOW "MAC_window" AS (PARTITION BY {{ foreign_dhcphost_mac }}), "IPAddress_window" AS (PARTITION BY {{ foreign_dhcphost_ipaddress }})) indexed
-  WHERE ((indexed."MAC_index" = 1) AND (indexed."IPAddress_index" = 1))
+    indexed."IPAddress",
+    indexed."Hostname"
+   FROM ( SELECT row_number() OVER "IPAddress_window" AS "IPAddress_index",
+            {{ foreign_auth_dhcp_host_mac }} AS "MAC",
+            {{ foreign_auth_dhcp_host_ipaddress }} AS "IPAddress",
+            CASE WHEN row_number() OVER "Hostname_window" = 1 THEN safe_hostname(foreign_auth_dhcp_host."Hostname") ELSE NULL END AS "Hostname"
+           FROM foreign_auth_dhcp_host
+          WHERE (({{ foreign_auth_dhcp_host_mac }} IS NOT NULL) AND ({{ foreign_auth_dhcp_host_ipaddress }} IS NOT NULL))
+          WINDOW "Hostname_window" AS (PARTITION BY safe_hostname(foreign_auth_dhcp_host."Hostname")), "IPAddress_window" AS (PARTITION BY {{ foreign_auth_dhcp_host_ipaddress }})) indexed
+  WHERE (indexed."IPAddress_index" = 1)
   WITH DATA;
 
 
-ALTER TABLE dhcphost OWNER TO "{{ constants.DATABASE_USER }}";
+ALTER TABLE auth_dhcp_host OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
 -- Name: foreign_nas; Type: FOREIGN TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
@@ -426,6 +447,38 @@ OPTIONS (
 
 ALTER FOREIGN TABLE foreign_radusergroup OWNER TO "{{ constants.DATABASE_USER }}";
 
+SET default_with_oids = false;
+
+--
+-- Name: auth_dhcp_lease; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+CREATE TABLE auth_dhcp_lease (
+    "MAC" macaddr NOT NULL,
+    "IPAddress" inet NOT NULL,
+    "Hostname" text,
+    "Domain" text,
+    "SuppliedHostname" text,
+    "ExpiresAt" timestamp with time zone NOT NULL,
+    "CreatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "UpdatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "RelayIPAddress" inet,
+    "Tags" text[] DEFAULT '{}' NOT NULL,
+    "ClientID" bytea,
+    "CircuitID" bytea,
+    "SubscriberID" bytea,
+    "RemoteID" bytea,
+    "VendorClass" text,
+    "RequestedOptions" integer[] DEFAULT '{}' NOT NULL,
+    "UserClasses" text[] DEFAULT '{}' NOT NULL,
+    CONSTRAINT "auth_dhcp_lease_Tags" CHECK ((COALESCE(array_ndims("Tags"), 1) = 1)),
+    CONSTRAINT "auth_dhcp_lease_RequestedOptions" CHECK ((COALESCE(array_ndims("RequestedOptions"), 1) = 1)),
+    CONSTRAINT "auth_dhcp_lease_UserClasses" CHECK ((COALESCE(array_ndims("UserClasses"), 1) = 1))
+);
+
+
+ALTER TABLE auth_dhcp_lease OWNER TO "{{ constants.DATABASE_USER }}";
+
 --
 -- Name: nas; Type: MATERIALIZED VIEW; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
@@ -462,8 +515,6 @@ CREATE MATERIALIZED VIEW nas AS
 
 
 ALTER TABLE nas OWNER TO "{{ constants.DATABASE_USER }}";
-
-SET default_with_oids = false;
 
 --
 -- Name: radacct; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
@@ -679,6 +730,35 @@ CREATE MATERIALIZED VIEW radusergroup AS
 ALTER TABLE radusergroup OWNER TO "{{ constants.DATABASE_USER }}";
 
 --
+-- Name: unauth_dhcp_lease; Type: TABLE; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+CREATE TABLE unauth_dhcp_lease (
+    "MAC" macaddr NOT NULL,
+    "IPAddress" inet NOT NULL,
+    "Hostname" text,
+    "Domain" text,
+    "SuppliedHostname" text,
+    "ExpiresAt" timestamp with time zone NOT NULL,
+    "CreatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "RelayIPAddress" inet,
+    "Tags" text[] NOT NULL,
+    "ClientID" bytea,
+    "CircuitID" bytea,
+    "SubscriberID" bytea,
+    "RemoteID" bytea,
+    "VendorClass" text,
+    "RequestedOptions" integer[] NOT NULL,
+    "UserClasses" text[] NOT NULL,
+    CONSTRAINT "unauth_dhcp_lease_Tags" CHECK ((COALESCE(array_ndims("Tags"), 1) = 1)),
+    CONSTRAINT "unauth_dhcp_lease_RequestedOptions" CHECK ((COALESCE(array_ndims("RequestedOptions"), 1) = 1)),
+    CONSTRAINT "unauth_dhcp_lease_UserClasses" CHECK ((COALESCE(array_ndims("UserClasses"), 1) = 1))
+);
+
+
+ALTER TABLE unauth_dhcp_lease OWNER TO "{{ constants.DATABASE_USER }}";
+
+--
 -- Name: radacct RadAcctId; Type: DEFAULT; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
@@ -701,6 +781,14 @@ ALTER TABLE ONLY radacct
 
 
 --
+-- Name: auth_dhcp_lease auth_dhcp_lease_pkey; Type: CONSTRAINT; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+ALTER TABLE ONLY auth_dhcp_lease
+    ADD CONSTRAINT auth_dhcp_lease_pkey PRIMARY KEY ("IPAddress");
+
+
+--
 -- Name: radacct radacct_pkey; Type: CONSTRAINT; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
@@ -717,6 +805,14 @@ ALTER TABLE ONLY radpostauth
 
 
 --
+-- Name: unauth_dhcp_lease unauth_dhcp_lease_pkey; Type: CONSTRAINT; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+ALTER TABLE ONLY unauth_dhcp_lease
+    ADD CONSTRAINT unauth_dhcp_lease_pkey PRIMARY KEY ("IPAddress");
+
+
+--
 -- Name: alternative_dns_IPAddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
@@ -724,17 +820,17 @@ CREATE UNIQUE INDEX "alternative_dns_IPAddress_idx" ON alternative_dns USING btr
 
 
 --
--- Name: dhcphost_IPAddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
+-- Name: auth_dhcp_host_IPAddress_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE UNIQUE INDEX "dhcphost_IPAddress_idx" ON dhcphost USING btree ("IPAddress");
+CREATE UNIQUE INDEX "auth_dhcp_host_IPAddress_idx" ON auth_dhcp_host USING btree ("IPAddress");
 
 
 --
--- Name: dhcphost_MAC_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
+-- Name: auth_dhcp_host_MAC_idx; Type: INDEX; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
-CREATE UNIQUE INDEX "dhcphost_MAC_idx" ON dhcphost USING btree ("MAC");
+CREATE UNIQUE INDEX "auth_dhcp_host_MAC_idx" ON auth_dhcp_host USING btree ("MAC");
 
 
 --
@@ -822,6 +918,14 @@ CREATE UNIQUE INDEX radusergroup_membership_idx ON radusergroup USING btree ("Us
 
 
 --
+-- Name: auth_dhcp_lease; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT ON TABLE auth_dhcp_lease TO "{{ constants.AGENT_USER }}";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE auth_dhcp_lease TO "{{ constants.AUTH_DHCP_USER }}";
+
+
+--
 -- Name: radacct; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
 --
 
@@ -888,6 +992,14 @@ GRANT SELECT ON TABLE radreply TO "{{ constants.RADIUS_USER }}";
 
 GRANT SELECT ON TABLE radusergroup TO "{{ constants.PORTAL_USER }}";
 GRANT SELECT ON TABLE radusergroup TO "{{ constants.RADIUS_USER }}";
+
+
+--
+-- Name: unauth_dhcp_lease; Type: ACL; Schema: public; Owner: {{ constants.DATABASE_USER }}
+--
+
+GRANT SELECT ON TABLE unauth_dhcp_lease TO "{{ constants.AGENT_USER }}";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE unauth_dhcp_lease TO "{{ constants.AUTH_DHCP_USER }}";
 
 
 --

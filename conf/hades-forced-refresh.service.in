@@ -1,6 +1,7 @@
 [Unit]
 Description=Hades forced refresh task (Service)
 Documentation=https://agdsn.github.io/hades/
+# no PartOf=hades because triggered by timer (which has PartOf=hades)
 After=hades-database.service
 After=hades-deputy.service
 Requires=hades-database.service

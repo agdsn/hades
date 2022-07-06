@@ -8,6 +8,12 @@ uppercase() {
 	printf "%s" "${@^^}"
 }
 
+join() {
+	local IFS="$1"
+	shift
+	printf "%s" "$*"
+}
+
 mac_plain() {
 	[[ $1 =~ $mac_regex ]]
 	printf "%s%s%s%s%s%s" "${BASH_REMATCH[@]:1}"
@@ -38,8 +44,74 @@ ns_exec() {
 	ip netns exec "$namespace" "$@"
 }
 
+assert_equals() {
+	[[ "$1" = "$2" ]] || (echo "Assertion failed: $1 != $2" && return 1)
+}
+
+assert_array_equals()
+{
+	[[ "$1" != first ]] && local -n first="$1"
+	[[ "$2" != second ]] && local -n second="$2"
+	if [[ ${#first[@]} -ne ${#second[@]} ]]; then
+		echo "Array size mismatch: ${#first[@]} != ${#second[@]}"
+		return 1
+	fi
+	for (( i=0; i < ${#first[@]}; i++)); do
+		if [[ "${first[$i]}" != "${second[$i]}" ]]; then
+			echo "Mismatch at index $i: ${first[$i]} != ${second[$i]}"
+			return 1
+		fi
+	done
+	return 0
+}
+
+pg_escape_string() {
+	if [[ -n $* ]]; then
+		printf "%s" \'"$(sed -e "s/'/''/g" <<<"$*")"\'
+	else
+		echo -n NULL
+	fi
+}
+
+pg_escape_array_value() {
+	sed -e 's/[\\"]/\\&/g' <<<"$*"
+}
+
+pg_escape_array() {
+	local -a values=()
+	for element in "$@"; do
+		if [[ -n $element ]]; then
+			values+=('"'"$(pg_escape_array_value "${element}")"'"')
+		else
+			values+=('NULL')
+		fi
+	done
+	echo -n \'\{
+	join , "${values[@]}"
+	echo -n \}\'
+}
+
+pg_encode_hex()
+{
+	echo -n \\x
+	echo -n "$*" | xxd -p
+}
+
 psql() {
 	runuser -u hades-database -- psql --host /run/hades/database --echo-errors --no-readline --single-transaction --set=ON_ERROR_STOP=1 "$@"
+}
+
+psql_query() {
+	psql --quiet --no-align --tuples-only "$@"
+}
+
+psql_mapfile() {
+	local -r var="$1"
+	shift
+	local -r lastpipe="$(shopt -p lastpipe)"
+	shopt -s lastpipe
+	psql_query --field-separator-zero --record-separator-zero "$@" | mapfile -d '' "$var"
+	eval "${lastpipe}"
 }
 
 refresh() {

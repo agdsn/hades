@@ -17,12 +17,20 @@ from sqlalchemy.engine import Engine
 
 from hades.common.db import (
     Attributes, DatetimeRange, Groups, create_engine,
+    get_all_auth_dhcp_leases as do_get_all_auth_dhcp_leases,
     get_auth_attempts_at_port as do_get_auth_attempts_at_port,
     get_auth_attempts_of_mac as do_get_auth_attempts_of_mac,
+    get_auth_dhcp_lease_of_ip as do_get_auth_dhcp_lease_of_ip,
+    get_auth_dhcp_leases_of_mac as do_get_auth_dhcp_leases_of_mac,
     get_sessions_of_mac as do_get_sessions_of_mac,
 )
 from hades.config.loader import get_config
-from hades.deputy.client import signal_cleanup, signal_refresh
+from hades.deputy.client import (
+    signal_cleanup,
+    signal_auth_dhcp_lease_release,
+    signal_refresh,
+    signal_unauth_dhcp_lease_release,
+)
 
 logger = get_task_logger(__name__)
 engine: Optional[Engine] = None
@@ -136,6 +144,21 @@ def check_ip_address(argument: str, ip_address: Any) -> netaddr.IPAddress:
                                       "{}".format(ip_address)) from e
 
 
+def check_ip_network(argument: str, ip_network: Any) -> netaddr.IPNetwork:
+    """Try to convert the argument to an IP network.
+
+    :param argument: Name of the argument
+    :param ip_network: The value to convert
+    :raises ArgumentError: if the argument is invalid
+    """
+    try:
+        return netaddr.IPNetwork(ip_network)
+    except netaddr.AddrFormatError as e:
+        raise ArgumentError(
+            argument, "Invalid IP address: {}".format(ip_network)
+        ) from e
+
+
 def check_timestamp_range(argument: str, timestamp_range: Any) -> DatetimeRange:
     """Try to convert the argument to a datetime range (tuple of
     :class:`datetime.datetime` objects or ``None``.
@@ -194,6 +217,18 @@ def refresh():
 def cleanup():
     """Perform a database cleanup"""
     signal_cleanup()
+
+
+@rpc_task()
+def release_auth_dhcp_lease(ip: str):
+    ip = check_ip_address("ip", ip)
+    signal_auth_dhcp_lease_release(ip)
+
+
+@rpc_task()
+def release_unauth_dhcp_lease(ip: str):
+    ip = check_ip_address("ip", ip)
+    signal_unauth_dhcp_lease_release(ip)
 
 
 @rpc_task()
@@ -284,6 +319,48 @@ def get_auth_attempts_at_port(
                 (user_name, packet_type, groups, reply, auth_date.timestamp()),
             do_get_auth_attempts_at_port(connection, nas_ip_address,
                                          nas_port_id, when, limit)))
+
+
+@rpc_task()
+def get_auth_dhcp_leases(
+    subnet: Optional[str] = None,
+    limit: Optional[int] = 100,
+) -> Optional[List[Tuple[float, str, str, Optional[str]]]]:
+    if subnet is not None:
+        subnet = check_ip_network("subnet", subnet)
+    if limit is not None:
+        limit = check_positive_int("limit", limit)
+    with contextlib.closing(engine.connect()) as connection:
+        return list(starmap(
+            lambda expires_at, mac, ip, hostname:
+                (expires_at.timestamp(), str(mac), str(ip), hostname),
+            do_get_all_auth_dhcp_leases(connection, subnet, limit)))
+
+
+@rpc_task()
+def get_auth_dhcp_leases_of_ip(
+    ip: str,
+) -> Optional[Tuple[float, str, Optional[str], Optional[str]]]:
+    ip = check_ip_address("ip", ip)
+    with contextlib.closing(engine.connect()) as connection:
+        result = do_get_auth_dhcp_lease_of_ip(connection, ip)
+        if result is not None:
+            expires_at, mac, hostname, client_id = result
+            return expires_at.timestamp(), str(mac), hostname, client_id
+        else:
+            return None
+
+
+@rpc_task()
+def get_auth_dhcp_leases_of_mac(
+    mac: str,
+) -> Optional[List[Tuple[float, str, Optional[str]]]]:
+    mac = check_mac("mac", mac)
+    with contextlib.closing(engine.connect()) as connection:
+        return list(starmap(
+            lambda expires_at, ip, hostname:
+                (expires_at.timestamp(), str(ip), hostname),
+            do_get_auth_dhcp_leases_of_mac(connection, mac)))
 
 
 def dict_from_attributes(

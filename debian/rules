@@ -1,5 +1,11 @@
 #!/usr/bin/make -rRf
 
+export DEB_BUILD_OPTIONS ?= hardening=+all
+include /usr/share/dpkg/buildflags.mk
+export CPPFLAGS
+export CFLAGS
+export LDFLAGS
+
 PACKAGE=$(shell dh_listpackages)
 
 USE_DH_VIRTUALENV ?= 0

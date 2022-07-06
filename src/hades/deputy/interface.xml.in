@@ -11,5 +11,9 @@
     <method name="Cleanup">
       <arg name='response' type='s' direction='out'/>
     </method>
+    <method name="ReleaseAuthDhcpLease">
+      <arg name="ip" type="s" direction="in"/>
+      <arg name='response' type='s' direction='out'/>
+    </method>
   </interface>
 </node>

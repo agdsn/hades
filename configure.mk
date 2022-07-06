@@ -138,6 +138,7 @@ $(call add_substitution, AGENT_PID_FILE, $(pkgrunstatedir)/agent/worker.pid)
 $(call add_substitution, AUTH_DHCP_HOSTS_FILE, $(pkglocalstatedir)/auth-dhcp/dnsmasq-dhcp.hosts)
 $(call add_substitution, AUTH_DHCP_LEASE_FILE, $(pkglocalstatedir)/auth-dhcp/dnsmasq-dhcp.leases)
 $(call add_substitution, AUTH_DHCP_PID_FILE, $(pkgrunstatedir)/auth-dhcp/dnsmasq.pid)
+$(call add_substitution, AUTH_DHCP_SCRIPT_SOCKET, $(pkgrunstatedir)/auth-dhcp/script.sock)
 $(call add_substitution, AUTH_DNS_ALTERNATIVE_PID_FILE, $(pkgrunstatedir)/auth-dns/unbound-alternative.pid)
 $(call add_substitution, AUTH_DNS_PRISTINE_PID_FILE, $(pkgrunstatedir)/auth-dns/unbound-pristine.pid)
 $(call add_substitution, AUTH_DNS_ROOT_HINTS, /usr/share/dns/root.hints)
@@ -277,6 +278,7 @@ CONFIGURE_FILES = \
     scripts/package-setup.sh \
     scripts/update-trust-anchor.sh \
     setup.py \
+    src/hades/bin/config.h \
     src/hades/deputy/interface.xml \
     $(NULL)
 

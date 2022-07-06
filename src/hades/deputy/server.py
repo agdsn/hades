@@ -12,12 +12,13 @@ import logging
 import os
 import pwd
 import re
+import signal
 import stat
 import string
 import subprocess
 import textwrap
 from functools import partial
-from typing import Iterable, Tuple
+from typing import Iterable, Optional, Tuple
 
 import netaddr
 import pkg_resources
@@ -29,9 +30,16 @@ from sqlalchemy.pool import StaticPool
 
 from hades import constants
 from hades.common import db
+from hades.common.db import (
+    auth_dhcp_lease,
+    get_dhcp_lease_of_ip,
+    unauth_dhcp_lease,
+)
 from hades.common.glib import typed_glib_error
 from hades.common.privileges import dropped_privileges
+from hades.common.signals import install_handler
 from hades.config.loader import Config, get_config
+from hades.deputy.dhcp import release_dhcp_lease
 
 logger = logging.getLogger(__name__)
 
@@ -65,20 +73,23 @@ def restart_systemd_unit(bus: Bus, unit: str, timeout: int = 100) -> None:
 
 
 def generate_dhcp_host_reservations(
-        hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress]]
+    hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress, Optional[str]]],
 ) -> Iterable[str]:
     """Generate lines suitable for dnsmasq's ``--dhcp-hostsfile=`` option.
 
     :param hosts: The MAC address-IP address pairs of the hosts
     """
-    for mac, ip in hosts:
+    for mac, ip, hostname in hosts:
         mac = netaddr.EUI(mac)
         mac.dialect = netaddr.mac_unix_expanded
-        yield "{0},id:*,{1}\n".format(mac, ip)
+        if hostname is not None:
+            yield "{0},id:*,{1},{2}\n".format(mac, ip, hostname)
+        else:
+            yield "{0},id:*,{1}\n".format(mac, ip)
 
 
-def generate_dhcp_hosts_file(
-        hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress]]
+def generate_auth_dhcp_hosts_file(
+    hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress, Optional[str]]],
 ) -> None:
     """Generate the dnsmasq hosts file for authenticated users"""
     file_name = constants.AUTH_DHCP_HOSTS_FILE
@@ -241,28 +252,34 @@ class HadesDeputyService(object):
                 db.refresh_materialized_view(connection, db.radusergroup)
             if force:
                 with connection.begin():
-                    db.refresh_materialized_view(connection, db.dhcphost)
+                    db.refresh_materialized_view(connection, db.auth_dhcp_host)
                     db.refresh_materialized_view(connection, db.nas)
                     db.refresh_materialized_view(connection, db.alternative_dns)
                 logger.info("Forcing reload of DHCP hosts, NAS clients and "
                             "alternative DNS clients")
-                reload_dhcp_host = True
+                reload_auth_dhcp_host = True
                 reload_nas = True
                 reload_alternative_dns = True
-                hosts = db.get_all_dhcp_hosts(connection)
+                hosts = db.get_all_auth_dhcp_hosts(connection)
                 clients = db.get_all_nas_clients(connection)
                 ips = db.get_all_alternative_dns_ips(connection)
             else:
-                dhcphost_diff = db.refresh_and_diff_materialized_view(
-                    connection, db.dhcphost, db.temp_dhcphost, [null()])
-                if dhcphost_diff != ([], [], []):
-                    logger.info('DHCP host reservations changed '
-                                '(%d added, %d deleted, %d modified).',
-                                *map(len, dhcphost_diff))
-                    hosts = db.get_all_dhcp_hosts(connection)
-                    reload_dhcp_host = True
+                auth_dhcp_host_diff = db.refresh_and_diff_materialized_view(
+                    connection,
+                    db.auth_dhcp_host,
+                    db.temp_auth_dhcp_host,
+                    [null()],
+                )
+                if auth_dhcp_host_diff != ([], [], []):
+                    logger.info(
+                        "Auth DHCP host reservations changed "
+                        "(%d added, %d deleted, %d modified).",
+                        *map(len, auth_dhcp_host_diff)
+                    )
+                    hosts = db.get_all_auth_dhcp_hosts(connection)
+                    reload_auth_dhcp_host = True
                 else:
-                    reload_dhcp_host = False
+                    reload_auth_dhcp_host = False
 
                 nas_diff = db.refresh_and_diff_materialized_view(
                     connection, db.nas, db.temp_nas, [null()])
@@ -289,8 +306,8 @@ class HadesDeputyService(object):
                 else:
                     reload_alternative_dns = False
 
-        if reload_dhcp_host:
-            generate_dhcp_hosts_file(hosts)
+        if reload_auth_dhcp_host:
+            generate_auth_dhcp_hosts_file(hosts)
             reload_systemd_unit(self.bus, 'hades-auth-dhcp.service')
         if reload_nas:
             generate_radius_clients_file(clients)
@@ -309,6 +326,46 @@ class HadesDeputyService(object):
             db.delete_old_auth_attempts(connection, interval)
         return "OK"
 
+    def _release_dhcp_lease(
+        self, table, server_ip: netaddr.IPAddress, client_ip: str
+    ) -> str:
+        """
+        Release an auth or unauth DHCP lease
+        :return:
+        """
+        try:
+            client_ip = netaddr.IPAddress(client_ip)
+        except ValueError:
+            return "ERROR: Illegal IP address %s" % client_ip
+        with contextlib.closing(self.engine.connect()) as connection:
+            lease_info = get_dhcp_lease_of_ip(table, connection, client_ip)
+            if lease_info is None:
+                logger.warning("No lease for %s found", client_ip)
+                return "OK"
+            expiry_time, mac, hostname, client_id = lease_info
+            release_dhcp_lease(server_ip, client_ip, mac, client_id)
+        return "OK"
+
+    def ReleaseAuthDhcpLease(self, client_ip: str) -> str:
+        """
+        Release an auth DHCP lease
+        :return:
+        """
+        logger.info("Releasing auth DHCP lease for client %s", client_ip)
+        return self._release_dhcp_lease(
+            auth_dhcp_lease, self.config.HADES_AUTH_LISTEN[0], client_ip
+        )
+
+    def ReleaseUnauthDhcpLease(self, client_ip: str) -> str:
+        """
+        Release an auth DHCP lease
+        :return:
+        """
+        logger.info("Releasing unauth DHCP lease for client %s", client_ip)
+        return self._release_dhcp_lease(
+            unauth_dhcp_lease, self.config.HADES_UNAUTH_LISTEN[0], client_ip
+        )
+
 
 def run_event_loop():
     """Run the DBus :class:`HadesDeputyService` on the GLib event loop."""
@@ -324,4 +381,10 @@ def run_event_loop():
             )
         )
         loop = GLib.MainLoop()
+        stack.enter_context(
+            install_handler(
+                (signal.SIGHUP, signal.SIGINT, signal.SIGTERM),
+                lambda _sig, _frame: loop.quit(),
+            )
+        )
         loop.run()
