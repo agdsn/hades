@@ -451,7 +451,7 @@ class Server(socketserver.UnixStreamServer):
         return data, size, (argv, environ)
 
     def _handle_shutdown_signal(self, signo, _frame):
-        logger.error("Received signal %d. Shutting down.", signo)
+        logger.critical("Received signal %d. Shutting down.", signo)
         # shutdown blocks until the server is stopped, therefore we must use a
         # separate thread, otherwise there will be deadlock
         threading.Thread(name='shutdown', target=self.shutdown).start()
