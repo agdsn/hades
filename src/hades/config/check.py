@@ -18,6 +18,7 @@ from hades.config.base import (
 )
 
 
+# noinspection PyPep8Naming
 class greater_than(Check):
     def __init__(self, threshold):
         super().__init__()
@@ -31,6 +32,7 @@ class greater_than(Check):
                                    option=self.option.__name__)
 
 
+# noinspection PyPep8Naming
 class between(Check):
     def __init__(self, low, high):
         super().__init__()
@@ -48,6 +50,7 @@ class between(Check):
                                    option=self.option.__name__)
 
 
+# noinspection PyPep8Naming
 class match(Check):
     def __init__(self, expr, flags=0):
         super().__init__()
@@ -63,6 +66,7 @@ class match(Check):
                                    option=self.option.name)
 
 
+# noinspection PyPep8Naming
 class sequence(Check):
     def __init__(self, element_check: Check):
         super().__init__()
@@ -86,6 +90,7 @@ class sequence(Check):
                                        option=self.option.__name__)
 
 
+# noinspection PyPep8Naming
 class mapping(Check):
     def __init__(self, key_check: Check = None, value_check: Check = None):
         super().__init__()
@@ -126,6 +131,7 @@ class mapping(Check):
                                        option=self.option.__name__)
 
 
+# noinspection PyPep8Naming
 class type_is(Check):
     def __init__(self, types: Union[Type, Sequence[Type]]):
         super().__init__()
@@ -160,6 +166,7 @@ def not_empty(option, config, value):
         raise OptionCheckError("Must not be empty", option=option.__name__)
 
 
+# noinspection PyPep8Naming
 class satisfy_all(Check):
     def __init__(self, *checks: Check):
         super().__init__()
@@ -256,6 +263,7 @@ def address_exists(cls, config, value):
                                option=cls.__name__)
 
 
+# noinspection PyPep8Naming
 class ip_range_in_networks(Check):
     def __init__(self, other_option):
         super().__init__()
@@ -300,6 +308,7 @@ def group_exists(option, config, value):
                                option=option.__name__)
 
 
+# noinspection PyPep8Naming
 class has_keys(Check):
     def __init__(self, *keys):
         super().__init__()
@@ -327,6 +336,7 @@ class has_keys(Check):
                 raise OptionCheckError("Missing key", option=path) from None
 
 
+# noinspection PyPep8Naming
 class user_mapping_for_user_exists(Check):
     def __init__(self, user_name):
         super().__init__()

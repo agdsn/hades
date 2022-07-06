@@ -5,6 +5,7 @@ from hades.config.base import (
 )
 
 
+# noinspection PyPep8Naming
 class equal_to(Compute):
     def __init__(self, other: Union[str, Type[Option]]):
         super().__init__()
@@ -25,6 +26,7 @@ class equal_to(Compute):
             ) from e
 
 
+# noinspection PyPep8Naming
 class deferred_format(Compute):
     """
     Evaluate a format string using values from others config options.

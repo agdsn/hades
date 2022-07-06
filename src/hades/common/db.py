@@ -304,6 +304,7 @@ radusergroup = Table(
 temp_radusergroup = as_copy(radusergroup, 'temp_radusergroup')
 
 
+# noinspection PyPep8Naming,SpellCheckingInspection
 class utcnow(expression.FunctionElement):
     type = DateTime()
 

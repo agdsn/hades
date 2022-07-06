@@ -202,6 +202,7 @@ def generate_radius_clients_file(
         logger.exception("Error writing %s: %s", file_name, e.strerror)
 
 
+# noinspection PyPep8Naming
 class HadesDeputyService(object):
     """Deputy DBus service
 

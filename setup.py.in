@@ -23,6 +23,7 @@ class Distribution(SetuptoolsDistribution):
         super().__init__(attrs)
 
 
+# noinspection PyPep8Naming
 class build_exe(Command):
     description = "build native executables"
 
@@ -81,6 +82,7 @@ class build_exe(Command):
 build.sub_commands.append(("build_exe", lambda _: True))
 
 
+# noinspection PyPep8Naming
 class install_exe(Command):
 
     description = "install executables"
@@ -139,6 +141,7 @@ class install_exe(Command):
 install.sub_commands.append(("install_exe", lambda _: True))
 
 
+# noinspection PyPep8Naming
 class develop(old_develop):
     __doc__ = old_develop.__doc__
 

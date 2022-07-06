@@ -151,6 +151,7 @@ class OptionDescriptor:
         # See https://bugs.python.org/issue43682#msg390496.
         inner_doc = m.__get__(None, object).__doc__
 
+        # noinspection PyPep8Naming
         @functools.wraps(f, updated=())
         class wrapper(cls):
             """Descriptor, that binds the given function in addition to an

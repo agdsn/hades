@@ -113,6 +113,7 @@ def make_release_packet(
 IP_PKTINFO = 8
 
 
+# noinspection PyPep8Naming
 class in_pktinfo(ctypes.Structure):
     _fields_ = (
         ("ipi_ifindex", ctypes.c_uint),
