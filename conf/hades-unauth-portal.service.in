@@ -24,7 +24,6 @@ ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
 KillSignal=SIGINT
-StandardError=syslog
 NotifyAccess=all
 
 PrivateNetwork=yes
