@@ -3,7 +3,6 @@ import collections.abc
 import re
 import urllib.parse
 from datetime import timedelta
-from typing import Optional
 
 import kombu
 import kombu.common
@@ -181,8 +180,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_TYPE(HadesOption):
 
     If HADES_LOCAL_MASTER_DATABASE is set, this option is ignored.
     """
-    type = (str, type(None))
-    default: Optional[str] = None
+    type = str
 
 
 class HADES_POSTGRESQL_FOREIGN_SERVER_VERSION(HadesOption):
@@ -192,8 +190,7 @@ class HADES_POSTGRESQL_FOREIGN_SERVER_VERSION(HadesOption):
     If :hades:option:`HADES_LOCAL_MASTER_DATABASE` is set, this option is
     ignored.
     """
-    type = (str, type(None))
-    default: Optional[str] = None
+    type = str
 
 
 class HADES_POSTGRESQL_FOREIGN_TABLE_GLOBAL_OPTIONS(HadesOption):
