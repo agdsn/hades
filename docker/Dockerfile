@@ -83,7 +83,6 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     python3-pysnmp4 \
     python3-pytest \
     python3-pytest-mock \
-    python3-pytest-runner \
     python3-setuptools \
     python3-sqlalchemy \
     python3-systemd \
