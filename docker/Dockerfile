@@ -10,6 +10,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     && echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache \
     && apt-get update \
     && apt-get install -y \
+    aptitude \
     bandit \
     bash-completion \
     bats \
