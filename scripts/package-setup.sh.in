@@ -36,7 +36,9 @@ if ! getent group '@SYSTEM_GROUP@' &>/dev/null; then
 fi
 
 for file in $(dpkg-query --listfiles hades | grep '^@pkgsysconfdir@'); do
-	chgrp '@SYSTEM_GROUP@' "$file"
+	if dpkg-statoverride --list "$file" >/dev/null; then
+		chgrp '@SYSTEM_GROUP@' "$file"
+	fi
 done
 
 for user in "${users[@]}"; do
@@ -50,7 +52,9 @@ for user in "${users[@]}"; do
 		echo "Creating $user user ..."
 		adduser --quiet --system --home "$home" --no-create-home --ingroup "$group" --disabled-password "$user"
 		adduser --quiet "$user" '@SYSTEM_GROUP@'
-		chown "$user":"$group" "$home"
-		chmod o= "$home"
+		if ! dpkg-statoverride --list "$home" >/dev/null; then
+			chown "$user":"$group" "$home"
+			chmod o= "$home"
+		fi
 	fi
 done
