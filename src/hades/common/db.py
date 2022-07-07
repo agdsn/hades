@@ -1,4 +1,11 @@
-"""Database utilities"""
+"""Database utilities.
+
+This module contains
+
+- the sqlalchemy :class:`Table <sqlalchemy:sqlalchemy.schema.Table>` schema definitions
+- structures related to the former, like :class:`TypeDecorators <sqlalchemy:sqlalchemy.types.TypeDecorator>`
+- functions interacting with the database (both for reading and manipulating)
+"""
 import logging
 import operator
 from dataclasses import dataclass
@@ -109,6 +116,8 @@ class TupleArray(ARRAY):
                          zero_indexes=True)
 
 
+#: :meta hide-value:
+#: :type: materialized view
 alternative_dns = Table(
     "alternative_dns",
     metadata,
@@ -117,6 +126,10 @@ alternative_dns = Table(
 )
 temp_alternative_dns = as_copy(alternative_dns, 'temp_alternative_dns')
 
+#: The table containing the DHCP host reservations.
+#:
+#: :meta hide-value:
+#: :type: materialized view
 auth_dhcp_host = Table(
     "auth_dhcp_host",
     metadata,
@@ -128,6 +141,10 @@ auth_dhcp_host = Table(
 )
 temp_auth_dhcp_host = as_copy(auth_dhcp_host, 'temp_auth_dhcp_host')
 
+#: The table representing the auth leases.  Synced from dnsmasq state via the ``--dhcp-script`` hook.
+#:
+#: :meta hide-value:
+#: :type: table
 auth_dhcp_lease = Table(
     "auth_dhcp_lease",
     metadata,
@@ -181,8 +198,16 @@ auth_dhcp_lease = Table(
     CheckConstraint(func.coalesce(func.array_ndims("UserClasses"), 1) == 1),
 )
 
+#: The table representing the unauth leases.  Synced from dnsmasq state via the ``--dhcp-script`` hook.
+#:
+#: :meta hide-value:
+#: :type: table
 unauth_dhcp_lease = as_copy(auth_dhcp_lease, "unauth_dhcp_lease", False)
 
+#: The table network access switches
+#:
+#: :meta hide-value:
+#: :type: materialized view
 nas = Table(
     "nas",
     metadata,
@@ -201,6 +226,10 @@ nas = Table(
 )
 temp_nas = as_copy(nas, 'temp_nas')
 
+#: radius accounting information
+#:
+#: :meta hide-value:
+#: :type: table
 radacct = Table(
     "radacct",
     metadata,
@@ -231,6 +260,8 @@ radacct = Table(
     Column('FramedIPAddress', IPAddress),
 )
 
+#: :meta hide-value:
+#: :type: materialized view
 radcheck = Table(
     "radcheck",
     metadata,
@@ -245,6 +276,8 @@ radcheck = Table(
 )
 temp_radcheck = as_copy(radcheck, 'temp_radcheck')
 
+#: :meta hide-value:
+#: :type: materialized view
 radgroupcheck = Table(
     "radgroupcheck",
     metadata,
@@ -257,6 +290,8 @@ radgroupcheck = Table(
 )
 temp_radgroupcheck = as_copy(radgroupcheck, 'temp_radgroupcheck')
 
+#: :meta hide-value:
+#: :type: materialized view
 radgroupreply = Table(
     "radgroupreply",
     metadata,
@@ -269,6 +304,10 @@ radgroupreply = Table(
 )
 temp_radgroupreply = as_copy(radgroupreply, 'temp_radgroupreply')
 
+#: Radius Authorization logs
+#:
+#: :meta hide-value:
+#: :type: table
 radpostauth = Table(
     "radpostauth",
     metadata,
@@ -287,6 +326,8 @@ radpostauth = Table(
     ),
 )
 
+#: :meta hide-value:
+#: :type: materialized view
 radreply = Table(
     "radreply",
     metadata,
@@ -301,6 +342,8 @@ radreply = Table(
 )
 temp_radreply = as_copy(radreply, 'temp_radreply')
 
+#: :meta hide-value:
+#: :type: materialized view
 radusergroup = Table(
     "radusergroup",
     metadata,
