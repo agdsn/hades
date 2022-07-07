@@ -29,6 +29,15 @@ readonly -A homes=(
 	['@RADIUS_USER@']='@RADIUS_HOME@'
 	['@UNAUTH_DNS_USER@']='@UNAUTH_DNS_HOME@'
 )
+readonly -A comments=(
+	['@AGENT_USER@']='Hades agent service user'
+	['@AUTH_DHCP_USER@']='Hades auth-dhcp service user'
+	['@AUTH_DNS_USER@']='Hades auth-dns service user'
+	['@DATABASE_USER@']='Hades database service user'
+	['@PORTAL_USER@']='Hades portal service user'
+	['@RADIUS_USER@']='Hades radius server user'
+	['@UNAUTH_DNS_USER@']='Hades unauth-dns service user'
+)
 
 if ! getent group '@SYSTEM_GROUP@' &>/dev/null; then
 	echo "Creating @SYSTEM_GROUP@ group ..."
@@ -44,13 +53,14 @@ done
 for user in "${users[@]}"; do
 	group="${groups[$user]}"
 	home="${homes[$user]}"
+	comment="${comments[$user]}"
 	if ! getent group "$group" >/dev/null; then
 		echo "Creating $group group ..."
 		addgroup --quiet --system "$group"
 	fi
 	if ! getent passwd "$user" >/dev/null; then
 		echo "Creating $user user ..."
-		adduser --quiet --system --home "$home" --no-create-home --ingroup "$group" --disabled-password "$user"
+		adduser --quiet --system --home "$home" --no-create-home --ingroup "$group" --disabled-password --gecos "$comment" "$user"
 		adduser --quiet "$user" '@SYSTEM_GROUP@'
 		if ! dpkg-statoverride --list "$home" >/dev/null; then
 			chown "$user":"$group" "$home"
