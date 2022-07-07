@@ -746,7 +746,7 @@ def get_sessions_of_mac(
         .order_by(radacct.c.AcctStartTime.desc())
     )
     if when is not None:
-        query.where(radacct.c.AcctStartTime.op('<@') <= func.tstzrange(*when))
+        query.where(radacct.c.AcctStartTime.op('<@')(func.tstzrange(*when)))
     if limit is not None:
         query = query.limit(limit)
     return iter(connection.execute(query))
@@ -778,7 +778,7 @@ def get_auth_attempts_of_mac(
         .order_by(radpostauth.c.AuthDate.desc())
     )
     if when is not None:
-        query.where(radpostauth.c.AuthDate.op('<@') <= func.tstzrange(*when))
+        query.where(radpostauth.c.AuthDate.op('<@')(func.tstzrange(*when)))
     if limit is not None:
         query = query.limit(limit)
     return iter(connection.execute(query))
@@ -814,7 +814,7 @@ def get_auth_attempts_at_port(
         .order_by(radpostauth.c.AuthDate.desc())
     )
     if when is not None:
-        query.where(radpostauth.c.AuthDate.op('<@') <= func.tstzrange(*when))
+        query.where(radpostauth.c.AuthDate.op('<@')(func.tstzrange(*when)))
     if limit is not None:
         query = query.limit(limit)
     return iter(connection.execute(query))
@@ -868,7 +868,7 @@ def get_all_dhcp_leases(
         ]
     ).order_by(dhcp_lease_table.c.IPAddress.asc())
     if subnet is not None:
-        query = query.where(dhcp_lease_table.c.IPAddress.op('<<=') <= subnet)
+        query = query.where(dhcp_lease_table.c.IPAddress.op('<<=')(subnet))
     if limit is not None:
         query = query.limit(limit)
     return iter(connection.execute(query))
