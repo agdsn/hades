@@ -86,4 +86,11 @@ teardown() {
 	[[ "${env[new_routers]}" = "$(netaddr.ip "$gateway_ip_address")" ]]
 	[[ "${env[new_subnet_cidr]}" = "$(netaddr.prefixlen "$gateway_ip_address")" ]]
 	[[ "${env[new_subnet_mask]}" = "$(netaddr.netmask "$gateway_ip_address")" ]]
+
+	[[ "$(psql_query_csv hades -c 'SELECT count(*) FROM auth_dhcp_lease')" = "1" ]]
+	local -a _got=()
+	local -a _expected=("$client_mac_address" "$(netaddr.ip "$client_ip_address")" "")
+	psql_mapfile _got hades -c 'SELECT "MAC", "IPAddress", "Hostname" from auth_dhcp_lease'
+
+	assert_array_equals _got _expected
 }
