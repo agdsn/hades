@@ -55,6 +55,7 @@ Pre-Depends:
  python3,
  ${misc:Pre-Depends},
 Depends:
+ adduser (>= 3.11),
  bridge-utils,
  dnsmasq,
  freeradius (>= 3.0),
