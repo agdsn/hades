@@ -55,10 +55,22 @@ parser.add_argument(
     dest="verbosity",
     default=DEFAULT_VERBOSITY,
     action="count",
-    help="Be more verbose",
+    help=(
+        f"Be more verbose (use up to "
+        f"{len(VERBOSITY_LEVELS) - DEFAULT_VERBOSITY}) times"
+    ),
 )
-parser.add_argument('-q', '--quiet', dest='verbosity',
-                    action='store_const', const=0, help='Be quiet')
+parser.add_argument(
+    "-q",
+    "--quiet",
+    dest="verbosity",
+    action="store_const",
+    const=0,
+    help=(
+        f"Be quiet ({logging.getLevelName(VERBOSITY_LEVELS[0])} and higher "
+        f"will still be logged)"
+    ),
+)
 parser.add_argument(
     "-V",
     "--version",
@@ -85,10 +97,17 @@ parser.add_argument(
         PACKAGE_AUTHOR=constants.PACKAGE_AUTHOR,
     )
 )
-parser.add_argument('--syslog', nargs='?', const='/dev/log', metavar='SOCKET',
-                    help="Log to syslog instead of stderr. A path to the log "
-                         "socket may be provided, defaults to /dev/log "
-                         "otherwise")
+parser.add_argument(
+    "--syslog",
+    nargs="?",
+    const="/dev/log",
+    metavar="SOCKET",
+    help=(
+        "Log to syslog instead of stderr. CRITICAL messages will still be "
+        "logged on stderr too. A path to the log socket may be provided, "
+        "defaults to /dev/log otherwise."
+    ),
+)
 
 
 def setup_cli_logging(program, args):
