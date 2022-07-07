@@ -1,3 +1,11 @@
 etc/hades
 etc/hades/config
 etc/hades/templates
+var/lib/hades
+var/lib/hades/agent
+var/lib/hades/auth-dhcp
+var/lib/hades/auth-dns
+var/lib/hades/database
+var/lib/hades/portal
+var/lib/hades/radius
+var/lib/hades/unauth-dns

@@ -46,10 +46,6 @@ for user in "${users[@]}"; do
 		echo "Creating $group group ..."
 		addgroup --quiet --system "$group"
 	fi
-	if [[ ! -d "$home" ]]; then
-		echo "Creating $home directory ..."
-		mkdir -p "$home"
-	fi
 	if ! getent passwd "$user" &>/dev/null; then
 		echo "Creating $user user ..."
 		adduser --quiet --system --home "$home" --no-create-home --ingroup "$group" --disabled-password "$user"
