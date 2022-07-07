@@ -29,19 +29,6 @@ readonly -A homes=(
 	['@RADIUS_USER@']='@RADIUS_HOME@'
 	['@UNAUTH_DNS_USER@']='@UNAUTH_DNS_HOME@'
 )
-readonly -A services=(
-	['agent']='@AGENT_USER@'
-	['auth-dhcp']='@AUTH_DHCP_USER@'
-	['auth-dns']='@AUTH_DNS_USER@'
-	['auth-vrrp']=
-	['database']='@DATABASE_USER@'
-	['radius']='@RADIUS_USER@'
-	['root-vrrp']=
-	['unauth-dns']='@UNAUTH_DNS_USER@'
-	['unauth-http']='@PORTAL_USER@'
-	['unauth-portal']='@PORTAL_USER@'
-	['unauth-vrrp']=
-)
 
 if ! getent group '@SYSTEM_GROUP@' &>/dev/null; then
 	echo "Creating @SYSTEM_GROUP@ group ..."
@@ -69,19 +56,5 @@ for user in "${users[@]}"; do
 		adduser --quiet "$user" '@SYSTEM_GROUP@'
 		chown "$user":"$group" "$home"
 		chmod o= "$home"
-	fi
-done
-
-for service in "${!services[@]}"; do
-	user="${services[$service]}"
-	directory="@pkglocalstatedir@/$service"
-	if [[ ! -d "$directory" ]]; then
-		echo "Creating $directory directory ..."
-		mkdir -p "$directory"
-		if [[ -n "$user" ]]; then
-			group="${groups[$user]}"
-			chown "$user":"$group" "$directory"
-			chmod o= "$directory"
-		fi
 	fi
 done
