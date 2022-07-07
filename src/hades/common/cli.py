@@ -14,7 +14,7 @@ from hades import constants
 class ArgumentParser(argparse.ArgumentParser):
     """ArgumentParser subclass that exists with :data:`os.EX_USAGE` exit code if
     parsing fails."""
-    def error(self, message):
+    def error(self, message: str) -> typing.NoReturn:
         self.print_usage(sys.stderr)
         args = {'prog': self.prog, 'message': message}
         self.exit(os.EX_USAGE, _('%(prog)s: error: %(message)s\n') % args)
