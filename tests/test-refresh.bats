@@ -42,11 +42,7 @@ teardown() {
 }
 
 get_leases_csv() {
-	psql hades -q <<-EOF
-		\t on
-		\pset format csv
-		SELECT "IPAddress", "MAC" FROM auth_dhcp_lease
-	EOF
+	psql_query_csv hades -c 'SELECT "IPAddress", "MAC" FROM auth_dhcp_lease'
 }
 
 assert_leases() {

@@ -105,6 +105,10 @@ psql_query() {
 	psql --quiet --no-align --tuples-only "$@"
 }
 
+psql_query_csv() {
+	psql --quiet --csv --tuples-only "$@"
+}
+
 psql_mapfile() {
 	local -r var="$1"
 	shift
