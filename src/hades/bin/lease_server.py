@@ -11,9 +11,7 @@ from systemd.daemon import listen_fds, is_socket_unix
 from hades import constants
 from hades.common import db
 
-from hades.common.cli import (
-    ArgumentParser, parser as common_parser, setup_cli_logging,
-)
+from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
 from hades.config.base import ConfigError
 from hades.config.loader import load_config, print_config_error
 from hades.leases.server import Server

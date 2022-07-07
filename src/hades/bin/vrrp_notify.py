@@ -12,7 +12,7 @@ from contextlib import closing
 import kombu
 
 from hades.agent import create_app
-from hades.common.cli import ArgumentParser, parser as common_parser
+from hades.common.cli import ArgumentParser, common_parser
 from hades.config.base import ConfigError
 from hades.config.loader import get_config, load_config, print_config_error
 from hades.config.options import CeleryOption

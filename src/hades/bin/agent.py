@@ -14,7 +14,9 @@ import celery.apps.worker
 from hades import constants
 from hades.agent import create_app
 from hades.common.cli import (
-    ArgumentParser, parser as common_parser, reset_cli_logging,
+    ArgumentParser,
+    common_parser,
+    reset_cli_logging,
     setup_cli_logging,
 )
 from hades.config.base import ConfigError

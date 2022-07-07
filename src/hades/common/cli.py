@@ -47,9 +47,11 @@ VERBOSITY_LEVELS = (
 )
 DEFAULT_VERBOSITY = 1
 
-parser = ArgumentParser(add_help=False)
-parser.add_argument('-c', '--config', default=None, help="Path to config file")
-parser.add_argument(
+common_parser = ArgumentParser(add_help=False)
+common_parser.add_argument(
+    "-c", "--config", default=None, help="Path to config file"
+)
+common_parser.add_argument(
     "-v",
     "--verbose",
     dest="verbosity",
@@ -60,7 +62,7 @@ parser.add_argument(
         f"{len(VERBOSITY_LEVELS) - DEFAULT_VERBOSITY}) times"
     ),
 )
-parser.add_argument(
+common_parser.add_argument(
     "-q",
     "--quiet",
     dest="verbosity",
@@ -71,7 +73,7 @@ parser.add_argument(
         f"will still be logged)"
     ),
 )
-parser.add_argument(
+common_parser.add_argument(
     "-V",
     "--version",
     action=VersionAction,
@@ -97,7 +99,7 @@ parser.add_argument(
         PACKAGE_AUTHOR=constants.PACKAGE_AUTHOR,
     )
 )
-parser.add_argument(
+common_parser.add_argument(
     "--syslog",
     nargs="?",
     const="/dev/log",

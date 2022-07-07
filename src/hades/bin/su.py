@@ -4,9 +4,7 @@ import os
 import pwd
 import sys
 
-from hades.common.cli import (
-    ArgumentParser, parser as common_parser, setup_cli_logging,
-)
+from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
 from hades.common.privileges import drop_privileges
 
 logger = logging.getLogger(__name__)

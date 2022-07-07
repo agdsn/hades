@@ -10,9 +10,7 @@ import argparse
 import os
 import sys
 
-from hades.common.cli import (
-    ArgumentParser, parser as parent_parser, setup_cli_logging,
-)
+from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
 from hades.config.base import ConfigError
 from hades.config.export import export
 from hades.config.loader import load_config, print_config_error
@@ -23,7 +21,7 @@ def create_parser():
                             epilog='Python sequence and mapping types will '
                                    'only be exported, if the destination '
                                    'format support it',
-                            parents=[parent_parser])
+                            parents=[common_parser])
     parser.add_argument('--format', choices=('systemd', 'posix', 'bash', 'ksh',
                                              'zsh'),
                         default='systemd', help='Export format.')

@@ -18,11 +18,7 @@ from sqlalchemy.engine.base import Connection, Engine
 from sqlalchemy.engine.result import RowProxy
 
 from hades import constants
-from hades.common.cli import (
-    ArgumentParser,
-    parser as parent_parser,
-    setup_cli_logging,
-)
+from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
 from hades.common.db import (
     auth_dhcp_lease,
     create_engine,
@@ -423,7 +419,7 @@ def create_parser(standalone: bool = True) -> ArgumentParser:
     parser = Parser(
         description="dnsmasq leasefile dhcp-script to store leases in the "
         "Hades database",
-        parents=[parent_parser] if standalone else [],
+        parents=[common_parser] if standalone else [],
         exit_on_error=standalone,
     )
     commands = parser.add_subparsers(metavar="COMMAND", dest="command")
