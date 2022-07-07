@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
 load common
+load common-dhcp
 
 readonly old_hostname="Old and busted"
 readonly new_hostname="New hotness"
@@ -39,25 +40,6 @@ setup() {
 teardown() {
 	sleep 2  # as to not anger the systemd timeouts (cleaner solution would be to deconfigure)
 	resume_timers
-}
-
-get_leases_csv() {
-	psql_query_csv hades -c 'SELECT "IPAddress", "MAC" FROM auth_dhcp_lease'
-}
-
-assert_leases() {
-	local -r expected="$1"; shift
-	local -r time_before=$(date +%s)
-	local -r leases=$(get_leases_csv)
-	while (( ($(date +%s) - time_before) < 5 ))
-	do
-		if [[ "$leases" == "$expected" ]]; then
-			return 0;
-		fi;
-		sleep 0.5;
-	done;
-	echo "$leases"
-	return 1;
 }
 
 @test "check that a refresh does not change a valid lease" {
