@@ -89,6 +89,24 @@ describes the details.
    a relational database.
    See https://kea.isc.org/wiki/HostReservationDesign for the details.
 
+Lease management
+----------------
+Hades tracks the leases in the :data:`auth_dhcp_lease <hades.common.db.auth_dhcp_lease>` table.
+The leases are said to be *consistent* if for every lease ``(MAC, IPAddress, Hostname, …)``
+there is a corresponding reservation ``(MAC, IPAddress, Hostname)``
+in the :data:`auth_dhcp_host <hades.common.db.auth_dhcp_host>` view.
+
+Eventual consistency
+....................
+Hades guarantees *eventual consistency* as follows:
+
+1. With every :func:`refresh <hades.deputy.server.HadesDeputyService.Refresh>`,
+   a diff of :data:`auth_dhcp_lease <hades.common.db.auth_dhcp_lease>` is calculated.
+   Leases which have been removed from the POV of this diff will be
+   :func:`invalidated <hades.deputy.dhcp.release_dhcp_lease>`.
+2. With every ``forced-refresh``, *every* lease without a reservation will be invalidated,
+   and not just those which lost their reservation between refreshes.
+
 Unauth DNS (dnsmasq)
 ====================
 The DNS server for unauthenticated users is a vital part of the captive portal
@@ -99,6 +117,12 @@ dnsmasq is very well suited for this unusual configuration.
 There is a special entry for dns.msftncsi.com to assist with the Network
 Connectivity Status Indicator service used in Microsoft products, such as
 Windows.
+
+Lease management
+----------------
+Unauth leases are tracked in the
+:data:`unauth_dhcp_lease <hades.common.db.unauth_dhcp_lease>` table.
+Since there are no host reservations, there is no consistency to uphold.
 
 Unauth DHCP (dnsmasq)
 =====================
