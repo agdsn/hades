@@ -20,6 +20,14 @@ insert_auth_dhcp_host() {
 	EOF
 }
 
+setup_file() {
+	suspend_timers
+}
+
+teardown_file() {
+	resume_timers
+}
+
 setup() {
 	log_test_start
 	declare -Ar host_reservation=(
@@ -35,12 +43,10 @@ setup() {
 		refresh materialized view auth_dhcp_host;
 	EOF
 	systemctl restart hades-auth-dhcp
-	suspend_timers
 }
 
 teardown() {
 	sleep 2  # as to not anger the systemd timeouts (cleaner solution would be to deconfigure)
-	resume_timers
 	log_test_stop
 }
 
