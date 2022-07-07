@@ -379,7 +379,7 @@ def do_nothing(
         context: Context,
         engine: Engine,
 ) -> int:
-    logger.warning("Unknown command %s", args.original_command)
+    logger.error("Unknown command %s", args.original_command)
     return os.EX_OK
 
 
