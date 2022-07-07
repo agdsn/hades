@@ -20,6 +20,7 @@ ns() {
 }
 
 setup() {
+	log_test_start
 	script_output_dir="$(mktemp -d)"
 	setup_namespace test-auth
 	setup_namespace test-relay
@@ -53,6 +54,7 @@ teardown() {
 		TRUNCATE auth_dhcp_host;
 	EOF
 	refresh
+	log_test_stop
 }
 
 @test "check that client can acquire DHCP lease" {

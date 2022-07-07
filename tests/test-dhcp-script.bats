@@ -23,11 +23,13 @@ expires_at="$(( ${now} + ${time_remaining} ))"
 user_classes=(foo bar)
 
 setup() {
+	log_test_start
 	psql_query hades -c 'TRUNCATE auth_dhcp_lease;'
 }
 
 teardown() {
 	psql_query hades -c 'TRUNCATE auth_dhcp_lease;'
+	log_test_stop
 }
 
 insert_lease() {

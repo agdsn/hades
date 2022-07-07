@@ -22,6 +22,7 @@ ns() {
 }
 
 setup() {
+	log_test_start
 	setup_namespace test-portal
 	link_namespace test-portal br-unauth eth0 "${client_mac_address}"
 	ns ip addr add dev eth0 "${client_ip_address}"
@@ -46,6 +47,7 @@ teardown() {
 		TRUNCATE radpostauth;
 		REFRESH MATERIALIZED VIEW radusergroup;
 	EOF
+	log_test_stop
 }
 
 insert_radusergroup() {

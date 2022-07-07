@@ -1,3 +1,15 @@
+log() {
+	echo "$@" | systemd-cat -p notice -t bats
+}
+
+log_test_start() {
+	log "Starting bats test ${BATS_TEST_NAME}"
+}
+
+log_test_stop() {
+	log "Stopping bats test ${BATS_TEST_NAME}"
+}
+
 readonly mac_regex='([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})'
 
 lowercase() {

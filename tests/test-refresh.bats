@@ -21,6 +21,7 @@ insert_auth_dhcp_host() {
 }
 
 setup() {
+	log_test_start
 	declare -Ar host_reservation=(
 		[mac]=$(mac_sextuple ${old_mac} :)
 		[ip]=${old_ip}
@@ -40,6 +41,7 @@ setup() {
 teardown() {
 	sleep 2  # as to not anger the systemd timeouts (cleaner solution would be to deconfigure)
 	resume_timers
+	log_test_stop
 }
 
 @test "check that a refresh does not change a valid lease" {
