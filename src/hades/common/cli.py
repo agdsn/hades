@@ -117,7 +117,7 @@ def setup_cli_logging(program, args):
 
     :param program: The name of the program
     :param args: The parsed arguments of the program with :data:`parser` or a
-    subparser.
+     subparser.
     """
     # Collect log messages until after we have finished setting up, so that we
     # can log them properly
