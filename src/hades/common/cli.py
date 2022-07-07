@@ -1,10 +1,10 @@
 """Functionality for the Hades command-line utilities in :mod:`hades.bin`."""
 import argparse
 import functools
+import inspect
 import logging.handlers
 import os
 import sys
-import textwrap
 import typing
 from gettext import gettext as _
 
@@ -60,8 +60,11 @@ parser.add_argument(
 parser.add_argument('-q', '--quiet', dest='verbosity',
                     action='store_const', const=0, help='Be quiet')
 parser.add_argument(
-    '-V', '--version', action=VersionAction, version_info=textwrap.dedent(
-        """\
+    "-V",
+    "--version",
+    action=VersionAction,
+    version_info=inspect.cleandoc(
+        """
         {PACKAGE_NAME} version {PACKAGE_VERSION}
         Configure Options: {CONFIGURE_ARGS}
 
@@ -75,7 +78,7 @@ parser.add_argument(
         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
         THE SOFTWARE.
         """
-    ).rstrip().format(
+    ).format(
         PACKAGE_NAME=constants.PACKAGE_NAME,
         PACKAGE_VERSION=constants.PACKAGE_VERSION,
         CONFIGURE_ARGS=constants.CONFIGURE_ARGS,
