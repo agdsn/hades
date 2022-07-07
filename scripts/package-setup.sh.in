@@ -35,9 +35,9 @@ if ! getent group '@SYSTEM_GROUP@' &>/dev/null; then
 	addgroup --quiet --system '@SYSTEM_GROUP@'
 fi
 
-if [[ $(stat --format='%G' '@pkgsysconfdir@') != '@SYSTEM_GROUP@' ]]; then
-	chgrp -R '@SYSTEM_GROUP@' '@pkgsysconfdir@'
-fi
+for file in $(dpkg-query --listfiles hades | grep '^@pkgsysconfdir@'); do
+	chgrp '@SYSTEM_GROUP@' "$file"
+done
 
 for user in "${users[@]}"; do
 	group="${groups[$user]}"
