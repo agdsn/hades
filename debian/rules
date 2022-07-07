@@ -49,4 +49,4 @@ override_dh_auto_configure:
 	dh_auto_configure
 
 override_dh_builddeb:
-	dh_builddeb -- -Zgzip -z3
+	dh_builddeb -- -Znone
