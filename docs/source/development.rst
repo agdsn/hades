@@ -71,13 +71,13 @@ To build the documentation, change into the ``docs`` directory and run:
 
 .. code-block:: console
 
-    make html
+    sphinx-build source build/html
 
 The documentation will built and stored in the ``docs/build/html`` directory.
 This directory is actually a git submodule with a clone of the same repository,
 but on a different branch, namely the special ``gh-pages`` branch.
-This branch does not contain the project sources like ``master`` and is also
-completely independent from the ``master`` branch.
+This branch does not contain the project sources like ``main`` and is also
+completely independent from the ``main`` branch.
 Never merge or rebase these branch with each other!
 
 You can view the documentation locally with your browser by opening the
