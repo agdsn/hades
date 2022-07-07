@@ -133,6 +133,7 @@ def send_dhcp_packet(
 
     If no interface or IP address to send the packet from is specified, the
     operating system will choose one.
+
     :param server_ip: IP address of server.
     :param packet: DHCP packet
     :param from_interface: Interface to send the packet from (optional)
@@ -165,6 +166,7 @@ def release_dhcp_lease(
     client_ip and client_mac.
 
     An optional client identifier may also be specified.
+
     :param server_ip: IP address of the DHCP server
     :param client_ip: IP address of the DHCP client
     :param client_mac: MAC address of the DHCP client

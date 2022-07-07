@@ -49,6 +49,7 @@ def generate_leasefile_lines(
 ) -> str:
     """
     Generate lines in dnsmasq leasefile format from an iterable.
+
     :param leases: An iterable that yields (ExpiresAt, MAC, IPAddress,
         Hostname, ClientID)-tuples
     :return: An iterable of strings

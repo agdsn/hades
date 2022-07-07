@@ -309,7 +309,10 @@ class HadesDeputyService(object):
     misused.
     """
     dbus = importlib.resources.read_text(__package__, "interface.xml")
-    """DBus object introspection specification"""
+    """DBus object introspection specification
+
+    :meta hide-value:
+    """
 
     def __init__(self, bus: Bus, config: Config):
         """
@@ -426,6 +429,7 @@ class HadesDeputyService(object):
     ) -> str:
         """
         Release an auth or unauth DHCP lease
+
         :return:
         """
         try:
@@ -444,6 +448,7 @@ class HadesDeputyService(object):
     def ReleaseAuthDhcpLease(self, client_ip: str) -> str:
         """
         Release an auth DHCP lease
+
         :return:
         """
         logger.info("Releasing auth DHCP lease for client %s", client_ip)
@@ -454,6 +459,7 @@ class HadesDeputyService(object):
     def ReleaseUnauthDhcpLease(self, client_ip: str) -> str:
         """
         Release an auth DHCP lease
+
         :return:
         """
         logger.info("Releasing unauth DHCP lease for client %s", client_ip)

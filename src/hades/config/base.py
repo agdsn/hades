@@ -131,6 +131,7 @@ class OptionDescriptor:
         Functions are automatically decorated with :class:`classmethod`, if they
         are not already an instance of :class:`classmethod` or
         :class:`staticmethod`.
+
         :param f: The function
         """
         # Ensure that we have a static or class method
