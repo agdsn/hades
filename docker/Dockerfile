@@ -72,6 +72,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     python3-flask \
     python3-flask-babel \
     python3-gi \
+    python3-guzzle-sphinx-theme \
     python3-jinja2 \
     python3-kombu \
     python3-nacl \
@@ -85,6 +86,9 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     python3-pytest \
     python3-pytest-mock \
     python3-setuptools \
+    python3-sphinx \
+    python3-sphinx-argparse \
+    python3-sphinx-autodoc-typehints \
     python3-sqlalchemy \
     python3-systemd \
     python3-venv \
