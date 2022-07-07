@@ -143,6 +143,13 @@ class OptionDescriptor:
             m = classmethod(f)
         else:
             m = f
+        # unfortunately, `functools.wraps` does not help us here since we're wrapping a staticmethod/classmethod;
+        # it only propagates `classmethod.__doc__`.
+        # We're unwrapping the classmethod descriptor to force the actual __doc__ onto what we return.
+        # In python3.10, this workaround will be obsolete,
+        # as staticmethod/classmethod will propagate `__doc__` themselves.
+        # See https://bugs.python.org/issue43682#msg390496.
+        inner_doc = m.__get__(None, object).__doc__
 
         @functools.wraps(f, updated=())
         class wrapper(cls):
@@ -160,7 +167,9 @@ class OptionDescriptor:
                     self.bound = m.__get__(instance, owner)
                 return super().__get__(instance, owner)
 
-        return wrapper()
+        descriptor = wrapper()
+        descriptor.__doc__ = inner_doc
+        return descriptor
 
     def __init__(self):
         self.option = None

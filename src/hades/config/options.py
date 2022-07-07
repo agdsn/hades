@@ -420,6 +420,7 @@ class HADES_AUTH_DHCP_LEASE_RENEW_TIMER(Option):
     type = timedelta
     static_check = check.greater_than(timedelta(0))
 
+    # noinspection PyNestedDecorators
     @Compute.decorate
     @staticmethod
     def default(config):
@@ -432,6 +433,7 @@ class HADES_AUTH_DHCP_LEASE_REBIND_TIMER(Option):
     type = timedelta
     static_check = check.greater_than(timedelta(0))
 
+    # noinspection PyNestedDecorators
     @Compute.decorate
     @staticmethod
     def default(config):
@@ -875,9 +877,15 @@ class BABEL_DEFAULT_TIMEZONE(FlaskOption):
 
 
 class SQLALCHEMY_DATABASE_URI(FlaskOption):
+    # noinspection PyNestedDecorators
     @Compute.decorate
     @staticmethod
     def default(config):
+        """A URI targeting the default postgresql socket in the pkgrunstatedir.
+
+        The port is set to :hades:option:`HADES_POSTGRESQL_PORT`
+        and the user is the default database user.
+        """
         if 'postgresql' not in urllib.parse.uses_netloc:
             urllib.parse.uses_netloc.append('postgresql')
         if 'postgresql' not in urllib.parse.uses_query:
@@ -983,6 +991,7 @@ class CELERY_DEFAULT_DELIVERY_MODE(CeleryOption):
 
 
 class CELERY_QUEUES(CeleryOption):
+    # noinspection PyNestedDecorators
     @Compute.decorate
     @staticmethod
     def default(config):

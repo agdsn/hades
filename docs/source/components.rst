@@ -79,10 +79,12 @@ dnsmasq's DHCP leases are stored in the local PostgreSQL database through the
 The `dnsmasq man page <http://www.thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html>`_
 describes the details.
 
-There is a new DHCP server called *kea* also developed by ISC, which would be
-the perfect fit for Hades, as it will support reading host reservations from
-a relational database.
-See https://kea.isc.org/wiki/HostReservationDesign for the details.
+.. note ::
+
+   There is a new DHCP server called *kea* also developed by ISC, which would be
+   the perfect fit for Hades, as it will support reading host reservations from
+   a relational database.
+   See https://kea.isc.org/wiki/HostReservationDesign for the details.
 
 Unauth DNS (dnsmasq)
 ====================
@@ -119,7 +121,7 @@ Although Celery supports different broker backends,
 only RabbitMQ is supported by Hades at this point,
 because Hades uses advanced AMQP features, which are not available on simpler
 brokers, such as Redis.
-Please see the `Celery documentation <http://docs.celeryproject.org/>`_ for more
+Please see the :doc:`Celery documentation <celery:index>` for more
 information about Celery.
 
 The central message queue **not** part of Hades, you must provide your own,

@@ -5,17 +5,22 @@ from typing import Any
 
 import sphinx.ext.autodoc
 from docutils.parsers.rst.roles import CustomRole, code_role
+from sphinx.addnodes import desc_signature, desc_addname
 from sphinx.application import Sphinx
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
+from sphinx.util import logging
 from sphinx.util.docfields import Field, GroupedField
 from sphinx.util.docstrings import prepare_docstring
 
 from hades.config.base import Compute, Option, OptionMeta, qualified_name
 
 
-class OptionDirective(ObjectDescription):
+logger = logging.getLogger(__name__)
+
+
+class OptionDirective(ObjectDescription[str]):
     doc_field_types = [
         Field('default', label='Default'),
         Field('required', label='Required'),
@@ -24,14 +29,27 @@ class OptionDirective(ObjectDescription):
         GroupedField('type', label='Types'),
     ]
 
-    def add_target_and_index(self, name, sig, signode):
+    def handle_signature(self, sig: str, signode: desc_signature) -> str:
+        """Parse the signature string.
+
+        In this case the “signature” just consists of the option name.
+
+        :param sig: The text coming directly after the directive: `.. option :: <sig>`
+        :param signode: The docutils node which has been prepared for us
+        """
+        return sig
+
+    def add_target_and_index(self, name: str, sig: str, signode: desc_signature) -> None:
         targetname = self.objtype + name
         if targetname not in self.state.document.ids:
             signode['names'].append(targetname)
             signode['ids'].append(targetname)
             signode['first'] = (not self.names)
             self.state.document.note_explicit_target(signode)
-            inv = self.env.domaindata[self.domain]['objects']
+            signode += desc_addname(name, name)
+
+            domaindata = self.env.domaindata[self.domain]
+            inv = domaindata.setdefault('objects', {})
             if name in inv:
                 self.state_machine.reporter.warning(
                     'duplicate option description of {}, other instance in {}'
@@ -39,8 +57,14 @@ class OptionDirective(ObjectDescription):
                     line=self.lineno)
             inv[name] = self.env.docname
 
-            self.indexnode['entries'].append(('pair: option; ' + name, name,
-                                              targetname, '', None))
+            # see https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#directive-index
+            self.indexnode['entries'].append((
+                'pair',  # entrytype
+                f"option; {name}",  # entryname
+                targetname,  # target
+                '',  # ignored
+                None,  # key
+            ))
 
 
 class HadesDomain(Domain):
@@ -102,11 +126,14 @@ class OptionDocumenter(sphinx.ext.autodoc.ClassDocumenter):
             self.add_line(":required: This option is **required**.", sourcename)
             self.add_line("", sourcename)
         if option.has_default:
-            self.add_field("default", (
-                option.default.__doc__
-                if isinstance(option.default, Compute) else
-                ":python:`{!r}`".format(option.default)
-            ), sourcename)
+            if isinstance(option.default, Compute):
+                default_desc = option.default.__doc__
+                if not default_desc:
+                    logger.warning("Undocumented default function in %s", name)
+                    default_desc = "*(undocumented)*"
+            else:
+                default_desc = f":python:`{option.default!r}`"
+            self.add_field("default", default_desc, sourcename)
         if option.type is None:
             types = ()
         elif isinstance(option.type, tuple):
@@ -122,8 +149,7 @@ class OptionDocumenter(sphinx.ext.autodoc.ClassDocumenter):
         if option.runtime_check is not None:
             self.add_field("Runtime Check", option.runtime_check.__doc__,
                            sourcename)
-        print('\n'.join(self.directive.result[idx:]))
-        #print(self.directive.result[idx:])
+        logger.verbose('\n'.join(self.directive.result[idx:]))
 
 
 def setup(app: Sphinx):
@@ -134,6 +160,14 @@ def setup(app: Sphinx):
     app.add_role("sql", CustomRole(
         "sql", code_role, {'language': 'sql', 'class': ['highlight']}
     ))
+    # These roles are used in the Celery documentation, which bleeds down onto our `RPCTask` definitions,
+    # because binding the celery app registers attributes on the `Task` classes via `setattr`.
+    # This causes sphinx to treat these attributes – and their documentation – as vendor-defined, and not third-party,
+    # and so they are included in the list of members whose documentation should be emitted.
+    # As a workaround, we treat :setting:`…` and :sig:`…` roles as code, effectively silencing the warning.
+    app.add_role("setting", CustomRole("setting", code_role, {}))
+    app.add_role("sig", CustomRole("setting", code_role, {}))
+
     app.add_domain(HadesDomain)
     app.add_autodocumenter(OptionDocumenter)
     return {
