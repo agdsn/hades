@@ -23,7 +23,7 @@ from hades.common.db import (
     get_auth_dhcp_leases_of_mac as do_get_auth_dhcp_leases_of_mac,
     get_sessions_of_mac as do_get_sessions_of_mac,
 )
-from hades.config.loader import get_config
+from hades.config import get_config
 from hades.deputy.client import (
     signal_cleanup,
     signal_auth_dhcp_lease_release,

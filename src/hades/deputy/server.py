@@ -40,7 +40,7 @@ from hades.common.db import (
 from hades.common.glib import typed_glib_error
 from hades.common.privileges import dropped_privileges
 from hades.common.signals import install_handler
-from hades.config.loader import Config, get_config
+from hades.config import Config, get_config
 from hades.deputy.dhcp import release_dhcp_lease
 
 logger = logging.getLogger(__name__)

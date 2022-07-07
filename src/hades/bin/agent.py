@@ -19,8 +19,7 @@ from hades.common.cli import (
     reset_cli_logging,
     setup_cli_logging,
 )
-from hades.config.base import ConfigError
-from hades.config.loader import load_config, print_config_error
+from hades.config import ConfigError, load_config, print_config_error
 
 
 class Formatter(argparse.HelpFormatter):

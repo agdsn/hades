@@ -10,12 +10,17 @@ import sys
 import traceback
 from typing import Any, Iterable, Optional, Tuple, Union
 
-# noinspection PyUnresolvedReferences
-import hades.config.options
 from hades import constants
-from hades.config.base import (
-    Compute, ConfigError, ConfigOptionError,
-    OptionMeta, is_option_name,
+
+# Force-load all config options
+# noinspection PyUnresolvedReferences
+from . import options
+from .base import (
+    Compute,
+    ConfigError,
+    ConfigOptionError,
+    OptionMeta,
+    is_option_name,
 )
 
 CONFIG_PACKAGE_NAME = 'hades_config'

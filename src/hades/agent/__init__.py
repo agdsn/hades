@@ -3,11 +3,11 @@
 import celery
 import celery.signals
 
-import hades.config.loader
+import hades.config
 from . import tasks
 
 
-def create_app(config: hades.config.loader.Config) -> celery.Celery:
+def create_app(config: hades.config.Config) -> celery.Celery:
     app = celery.Celery(__package__)
     for obj in tasks.__dict__.values():
         if isinstance(obj, tasks.Task):

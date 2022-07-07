@@ -4,7 +4,7 @@ from flask import Flask
 from flask_babel import Babel
 
 from hades import constants
-from hades.config.loader import get_config
+from hades.config import get_config
 from hades.portal.session import NullSessionInterface
 
 path = importlib.resources.files(__package__)

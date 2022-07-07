@@ -11,9 +11,8 @@ import os
 import sys
 
 from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
-from hades.config.base import ConfigError
+from hades.config import ConfigError, load_config, print_config_error
 from hades.config.export import export
-from hades.config.loader import load_config, print_config_error
 
 
 def create_parser():

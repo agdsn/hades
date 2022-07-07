@@ -13,7 +13,7 @@ from typing import Sequence, Type, Union
 import netaddr
 from pyroute2.iproute import IPRoute
 
-from hades.config.base import (
+from .base import (
     Check, ConfigOptionError, OptionCheckError, coerce, option_reference,
 )
 

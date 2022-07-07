@@ -20,8 +20,7 @@ from hades import constants
 from hades.common import db
 from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
 from hades.common.privileges import dropped_privileges
-from hades.config.base import ConfigError
-from hades.config.loader import load_config, print_config_error
+from hades.config import ConfigError, load_config, print_config_error
 
 logger = logging.getLogger('hades.bin.check_database')
 

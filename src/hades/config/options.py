@@ -9,8 +9,9 @@ import kombu.common
 import netaddr
 
 from hades import constants
-from hades.config import check, compute
-from hades.config.base import Compute, Option
+
+from . import check, compute
+from .base import Compute, Option
 
 
 class HadesOption(Option, abstract=True):

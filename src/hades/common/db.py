@@ -17,7 +17,7 @@ from sqlalchemy.engine.base import Connection
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
 
-from hades.config.loader import Config, get_config
+from hades.config import Config, get_config
 
 logger = logging.getLogger(__name__)
 metadata = MetaData()

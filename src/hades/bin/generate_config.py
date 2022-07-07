@@ -11,9 +11,8 @@ import sys
 
 from hades import constants
 from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
-from hades.config.base import ConfigError
+from hades.config import ConfigError, load_config, print_config_error
 from hades.config.generate import ConfigGenerator, GeneratorError
-from hades.config.loader import load_config, print_config_error
 
 logger = logging.getLogger()
 

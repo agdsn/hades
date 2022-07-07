@@ -25,7 +25,7 @@ from hades.common.db import (
     get_all_auth_dhcp_leases,
 )
 from hades.common.privileges import drop_privileges
-from hades.config.loader import load_config
+from hades.config import load_config
 
 logger = logging.getLogger(__name__)
 

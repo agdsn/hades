@@ -1,7 +1,12 @@
 from typing import Union, Type
 
-from hades.config.base import (
-    Compute, ConfigOptionError, MissingOptionError, Option, coerce, option_reference,
+from .base import (
+    Compute,
+    ConfigOptionError,
+    MissingOptionError,
+    Option,
+    coerce,
+    option_reference,
 )
 
 

@@ -5,8 +5,7 @@ as a command-line application.
 Also export the app object for use by WSGI application servers, if imported as
 an ordinary Python module.
 """
-from hades.config.loader import load_config
-from hades.config.options import FlaskOption
+from hades.config import FlaskOption, load_config
 # noinspection PyUnresolvedReferences
 from hades.portal import app, views
 
