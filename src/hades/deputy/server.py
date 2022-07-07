@@ -11,15 +11,17 @@ import importlib.resources
 import io
 import logging
 import os
+import pathlib
 import pwd
 import re
 import signal
 import stat
 import string
 import subprocess
+import tempfile
 import textwrap
 from functools import partial
-from typing import Iterable, Optional, Tuple
+from typing import Iterable, Optional, Tuple, Union, overload
 
 import netaddr
 from gi.repository import GLib
@@ -88,22 +90,115 @@ def generate_dhcp_host_reservations(
             yield "{0},id:*,{1}\n".format(mac, ip)
 
 
+@overload
+def replace_file(
+    path: Union[os.PathLike, str],
+    content: Union[Iterable[bytes], bytes],
+    *,
+    encoding: None = ...,
+    owner: Optional[int] = ...,
+    group: Optional[int] = ...,
+    mode: Optional[int] = ...,
+) -> None: ...
+
+
+@overload
+def replace_file(
+    path: Union[os.PathLike, str],
+    content: Union[Iterable[str], str],
+    *,
+    encoding: str = ...,
+    owner: Optional[int] = ...,
+    group: Optional[int] = ...,
+    mode: Optional[int] = ...,
+) -> None: ...
+
+
+def replace_file(
+    path: Union[os.PathLike, str],
+    content: Union[Iterable[Union[bytes, str]], Union[bytes, str]],
+    *,
+    encoding: Optional[str] = None,
+    owner: Optional[int] = None,
+    group: Optional[int] = None,
+    mode: Optional[int] = None,
+) -> None:
+    """
+    Atomically replace a file with the given content.
+
+    The directory of the file must exist and must be writeable. The content may
+    either be a str or bytes object or an Iterable of such objects, in which
+    case the content will be written via :func:`io.IO.writelines`.
+
+    :param path: Path to the file
+    :param content: The new content of the file
+    :param encoding: The encoding for :class:`str` content
+    :param owner: File owner
+    :param group: File group
+    :param mode: File mode
+    :raises OSError: if file system operations fail
+    """
+    open_mode = "wb" if encoding is None else "w"
+    path = pathlib.Path(path)
+    parent = path.parent
+    if encoding is None and isinstance(content, str):
+        raise ValueError("encoding required for writing str content")
+    with tempfile.NamedTemporaryFile(
+        open_mode, encoding=encoding, dir=parent, delete=False
+    ) as file:
+        dir_fd = None
+        try:
+            dir_fd = os.open(
+                parent, os.O_DIRECTORY | os.O_CLOEXEC | os.O_RDONLY, 0
+            )
+            fd = file.fileno()
+            if (owner is None) ^ (group is None):
+                stat_result = os.fstat(fd)
+                if owner is None:
+                    owner = stat_result.st_uid
+                if group is None:
+                    group = stat_result.st_gid
+            if owner is not None:
+                os.fchown(fd, owner, group)
+            if mode is not None:
+                os.fchmod(fd, mode)
+            if isinstance(content, (bytes, str)):
+                file.write(content)
+            else:
+                file.writelines(content)
+            file.flush()
+            os.fsync(fd)
+            os.rename(file.name, path)
+            os.fsync(dir_fd)
+        except BaseException:
+            os.unlink(file)
+            raise
+        finally:
+            if dir_fd is not None:
+                os.close(dir_fd)
+
+
 def generate_auth_dhcp_hosts_file(
     hosts: Iterable[Tuple[netaddr.EUI, netaddr.IPAddress, Optional[str]]],
 ) -> None:
     """Generate the dnsmasq hosts file for authenticated users"""
-    file_name = constants.AUTH_DHCP_HOSTS_FILE
-    logger.info("Generating DHCP hosts file %s", file_name)
+    file = pathlib.Path(constants.AUTH_DHCP_HOSTS_FILE)
+    logger.info("Generating DHCP hosts file %s", file)
+    # Use hades-auth-dhcp as owner not as root
     auth_dhcp_pwd = pwd.getpwnam(constants.AUTH_DHCP_USER)
     try:
-        fd = os.open(file_name, os.O_CREAT | os.O_WRONLY | os.O_CLOEXEC,
-                     stat.S_IRUSR | stat.S_IRGRP)
-        with open(fd, mode='w', encoding='ascii') as f:
-            os.fchown(fd, auth_dhcp_pwd.pw_uid, auth_dhcp_pwd.pw_gid)
-            os.fchmod(fd, stat.S_IRUSR | stat.S_IRGRP)
-            f.writelines(generate_dhcp_host_reservations(hosts))
+        replace_file(
+            file,
+            generate_dhcp_host_reservations(hosts),
+            encoding="ascii",
+            owner=auth_dhcp_pwd.pw_uid,
+            group=auth_dhcp_pwd.pw_gid,
+            mode=stat.S_IRUSR | stat.S_IRGRP,
+        )
     except OSError as e:
-        logger.error("Error writing %s: %s", file_name, e.strerror)
+        logger.error(
+            "Failed to replace DHCP hosts file %s: %s", file, e.strerror
+        )
 
 
 def generate_ipset_swap(ipset_name: str, tmp_ipset_name: str,
