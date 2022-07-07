@@ -35,6 +35,9 @@ database, all other components support it as a backend and its Foreign Data
 Wrapper combined with Materialized Views are a very simple and robust way to
 implement asynchronous replication.
 
+Hades distributes a ``hades-psql`` convenience wrapper around ``psql``
+which can be used for quick interaction with the database.
+
 RADIUS (FreeRADIUS)
 ===================
 `FreeRADIUS <http://freeradius.org/>`_ is the de facto standard RADIUS open
