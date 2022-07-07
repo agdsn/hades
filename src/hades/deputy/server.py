@@ -37,7 +37,7 @@ from hades.common.db import (
     auth_dhcp_lease,
     get_dhcp_lease_of_ip,
     unauth_dhcp_lease,
-    ObjectsDiff, LeaseInfo,
+    ObjectsDiff, LeaseInfo, eui_as_unix,
 )
 from hades.common.glib import typed_glib_error
 from hades.common.privileges import dropped_privileges
@@ -486,6 +486,25 @@ class HadesDeputyService(object):
         with contextlib.closing(self.engine.connect()) as connection:
             db.delete_old_sessions(connection, interval)
             db.delete_old_auth_attempts(connection, interval)
+            old_auth_leases = db.get_all_auth_dhcp_leases(
+                connection,
+                interval=self.config.HADES_AUTH_DHCP_LEASE_LIFETIME
+            )
+            old_unauth_leases = db.get_all_unauth_dhcp_leases(
+                connection,
+                interval=self.config.HADES_UNAUTH_DHCP_LEASE_TIME
+            )
+        for expires_at, mac, ip, hostname, client_id in old_auth_leases:
+            logger.warning(
+                "Found expired auth_dhcp_lease: (%s, %s, %s) (expired at %s)",
+                eui_as_unix(mac), ip, hostname or "<no hostname>", expires_at,
+            )
+        for expires_at, mac, ip, hostname, client_id in old_unauth_leases:
+            logger.warning(
+                "Found expired unauth_dhcp_lease: (%s, %s, %s) (expired at %s)",
+                eui_as_unix(mac), ip, hostname or "<no hostname>", expires_at,
+            )
+
         return "OK"
 
     def _release_dhcp_lease(

@@ -87,6 +87,16 @@ class MACAddress(TypeDecorator):
         return netaddr.EUI(value, dialect=netaddr.mac_pgsql)
 
 
+def eui_as_unix(mac: netaddr.EUI) -> netaddr.EUI:
+    """Represent a mac address as itself with the :ref:`netaddr.mac_unix_expanded` dialect set.
+
+    This causes the string representation to be the colon-separated ``00:de:ad:be:ef:00``
+    which is used in most other places in hades.
+    This normalization is useful to keep the representations of MAC addresses in the journal consistent.
+    """
+    return netaddr.EUI(int(mac), dialect=netaddr.mac_unix_expanded)
+
+
 class IPAddress(TypeDecorator):
     """Custom SQLAlchemy type for IP addresses.
 
