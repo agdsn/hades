@@ -12,6 +12,7 @@ readonly new_mac=00:de:ad:be:ef:ff
 
 
 insert_auth_dhcp_host() {
+	# truncate auth_dhcp_host and insert a single lease
 	eval "local -A reservation=${1#*=}"
 	psql foreign <<-EOF
 		TRUNCATE auth_dhcp_host;
@@ -30,6 +31,8 @@ teardown_file() {
 
 setup() {
 	log_test_start
+	# `auth_dhcp_lease` filled with precisely one reservation:
+	# ($old_mac, $old_ip, $old_hostname)
 	declare -Ar host_reservation=(
 		[mac]=$(mac_sextuple ${old_mac} :)
 		[ip]=${old_ip}
@@ -88,10 +91,19 @@ teardown() {
 	assert_leases ""
 }
 
-@test "check that completely changing the reservation removes the lease" {
+@test "check that a refresh deletes an unknown lease" {
+	# completely unknown, new reservation:
+	# the diff just detects our old reservation as removed,
+	# and this new reservation as something different.
+	# Thus, any lease will be cleaned up.
 	declare -Ar reservation=(
 		[mac]=${new_mac}
+		[ip]=${new_ip}
+		[hostname]=${new_hostname}
 	)
+	insert_auth_dhcp_host "$(declare -p reservation)"
+	refresh
+	assert_leases ""
 }
 
 @test "check that a forced refresh deletes an unknown lease" {
