@@ -42,11 +42,11 @@ fi
 for user in "${users[@]}"; do
 	group="${groups[$user]}"
 	home="${homes[$user]}"
-	if ! getent group "$group" &>/dev/null; then
+	if ! getent group "$group" >/dev/null; then
 		echo "Creating $group group ..."
 		addgroup --quiet --system "$group"
 	fi
-	if ! getent passwd "$user" &>/dev/null; then
+	if ! getent passwd "$user" >/dev/null; then
 		echo "Creating $user user ..."
 		adduser --quiet --system --home "$home" --no-create-home --ingroup "$group" --disabled-password "$user"
 		adduser --quiet "$user" '@SYSTEM_GROUP@'
