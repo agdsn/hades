@@ -3,6 +3,8 @@ import contextlib
 
 from gi.repository import Gio, GLib
 
+from hades.common.util import qualified_name
+
 
 class TypedGLibError(Exception):
     """Base GLib exception"""
@@ -20,9 +22,9 @@ class TypedGLibError(Exception):
             domain_cls = TypedGLibError.domains.setdefault(domain, cls)
             if domain_cls is not cls:
                 raise TypeError(
-                    f"Exception {domain_cls.__module__}."
-                    f"{domain_cls.__qualname__} already registered for error "
-                    f"domain {domain} ({GLib.quark_to_string(cls.domain)})"
+                    f"Exception {qualified_name(domain_cls)} already "
+                    f"registered for error domain {domain} "
+                    f"({GLib.quark_to_string(cls.domain)})"
                 )
         else:
             try:
@@ -35,9 +37,9 @@ class TypedGLibError(Exception):
             if domain_cls.codes.setdefault(cls.code, cls) is not cls:
                 code_cls = domain_cls.codes[cls.code]
                 raise TypeError(
-                    f"Exception {code_cls.__module__}.{code_cls.__qualname__} "
-                    f"already registered for error code {cls.code.value_name} "
-                    f"of domain {domain} ({GLib.quark_to_string(cls.domain)})"
+                    f"Exception {qualified_name(code_cls)} already registered "
+                    f"for error code {cls.code.value_name} of domain {domain} "
+                    f"({GLib.quark_to_string(cls.domain)})"
                 )
 
     @classmethod

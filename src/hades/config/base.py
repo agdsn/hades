@@ -2,6 +2,8 @@ import functools
 import re
 from typing import Any, Dict
 
+from hades.common.util import qualified_name
+
 option_name_regex = re.compile(r'\A[A-Z][A-Z0-9_]*\Z', re.ASCII)
 
 
@@ -17,13 +19,6 @@ def is_option_name(name):
     :rtype: bool
     """
     return isinstance(name, str) and option_name_regex.match(name)
-
-
-def qualified_name(type_):
-    if type_.__module__ is None or type_.__module__ == 'builtins':
-        return type_.__qualname__
-    else:
-        return type_.__module__ + '.' + type_.__qualname__
 
 
 def option_reference(option):

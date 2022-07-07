@@ -14,8 +14,9 @@ from sphinx.util import logging
 from sphinx.util.docfields import Field, GroupedField
 from sphinx.util.docstrings import prepare_docstring
 
-from .base import Compute, Option, OptionMeta, qualified_name
+from hades.common.util import qualified_name
 
+from .base import Compute, Option, OptionMeta
 
 logger = logging.getLogger(__name__)
 

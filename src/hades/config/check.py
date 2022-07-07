@@ -14,7 +14,12 @@ import netaddr
 from pyroute2.iproute import IPRoute
 
 from .base import (
-    Check, ConfigOptionError, OptionCheckError, coerce, option_reference,
+    Check,
+    ConfigOptionError,
+    OptionCheckError,
+    coerce,
+    option_reference,
+    qualified_name,
 )
 
 
@@ -140,20 +145,18 @@ class type_is(Check):
         else:
             self.types = (types,)
         if len(self.types) > 1:
-            self.__doc__ = "Type must be one of {}".format(", ".join(
-                ":class:`{}`".format(type_.__qualname__)
-                for type_ in self.types
-            ))
+            types = ", ".join([qualified_name(type_) for type_ in self.types])
+            self.__doc__ = f"Type must be one of {types}"
         else:
-            self.__doc__ = "Type must be :class:`{}`".format(
-                self.types[0].__qualname__
+            self.__doc__ = (
+                f"Type must be :class:`{qualified_name(self.types[0])}`"
             )
 
     def __call__(self, config, value):
         if not isinstance(value, self.types):
-            types = ", ".join([type_.__qualname__ for type_ in self.types])
+            types = ", ".join([qualified_name(type_) for type_ in self.types])
             raise OptionCheckError(
-                "Must be an instance of {}".format(types),
+                f"Must be an instance of {types}",
                 option=self.option.__name__,
             )
 
