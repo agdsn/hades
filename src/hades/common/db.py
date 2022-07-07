@@ -839,6 +839,7 @@ def get_all_dhcp_leases(
     connection: Connection,
     subnet: Optional[netaddr.IPNetwork] = None,
     limit: Optional[int] = None,
+    interval: Optional[timedelta] = None,
 ) -> Iterator[
     Tuple[
         datetime,
@@ -855,6 +856,7 @@ def get_all_dhcp_leases(
     :param connection: A SQLAlchemy connection
     :param subnet: Limit leases to subnet
     :param limit: Maximum number of leases
+    :param interval: If set, only return leases older than ``now - interval``.
     :return: An iterator that yields (Expires-At, MAC, IP-Address, Hostname,
         Client-ID)-tuples
     """
@@ -869,6 +871,8 @@ def get_all_dhcp_leases(
     ).order_by(dhcp_lease_table.c.IPAddress.asc())
     if subnet is not None:
         query = query.where(dhcp_lease_table.c.IPAddress.op('<<=')(subnet))
+    if interval is not None:
+        query = query.where(dhcp_lease_table.c.ExpiresAt < utcnow() - interval)
     if limit is not None:
         query = query.limit(limit)
     return iter(connection.execute(query))
@@ -927,6 +931,7 @@ def get_all_auth_dhcp_leases(
     connection: Connection,
     subnet: Optional[netaddr.IPNetwork] = None,
     limit: Optional[int] = None,
+    interval: Optional[timedelta] = None,
 ) -> Iterator[
     Tuple[
         datetime,
@@ -942,11 +947,12 @@ def get_all_auth_dhcp_leases(
     :param connection: A SQLAlchemy connection
     :param subnet: Limit leases to subnet
     :param limit: Maximum number of leases
+    :param interval: If set, only return leases older than ``now - interval``.
     :return: An iterator that yields (Expires-At, MAC, IP-Address, Hostname,
         Client-ID)-tuples
     """
     logger.debug("Getting all auth DHCP leases")
-    return get_all_dhcp_leases(auth_dhcp_lease, connection, subnet, limit)
+    return get_all_dhcp_leases(auth_dhcp_lease, connection, subnet, limit, interval)
 
 
 def get_auth_dhcp_lease_of_ip(
@@ -985,6 +991,7 @@ def get_all_unauth_dhcp_leases(
     connection: Connection,
     subnet: Optional[netaddr.IPNetwork] = None,
     limit: Optional[int] = None,
+    interval: Optional[timedelta] = None,
 ) -> Iterator[
     Tuple[
         datetime,
@@ -1000,11 +1007,12 @@ def get_all_unauth_dhcp_leases(
     :param connection: A SQLAlchemy connection
     :param subnet: Limit leases to subnet
     :param limit: Maximum number of leases
+    :param interval: If set, only return leases older than ``now - interval``.
     :return: An iterator that yields (Expires-At, MAC, IP-Address, Hostname,
         Client-ID)-tuples
     """
     logger.debug("Getting all unauth DHCP leases")
-    return get_all_dhcp_leases(unauth_dhcp_lease, connection, subnet, limit)
+    return get_all_dhcp_leases(unauth_dhcp_lease, connection, subnet, limit, interval)
 
 
 def get_unauth_dhcp_lease_of_ip(
