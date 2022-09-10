@@ -21,7 +21,7 @@ import subprocess
 import tempfile
 import textwrap
 from functools import partial
-from typing import Iterable, Optional, Tuple, Union, overload
+from typing import Iterable, Optional, Tuple, Union, overload, Iterator
 
 import netaddr
 from gi.repository import GLib
@@ -342,6 +342,15 @@ class HadesDeputyService(object):
         If necessary depended config files are regenerate and the corresponding
         services are reloaded.
         """
+        reload_auth_dhcp_host: bool  # if set, we want `hosts: List`
+        hosts: Optional[Iterator[...]]  # set iff `reload_auth_dhcp_host`
+
+        reload_nas: bool  # if set, we want `clients: List`
+        clients: Optional[Iterator[...]]  # set iff `reload_nas`
+
+        reload_alternative_dns: bool  # if set, we want `ips: List`
+        ips: Optional[Iterator[...]]
+
         logger.info("Refreshing materialized views")
         with contextlib.closing(self.engine.connect()) as connection:
             with connection.begin():
@@ -419,12 +428,15 @@ class HadesDeputyService(object):
                     reload_alternative_dns = False
 
         if reload_auth_dhcp_host:
+            assert hosts is not None
             generate_auth_dhcp_hosts_file(hosts)
             reload_systemd_unit(self.bus, 'hades-auth-dhcp.service')
         if reload_nas:
+            assert clients is not None
             generate_radius_clients_file(clients)
             restart_systemd_unit(self.bus, 'hades-radius.service')
         if reload_alternative_dns:
+            assert ips is not None
             update_alternative_dns_ipset(ips)
         return "OK"
 
