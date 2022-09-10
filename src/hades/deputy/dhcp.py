@@ -3,7 +3,6 @@ import ctypes
 import secrets
 import socket
 import typing
-from contextlib import closing, contextmanager, nullcontext
 from typing import Optional
 
 import logging
@@ -124,7 +123,7 @@ class in_pktinfo(ctypes.Structure):
     )
 
 
-@contextmanager
+@contextlib.contextmanager
 def netns(ns: str) -> typing.Iterator[None]:
     pushns(ns)
     try:
@@ -151,7 +150,7 @@ def send_dhcp_packet(
     :param from_ip: IP address to send the packet from (optional)
     """
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    with closing(sock):
+    with contextlib.closing(sock):
         if from_interface is not None:
             sock.setsockopt(
                 socket.SOL_SOCKET, socket.SO_BINDTODEVICE,
@@ -194,5 +193,5 @@ def release_dhcp_lease(
     #
     # fun fact: this may have caused multiple DHCPRELEASEs to target the production hades instance
     # because that's just where the `default` route directs you if you're in the office. Oops.
-    with netns(ns) if ns else nullcontext():
+    with netns(ns) if ns else contextlib.nullcontext():
         send_dhcp_packet(server_ip, packet, from_interface, from_ip)
