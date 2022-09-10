@@ -443,7 +443,7 @@ class Server(socketserver.UnixStreamServer):
                 data, size = yield need
             except BaseParseError as e:
                 raise e.with_element(element)
-        value = struct.unpack("=i", data.read(need))[0]
+        value = struct.unpack("@i", data.read(need))[0]
         return data, size, value
 
     @staticmethod

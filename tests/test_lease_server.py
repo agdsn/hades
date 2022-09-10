@@ -73,7 +73,7 @@ def test_parse_ancillary_data_unknown(caplog: LogCaptureFixture):
     data = [(
         socket.SOL_SOCKET,
         socket.SCM_CREDENTIALS,
-        struct.pack("=iII", 1, 0, 0),
+        struct.pack("@iII", 1, 0, 0),
     )]
     streams = Server.parse_ancillary_data(data, ())
     assert len(streams) == 0
@@ -169,7 +169,7 @@ def fill_buffer(buffer: mmap.mmap, value: bytes) -> int:
     "value", [0, 1, 2, 3, 4, -1],
 )
 def test_parse_valid_int(driver: Driver[int], buffer: mmap.mmap, value: int):
-    size = fill_buffer(buffer, struct.pack("=i", value))
+    size = fill_buffer(buffer, struct.pack("@i", value))
 
     parsed_value = driver(buffer, size, Server.parse_int)
     assert parsed_value == value
@@ -178,7 +178,7 @@ def test_parse_valid_int(driver: Driver[int], buffer: mmap.mmap, value: int):
 
 def test_parse_int_eof(driver: Driver[int], buffer: mmap.mmap):
     offset = buffer.tell()
-    serialized = struct.pack("=i", -1)
+    serialized = struct.pack("@i", -1)
     end = len(serialized) // 2
     size = fill_buffer(buffer, serialized[:end])
 
@@ -189,7 +189,7 @@ def test_parse_int_eof(driver: Driver[int], buffer: mmap.mmap):
 
 
 def test_parse_int_buffer_too_small(driver: Driver[int]):
-    value = struct.pack("=i", -1)
+    value = struct.pack("@i", -1)
     size = len(value) // 2
     with create_buffer(size) as buffer:
         buffer[:] = value[:size]
@@ -244,11 +244,11 @@ def serialize_request(
         envc: Optional[int] = None,
 ) -> bytes:
     return b"".join([
-        struct.pack("=i", len(argv) if argc is None else argc),
+        struct.pack("@i", len(argv) if argc is None else argc),
     ] + [
         arg + b"\x00" for arg in argv
     ] + [
-        struct.pack("=i", len(environ) if envc is None else envc),
+        struct.pack("@i", len(environ) if envc is None else envc),
     ] + [
         k + b"=" + v + b"\x00" for k, v in environ.items()
     ])

@@ -45,7 +45,7 @@ Result = Tuple[
     Optional[bytes],
 ]
 T = typing.TypeVar('T')
-SIZEOF_INT = struct.calcsize("i")
+SIZEOF_INT = struct.calcsize("@i")
 ucred = struct.Struct("iII")
 TIMEOUT = 1.0
 RECVMSG_FLAGS = socket.MSG_CMSG_CLOEXEC
@@ -513,7 +513,7 @@ class ConnectedRun(BaseRun, abc.ABC):
             # Check for pending bytes in the pipe
             pending_bytes = bytearray(SIZEOF_INT)
             fcntl.ioctl(reader.fileno(), termios.FIONREAD, pending_bytes)
-            pending_bytes = struct.unpack_from("=i", pending_bytes)[0]
+            pending_bytes = struct.unpack_from("@i", pending_bytes)[0]
             test_size = min(mmap.PAGESIZE, pipe_size - pending_bytes)
             expected_bytes = random.randbytes(test_size)
             writer.buffer.write(expected_bytes)
@@ -560,11 +560,11 @@ class ConnectedRun(BaseRun, abc.ABC):
     ):
         got = b"".join(map(operator.itemgetter(0), messages))
         expected = b"".join([
-            struct.pack("=i", len(argv)),
+            struct.pack("@i", len(argv)),
         ] + [
             arg + b"\x00" for arg in argv
         ] + [
-            struct.pack("=i", len(environ)),
+            struct.pack("@i", len(environ)),
         ] + [
             b"%b=%b\x00" % i for i in environ.items()
         ])
