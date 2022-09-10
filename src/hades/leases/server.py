@@ -42,8 +42,8 @@ class BaseParseError(Exception):
     def _prefix(self) -> str:
         offset, element = self.offset, self.element
         return "".join([
-            "" if offset is None else "at offset {}: ".format(offset),
-            "" if element is None else "while parsing {}: ".format(element),
+            "" if offset is None else f"at offset {offset:d}: ",
+            "" if element is None else f"while parsing {element}: ",
         ]).capitalize()
 
     def with_element(self, element: str):
@@ -92,9 +92,9 @@ class UnexpectedEOFError(BaseParseError):
 
     def __str__(self) -> str:
         return (
-            "{}Unexpected end of file, expected at least {} more byte(s), "
-            "but only {} byte(s) left."
-            .format(self._prefix(), self.needed, self.available)
+            f"{self._prefix()}"
+            f"Unexpected end of file, expected at least {self.needed} more "
+            f"byte(s), but only {self.available} byte(s) left."
         )
 
 
@@ -118,8 +118,9 @@ class BufferTooSmallError(BaseParseError):
 
     def __str__(self) -> str:
         return (
-            "{}Parser requires more data ({}) than can be buffered ({})."
-            .format(self._prefix(), self.needed, self.available)
+            f"{self._prefix()}"
+            f"Parser requires more data ({self.needed}) than can be buffered "
+            f"({self.available})."
         )
 
 
@@ -271,8 +272,8 @@ class Server(socketserver.UnixStreamServer):
                     _, _, (argv, environ) = e.value
                     if buffer.tell() < available:
                         raise ProtocolError(
-                            "{} byte(s) left over after parsing"
-                            .format(available - buffer.tell())
+                            f"{available - buffer.tell()} byte(s) left over "
+                            f"after parsing"
                         )
                     needed = 0
                 except BaseParseError as e:
@@ -338,7 +339,7 @@ class Server(socketserver.UnixStreamServer):
                 raise ProtocolError(
                     "Received truncated file descriptor. "
                     "SCM_RIGHTS control message data must be an multiple of "
-                    "sizeof(int) = {}".format(fds.itemsize)
+                    f"sizeof(int) = {fds.itemsize}"
                 )
             for fd, fd_mode in zip_left(fds, expected_fd_modes):
                 flags = fcntl.fcntl(fd, fcntl.F_GETFL)
@@ -426,7 +427,7 @@ class Server(socketserver.UnixStreamServer):
         # Parse arguments
         argv = []
         for i in range(argc):
-            element = "argv[{:d}]".format(i)
+            element = f"argv[{i:d}]"
             data, size, arg = yield from cls.parse_string(data, size, element)
             argv.append(arg)
 
@@ -439,7 +440,7 @@ class Server(socketserver.UnixStreamServer):
         # Parse environment variables
         environ = {}
         for i in range(envc):
-            element = "environ[{}]".format(i)
+            element = f"environ[{i:d}]"
             data, size, env = yield from cls.parse_string(data, size, element)
             name, sep, value = env.partition(b'=')
             if not sep:
