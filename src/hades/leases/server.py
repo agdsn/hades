@@ -231,6 +231,7 @@ class Server(socketserver.UnixStreamServer):
       exit with the status code.
     """
     max_packet_size = mmap.PAGESIZE - 1
+    ancillary_buffer = socket.CMSG_LEN(struct.calcsize("@3i"))
 
     def __init__(
         self, sock: socket.socket, engine: Engine, dhcp_lease_table: Table
@@ -289,38 +290,9 @@ class Server(socketserver.UnixStreamServer):
         needed = next(parser)
         with contextlib.ExitStack() as stack:
             while needed:
-                # Prepare buffer for refill
-                parsed = buffer.tell()
-                offset += parsed
-                buffer.move(0, parsed, available - parsed)
-                buffer.seek(0, os.SEEK_SET)
-                available -= parsed
-                if needed > self.max_packet_size:
-                    parser.throw(BufferTooSmallError(
-                        needed,
-                        self.max_packet_size,
-                        offset=offset,
-                    ))
-                # Leave space for a trailing zero byte
-                size, ancdata, msg_flags, _ = request.recvmsg_into(
-                    (memoryview(buffer)[available:-1],),
-                    socket.CMSG_LEN(3 * SIZEOF_INT),
-                    socket.MSG_CMSG_CLOEXEC,
+                available = self.fill_buffer(
+                    stack, streams, offset, available, needed, request
                 )
-                available += size
-                # Ensure that a trailing zero byte exists
-                buffer[available] = 0
-
-                streams.extend(
-                    stack.enter_context(stream)
-                    for stream in self.parse_ancillary_data(
-                        ancdata, (Mode.READ, Mode.WRITE, Mode.WRITE)
-                    )
-                )
-
-                if msg_flags & socket.MSG_CTRUNC:
-                    raise ProtocolError("Truncated ancillary data")
-
                 try:
                     needed = parser.send((buffer, available))
                 except StopIteration as e:
@@ -330,19 +302,9 @@ class Server(socketserver.UnixStreamServer):
                             f"{available - buffer.tell()} byte(s) left over "
                             f"after parsing"
                         )
-                    needed = 0
+                    break
                 except BaseParseError as e:
                     raise e.with_offset(offset + buffer.tell())
-                else:
-                    # Remote end closed/shut down writing
-                    if needed > 0 and size == 0:
-                        # Raise an error in the parser to produce an error with
-                        # proper message
-                        parser.throw(UnexpectedEOFError(
-                            needed,
-                            available,
-                            offset=offset + buffer.tell(),
-                        ))
 
             if not streams:
                 raise ProtocolError("No file descriptors received")
@@ -356,6 +318,49 @@ class Server(socketserver.UnixStreamServer):
             return (stdin, stdout, stderr), argv, environ
         # ExitStack does not swallow exceptions, so final `return` always reached
         assert False
+
+    def fill_buffer(self, stack, streams, offset, available, needed, sock):
+        buffer = self.buffer
+        while available < needed:
+            # Prepare buffer for refill
+            parsed = buffer.tell()
+            offset += parsed
+            buffer.move(0, parsed, available - parsed)
+            buffer.seek(0, os.SEEK_SET)
+            available -= parsed
+            if needed > self.max_packet_size:
+                raise BufferTooSmallError(
+                    needed,
+                    self.max_packet_size,
+                    offset=offset,
+                )
+            # Leave space for a trailing zero byte
+            size, ancdata, msg_flags, _ = sock.recvmsg_into(
+                (memoryview(buffer)[available:-1],),
+                self.ancillary_buffer,
+                socket.MSG_CMSG_CLOEXEC,
+            )
+
+            if not ancdata and not size:
+                raise UnexpectedEOFError(
+                    needed, available, offset=offset + available
+                )
+
+            available += size
+            # Ensure that a trailing zero byte exists
+            buffer[available] = 0
+
+            new_streams = self.parse_ancillary_data(
+                ancdata, (Mode.READ, Mode.WRITE, Mode.WRITE)
+            )
+            for stream in new_streams:
+                stack.enter_context(stream)
+            streams.extend(new_streams)
+
+            if msg_flags & socket.MSG_CTRUNC:
+                raise ProtocolError("Truncated ancillary data")
+
+        return available
 
     @staticmethod
     def parse_ancillary_data(
