@@ -53,7 +53,7 @@ class AttributeAccessibleDict(dict):
                                  .format(type(self).__name__, item)) from None
 
     def __dir__(self):
-        attributes = super().__dir__()
+        attributes = list(super().__dir__())
         self_attributes = set(attributes)
         attributes.extend(attribute for attribute in self.keys()
                           if attribute not in self_attributes)
@@ -89,7 +89,7 @@ class Config(collections.abc.Mapping):
             option.check_option(self._config, value, self._runtime_checks)
 
     def __dir__(self):
-        attributes = super().__dir__()
+        attributes = list(super().__dir__())
         self_attributes = set(attributes)
         attributes.extend(attribute for attribute in dir(self._config)
                           if attribute not in self_attributes)
@@ -193,7 +193,7 @@ def print_config_error(e: ConfigError):
                 .strip())
 
     def config_from_module_name():
-        if cause.name is not None:
+        if isinstance(cause, ImportError) and cause.name is not None:
             top, sep, tail = cause.name.partition('.')
             if top == CONFIG_PACKAGE_NAME:
                 if tail == '':
@@ -314,5 +314,5 @@ def load_config(filename: Optional[str] = None, *, runtime_checks: bool = False,
                   for name in dir(module) if is_option_name(name))
     config = CallableEvaluator(config)
     OptionMeta.check_config(config)
-    package_module.hades_config = config
+    package_module.hades_config = config  # type: ignore
     return get_config(runtime_checks=runtime_checks, option_cls=option_cls)

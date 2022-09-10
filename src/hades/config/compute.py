@@ -79,5 +79,5 @@ class deferred_format(Compute):
 
     def __call__(self, config):
         fmt_args = tuple(config[a] for a in self.args)
-        fmt_kwargs = {k: config[v] for k, v in self.kwargs}
+        fmt_kwargs = {k: config[v] for k, v in self.kwargs.items()}
         return self.fmt_string.format(*fmt_args, **fmt_kwargs)

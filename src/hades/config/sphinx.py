@@ -1,6 +1,7 @@
 """
 Sphinx extension for Hades's options
 """
+import typing
 from typing import Any
 
 import sphinx.ext.autodoc
@@ -134,6 +135,7 @@ class OptionDocumenter(sphinx.ext.autodoc.ClassDocumenter):
             else:
                 default_desc = f":python:`{option.default!r}`"
             self.add_field("default", default_desc, sourcename)
+        types: typing.Tuple[type, ...]
         if option.type is None:
             types = ()
         elif isinstance(option.type, tuple):

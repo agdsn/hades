@@ -1,5 +1,7 @@
+from __future__ import annotations
 import functools
 import re
+import typing
 from typing import Any, Dict
 
 from hades.common.util import qualified_name
@@ -130,7 +132,7 @@ def coerce(value):
 
 class OptionDescriptor:
     @classmethod
-    def decorate(cls, f):
+    def decorate(cls: typing.Type[OptionDescriptor], f):
         """
         Convert regular functions into an :class:`OptionDescriptor`.
 
@@ -146,7 +148,7 @@ class OptionDescriptor:
         if not isinstance(f, (classmethod, staticmethod)):
             m = classmethod(f)
         else:
-            m = f
+            m = f  # type: ignore
         # unfortunately, `functools.wraps` does not help us here since we're wrapping a staticmethod/classmethod;
         # it only propagates `classmethod.__doc__`.
         # We're unwrapping the classmethod descriptor to force the actual __doc__ onto what we return.
@@ -157,7 +159,7 @@ class OptionDescriptor:
 
         # noinspection PyPep8Naming
         @functools.wraps(f, updated=())
-        class wrapper(cls):
+        class wrapper(cls):  # type: ignore  # see #mypy/5865
             """Descriptor, that binds the given function in addition to an
             option"""
             def __init__(self, *args, **kwargs):
@@ -195,7 +197,7 @@ class Check(OptionDescriptor):
         :param value: The value of the Option
         :raises OptionCheckError: if the value of the option is illegal
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 class Compute(OptionDescriptor):
@@ -207,4 +209,4 @@ class Compute(OptionDescriptor):
         :param config: An potentially not fully expanded config object
         :raises OptionCheckError: if the value can't be computed
         """
-        raise NotImplemented()
+        raise NotImplementedError()
