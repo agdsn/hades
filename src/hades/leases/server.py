@@ -153,11 +153,16 @@ class Mode(enum.Enum):
     READ = "r", (os.O_RDONLY, os.O_RDWR), None
     WRITE = "w", (os.O_WRONLY, os.O_RDWR), False
     UPDATE = "r+", (os.O_RDWR,), False
+    APPEND = "a", (os.O_RDONLY, os.O_RDWR), True
+    READABLE_APPEND = "a+", (os.O_RDWR,), True
 
-    def __init__(self, stdio_mode: str, access_mode: Tuple[int, ...]) -> None:
+    def __init__(
+        self, stdio_mode: str, access_mode: Tuple[int, ...], append: bool
+    ) -> None:
         super().__init__()
         self.stdio_mode = stdio_mode
         self.access_mode = access_mode
+        self.append = append
 
 
 class Server(socketserver.UnixStreamServer):
@@ -378,7 +383,14 @@ class Server(socketserver.UnixStreamServer):
             for num, (fd, requested_mode) in enumerate(
                 zip_left(fds, requested_modes)
             ):
-                accmode = fcntl.fcntl(fd, fcntl.F_GETFL) & os.O_ACCMODE
+                flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+                accmode = flags & os.O_ACCMODE
+                appendable = flags & os.O_APPEND == os.O_APPEND
+
+                if requested_mode is None:
+                    requested_mode = (
+                        Mode.READ if accmode != os.O_WRONLY else Mode.WRITE
+                    )
 
                 if accmode not in requested_mode.access_mode:
                     raise ProtocolError(
@@ -387,15 +399,32 @@ class Server(socketserver.UnixStreamServer):
                         f"{requested_mode.name}."
                     )
 
+                if requested_mode.append is True and not appendable:
+                    try:
+                        fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_APPEND)
+                    except OSError as e:
+                        raise ProtocolError(
+                            f"File descriptor at index {num} does not support "
+                            f"O_APPEND."
+                        ) from e
+
+                if requested_mode.append is False and appendable:
+                    try:
+                        fcntl.fcntl(fd, fcntl.F_SETFL, flags & ~os.O_APPEND)
+                    except OSError as e:
+                        raise ProtocolError(
+                            f"File descriptor at index {num} does not support "
+                            f"disabling O_APPEND."
+                        ) from e
+
                 # noinspection PyTypeChecker
+                stdio_mode = requested_mode.stdio_mode
                 try:
-                    stream: TextIO = os.fdopen(
-                        fd, requested_mode.stdio_mode, closefd=True
-                    )
+                    stream: TextIO = os.fdopen(fd, stdio_mode, closefd=True)
                 except io.UnsupportedOperation as e:
                     raise RuntimeError(
                         f"Unable to create IO object for fd at index {num} "
-                        f"with mode {requested_mode.stdio_mode!r})"
+                        f"with mode {stdio_mode!r})"
                     ) from e
                 streams.append(stream)
             stack.pop_all()
