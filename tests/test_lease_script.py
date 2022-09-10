@@ -572,11 +572,11 @@ class ConnectedRun(BaseRun, abc.ABC):
     ):
         got = b"".join(map(operator.itemgetter(0), messages))
         expected = b"".join([
-            struct.pack("@i", len(argv)),
+            struct.pack("@I", len(argv)),
         ] + [
             arg + b"\x00" for arg in argv
         ] + [
-            struct.pack("@i", len(environ)),
+            struct.pack("@I", len(environ)),
         ] + [
             b"%b=%b\x00" % i for i in environ.items()
         ])

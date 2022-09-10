@@ -15,7 +15,14 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 
 from hades.leases.server import (
-    BufferTooSmallError, BaseParseError, Mode, ParseError, Parser, Server, UnexpectedEOFError, zip_left,
+    BufferTooSmallError,
+    BaseParseError,
+    Mode,
+    Parser,
+    SIZEOF_UINT,
+    Server,
+    UnexpectedEOFError,
+    zip_left,
 )
 
 T = TypeVar('T')
@@ -186,7 +193,9 @@ def fill_buffer(buffer: mmap.mmap, value: bytes) -> int:
 def test_parse_valid_int(driver: Driver[int], buffer: mmap.mmap, value: int):
     size = fill_buffer(buffer, struct.pack("@i", value))
 
-    parsed_value = driver(buffer, size, Server.parse_integer())
+    parsed_value = driver(
+        buffer, size, Server.parse_integer(4, signed=value < 0)
+    )
     assert (parsed_value, buffer.tell()) == (value, size)
 
 
@@ -197,7 +206,7 @@ def test_parse_int_eof(driver: Driver[int], buffer: mmap.mmap):
     size = fill_buffer(buffer, serialized[:end])
 
     with pytest.raises(UnexpectedEOFError) as e:
-        driver(buffer, size, Server.parse_integer())
+        driver(buffer, size, Server.parse_integer(4))
     assert (e.value.element, e.value.offset) == ("integer", offset)
 
 
@@ -207,7 +216,7 @@ def test_parse_int_buffer_too_small(driver: Driver[int]):
     with create_buffer(size) as buffer:
         buffer[:] = value[:size]
         with pytest.raises(BufferTooSmallError) as e:
-            driver(buffer, size, Server.parse_integer())
+            driver(buffer, size, Server.parse_integer(4))
         assert (e.value.element, e.value.offset) == ("integer", 0)
 
 
@@ -254,11 +263,11 @@ def serialize_request(
         envc: Optional[int] = None,
 ) -> bytes:
     return b"".join([
-        struct.pack("@i", len(argv) if argc is None else argc),
+        struct.pack("@I", len(argv) if argc is None else argc),
     ] + [
         arg + b"\x00" for arg in argv
     ] + [
-        struct.pack("@i", len(environ) if envc is None else envc),
+        struct.pack("@I", len(environ) if envc is None else envc),
     ] + [
         k + b"=" + v + b"\x00" for k, v in environ.items()
     ])
@@ -282,20 +291,14 @@ def test_parse_valid_request(
     assert (argv, environ) == (got_argv, got_environ)
 
 
-def test_parse_negative_argc(
-        driver: Driver[Tuple[List[bytes], Dict[bytes, bytes]]],
-        buffer: mmap.mmap,
-):
-    size = fill_buffer(buffer, serialize_request([], {}, -1))
-    with pytest.raises(ParseError):
-        driver(buffer, size, Server.parse_request())
-
-
 def test_parse_overflow_argc(
         driver: Driver[Tuple[List[bytes], Dict[bytes, bytes]]],
         buffer: mmap.mmap,
 ):
-    size = fill_buffer(buffer, serialize_request([], {}, 1, -1))
+    # We need to ensure, that no null bytes follow after argc, otherwise envc
+    # would be parsed as a string
+    uintmax = (1 << SIZEOF_UINT * 8) - 1
+    size = fill_buffer(buffer, serialize_request([], {}, 1, uintmax))
     with pytest.raises(UnexpectedEOFError) as e:
         driver(buffer, size, Server.parse_request())
     assert e.value.element == "argv[0]"

@@ -100,11 +100,12 @@ static struct iovec iovs[IOV_MAX];
  * Idea: Let the kernel gather the different pieces of data via iovec, instead
  * of collecting it ourselves in a temporary buffer.
  */
-int main(int argc, char *argv[]) {
-    if (argc < 2) {
+int main(int _argc, char *argv[]) {
+    if (_argc < 2) {
         print_usage();
         return EX_USAGE;
     }
+    unsigned int argc = _argc;
 
     if (strcmp("-h", argv[1]) == 0
         || strcmp("--help", argv[1]) == 0
@@ -116,7 +117,7 @@ int main(int argc, char *argv[]) {
 
     const char *path = NULL;
     // Find socket path and count environment variables
-    int envc;
+    unsigned int envc;
     for (envc = 0; environ[envc]; envc++) {
         if (strncmp(SOCKET_OPTION_EQ, environ[envc], strlen(SOCKET_OPTION_EQ)) == 0) {
             path = environ[envc] + strlen(SOCKET_OPTION_EQ);

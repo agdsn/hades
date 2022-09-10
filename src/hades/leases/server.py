@@ -18,7 +18,7 @@ import typing
 
 from collections.abc import Iterable
 from itertools import chain, repeat
-from typing import Dict, Generator, List, Optional, Sequence, Tuple, TypeVar, TextIO
+from typing import Dict, Generator, List, Literal, Optional, Sequence, Tuple, TypeVar, TextIO
 
 from sqlalchemy import Table
 from sqlalchemy.engine import Engine
@@ -27,7 +27,7 @@ from hades.bin.dhcp_script import Context, create_parser, dispatch_commands
 from hades.common.signals import install_handler
 
 logger = logging.getLogger(__name__)
-SIZEOF_INT = struct.calcsize("@i")
+SIZEOF_UINT = struct.calcsize("@I")
 T = TypeVar('T')
 Parser = Generator[
     int,  # what we yield
@@ -455,14 +455,20 @@ class Server(socketserver.UnixStreamServer):
         assert False
 
     @staticmethod
-    def parse_integer(element: str = "integer") -> Parser[int]:
+    def parse_integer(
+        length: int,
+        element: str = "integer",
+        byteorder: Literal["little", "big"] = sys.byteorder,
+        signed: bool = False,
+    ) -> Parser[int]:
         """Try to parse a C int"""
-        need = SIZEOF_INT
         try:
             data, size = yield length
         except BaseParseError as e:
             raise e.with_element(element)
-        value = struct.unpack("@i", data.read(need))[0]
+        value = int.from_bytes(
+            data.read(length), byteorder=byteorder, signed=signed
+        )
         return value
 
     @staticmethod
@@ -488,7 +494,7 @@ class Server(socketserver.UnixStreamServer):
     @classmethod
     def parse_request(cls) -> Parser[Tuple[List[bytes], Dict[bytes, bytes]]]:
         # Parse number of arguments
-        argc = yield from cls.parse_integer("argc")
+        argc = yield from cls.parse_integer(SIZEOF_UINT, "argc")
 
         # Parse arguments
         argv = []
@@ -497,7 +503,7 @@ class Server(socketserver.UnixStreamServer):
             argv.append(arg)
 
         # Parse number of environment variables
-        envc = yield from cls.parse_integer("envc")
+        envc = yield from cls.parse_integer(SIZEOF_UINT, "envc")
 
         # Parse environment variables
         environ = {}
