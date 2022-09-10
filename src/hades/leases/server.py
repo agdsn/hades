@@ -309,7 +309,7 @@ class Server(socketserver.UnixStreamServer):
         ancillary data.
 
         :param ancdata:
-        :param expected_fd_modes: a sequence of modes in which the fds should be opened
+        :param requested_fd_modes: a sequence of modes in which the fds should be opened
         :return:
         """
         fds = array.array("i")
@@ -338,7 +338,7 @@ class Server(socketserver.UnixStreamServer):
                     "SCM_RIGHTS control message data must be an multiple of "
                     f"sizeof(int) = {fds.itemsize}"
                 )
-            for fd, fd_mode in zip_left(fds, expected_fd_modes):
+            for fd, requested_fd_mode in zip_left(fds, requested_fd_modes):
                 flags = fcntl.fcntl(fd, fcntl.F_GETFL)
                 if flags & os.O_ACCMODE == os.O_RDONLY:
                     mode = "r"
@@ -352,7 +352,7 @@ class Server(socketserver.UnixStreamServer):
                     # causes open() to refuse operation because the buffer is not seekable.
                     # See https://bugs.python.org/issue20074#msg207012 and the related discussion
                     # for some details on the core developers' philosophy on this.
-                    mode = fd_mode or "w"
+                    mode = requested_fd_mode or "w"
                 else:
                     os.close(fd)
                     logger.warning("Unknown fd ACCMODE %x for fd %d", flags & os.O_ACCMODE, fd)
