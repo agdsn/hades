@@ -6,6 +6,7 @@ import itertools
 import logging
 import os
 import pwd
+import typing
 from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -46,7 +47,7 @@ def generate_leasefile_lines(
             Optional[bytes],
         ]
     ]
-) -> str:
+) -> typing.Iterator[str]:
     """
     Generate lines in dnsmasq leasefile format from an iterable.
 
@@ -54,14 +55,17 @@ def generate_leasefile_lines(
         Hostname, ClientID)-tuples
     :return: An iterable of strings
     """
-    for expires_at, mac, ip, hostname, client_id in leases:
+    for expires_at, mac, ip, hostname, raw_client_id in leases:
         mac = netaddr.EUI(mac)
         mac.dialect = netaddr.mac_unix_expanded
-        if client_id is None:
+
+        client_id: str
+        if raw_client_id is None:
             client_id = "*"
         else:
-            it = iter(client_id.hex())
+            it = iter(raw_client_id.hex())
             client_id = ":".join(a + b for a, b in zip(it, it))
+
         yield "{expires_at:d} {mac} {ip} {hostname} {client_id}\n".format(
             expires_at=int(expires_at.timestamp()),
             mac=mac,
@@ -127,7 +131,7 @@ def obtain_and_convert(
         ) from e
 
 
-def obtain_user_classes(environ: Mapping[str, str]) -> str:
+def obtain_user_classes(environ: Mapping[str, str]) -> typing.Iterator[str]:
     """Gather all user classes from environment variables."""
     for number in itertools.count():
         user_class = get_env_safe(environ, "DNSMASQ_USER_CLASS" + str(number))
@@ -140,20 +144,23 @@ def obtain_tuple(
     environ: Mapping[str, str],
     name: str,
     sep: str,
-    func: Callable[[Any], T] = lambda x: x,
+    func: Callable[[Any], T] = lambda x: x,  # type: ignore
 ) -> Optional[Tuple[T]]:
     """Obtain a tuple of values from the environment"""
-    value = get_env_safe(environ, name)
-    if value is not None:
+    env_value = get_env_safe(environ, name)
+    if env_value is not None:
         try:
-            value = tuple(func(v) for v in value.split(sep) if v)
+            value = typing.cast(
+                Tuple[T], tuple(func(v) for v in env_value.split(sep) if v)
+            )
         except ValueError as e:
             raise ValueError(
                 "Environment variable {} contains illegal value {}".format(
-                    name, value
+                    name, env_value
                 )
             ) from e
-    return value
+        return value
+    return env_value
 
 
 @dataclass
@@ -188,15 +195,15 @@ def obtain_lease_info(
     environment variable should result in the corresponding key being present
     with value of None in the resulting dict or if the key should be absent.
     """
-    expires_at = obtain_and_convert(context.environ, "DNSMASQ_LEASE_EXPIRES", int)
+    expires_at_int = obtain_and_convert(context.environ, "DNSMASQ_LEASE_EXPIRES", int)
     time_remaining = obtain_and_convert(context.environ, "DNSMASQ_TIME_REMAINING", int)
     if time_remaining is None:
         time_remaining = 0
-    if expires_at is None:
+    if expires_at_int is None:
         now = datetime.utcnow().replace(tzinfo=timezone.utc)
         expires_at = now + timedelta(seconds=time_remaining)
     else:
-        expires_at = datetime.utcfromtimestamp(expires_at).replace(
+        expires_at = datetime.utcfromtimestamp(expires_at_int).replace(
             tzinfo=timezone.utc
         )
 
