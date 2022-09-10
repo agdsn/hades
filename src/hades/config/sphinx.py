@@ -114,8 +114,7 @@ class OptionDocumenter(sphinx.ext.autodoc.ClassDocumenter):
         self.parse_name()
         self.import_object()
         idx = len(self.directive.result)
-        # type: OptionMeta
-        option = self.object
+        option: OptionMeta = self.object
         sourcename = self.get_sourcename()
         name = option.__name__
         self.add_line(".. hades:option:: " + name, sourcename)

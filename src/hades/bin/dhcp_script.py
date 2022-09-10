@@ -494,8 +494,7 @@ def dispatch_commands(
         engine: Engine,
 ) -> int:
     """"""
-    # type: Dict[str, Callable[[Any, Context, Engine], int]]
-    funcs = {
+    funcs: Dict[str, Callable[[Any, Context, Engine], int]] = {
         "init": print_leases,
         "add": add_lease,
         "del": delete_lease,

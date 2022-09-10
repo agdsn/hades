@@ -37,6 +37,14 @@ class OptionMeta(type):
     """
     options: Dict[str, Any] = {}
 
+    # class variables of classes using this as a meta class
+    default: Any
+    has_default: bool
+    required: bool
+    type: Any
+    runtime_check: Any
+    static_check: Any
+
     def __new__(mcs, name, bases, attributes, abstract=False):
         if name in mcs.options:
             raise TypeError("option named {} already defined as {}."
