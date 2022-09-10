@@ -6,6 +6,7 @@ import mmap
 import os
 import socket
 import struct
+import typing as t
 from io import FileIO
 
 from typing import Callable, Dict, Generator, List, Optional, Sequence, Tuple, TypeVar
@@ -35,20 +36,29 @@ def modes(request) -> Sequence[Mode]:
     return request.param
 
 
+def _try_close(file: t.IO) -> None:
+    try:
+        os.close(file.fileno())
+    except OSError:  # IO object still open, but FD already closed by unrelated IO wrapper
+        pass
+
+
 @pytest.fixture
 def files(modes) -> List[io.TextIOWrapper]:
     with contextlib.ExitStack() as stack:
         # Must use closefd=False, because parse_ancillary_data will return
         # streams with closefd=True.
         # noinspection PyTypeChecker
-        yield [
-            stack.enter_context(os.fdopen(
+        files = []
+        for mode in modes:
+            file = os.fdopen(
                 os.open(os.devnull, flags=mode.access_mode[0]),
                 mode=mode.stdio_mode,
                 closefd=False,
-            ))
-            for mode in modes
-        ]
+            )
+            stack.callback(_try_close, file)
+            files.append(file)
+        yield files
 
 
 def test_parse_ancillary_data(modes: Sequence[Mode], files: List[FileIO]):
@@ -62,11 +72,11 @@ def test_parse_ancillary_data(modes: Sequence[Mode], files: List[FileIO]):
         )]
         streams = Server.parse_ancillary_data(data, modes)
         stack.pop_all()
-    assert [
-        (stream.fileno(), stream.mode) for stream in streams
-    ] == [
-        (file.fileno(), file.mode) for file in files
-    ]
+        for stream in streams:
+            stack.enter_context(stream)
+        assert [(stream.fileno(), stream.mode) for stream in streams] == [
+            (file.fileno(), file.mode) for file in files
+        ]
 
 
 def test_parse_ancillary_data_unknown(caplog: LogCaptureFixture):
