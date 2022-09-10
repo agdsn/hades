@@ -1,6 +1,7 @@
 import array
 import contextlib
 import fcntl
+import functools
 import io
 import logging
 import mmap
@@ -495,9 +496,12 @@ class Server(socketserver.UnixStreamServer):
         )
 
 
-def decode(x: bytes) -> str:
-    """Decode a string like done in `os._createenviron` (hard-coding utf-8)"""
-    return x.decode("utf-8", errors="surrogateescape")
+decode = functools.partial(
+    bytes.decode,
+    encoding="utf-8",
+    errors="surrogateescape",
+)
+"""Decode bytes like done in `os._createenviron` (hard-coding utf-8)"""
 
 
 def _try_close(fd):
