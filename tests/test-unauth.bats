@@ -2,6 +2,7 @@
 
 load common
 
+readonly client_mac_address=de:ad:be:ef:00:00
 readonly client_ip_address=10.66.10.10/19
 readonly nameserver_ip_address=10.66.0.1
 readonly dnsmasq_pidfile=/run/hades/unauth-dns/dnsmasq.pid
@@ -13,7 +14,7 @@ ns() {
 setup() {
 	log_test_start
 	setup_namespace test-unauth
-	link_namespace test-unauth br-unauth eth0
+	link_namespace test-unauth br-unauth eth0 "$client_mac_address"
 	ns ip addr add dev eth0 "$client_ip_address"
 	ns ip route add default via "$nameserver_ip_address"
 	echo "nameserver $nameserver_ip_address" | ns tee /etc/resolv.conf >/dev/null
@@ -30,18 +31,34 @@ teardown() {
 	log_test_stop
 }
 
-@test "check that client can aquire DHCP lease" {
+@test "check that client can acquire unauth DHCP lease" {
 	ns ip addr flush dev eth0
 	ns truncate -s0 /etc/resolv.conf
-	run ns dhcpcd --noipv4ll --ipv4only --oneshot eth0
+	run ns dhcpcd --noipv4ll --ipv4only eth0
 	echo "$output" >&2
 	[[ $status = 0 ]]
-	egrep 'leased [^ ]+ for [0-9]+ seconds' <<<"$output"
+	lease_line=$(egrep 'leased [^ ]+ for [0-9]+ seconds' <<<"$output")
+	ip=$(sed -E 's/^.*leased ([^ ]+) for.*$/\1/' <<<"$lease_line")
 	ns cat /etc/resolv.conf >&2
 	nameserver=$(ns sed -rne 's/^nameserver (.*)$/\1/p' /etc/resolv.conf)
 	[[ "$nameserver" = "$nameserver_ip_address" ]]
-	# TODO test this lands in `unauth_dhcp_lease`
-	# TODO test that releasing removes the lease
+
+	# shellcheck disable=SC2001
+	# shellcheck disable=SC2016
+	run psql --no-align --tuples-only hades <<-EOF
+		select "IPAddress" from unauth_dhcp_lease where "MAC"='$client_mac_address'
+	EOF
+	[[ "$output" == "$ip" ]]
+
+	# RELEASE
+	run ns dhcpcd --noipv4ll --ipv4only --release eth0
+	run psql --no-align --tuples-only hades <<-EOF
+		select count(*) from unauth_dhcp_lease where "MAC"='$client_mac_address'
+	EOF
+	hexdump -C <<<"$output"
+	[[ "$output" == "0" ]]
+
+	run ns dhcpcd --noipv4ll --ipv4only --exit eth0
 }
 
 @test "check that DNS queries get redirected" {
