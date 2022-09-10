@@ -292,9 +292,7 @@ class Server(socketserver.UnixStreamServer):
                 raise ProtocolError(
                     "Expected to receive exactly 3 file descriptors"
                 )
-            stdin = ensure_stream_readable(streams[0], 'stdin')
-            stdout = ensure_stream_writable(streams[1], 'stdout')
-            stderr = ensure_stream_writable(streams[2], 'stderr')
+            stdin, stdout, stderr = streams
             # Clear the stack
             stack.pop_all()
             return (stdin, stdout, stderr), argv, environ
@@ -365,6 +363,14 @@ class Server(socketserver.UnixStreamServer):
                     raise ProtocolError(
                         f"Unknown O_ACCMODE {accmode} of fd at index {num}"
                     )
+
+                if mode != requested_fd_mode:
+                    raise ProtocolError(
+                        f"File descriptor O_ACCMODE {accmode:02x} of fd at "
+                        f"index {num} is not compatible with requested mode "
+                        f"{requested_fd_mode!r}."
+                    )
+
                 # noinspection PyTypeChecker
                 try:
                     stream: TextIO = os.fdopen(fd, mode, closefd=True)
@@ -492,23 +498,6 @@ class Server(socketserver.UnixStreamServer):
 def decode(x: bytes) -> str:
     """Decode a string like done in `os._createenviron` (hard-coding utf-8)"""
     return x.decode("utf-8", errors="surrogateescape")
-
-
-def ensure_stream_readable(stream, stream_desc: str):
-    if 'r' not in stream.mode:
-        raise ProtocolError(
-            f"stream {stream_desc} is not readable ({stream.mode=})"
-        )
-    return stream
-
-
-def ensure_stream_writable(stream, stream_desc: str):
-    is_writable = bool({'w', '+'} & set(stream.mode))
-    if not is_writable:
-        raise ProtocolError(
-            f"Stream {stream_desc} is not writable ({stream.mode=})"
-        )
-    return stream
 
 
 def _try_close(fd):
