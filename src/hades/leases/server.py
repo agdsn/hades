@@ -13,8 +13,9 @@ import socketserver
 import struct
 import sys
 import threading
+import typing
 
-from collections.abc import Container
+from collections.abc import Iterable
 from itertools import chain, repeat
 from typing import Dict, Generator, List, Optional, Sequence, Tuple, TypeVar, TextIO
 
@@ -24,7 +25,15 @@ from hades.common.signals import install_handler
 logger = logging.getLogger(__name__)
 SIZEOF_INT = struct.calcsize("@i")
 T = TypeVar('T')
-Parser = Generator[int, Tuple[mmap.mmap, int], T]
+Parser = Generator[
+    int,  # what we yield
+    Tuple[mmap.mmap, int],  # what we get sent
+    Tuple[
+        mmap.mmap,  # data
+        int,  # size
+        T,  # value
+    ]  # what we return
+]
 
 
 class BaseParseError(Exception):
@@ -339,10 +348,12 @@ class Server(socketserver.UnixStreamServer):
             # Clear the stack
             stack.pop_all()
             return (stdin, stdout, stderr), argv, environ
+        # ExitStack does not swallow exceptions, so final `return` always reached
+        assert False
 
     @staticmethod
     def parse_ancillary_data(
-        ancdata: Container[Tuple[int, int, bytes]],
+        ancdata: Iterable[Tuple[int, int, bytes]],
         requested_modes: Sequence[Mode],
     ) -> List[TextIO]:
         """
@@ -354,7 +365,7 @@ class Server(socketserver.UnixStreamServer):
         :return:
         """
         fds = array.array("i")
-        streams = []
+        streams: List[TextIO] = []
         with contextlib.ExitStack() as stack:
             truncated = False
             for cmsg_level, cmsg_type, cmsg_data in ancdata:
@@ -421,7 +432,7 @@ class Server(socketserver.UnixStreamServer):
                 # noinspection PyTypeChecker
                 stdio_mode = requested_mode.stdio_mode
                 try:
-                    stream: TextIO = os.fdopen(fd, stdio_mode, closefd=True)
+                    stream: TextIO = typing.cast(TextIO, os.fdopen(fd, stdio_mode, closefd=True))
                 except io.UnsupportedOperation as e:
                     raise RuntimeError(
                         f"Unable to create IO object for fd at index {num} "
@@ -430,6 +441,8 @@ class Server(socketserver.UnixStreamServer):
                 streams.append(stream)
             stack.pop_all()
             return streams
+        # ExitStack does not swallow exceptions, so final `return` always reached
+        assert False
 
     @staticmethod
     def parse_int(
@@ -452,7 +465,7 @@ class Server(socketserver.UnixStreamServer):
             data: mmap.mmap,
             size: int,
             element: str = "string"
-    ) -> Parser[str]:
+    ) -> Parser[bytes]:
         """Try to parse a zero-terminated C string"""
         need = 1
         while True:
@@ -485,7 +498,7 @@ class Server(socketserver.UnixStreamServer):
             raise ParseError("Negative argc: " + str(argc), element=element)
 
         # Parse arguments
-        argv = []
+        argv: List[bytes] = []
         for i in range(argc):
             element = f"argv[{i:d}]"
             data, size, arg = yield from cls.parse_string(data, size, element)
