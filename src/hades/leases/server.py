@@ -301,8 +301,8 @@ class Server(socketserver.UnixStreamServer):
 
     @staticmethod
     def parse_ancillary_data(
-            ancdata: Container[Tuple[int, int, bytes]],
-            expected_fd_modes: Sequence[str],
+        ancdata: Container[Tuple[int, int, bytes]],
+        requested_fd_modes: Sequence[str],
     ) -> List[TextIO]:
         """
         Open streams for file descriptors received via :func:`socket.recvmsg`
