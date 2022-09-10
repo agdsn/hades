@@ -7,7 +7,6 @@ Before=hades.service
 # The socket is strictly required for startup because dnsmasq needs to call
 # `hades-dhcp-script init` initially
 After=hades-unauth-dhcp-leases.socket
-Requires=hades-unauth-dhcp-leases.socket
 BindsTo=hades-unauth-dhcp-leases.socket
 After=hades-unauth-netns.service
 BindsTo=hades-unauth-netns.service
