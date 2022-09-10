@@ -30,7 +30,7 @@ import trio
 from setuptools import Distribution
 
 from hades import constants
-from hades.leases.server import Server
+from hades.leases.server import Mode, Server
 
 
 # Available since CPython 3.10
@@ -145,14 +145,14 @@ class TimeoutExceeded(Exception):
 @contextlib.contextmanager
 def pipe():
     r, w = os.pipe2(os.O_CLOEXEC | os.O_NONBLOCK)
-    r = os.fdopen(r, "rb", buffering=0, closefd=True)
-    w = os.fdopen(w, "wb", buffering=0, closefd=True)
+    r = os.fdopen(r, "r", closefd=True)
+    w = os.fdopen(w, "w", closefd=True)
     with r, w:
         yield r, w
 
 
-def drain_pipe(stream: io.FileIO, buffer: typing.BinaryIO) -> Optional[int]:
-    chunk = stream.readall()
+def drain_pipe(stream: io.TextIOWrapper, buffer: typing.BinaryIO) -> Optional[int]:
+    chunk = stream.buffer.read()
     if chunk is not None:
         buffer.write(chunk)
         return len(chunk)
@@ -204,9 +204,9 @@ async def run_with_trio(
         executable: pathlib.PosixPath,
         argv: List[bytes],
         environ: Dict[bytes, bytes],
-        stdin: Tuple[io.FileIO, io.FileIO],
-        stdout: Tuple[io.FileIO, io.FileIO],
-        stderr: Tuple[io.FileIO, io.FileIO],
+        stdin: Tuple[io.TextIOWrapper, io.TextIOWrapper],
+        stdout: Tuple[io.TextIOWrapper, io.TextIOWrapper],
+        stderr: Tuple[io.TextIOWrapper, io.TextIOWrapper],
         server: socket.socket,
         reply: bytes,
         wmem_default: int,
@@ -270,17 +270,17 @@ class BaseRun(abc.ABC):
         ))
 
     @pytest.fixture(scope="class")
-    def stdin(self) -> Tuple[io.FileIO, io.FileIO]:
+    def stdin(self) -> Tuple[io.TextIOWrapper, io.TextIOWrapper]:
         with pipe() as p:
             yield p
 
     @pytest.fixture(scope="class")
-    def stdout(self) -> Tuple[io.FileIO, io.FileIO]:
+    def stdout(self) -> Tuple[io.TextIOWrapper, io.TextIOWrapper]:
         with pipe() as p:
             yield p
 
     @pytest.fixture(scope="class")
-    def stderr(self) -> Tuple[io.FileIO, io.FileIO]:
+    def stderr(self) -> Tuple[io.TextIOWrapper, io.TextIOWrapper]:
         with pipe() as p:
             yield p
 
@@ -290,9 +290,9 @@ class BaseRun(abc.ABC):
             executable: pathlib.PosixPath,
             argv: List[bytes],
             environ: Dict[bytes, bytes],
-            stdin: Tuple[io.FileIO, io.FileIO],
-            stdout: Tuple[io.FileIO, io.FileIO],
-            stderr: Tuple[io.FileIO, io.FileIO],
+            stdin: Tuple[io.TextIOWrapper, io.TextIOWrapper],
+            stdout: Tuple[io.TextIOWrapper, io.TextIOWrapper],
+            stderr: Tuple[io.TextIOWrapper, io.TextIOWrapper],
             server: socket.socket,
             reply: bytes,
             wmem_default: int,
@@ -430,15 +430,17 @@ class ConnectedRun(BaseRun, abc.ABC):
 
     @pytest.fixture(scope="class")
     def file_descriptors(
-            self,
-            messages: List[RECVMSG],
-    ) -> Generator[List[io.FileIO], None, None]:
+        self,
+        messages: List[RECVMSG],
+    ) -> Generator[List[io.TextIOWrapper], None, None]:
         streams = []
         with contextlib.ExitStack() as stack:
             for _, ancdata, _ in messages:
                 streams.extend(
                     stack.enter_context(stream)
-                    for stream in Server.parse_ancillary_data(ancdata)
+                    for stream in Server.parse_ancillary_data(
+                        ancdata, (Mode.READ, Mode.WRITE, Mode.WRITE)
+                    )
                 )
             # Make received file descriptors non-blocking
             for stream in streams:
@@ -446,19 +448,19 @@ class ConnectedRun(BaseRun, abc.ABC):
             yield streams
 
     @pytest.fixture(scope="class")
-    def passed_stdin(self, file_descriptors: List[io.FileIO]):
+    def passed_stdin(self, file_descriptors: List[io.TextIOWrapper]):
         if len(file_descriptors) != 3:
             pytest.fail("Wrong number of file descriptors")
         return file_descriptors[0]
 
     @pytest.fixture(scope="class")
-    def passed_stdout(self, file_descriptors: List[io.FileIO]):
+    def passed_stdout(self, file_descriptors: List[io.TextIOWrapper]):
         if len(file_descriptors) != 3:
             pytest.fail("Wrong number of file descriptors")
         return file_descriptors[1]
 
     @pytest.fixture(scope="class")
-    def passed_stderr(self, file_descriptors: List[io.FileIO]):
+    def passed_stderr(self, file_descriptors: List[io.TextIOWrapper]):
         if len(file_descriptors) != 3:
             pytest.fail("Wrong number of file descriptors")
         return file_descriptors[2]
@@ -496,13 +498,13 @@ class ConnectedRun(BaseRun, abc.ABC):
         assert len(file_descriptors) == 3
 
     @staticmethod
-    def assert_file(our_file: io.FileIO, passed_file: io.FileIO):
+    def assert_file(our_file: io.TextIOWrapper, passed_file: io.TextIOWrapper):
         our_readable = our_file.readable()
         got_mode = passed_file.mode
         our_stat = os.fstat(our_file.fileno())
         passed_stat = os.fstat(passed_file.fileno())
         is_fifo = stat.S_ISFIFO(passed_stat.st_mode)
-        expected_mode = "wb" if our_readable else "rb"
+        expected_mode = "w" if our_readable else "r"
         reader = our_file if our_readable else passed_file
         writer = passed_file if our_readable else our_file
         # Verify that we have a pipe with its two ends
@@ -514,9 +516,9 @@ class ConnectedRun(BaseRun, abc.ABC):
             pending_bytes = struct.unpack_from("=i", pending_bytes)[0]
             test_size = min(mmap.PAGESIZE, pipe_size - pending_bytes)
             expected_bytes = random.randbytes(test_size)
-            writer.write(expected_bytes)
-            writer.flush()
-            got_bytes = reader.read(pipe_size)
+            writer.buffer.write(expected_bytes)
+            writer.buffer.flush()
+            got_bytes = reader.buffer.read(pipe_size)
         else:
             expected_bytes = None
             got_bytes = None
@@ -528,25 +530,25 @@ class ConnectedRun(BaseRun, abc.ABC):
 
     @pytest.mark.xfail(raises=BlockingIOError)
     def test_passed_stdin(
-            self,
-            stdin: Tuple[io.FileIO, io.FileIO],
-            passed_stdin: io.FileIO,
+        self,
+        stdin: Tuple[io.TextIOWrapper, io.TextIOWrapper],
+        passed_stdin: io.TextIOWrapper,
     ):
         self.assert_file(stdin[1], passed_stdin)
 
     @pytest.mark.xfail(raises=BlockingIOError)
     def test_passed_stdout(
-            self,
-            stdout: Tuple[io.FileIO, io.FileIO],
-            passed_stdout: io.FileIO,
+        self,
+        stdout: Tuple[io.TextIOWrapper, io.TextIOWrapper],
+        passed_stdout: io.TextIOWrapper,
     ):
         self.assert_file(stdout[0], passed_stdout)
 
     @pytest.mark.xfail(raises=BlockingIOError)
     def test_passed_stderr(
-            self,
-            stderr: Tuple[io.FileIO, io.FileIO],
-            passed_stderr: io.FileIO,
+        self,
+        stderr: Tuple[io.TextIOWrapper, io.TextIOWrapper],
+        passed_stderr: io.TextIOWrapper,
     ):
         self.assert_file(stderr[0], passed_stderr)
 
@@ -576,9 +578,9 @@ class TestSuccess(ConnectedRun, SuccessfulRun, NoStdoutOutputRun):
 
     @pytest.fixture(scope="session")
     def argv(
-            self,
-            executable: pathlib.PosixPath,
-            wmem_default: int,
+        self,
+        executable: pathlib.PosixPath,
+        wmem_default: int,
     ) -> List[bytes]:
         random_args = random.randbytes(2 * wmem_default).split(b"\x00")
         return [

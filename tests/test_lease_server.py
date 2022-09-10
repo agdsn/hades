@@ -1,5 +1,6 @@
 import array
 import contextlib
+import io
 import logging
 import mmap
 import os
@@ -7,13 +8,13 @@ import socket
 import struct
 from io import FileIO
 
-from typing import Callable, Dict, Generator, List, Optional, Tuple, TypeVar
+from typing import Callable, Dict, Generator, List, Optional, Sequence, Tuple, TypeVar
 
 import pytest
 from _pytest.logging import LogCaptureFixture
 
 from hades.leases.server import (
-    BufferTooSmallError, BaseParseError, ParseError, Parser, Server, UnexpectedEOFError, zip_left,
+    BufferTooSmallError, BaseParseError, Mode, ParseError, Parser, Server, UnexpectedEOFError, zip_left,
 )
 
 T = TypeVar('T')
@@ -21,42 +22,45 @@ ParserFactory = Callable[[mmap.mmap, int], Parser[T]]
 Driver = Callable[[mmap.mmap, int, ParserFactory], T]
 
 
-MODE_MAP = {
-    'rb': os.O_RDONLY,
-    'wb': os.O_WRONLY,
-    'rb+': os.O_RDWR,
-}
-
-
 @pytest.fixture(
-    params=[["rb"], ["wb"], ["rb+"], ["rb", "wb", "rb+"]],
+    params=(
+        [Mode.READ],
+        [Mode.WRITE],
+        [Mode.UPDATE],
+        [Mode.READ, Mode.WRITE, Mode.UPDATE],
+    ),
+    scope="session"
 )
-def files(request) -> List[FileIO]:
+def modes(request) -> Sequence[Mode]:
+    return request.param
+
+
+@pytest.fixture
+def files(modes) -> List[io.TextIOWrapper]:
     with contextlib.ExitStack() as stack:
         # Must use closefd=False, because parse_ancillary_data will return
         # streams with closefd=True.
         # noinspection PyTypeChecker
         yield [
             stack.enter_context(os.fdopen(
-                os.open(os.devnull, flags=MODE_MAP[mode]),
-                mode=mode,
-                buffering=0,
+                os.open(os.devnull, flags=mode.access_mode[0]),
+                mode=mode.stdio_mode,
                 closefd=False,
             ))
-            for mode in request.param
+            for mode in modes
         ]
 
 
-def test_parse_ancillary_data(files: List[FileIO]):
+def test_parse_ancillary_data(modes: Sequence[Mode], files: List[FileIO]):
     with contextlib.ExitStack() as stack:
         for file in files:
             stack.callback(os.close, file.fileno())
         data = [(
             socket.SOL_SOCKET,
             socket.SCM_RIGHTS,
-            array.array("i", map(FileIO.fileno, files)).tobytes(),
+            array.array("i", [f.fileno() for f in files]).tobytes(),
         )]
-        streams = Server.parse_ancillary_data(data)
+        streams = Server.parse_ancillary_data(data, modes)
         stack.pop_all()
     assert [
         (stream.fileno(), stream.mode) for stream in streams
@@ -71,7 +75,7 @@ def test_parse_ancillary_data_unknown(caplog: LogCaptureFixture):
         socket.SCM_CREDENTIALS,
         struct.pack("=iII", 1, 0, 0),
     )]
-    streams = Server.parse_ancillary_data(data)
+    streams = Server.parse_ancillary_data(data, ())
     assert len(streams) == 0
     assert caplog.record_tuples == [(
         Server.__module__,
