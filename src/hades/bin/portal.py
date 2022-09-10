@@ -12,7 +12,7 @@ from hades.portal import app, views
 application = app
 
 
-def configure_app():
+def configure_app() -> None:
     app.config.from_object(load_config(option_cls=FlaskOption))
 
 

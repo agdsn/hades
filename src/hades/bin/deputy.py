@@ -27,6 +27,8 @@ def main() -> int:
         print_config_error(e)
         return os.EX_CONFIG
     run_event_loop()
+    # never reached, but to satisfy mypy. probably fixed in https://github.com/python/mypy/pull/13575
+    return os.EX_OK
 
 
 if __name__ == '__main__':

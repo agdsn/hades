@@ -8,6 +8,7 @@ import pwd
 import re
 import socket
 import textwrap
+import typing
 from typing import Sequence, Type, Union
 
 import netaddr
@@ -145,8 +146,8 @@ class type_is(Check):
         else:
             self.types = (types,)
         if len(self.types) > 1:
-            types = ", ".join([qualified_name(type_) for type_ in self.types])
-            self.__doc__ = f"Type must be one of {types}"
+            types_desc = ", ".join([qualified_name(type_) for type_ in self.types])
+            self.__doc__ = f"Type must be one of {types_desc}"
         else:
             self.__doc__ = (
                 f"Type must be :class:`{qualified_name(self.types[0])}`"
@@ -171,6 +172,8 @@ def not_empty(option, config, value):
 
 # noinspection PyPep8Naming
 class satisfy_all(Check):
+    checks: typing.Sequence[Check]
+
     def __init__(self, *checks: Check):
         super().__init__()
         self.checks = checks
@@ -313,7 +316,7 @@ def group_exists(option, config, value):
 
 # noinspection PyPep8Naming
 class has_keys(Check):
-    def __init__(self, *keys):
+    def __init__(self, *keys: str):
         super().__init__()
         self.keys = keys
         self.__doc__ = "Must contain {}".format(
@@ -322,7 +325,7 @@ class has_keys(Check):
 
     def __call__(self, config, value):
         obj = value
-        checked = []
+        checked: typing.List[str] = []
 
         for key in self.keys:
             if not isinstance(obj, collections.abc.Mapping):

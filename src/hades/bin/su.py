@@ -10,7 +10,7 @@ from hades.common.privileges import drop_privileges
 logger = logging.getLogger(__name__)
 
 
-def main():
+def main() -> int:
     parser = ArgumentParser(parents=[common_parser])
     parser.add_argument('user')
     parser.add_argument('command')
@@ -37,6 +37,7 @@ def main():
     except OSError:
         logger.exception("An OSError occurred")
         return os.EX_OSERR
+    return os.EX_OK
 
 
 if __name__ == '__main__':

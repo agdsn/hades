@@ -1,3 +1,4 @@
+from __future__ import annotations
 import array
 import contextlib
 import enum
@@ -13,10 +14,14 @@ import socketserver
 import struct
 import sys
 import threading
+import typing
 
-from collections.abc import Container
+from collections.abc import Iterable
 from itertools import chain, repeat
 from typing import Dict, Generator, List, Optional, Sequence, Tuple, TypeVar, TextIO
+
+from sqlalchemy import Table
+from sqlalchemy.engine import Engine
 
 from hades.bin.dhcp_script import Context, create_parser, dispatch_commands
 from hades.common.signals import install_handler
@@ -24,15 +29,23 @@ from hades.common.signals import install_handler
 logger = logging.getLogger(__name__)
 SIZEOF_INT = struct.calcsize("@i")
 T = TypeVar('T')
-Parser = Generator[int, Tuple[mmap.mmap, int], T]
+Parser = Generator[
+    int,  # what we yield
+    Tuple[mmap.mmap, int],  # what we get sent
+    Tuple[
+        mmap.mmap,  # data
+        int,  # size
+        T,  # value
+    ]  # what we return
+]
 
 
 class BaseParseError(Exception):
     def __init__(
-            self,
-            *args,
-            element: Optional[str] = None,
-            offset: Optional[int] = None,
+        self,
+        *args: typing.Any,
+        element: Optional[str] = None,
+        offset: Optional[int] = None,
     ) -> None:
         self.element = element
         self.offset = offset
@@ -45,11 +58,11 @@ class BaseParseError(Exception):
             "" if element is None else f"while parsing {element}: ",
         ]).capitalize()
 
-    def with_element(self, element: str):
+    def with_element(self, element: str) -> BaseParseError:  # ≥3.11: typing.Self
         self.element = element
         return self
 
-    def with_offset(self, offset: int):
+    def with_offset(self, offset: int) -> BaseParseError:  # ≥3.11: typing.self
         self.offset = offset
         return self
 
@@ -219,7 +232,9 @@ class Server(socketserver.UnixStreamServer):
     """
     max_packet_size = mmap.PAGESIZE - 1
 
-    def __init__(self, sock, engine, dhcp_lease_table):
+    def __init__(
+        self, sock: socket.socket, engine: Engine, dhcp_lease_table: Table
+    ) -> None:
         self.parser = create_parser(standalone=False)
         self.engine = engine
         self.dhcp_lease_table = dhcp_lease_table
@@ -231,7 +246,7 @@ class Server(socketserver.UnixStreamServer):
         # Leave one byte extra for trailing zero byte
         # TODO: With Python 3.8 a memfd can be opened and mapped twice:
         # writable and readonly
-        fd = os.memfd_create(b"buffer", os.MFD_CLOEXEC)
+        fd = os.memfd_create("buffer", os.MFD_CLOEXEC)
         os.ftruncate(fd, self.max_packet_size + 1)
         self.buffer = mmap.mmap(
             fd,
@@ -241,11 +256,11 @@ class Server(socketserver.UnixStreamServer):
         )
 
     def _request_handler(
-            self,
-            request: socket.socket,
-            client_address,
-            server: socketserver.BaseServer,
-    ):
+        self,
+        request: socket.socket,
+        client_address: str,
+        server: socketserver.BaseServer,
+    ) -> None:
         assert self == server
 
         logger.debug("Received new request from %s", client_address)
@@ -339,10 +354,12 @@ class Server(socketserver.UnixStreamServer):
             # Clear the stack
             stack.pop_all()
             return (stdin, stdout, stderr), argv, environ
+        # ExitStack does not swallow exceptions, so final `return` always reached
+        assert False
 
     @staticmethod
     def parse_ancillary_data(
-        ancdata: Container[Tuple[int, int, bytes]],
+        ancdata: Iterable[Tuple[int, int, bytes]],
         requested_modes: Sequence[Mode],
     ) -> List[TextIO]:
         """
@@ -354,7 +371,7 @@ class Server(socketserver.UnixStreamServer):
         :return:
         """
         fds = array.array("i")
-        streams = []
+        streams: List[TextIO] = []
         with contextlib.ExitStack() as stack:
             truncated = False
             for cmsg_level, cmsg_type, cmsg_data in ancdata:
@@ -379,10 +396,9 @@ class Server(socketserver.UnixStreamServer):
                     "SCM_RIGHTS control message data must be an multiple of "
                     f"sizeof(int) = {fds.itemsize}"
                 )
-
             requested_mode: Mode
             for num, (fd, requested_mode) in enumerate(
-                zip_left(fds, requested_modes)
+                zip_left_none(fds, requested_modes)
             ):
                 flags = fcntl.fcntl(fd, fcntl.F_GETFL)
                 accmode = flags & os.O_ACCMODE
@@ -421,7 +437,7 @@ class Server(socketserver.UnixStreamServer):
                 # noinspection PyTypeChecker
                 stdio_mode = requested_mode.stdio_mode
                 try:
-                    stream: TextIO = os.fdopen(fd, stdio_mode, closefd=True)
+                    stream: TextIO = typing.cast(TextIO, os.fdopen(fd, stdio_mode, closefd=True))
                 except io.UnsupportedOperation as e:
                     raise RuntimeError(
                         f"Unable to create IO object for fd at index {num} "
@@ -430,6 +446,8 @@ class Server(socketserver.UnixStreamServer):
                 streams.append(stream)
             stack.pop_all()
             return streams
+        # ExitStack does not swallow exceptions, so final `return` always reached
+        assert False
 
     @staticmethod
     def parse_int(
@@ -452,7 +470,7 @@ class Server(socketserver.UnixStreamServer):
             data: mmap.mmap,
             size: int,
             element: str = "string"
-    ) -> Parser[str]:
+    ) -> Parser[bytes]:
         """Try to parse a zero-terminated C string"""
         need = 1
         while True:
@@ -485,7 +503,7 @@ class Server(socketserver.UnixStreamServer):
             raise ParseError("Negative argc: " + str(argc), element=element)
 
         # Parse arguments
-        argv = []
+        argv: List[bytes] = []
         for i in range(argc):
             element = f"argv[{i:d}]"
             data, size, arg = yield from cls.parse_string(data, size, element)
@@ -511,19 +529,22 @@ class Server(socketserver.UnixStreamServer):
             environ[name] = value
         return data, size, (argv, environ)
 
-    def _handle_shutdown_signal(self, signo, _frame):
+    def _handle_shutdown_signal(self, signo: int, _frame: typing.Any) -> None:
         logger.critical("Received signal %d. Shutting down.", signo)
         # shutdown blocks until the server is stopped, therefore we must use a
         # separate thread, otherwise there will be deadlock
         threading.Thread(name='shutdown', target=self.shutdown).start()
 
-    def serve_forever(self, poll_interval=0.5):
+    def serve_forever(self, poll_interval: float = 0.5) -> typing.NoReturn:
         logger.info("Starting server loop")
         with install_handler(
             (signal.SIGHUP, signal.SIGINT, signal.SIGTERM),
             self._handle_shutdown_signal
         ):
             super().serve_forever(poll_interval)
+        raise RuntimeError(
+            "This should be unreachable. `install_handler` must have swallowed an exception!"
+        )
 
     def _process(
             self,
@@ -559,5 +580,16 @@ def _try_close(fd):
         logger.error("Problem closing file descriptor", exc_info=e)
 
 
-def zip_left(left, right, rfill=None):
+S = typing.TypeVar("S")
+
+
+def zip_left(
+    left: typing.Iterable[S], right: typing.Iterable[T], rfill: T
+) -> typing.Iterable[typing.Tuple[S, T]]:
     return zip(left, chain(right, repeat(rfill)))
+
+
+def zip_left_none(
+    left: typing.Iterable[S], right: typing.Iterable[T]
+) -> typing.Iterable[typing.Tuple[S, typing.Optional[T]]]:
+    return zip_left(left, right, rfill=None)

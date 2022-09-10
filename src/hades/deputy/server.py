@@ -20,6 +20,7 @@ import string
 import subprocess
 import tempfile
 import textwrap
+import typing
 from functools import partial
 from typing import Iterable, Optional, Tuple, Union, overload, Iterator, List
 
@@ -232,12 +233,13 @@ def update_alternative_dns_ipset(ips: Iterable[netaddr.IPAddress]) -> None:
     ipset_name = conf['HADES_AUTH_DNS_ALTERNATIVE_IPSET']
     tmp_ipset_name = 'tmp_' + ipset_name
     logger.info("Updating alternative_dns ipset (%s)", ipset_name)
-    commands = io.TextIOWrapper(io.BytesIO(), 'ascii')
+    buffer = io.BytesIO()
+    commands = io.TextIOWrapper(buffer, 'ascii')
     commands.writelines(generate_ipset_swap(ipset_name, tmp_ipset_name, ips))
     commands.flush()
     subprocess.run(
         [constants.IP, 'netns', 'exec', 'auth', constants.IPSET, 'restore'],
-        input=commands.buffer.getvalue())
+        input=buffer.getvalue())
 
 
 def generate_radius_clients(
@@ -361,14 +363,18 @@ class HadesDeputyService(object):
         :param force: Whether to use the forced refresh.
         """
         reload_auth_dhcp_host: bool  # if set, we want `hosts: List`
-        hosts: Optional[Iterator[...]]  # set iff `reload_auth_dhcp_host`
+        hosts: Optional[Iterator[
+            Tuple[netaddr.EUI, netaddr.IPAddress, Optional[str]]
+        ]]  # set iff `reload_auth_dhcp_host`
         auth_leases_to_invalidate: List[LeaseInfo] = []
 
         reload_nas: bool  # if set, we want `clients: List`
-        clients: Optional[Iterator[...]]  # set iff `reload_nas`
+        clients: Optional[Iterator[
+            Tuple[str, str, str, int, str, str, str, str]
+        ]]  # set iff `reload_nas`
 
         reload_alternative_dns: bool  # if set, we want `ips: List`
-        ips: Optional[Iterator[...]]
+        ips: Optional[Iterator[netaddr.IPAddress]]
 
         logger.info("Refreshing materialized views")
         with contextlib.closing(self.engine.connect()) as connection:
@@ -395,19 +401,21 @@ class HadesDeputyService(object):
                 clients = db.get_all_nas_clients(connection)
                 ips = db.get_all_alternative_dns_ips(connection)
             else:
-                auth_dhcp_host_diff: ObjectsDiff[
-                    Tuple[IPAddress, EUI, IPAddress, EUI]
-                ] = db.refresh_and_diff_materialized_view(
-                    connection,
-                    db.auth_dhcp_host,
-                    db.temp_auth_dhcp_host,
-                    [
-                        db.temp_auth_dhcp_host.c.IPAddress,  # old ip
-                        db.temp_auth_dhcp_host.c.MAC,  # old mac
-                        db.auth_dhcp_host.c.IPAddress,  # new ip
-                        db.auth_dhcp_host.c.MAC,  # new mac
-                    ],
-                    unique_columns=(db.auth_dhcp_host.c.MAC, db.auth_dhcp_host.c.IPAddress),
+                HostDiff = ObjectsDiff[Tuple[IPAddress, EUI, IPAddress, EUI]]
+                auth_dhcp_host_diff: HostDiff = typing.cast(
+                    HostDiff,
+                    db.refresh_and_diff_materialized_view(
+                        connection,
+                        db.auth_dhcp_host,
+                        db.temp_auth_dhcp_host,
+                        [
+                            db.temp_auth_dhcp_host.c.IPAddress,  # old ip
+                            db.temp_auth_dhcp_host.c.MAC,  # old mac
+                            db.auth_dhcp_host.c.IPAddress,  # new ip
+                            db.auth_dhcp_host.c.MAC,  # new mac
+                        ],
+                        unique_columns=(db.auth_dhcp_host.c.MAC, db.auth_dhcp_host.c.IPAddress),
+                    )
                 )
                 if auth_dhcp_host_diff:
                     logger.info(
@@ -551,7 +559,7 @@ class HadesDeputyService(object):
         )
 
 
-def run_event_loop():
+def run_event_loop() -> typing.NoReturn:
     """Run the DBus :class:`HadesDeputyService` on the GLib event loop."""
     with contextlib.ExitStack() as stack:
         bus: Bus = stack.enter_context(SystemBus())
@@ -572,3 +580,4 @@ def run_event_loop():
             )
         )
         loop.run()
+    assert False

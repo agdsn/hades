@@ -1,6 +1,8 @@
+import contextlib
 import ctypes
 import secrets
 import socket
+import typing
 from contextlib import closing, contextmanager, nullcontext
 from typing import Optional
 
@@ -123,7 +125,7 @@ class in_pktinfo(ctypes.Structure):
 
 
 @contextmanager
-def netns(ns: str):
+def netns(ns: str) -> typing.Iterator[None]:
     pushns(ns)
     try:
         yield
@@ -192,5 +194,5 @@ def release_dhcp_lease(
     #
     # fun fact: this may have caused multiple DHCPRELEASEs to target the production hades instance
     # because that's just where the `default` route directs you if you're in the office. Oops.
-    with netns(ns) if ns else nullcontext:
+    with netns(ns) if ns else nullcontext():
         send_dhcp_packet(server_ip, packet, from_interface, from_ip)

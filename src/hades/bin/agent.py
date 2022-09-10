@@ -8,6 +8,8 @@ import inspect
 import logging
 import os
 import sys
+import typing
+from argparse import Action, _ArgumentGroup
 
 import celery.apps.worker
 
@@ -23,7 +25,13 @@ from hades.config import ConfigError, load_config, print_config_error
 
 
 class Formatter(argparse.HelpFormatter):
-    def add_usage(self, usage, actions, groups, prefix=None):
+    def add_usage(
+        self,
+        usage: str,
+        actions: typing.Iterable[Action],
+        groups: typing.Iterable[_ArgumentGroup],
+        prefix: typing.Optional[str] = None,
+    ) -> None:
         actions = list(actions)
         actions.append(argparse.Action([], dest='worker_options',
                                        metavar='worker options', nargs='?'))
@@ -72,7 +80,7 @@ def main() -> int:
         loglevel=log_level
     )
     worker.start()
-    return worker.exitcode
+    return typing.cast(int, worker.exitcode)
 
 
 if __name__ == '__main__':

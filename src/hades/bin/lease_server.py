@@ -45,7 +45,7 @@ def create_parser() -> ArgumentParser:
     return parser
 
 
-def main():
+def main() -> int:
     parser = create_parser()
     args = parser.parse_args()
     SCRIPT_SOCKET = args.socket

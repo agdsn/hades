@@ -7,6 +7,7 @@ import logging
 import os
 import sys
 import textwrap
+import typing
 from contextlib import closing
 
 import kombu
@@ -25,12 +26,12 @@ logger = logging.getLogger('hades.bin.vrrp_notify')
 
 
 # noinspection PyUnusedLocal
-def notify_auth(state, priority) -> int:
+def notify_auth(state: str, priority: int) -> int:
     return 0
 
 
 # noinspection PyUnusedLocal
-def notify_root(state, priority) -> int:
+def notify_root(state: str, priority: int) -> int:
     config = get_config(runtime_checks=True)
     app = create_app(config)
     queue_name = config.HADES_CELERY_NODE_QUEUE
@@ -55,7 +56,7 @@ def notify_root(state, priority) -> int:
 
 
 # noinspection PyUnusedLocal
-def notify_unauth(state, priority) -> int:
+def notify_unauth(state: str, priority: int) -> int:
     return 0
 
 
@@ -99,6 +100,7 @@ def main() -> int:
         return notify_root(args.state, args.priority)
     elif args.name == 'hades-unauth':
         return notify_unauth(args.state, args.priority)
+    raise NotImplementedError(f"Unknown name {args.name}")
 
 
 if __name__ == '__main__':

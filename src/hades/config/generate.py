@@ -12,6 +12,7 @@ import pathlib
 import shutil
 import stat
 import sys
+import typing
 from functools import partial
 from typing import Optional, Union, Iterable, Iterator, TextIO, Tuple
 
@@ -25,16 +26,14 @@ from hades import constants
 logger = logging.getLogger(__name__)
 
 
+template_filters: dict[str, typing.Callable] = {}
+
 def template_filter(name):
     def decorator(f):
-        template_filter.registered[name] = f
+        template_filters[name] = f
         return f
 
     return decorator
-
-
-template_filter.registered = dict()
-
 
 @template_filter('unique')
 def do_unique(a):
@@ -143,7 +142,12 @@ def yield_all_sources(
     # Perform a bread-first search via a queue.
     # The queue contains a sequence of (search-path, file) pairs for each
     # version of a file on the search path
-    queue = collections.deque()
+    queue: typing.Deque[
+        typing.Sequence[typing.Tuple[
+            pathlib.Path,  # base
+            pathlib.Path,  # children
+        ]]
+    ] = collections.deque()
     queue.appendleft(tuple(zip(search_path, search_path)))
     while queue:
         sources = queue.pop()
@@ -156,7 +160,16 @@ def yield_all_sources(
         # a list, for all other elements we break the loop and continue with the
         # next element. If an error occurs we continue with the next version of
         # the file instead.
-        directories = []
+        directories: typing.List[
+            typing.Tuple[
+                pathlib.Path,  # base
+                pathlib.Path,  # source
+                typing.Dict[
+                    str,  # child.name
+                    pathlib.Path  # child
+                ]
+            ]
+        ] = []
         for base, source in sources:
             if source.is_symlink():
                 target = os.readlink(str(source))
@@ -282,20 +295,20 @@ class OverridableFileSystemLoader(jinja2.BaseLoader):
 
     def get_source(self, environment: jinja2.Environment,
                    template: str):
-        template = pathlib.Path(template)
-        if not template.is_absolute():
+        path_template = pathlib.Path(template)
+        if not path_template.is_absolute():
             try:
-                base, template = next(yield_all_versions(template,
+                base, path_template = next(yield_all_versions(path_template,
                                                          *self.search_paths))
             except StopIteration:
-                raise jinja2.TemplateNotFound(template.name) from None
+                raise jinja2.TemplateNotFound(path_template.name) from None
         try:
-            with template.open('r', encoding=self.encoding) as f:
+            with path_template.open('r', encoding=self.encoding) as f:
                 contents = f.read()
         except (FileNotFoundError, IsADirectoryError):
-            raise jinja2.TemplateNotFound(template.name)
+            raise jinja2.TemplateNotFound(path_template.name)
 
-        mtime = template.stat().st_mtime
+        mtime = path_template.stat().st_mtime
 
         def has_changed():
             """Checks whether the template loaded via
@@ -306,11 +319,11 @@ class OverridableFileSystemLoader(jinja2.BaseLoader):
             search paths. We would additionally need a list of all parent
             directories in the other search paths and check all of them."""
             try:
-                return template.stat().st_mtime == mtime
+                return path_template.stat().st_mtime == mtime
             except OSError:
                 return False
 
-        return contents, str(template), has_changed
+        return contents, str(path_template), has_changed
 
     def list_templates(self):
         return set(str(path.relative_to(base))
@@ -371,7 +384,7 @@ class ConfigGenerator(object):
             'dirname': os.path.dirname,
             'constants': constants,
         })
-        self.env.filters.update(template_filter.registered)
+        self.env.filters.update(template_filters)
 
     def _format_search_path(self):
         return ':'.join(map(str, self.template_dirs))
@@ -466,7 +479,7 @@ class ConfigGenerator(object):
         self._do_generate_file(base, source, destination)
 
     def _do_generate_file(self, base: pathlib.Path, source: pathlib.Path,
-                          destination: Optional[pathlib.Path]):
+                          destination: Optional[PathArg]):
         if destination is None:
             if source.suffix == self.TEMPLATE_SUFFIX:
                 self._generate_template_to_stdout(base, source)

@@ -201,11 +201,10 @@ def check_positive_int(argument: str, number: Any) -> int:
     :param number: The value to convert
     :raises ArgumentError: if the argument is invalid
     """
-    number = check_int(argument, number)
-    if number < 0:
-        raise ArgumentError(argument, "Not a positive integer: "
-                                      "{:d}".format(number))
-    return number
+    safe_num = check_int(argument, number)
+    if safe_num < 0:
+        raise ArgumentError(argument, f"Not a positive integer: {safe_num:d}")
+    return safe_num
 
 
 @rpc_task()
@@ -249,14 +248,14 @@ def get_sessions_of_mac(
     """
     mac = check_mac("mac", mac)
     if when is not None:
-        when = check_timestamp_range("when", when)
+        safe_when = check_timestamp_range("when", when)
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
         return list(starmap(
             lambda nas_ip, nas_port, start, stop:
                 (str(nas_ip), nas_port, start.timestamp(), stop.timestamp()),
-            do_get_sessions_of_mac(connection, mac, when, limit)))
+            do_get_sessions_of_mac(connection, mac, safe_when, limit)))
 
 
 @rpc_task()
@@ -278,7 +277,7 @@ def get_auth_attempts_of_mac(
     """
     mac = check_mac("mac", mac)
     if when is not None:
-        when = check_timestamp_range("when", when)
+        safe_when = check_timestamp_range("when", when)
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
@@ -286,7 +285,7 @@ def get_auth_attempts_of_mac(
             lambda nas_ip, nas_port, packet_type, groups, reply, auth_date:
                 (str(nas_ip), nas_port, packet_type, groups, reply,
                  auth_date.timestamp()),
-            do_get_auth_attempts_of_mac(connection, mac, when, limit)))
+            do_get_auth_attempts_of_mac(connection, mac, safe_when, limit)))
 
 
 @rpc_task()
@@ -311,7 +310,7 @@ def get_auth_attempts_at_port(
     nas_ip_address = check_ip_address("nas_ip_address", nas_ip_address)
     nas_port_id = check_str("nas_port_id", nas_port_id)
     if when is not None:
-        when = check_timestamp_range("until", when)
+        safe_when = check_timestamp_range("until", when)
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
@@ -319,7 +318,7 @@ def get_auth_attempts_at_port(
             lambda user_name, packet_type, groups, reply, auth_date:
                 (user_name, packet_type, groups, reply, auth_date.timestamp()),
             do_get_auth_attempts_at_port(connection, nas_ip_address,
-                                         nas_port_id, when, limit)))
+                                         nas_port_id, safe_when, limit)))
 
 
 @rpc_task()
@@ -350,7 +349,7 @@ def get_auth_dhcp_leases(
 def get_unauth_dhcp_leases(
     subnet: Optional[str] = None,
     limit: Optional[int] = 100,
-) -> List[Tuple[float, str, str, Optional[str]]]:
+) -> List[Tuple[float, str, str, Optional[str], Optional[bytes]]]:
     """Return all unauth leases.
 
     :param subnet: Limit leases to subnet
@@ -371,15 +370,16 @@ def get_unauth_dhcp_leases(
             str(mac),
             str(ip),
             hostname,
+            client_id,
         )
-        for expires_at, mac, ip, hostname in leases
+        for expires_at, mac, ip, hostname, client_id in leases
     ]
 
 
 @rpc_task()
 def get_auth_dhcp_leases_of_ip(
     ip: str,
-) -> Optional[Tuple[float, str, Optional[str], Optional[str]]]:
+) -> Optional[Tuple[float, str, Optional[str], Optional[bytes]]]:
     """Get basic auth lease information for a given IP.
 
     :param ip: IP address
@@ -400,7 +400,7 @@ def get_auth_dhcp_leases_of_ip(
 @rpc_task()
 def get_unauth_dhcp_leases_of_ip(
     ip: str,
-) -> Optional[Tuple[float, str, Optional[str], Optional[str]]]:
+) -> Optional[Tuple[float, str, Optional[str], Optional[bytes]]]:
     """Get basic unauth lease information for a given IP.
 
     :param ip: IP address
@@ -420,7 +420,7 @@ def get_unauth_dhcp_leases_of_ip(
 @rpc_task()
 def get_auth_dhcp_leases_of_mac(
     mac: str,
-) -> List[Tuple[float, str, Optional[str]]]:
+) -> List[Tuple[float, str, Optional[str], Optional[bytes]]]:
     """Get basic information about all auth leases of a given MAC.
 
     :param mac: MAC address
@@ -432,10 +432,11 @@ def get_auth_dhcp_leases_of_mac(
     with contextlib.closing(engine.connect()) as connection:
         return list(
             starmap(
-                lambda expires_at, ip, hostname: (
+                lambda expires_at, ip, hostname, client_id: (
                     expires_at.timestamp(),
                     str(ip),
                     hostname,
+                    client_id,
                 ),
                 do_get_auth_dhcp_leases_of_mac(connection, mac),
             )
@@ -445,7 +446,7 @@ def get_auth_dhcp_leases_of_mac(
 @rpc_task()
 def get_unauth_dhcp_leases_of_mac(
     mac: str,
-) -> List[Tuple[float, str, Optional[str]]]:
+) -> List[Tuple[float, str, Optional[str], Optional[bytes]]]:
     """Get basic information about all unauth leases of a given MAC.
 
     :param mac: MAC address
@@ -461,8 +462,9 @@ def get_unauth_dhcp_leases_of_mac(
             expires_at.timestamp(),
             str(ip),
             hostname,
+            client_id
         )
-        for expires_at, ip, hostname in leases
+        for expires_at, ip, hostname, client_id in leases
     ]
 
 
