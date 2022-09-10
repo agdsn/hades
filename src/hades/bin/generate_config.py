@@ -18,12 +18,12 @@ logger = logging.getLogger()
 
 
 def mode(value: str) -> int:
-    value = int(value, 8)
-    if value & ~0o7777:
-        raise argparse.ArgumentTypeError("Illegal mode: 0{:03o}".format(value))
-    if stat.S_ISUID & value:
+    mode_int = int(value, 8)
+    if mode_int & ~0o7777:
+        raise argparse.ArgumentTypeError(f"Illegal mode: 0{mode_int:03o}")
+    if stat.S_ISUID & mode_int:
         raise argparse.ArgumentTypeError("setuid bit may not be set")
-    return value
+    return mode_int
 
 
 def group(value: str) -> grp.struct_group:

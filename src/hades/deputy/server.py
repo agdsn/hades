@@ -20,6 +20,7 @@ import string
 import subprocess
 import tempfile
 import textwrap
+import typing
 from functools import partial
 from typing import Iterable, Optional, Tuple, Union, overload, Iterator, List
 
@@ -551,7 +552,7 @@ class HadesDeputyService(object):
         )
 
 
-def run_event_loop():
+def run_event_loop() -> typing.NoReturn:
     """Run the DBus :class:`HadesDeputyService` on the GLib event loop."""
     with contextlib.ExitStack() as stack:
         bus: Bus = stack.enter_context(SystemBus())

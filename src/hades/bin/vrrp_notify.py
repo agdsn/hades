@@ -7,6 +7,7 @@ import logging
 import os
 import sys
 import textwrap
+import typing
 from contextlib import closing
 
 import kombu
@@ -99,6 +100,7 @@ def main() -> int:
         return notify_root(args.state, args.priority)
     elif args.name == 'hades-unauth':
         return notify_unauth(args.state, args.priority)
+    raise NotImplementedError(f"Unknown name {args.name}")
 
 
 if __name__ == '__main__':

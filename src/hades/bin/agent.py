@@ -8,6 +8,7 @@ import inspect
 import logging
 import os
 import sys
+import typing
 
 import celery.apps.worker
 
@@ -72,7 +73,7 @@ def main() -> int:
         loglevel=log_level
     )
     worker.start()
-    return worker.exitcode
+    return typing.cast(int, worker.exitcode)
 
 
 if __name__ == '__main__':
