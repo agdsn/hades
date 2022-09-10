@@ -349,7 +349,7 @@ def get_auth_dhcp_leases(
 def get_unauth_dhcp_leases(
     subnet: Optional[str] = None,
     limit: Optional[int] = 100,
-) -> List[Tuple[float, str, str, Optional[str], Optional[str]]]:
+) -> List[Tuple[float, str, str, Optional[str], Optional[bytes]]]:
     """Return all unauth leases.
 
     :param subnet: Limit leases to subnet
@@ -379,7 +379,7 @@ def get_unauth_dhcp_leases(
 @rpc_task()
 def get_auth_dhcp_leases_of_ip(
     ip: str,
-) -> Optional[Tuple[float, str, Optional[str], Optional[str]]]:
+) -> Optional[Tuple[float, str, Optional[str], Optional[bytes]]]:
     """Get basic auth lease information for a given IP.
 
     :param ip: IP address
@@ -400,7 +400,7 @@ def get_auth_dhcp_leases_of_ip(
 @rpc_task()
 def get_unauth_dhcp_leases_of_ip(
     ip: str,
-) -> Optional[Tuple[float, str, Optional[str], Optional[str]]]:
+) -> Optional[Tuple[float, str, Optional[str], Optional[bytes]]]:
     """Get basic unauth lease information for a given IP.
 
     :param ip: IP address
@@ -420,7 +420,7 @@ def get_unauth_dhcp_leases_of_ip(
 @rpc_task()
 def get_auth_dhcp_leases_of_mac(
     mac: str,
-) -> List[Tuple[float, str, Optional[str]]]:
+) -> List[Tuple[float, str, Optional[str], Optional[bytes]]]:
     """Get basic information about all auth leases of a given MAC.
 
     :param mac: MAC address
@@ -432,10 +432,11 @@ def get_auth_dhcp_leases_of_mac(
     with contextlib.closing(engine.connect()) as connection:
         return list(
             starmap(
-                lambda expires_at, ip, hostname: (
+                lambda expires_at, ip, hostname, client_id: (
                     expires_at.timestamp(),
                     str(ip),
                     hostname,
+                    client_id,
                 ),
                 do_get_auth_dhcp_leases_of_mac(connection, mac),
             )
@@ -445,7 +446,7 @@ def get_auth_dhcp_leases_of_mac(
 @rpc_task()
 def get_unauth_dhcp_leases_of_mac(
     mac: str,
-) -> List[Tuple[float, str, Optional[str], Optional[str]]]:
+) -> List[Tuple[float, str, Optional[str], Optional[bytes]]]:
     """Get basic information about all unauth leases of a given MAC.
 
     :param mac: MAC address

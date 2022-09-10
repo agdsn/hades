@@ -856,7 +856,7 @@ def get_all_dhcp_leases(
         netaddr.EUI,
         netaddr.IPAddress,
         Optional[str],
-        Optional[str],
+        Optional[bytes],
     ]
 ]:
     """
@@ -892,7 +892,7 @@ def get_dhcp_lease_of_ip(
     dhcp_lease_table: Table,
     connection: Connection,
     ip: netaddr.IPAddress,
-) -> Optional[Tuple[datetime, netaddr.EUI, Optional[str], Optional[str]]]:
+) -> Optional[Tuple[datetime, netaddr.EUI, Optional[str], Optional[bytes]]]:
     """
     Get basic lease information for a given IP.
 
@@ -916,7 +916,7 @@ def get_dhcp_leases_of_mac(
     dhcp_lease_table: Table,
     connection: Connection,
     mac: netaddr.EUI,
-) -> Iterator[Tuple[datetime, netaddr.IPAddress, Optional[str], Optional[str]]]:
+) -> Iterator[Tuple[datetime, netaddr.IPAddress, Optional[str], Optional[bytes]]]:
     """
     Get basic information about all leases of a given MAC.
 
@@ -948,7 +948,7 @@ def get_all_auth_dhcp_leases(
         netaddr.EUI,
         netaddr.IPAddress,
         Optional[str],
-        Optional[str],
+        Optional[bytes],
     ]
 ]:
     """
@@ -968,7 +968,7 @@ def get_all_auth_dhcp_leases(
 def get_auth_dhcp_lease_of_ip(
     connection: Connection,
     ip: netaddr.IPAddress,
-) -> Optional[Tuple[datetime, netaddr.EUI, Optional[str], Optional[str]]]:
+) -> Optional[Tuple[datetime, netaddr.EUI, Optional[str], Optional[bytes]]]:
     """
     Get basic auth lease information for a given IP.
 
@@ -984,7 +984,7 @@ def get_auth_dhcp_lease_of_ip(
 def get_auth_dhcp_leases_of_mac(
     connection: Connection,
     mac: netaddr.EUI,
-) -> Iterator[Tuple[datetime, netaddr.IPAddress, Optional[str], Optional[str]]]:
+) -> Iterator[Tuple[datetime, netaddr.IPAddress, Optional[str], Optional[bytes]]]:
     """
     Get basic information about all auth leases of a given MAC.
 
@@ -1008,7 +1008,7 @@ def get_all_unauth_dhcp_leases(
         netaddr.EUI,
         netaddr.IPAddress,
         Optional[str],
-        Optional[str],
+        Optional[bytes],
     ]
 ]:
     """
@@ -1028,7 +1028,7 @@ def get_all_unauth_dhcp_leases(
 def get_unauth_dhcp_lease_of_ip(
     connection: Connection,
     ip: netaddr.IPAddress,
-) -> Optional[Tuple[datetime, netaddr.EUI, Optional[str], Optional[str]]]:
+) -> Optional[Tuple[datetime, netaddr.EUI, Optional[str], Optional[bytes]]]:
     """
     Get basic unauth lease information for a given IP.
 
@@ -1043,7 +1043,7 @@ def get_unauth_dhcp_lease_of_ip(
 def get_unauth_dhcp_leases_of_mac(
     connection: Connection,
     mac: netaddr.EUI,
-) -> Iterator[Tuple[datetime, netaddr.IPAddress, Optional[str], Optional[str]]]:
+) -> Iterator[Tuple[datetime, netaddr.IPAddress, Optional[str], Optional[bytes]]]:
     """
     Get basic information about all unauth leases of a given MAC.
 
