@@ -22,8 +22,6 @@ from hades.common.signals import install_handler
 
 logger = logging.getLogger(__name__)
 SIZEOF_INT = ctypes.sizeof(ctypes.c_int)
-memfd_create = ctypes.cdll.LoadLibrary("libc.so.6").memfd_create
-MFD_CLOEXEC = 1
 T = TypeVar('T')
 Parser = Generator[int, Tuple[mmap.mmap, int], T]
 
@@ -193,7 +191,7 @@ class Server(socketserver.UnixStreamServer):
         # Leave one byte extra for trailing zero byte
         # TODO: With Python 3.8 a memfd can be opened and mapped twice:
         # writable and readonly
-        fd = memfd_create(b"buffer", MFD_CLOEXEC)
+        fd = os.memfd_create(b"buffer", os.MFD_CLOEXEC)
         os.ftruncate(fd, self.max_packet_size + 1)
         self.buffer = mmap.mmap(
             fd,
