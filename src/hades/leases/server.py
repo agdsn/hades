@@ -32,11 +32,7 @@ T = TypeVar('T')
 Parser = Generator[
     int,  # what we yield
     Tuple[mmap.mmap, int],  # what we get sent
-    Tuple[
-        mmap.mmap,  # data
-        int,  # size
-        T,  # value
-    ]  # what we return
+    T,  # what we return
 ]
 
 
@@ -286,7 +282,7 @@ class Server(socketserver.UnixStreamServer):
         # Initialize parser
         buffer = self.buffer
         buffer.seek(0, os.SEEK_SET)
-        parser = self.parse_request(buffer, 0)
+        parser = self.parse_request()
         needed = next(parser)
         with contextlib.ExitStack() as stack:
             while needed:
@@ -294,7 +290,10 @@ class Server(socketserver.UnixStreamServer):
                     stack, streams, offset, available, needed, request
                 )
                 try:
-                    needed = parser.send((buffer, available))
+                    parsed = 0
+                    while parsed + needed < available:
+                        needed = parser.send((buffer, available - parsed))
+                        parsed = buffer.tell()
                 except StopIteration as e:
                     _, _, (argv, environ) = e.value
                     if buffer.tell() < available:
@@ -401,6 +400,7 @@ class Server(socketserver.UnixStreamServer):
                     "SCM_RIGHTS control message data must be an multiple of "
                     f"sizeof(int) = {fds.itemsize}"
                 )
+
             requested_mode: Mode
             for num, (fd, requested_mode) in enumerate(
                 zip_left_none(fds, requested_modes)
@@ -455,76 +455,55 @@ class Server(socketserver.UnixStreamServer):
         assert False
 
     @staticmethod
-    def parse_int(
-            data: mmap.mmap,
-            size: int,
-            element: str = "int",
-    ) -> Parser[int]:
+    def parse_integer(element: str = "integer") -> Parser[int]:
         """Try to parse a C int"""
         need = SIZEOF_INT
-        if data.tell() + need > size:
+        try:
+            data, size = yield length
+        except BaseParseError as e:
+            raise e.with_element(element)
+        value = struct.unpack("@i", data.read(need))[0]
+        return value
+
+    @staticmethod
+    def parse_string(element: str = "string") -> Parser[bytes]:
+        """Try to parse a zero-terminated C string"""
+        need = 1
+        while True:
             try:
                 data, size = yield need
             except BaseParseError as e:
                 raise e.with_element(element)
-        value = struct.unpack("@i", data.read(need))[0]
-        return data, size, value
-
-    @staticmethod
-    def parse_string(
-            data: mmap.mmap,
-            size: int,
-            element: str = "string"
-    ) -> Parser[bytes]:
-        """Try to parse a zero-terminated C string"""
-        need = 1
-        while True:
-            if data.tell() + need > size:
-                try:
-                    data, size = yield need
-                except BaseParseError as e:
-                    raise e.with_element(element)
             # This is safe, because we ensure that underlying buffer is always
             # zero-terminated
             start = data.tell()
             end = data.find(b'\x00', start, size)
             if end != -1:
-                arg = data[start:end]
+                string = data[start:end]
                 data.seek(end + 1, os.SEEK_SET)
-                return data, size, arg
+                return string
             else:
                 need = size - start + 1
 
     @classmethod
-    def parse_request(
-            cls,
-            data: mmap.mmap,
-            size: int,
-    ) -> Parser[Tuple[List[bytes], Dict[bytes, bytes]]]:
+    def parse_request(cls) -> Parser[Tuple[List[bytes], Dict[bytes, bytes]]]:
         # Parse number of arguments
-        element = "argc"
-        data, size, argc = yield from cls.parse_int(data, size, element)
-        if argc < 0:
-            raise ParseError("Negative argc: " + str(argc), element=element)
+        argc = yield from cls.parse_integer("argc")
 
         # Parse arguments
-        argv: List[bytes] = []
+        argv = []
         for i in range(argc):
-            element = f"argv[{i:d}]"
-            data, size, arg = yield from cls.parse_string(data, size, element)
+            arg = yield from cls.parse_string(f"argv[{i:d}]")
             argv.append(arg)
 
         # Parse number of environment variables
-        element = "envc"
-        data, size, envc = yield from cls.parse_int(data, size, element)
-        if envc < 0:
-            raise ParseError("Negative envc: " + str(envc), element=element)
+        envc = yield from cls.parse_integer("envc")
 
         # Parse environment variables
         environ = {}
         for i in range(envc):
             element = f"environ[{i:d}]"
-            data, size, env = yield from cls.parse_string(data, size, element)
+            env = yield from cls.parse_string(element)
             name, sep, value = env.partition(b'=')
             if not sep:
                 raise ParseError(
@@ -532,7 +511,7 @@ class Server(socketserver.UnixStreamServer):
                     element=element,
                 )
             environ[name] = value
-        return data, size, (argv, environ)
+        return argv, environ
 
     def _handle_shutdown_signal(self, signo: int, _frame: typing.Any) -> None:
         logger.critical("Received signal %d. Shutting down.", signo)

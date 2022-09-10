@@ -19,8 +19,7 @@ from hades.leases.server import (
 )
 
 T = TypeVar('T')
-ParserFactory = Callable[[mmap.mmap, int], Parser[T]]
-Driver = Callable[[mmap.mmap, int, ParserFactory], T]
+Driver = Callable[[mmap.mmap, int, Parser[T]], T]
 
 
 @pytest.fixture(
@@ -115,49 +114,55 @@ def buffer(request) -> Generator[mmap.mmap, None, None]:
         yield b
 
 
-def drive_at_once(buffer: mmap.mmap, size: int, parser: ParserFactory[T]) -> T:
+def drive_at_once(buffer: mmap.mmap, size: int, parser: Parser[T]) -> T:
     """Pass all data to a parser"""
-    generator = parser(buffer, size)
-    with contextlib.closing(generator):
+    with contextlib.closing(parser):
+        needed = next(parser)
         try:
-            needed = next(generator)
+            parsed = buffer.tell()
+            while parsed + needed <= size:
+                needed = parser.send((buffer, size))
+                parsed = buffer.tell()
         except StopIteration as e:
-            assert id(e.value[0]) == id(buffer)
-            assert e.value[1] == size
-            return e.value[2]
+            return e.value
         except BaseParseError as e:
             raise e.with_offset(buffer.tell())
         else:
             offset = buffer.tell()
             if needed > len(buffer):
-                generator.throw(BufferTooSmallError(needed, len(buffer), offset=offset))
+                parser.throw(
+                    BufferTooSmallError(needed, len(buffer), offset=offset)
+                )
             else:
-                generator.throw(UnexpectedEOFError(needed, size - offset, offset=offset))
+                parser.throw(
+                    UnexpectedEOFError(needed, size - offset, offset=offset)
+                )
 
 
-def drive_minimal(buffer: mmap.mmap, size: int, parser: ParserFactory[T]) -> T:
+def drive_minimal(buffer: mmap.mmap, size: int, parser: Parser[T]) -> T:
     """Pass only the minimum number of requested bytes to a parser"""
+    parsed = buffer.tell()
     end = size
-    size = buffer.tell()
-    generator = parser(buffer, size)
-    needed = next(generator)
+    needed = next(parser)
 
-    with contextlib.closing(generator):
-        while buffer.tell() + needed <= end:
+    with contextlib.closing(parser):
+        while parsed + needed <= end:
             try:
-                size = buffer.tell() + needed
-                needed = generator.send((buffer, size))
+                needed = parser.send((buffer, parsed + needed))
+                parsed = buffer.tell()
             except StopIteration as e:
-                assert id(e.value[0]) == id(buffer)
-                assert e.value[1] == size
-                return e.value[2]
+                return e.value
             except BaseParseError as e:
                 raise e.with_offset(buffer.tell())
         offset = buffer.tell()
         if needed > len(buffer):
-            generator.throw(BufferTooSmallError(needed, len(buffer), offset=offset))
+            parser.throw(
+                BufferTooSmallError(needed, len(buffer) - parsed, offset=offset)
+            )
         else:
-            generator.throw(UnexpectedEOFError(needed, end - offset, offset=offset))
+            parser.throw(
+                UnexpectedEOFError(needed, end - offset, offset=offset)
+            )
 
 
 @pytest.fixture(scope='session', params=[drive_at_once, drive_minimal])
@@ -181,9 +186,8 @@ def fill_buffer(buffer: mmap.mmap, value: bytes) -> int:
 def test_parse_valid_int(driver: Driver[int], buffer: mmap.mmap, value: int):
     size = fill_buffer(buffer, struct.pack("@i", value))
 
-    parsed_value = driver(buffer, size, Server.parse_int)
-    assert parsed_value == value
-    assert buffer.tell() == size
+    parsed_value = driver(buffer, size, Server.parse_integer())
+    assert (parsed_value, buffer.tell()) == (value, size)
 
 
 def test_parse_int_eof(driver: Driver[int], buffer: mmap.mmap):
@@ -193,9 +197,8 @@ def test_parse_int_eof(driver: Driver[int], buffer: mmap.mmap):
     size = fill_buffer(buffer, serialized[:end])
 
     with pytest.raises(UnexpectedEOFError) as e:
-        driver(buffer, size, Server.parse_int)
-    assert e.value.element == "int"
-    assert e.value.offset == offset
+        driver(buffer, size, Server.parse_integer())
+    assert (e.value.element, e.value.offset) == ("integer", offset)
 
 
 def test_parse_int_buffer_too_small(driver: Driver[int]):
@@ -204,9 +207,8 @@ def test_parse_int_buffer_too_small(driver: Driver[int]):
     with create_buffer(size) as buffer:
         buffer[:] = value[:size]
         with pytest.raises(BufferTooSmallError) as e:
-            driver(buffer, size, Server.parse_int)
-        assert e.value.element == "int"
-        assert e.value.offset == 0
+            driver(buffer, size, Server.parse_integer())
+        assert (e.value.element, e.value.offset) == ("integer", 0)
 
 
 @pytest.mark.parametrize(
@@ -221,9 +223,8 @@ def test_parse_valid_string(
 ):
     size = fill_buffer(buffer, value + b"\x00")
 
-    parsed_value = driver(buffer, size, Server.parse_string)
-    assert parsed_value == value
-    assert buffer.tell() == size
+    parsed_value = driver(buffer, size, Server.parse_string())
+    assert (parsed_value, buffer.tell()) == (value, size)
 
 
 def test_parse_string_eof(driver: Driver[bytes], buffer: mmap.mmap):
@@ -231,7 +232,7 @@ def test_parse_string_eof(driver: Driver[bytes], buffer: mmap.mmap):
     size = fill_buffer(buffer, b"test")
 
     with pytest.raises(UnexpectedEOFError) as e:
-        driver(buffer, size, Server.parse_string)
+        driver(buffer, size, Server.parse_string())
     assert e.value.element == "string"
     assert e.value.offset == offset
 
@@ -242,9 +243,8 @@ def test_parse_string_buffer_too_small(driver: Driver[bytes]):
     with create_buffer(size) as buffer:
         buffer[:] = value
         with pytest.raises(BufferTooSmallError) as e:
-            driver(buffer, size, Server.parse_string)
-        assert e.value.element == "string"
-        assert e.value.offset == 0
+            driver(buffer, size, Server.parse_string())
+        assert (e.value.element, e.value.offset) == ("string", 0)
 
 
 def serialize_request(
@@ -278,7 +278,7 @@ def test_parse_valid_request(
         environ: Dict[bytes, bytes],
 ):
     size = fill_buffer(buffer, serialize_request(argv, environ))
-    got_argv, got_environ = driver(buffer, size, Server.parse_request)
+    got_argv, got_environ = driver(buffer, size, Server.parse_request())
     assert (argv, environ) == (got_argv, got_environ)
 
 
@@ -288,7 +288,7 @@ def test_parse_negative_argc(
 ):
     size = fill_buffer(buffer, serialize_request([], {}, -1))
     with pytest.raises(ParseError):
-        driver(buffer, size, Server.parse_request)
+        driver(buffer, size, Server.parse_request())
 
 
 def test_parse_overflow_argc(
@@ -297,7 +297,7 @@ def test_parse_overflow_argc(
 ):
     size = fill_buffer(buffer, serialize_request([], {}, 1, -1))
     with pytest.raises(UnexpectedEOFError) as e:
-        driver(buffer, size, Server.parse_request)
+        driver(buffer, size, Server.parse_request())
     assert e.value.element == "argv[0]"
 
 
@@ -307,7 +307,7 @@ def test_parse_overflow_envc(
 ):
     size = fill_buffer(buffer, serialize_request([], {}, None, 1))
     with pytest.raises(UnexpectedEOFError) as e:
-        driver(buffer, size, Server.parse_request)
+        driver(buffer, size, Server.parse_request())
     assert e.value.element == "environ[0]"
 
 
