@@ -38,7 +38,9 @@ from hades.common.db import (
     auth_dhcp_lease,
     get_dhcp_lease_of_ip,
     unauth_dhcp_lease,
-    ObjectsDiff, LeaseInfo, eui_as_unix,
+    ObjectsDiff,
+    LeaseInfo,
+    eui_as_unix,
 )
 from hades.common.glib import typed_glib_error
 from hades.common.privileges import dropped_privileges
