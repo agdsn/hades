@@ -201,11 +201,10 @@ def check_positive_int(argument: str, number: Any) -> int:
     :param number: The value to convert
     :raises ArgumentError: if the argument is invalid
     """
-    number = check_int(argument, number)
-    if number < 0:
-        raise ArgumentError(argument, "Not a positive integer: "
-                                      "{:d}".format(number))
-    return number
+    safe_num = check_int(argument, number)
+    if safe_num < 0:
+        raise ArgumentError(argument, f"Not a positive integer: {safe_num:d}")
+    return safe_num
 
 
 @rpc_task()
@@ -249,14 +248,14 @@ def get_sessions_of_mac(
     """
     mac = check_mac("mac", mac)
     if when is not None:
-        when = check_timestamp_range("when", when)
+        safe_when = check_timestamp_range("when", when)
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
         return list(starmap(
             lambda nas_ip, nas_port, start, stop:
                 (str(nas_ip), nas_port, start.timestamp(), stop.timestamp()),
-            do_get_sessions_of_mac(connection, mac, when, limit)))
+            do_get_sessions_of_mac(connection, mac, safe_when, limit)))
 
 
 @rpc_task()
@@ -278,7 +277,7 @@ def get_auth_attempts_of_mac(
     """
     mac = check_mac("mac", mac)
     if when is not None:
-        when = check_timestamp_range("when", when)
+        safe_when = check_timestamp_range("when", when)
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
@@ -286,7 +285,7 @@ def get_auth_attempts_of_mac(
             lambda nas_ip, nas_port, packet_type, groups, reply, auth_date:
                 (str(nas_ip), nas_port, packet_type, groups, reply,
                  auth_date.timestamp()),
-            do_get_auth_attempts_of_mac(connection, mac, when, limit)))
+            do_get_auth_attempts_of_mac(connection, mac, safe_when, limit)))
 
 
 @rpc_task()
@@ -311,7 +310,7 @@ def get_auth_attempts_at_port(
     nas_ip_address = check_ip_address("nas_ip_address", nas_ip_address)
     nas_port_id = check_str("nas_port_id", nas_port_id)
     if when is not None:
-        when = check_timestamp_range("until", when)
+        safe_when = check_timestamp_range("until", when)
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
@@ -319,7 +318,7 @@ def get_auth_attempts_at_port(
             lambda user_name, packet_type, groups, reply, auth_date:
                 (user_name, packet_type, groups, reply, auth_date.timestamp()),
             do_get_auth_attempts_at_port(connection, nas_ip_address,
-                                         nas_port_id, when, limit)))
+                                         nas_port_id, safe_when, limit)))
 
 
 @rpc_task()
