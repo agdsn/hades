@@ -1,3 +1,4 @@
+from __future__ import annotations
 import array
 import contextlib
 import enum
@@ -19,6 +20,9 @@ from collections.abc import Iterable
 from itertools import chain, repeat
 from typing import Dict, Generator, List, Optional, Sequence, Tuple, TypeVar, TextIO
 
+from sqlalchemy import Table
+from sqlalchemy.engine import Engine
+
 from hades.bin.dhcp_script import Context, create_parser, dispatch_commands
 from hades.common.signals import install_handler
 
@@ -38,10 +42,10 @@ Parser = Generator[
 
 class BaseParseError(Exception):
     def __init__(
-            self,
-            *args,
-            element: Optional[str] = None,
-            offset: Optional[int] = None,
+        self,
+        *args: typing.Any,
+        element: Optional[str] = None,
+        offset: Optional[int] = None,
     ) -> None:
         self.element = element
         self.offset = offset
@@ -54,11 +58,11 @@ class BaseParseError(Exception):
             "" if element is None else f"while parsing {element}: ",
         ]).capitalize()
 
-    def with_element(self, element: str):
+    def with_element(self, element: str) -> BaseParseError:  # ≥3.11: typing.Self
         self.element = element
         return self
 
-    def with_offset(self, offset: int):
+    def with_offset(self, offset: int) -> BaseParseError:  # ≥3.11: typing.self
         self.offset = offset
         return self
 
@@ -228,7 +232,9 @@ class Server(socketserver.UnixStreamServer):
     """
     max_packet_size = mmap.PAGESIZE - 1
 
-    def __init__(self, sock, engine, dhcp_lease_table):
+    def __init__(
+        self, sock: socket.socket, engine: Engine, dhcp_lease_table: Table
+    ) -> None:
         self.parser = create_parser(standalone=False)
         self.engine = engine
         self.dhcp_lease_table = dhcp_lease_table
@@ -250,11 +256,11 @@ class Server(socketserver.UnixStreamServer):
         )
 
     def _request_handler(
-            self,
-            request: socket.socket,
-            client_address,
-            server: socketserver.BaseServer,
-    ):
+        self,
+        request: socket.socket,
+        client_address: str,
+        server: socketserver.BaseServer,
+    ) -> None:
         assert self == server
 
         logger.debug("Received new request from %s", client_address)
@@ -390,10 +396,9 @@ class Server(socketserver.UnixStreamServer):
                     "SCM_RIGHTS control message data must be an multiple of "
                     f"sizeof(int) = {fds.itemsize}"
                 )
-
             requested_mode: Mode
             for num, (fd, requested_mode) in enumerate(
-                zip_left(fds, requested_modes)
+                zip_left_none(fds, requested_modes)
             ):
                 flags = fcntl.fcntl(fd, fcntl.F_GETFL)
                 accmode = flags & os.O_ACCMODE
@@ -524,19 +529,22 @@ class Server(socketserver.UnixStreamServer):
             environ[name] = value
         return data, size, (argv, environ)
 
-    def _handle_shutdown_signal(self, signo, _frame):
+    def _handle_shutdown_signal(self, signo: int, _frame: typing.Any) -> None:
         logger.critical("Received signal %d. Shutting down.", signo)
         # shutdown blocks until the server is stopped, therefore we must use a
         # separate thread, otherwise there will be deadlock
         threading.Thread(name='shutdown', target=self.shutdown).start()
 
-    def serve_forever(self, poll_interval=0.5):
+    def serve_forever(self, poll_interval: float = 0.5) -> typing.NoReturn:
         logger.info("Starting server loop")
         with install_handler(
             (signal.SIGHUP, signal.SIGINT, signal.SIGTERM),
             self._handle_shutdown_signal
         ):
             super().serve_forever(poll_interval)
+        raise RuntimeError(
+            "This should be unreachable. `install_handler` must have swallowed an exception!"
+        )
 
     def _process(
             self,
@@ -572,5 +580,16 @@ def _try_close(fd):
         logger.error("Problem closing file descriptor", exc_info=e)
 
 
-def zip_left(left, right, rfill=None):
+S = typing.TypeVar("S")
+
+
+def zip_left(
+    left: typing.Iterable[S], right: typing.Iterable[T], rfill: T
+) -> typing.Iterable[typing.Tuple[S, T]]:
     return zip(left, chain(right, repeat(rfill)))
+
+
+def zip_left_none(
+    left: typing.Iterable[S], right: typing.Iterable[T]
+) -> typing.Iterable[typing.Tuple[S, typing.Optional[T]]]:
+    return zip_left(left, right, rfill=None)
