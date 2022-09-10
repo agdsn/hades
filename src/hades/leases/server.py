@@ -271,8 +271,7 @@ class Server(socketserver.UnixStreamServer):
             request.send(status.to_bytes(1, sys.byteorder))
 
     def _receive(
-            self,
-            request: socket.socket,
+        self, request: socket.socket
     ) -> Tuple[Tuple[TextIO, TextIO, TextIO], List[bytes], Dict[bytes, bytes]]:
         streams: List[TextIO] = []
         # Offset of the buffer relative to the input stream
