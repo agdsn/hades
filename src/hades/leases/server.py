@@ -362,9 +362,9 @@ class Server(socketserver.UnixStreamServer):
                     # for some details on the core developers' philosophy on this.
                     mode = requested_fd_mode or "w"
                 else:
-                    os.close(fd)
-                    logger.warning("Unknown fd ACCMODE %x for fd at index %d", accmode, num)
-                    continue
+                    raise ProtocolError(
+                        f"Unknown O_ACCMODE {accmode} of fd at index {num}"
+                    )
                 # noinspection PyTypeChecker
                 try:
                     stream: TextIO = os.fdopen(fd, mode, closefd=True)
