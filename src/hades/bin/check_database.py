@@ -11,8 +11,9 @@ import pwd
 import sys
 from typing import Iterable
 
+import sqlalchemy.engine
 from sqlalchemy import Table, exists, null, select
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine import Engine, Connection
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.pool import NullPool
 
@@ -29,7 +30,7 @@ def check_database(
         engine: Engine,
         user: pwd.struct_passwd,
         tables: Iterable[Table],
-):
+) -> None:
     """Check a set of tables as a user.
 
     :param engine: The SQLAlchemy engine
@@ -54,7 +55,7 @@ def check_database(
                 raise
 
 
-def check_table(conn, table):
+def check_table(conn: Connection, table: Table) -> None:
     """Perform :sql:`SELECT NULL` on a given table."""
     conn.execute(select([exists(select([null()]).select_from(table))])).scalar()
 

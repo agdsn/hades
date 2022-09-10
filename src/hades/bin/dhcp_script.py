@@ -7,6 +7,7 @@ import logging
 import os
 import pwd
 import typing
+from argparse import _SubParsersAction
 from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -14,6 +15,7 @@ from typing import Any, Callable, Dict, Iterable, Optional, Tuple, TypeVar, Text
     Mapping
 
 import netaddr
+import sqlalchemy
 from sqlalchemy import text, Table
 from sqlalchemy.engine.base import Connection, Engine
 from sqlalchemy.engine.result import RowProxy
@@ -77,9 +79,9 @@ def generate_leasefile_lines(
 
 # noinspection PyUnusedLocal
 def print_leases(
-        args,
-        context: Context,
-        engine: Engine,
+    args: typing.Any,
+    context: Context,
+    engine: Engine,
 ) -> int:
     """Print all leases in dnsmasq leasefile format"""
     with engine.connect() as connection, connection.begin():
@@ -167,7 +169,7 @@ class LeaseArguments:
     hostname: Optional[str]
 
     @classmethod
-    def from_anonymous_args(cls, args):
+    def from_anonymous_args(cls, args: typing.Any) -> LeaseArguments:
         return cls(
             mac=args.mac,
             ip=args.ip,
@@ -221,7 +223,7 @@ def obtain_lease_info(
         "ExpiresAt": expires_at,
     }
 
-    def set_value(key, value):
+    def set_value(key: str, value: typing.Any) -> None:
         if value is not None or missing_as_none:
             values[key] = value
 
@@ -280,10 +282,10 @@ def perform_lease_update(
     mac: netaddr.EUI,
     old: RowProxy,
     new: Dict[str, Any],
-):
+) -> typing.Optional[sqlalchemy.engine.Result]:
     changes = {k: v for k, v in new.items() if old[k] != v}
     if not changes:
-        return
+        return None
     query = dhcp_lease_table.update(values=changes).where(
         dhcp_lease_table.c.IPAddress == ip
     )
@@ -300,9 +302,9 @@ def perform_lease_update(
 
 
 def add_lease(
-        args,
-        context: Context,
-        engine: Engine,
+    args: typing.Any,
+    context: Context,
+    engine: Engine,
 ) -> int:
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
@@ -330,9 +332,9 @@ def add_lease(
 
 
 def delete_lease(
-        args,
-        context: Context,
-        engine: Engine,
+    args: typing.Any,
+    context: Context,
+    engine: Engine,
 ) -> int:
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
@@ -356,9 +358,9 @@ def delete_lease(
 
 
 def update_lease(
-        args,
-        context: Context,
-        engine: Engine,
+    args: typing.Any,
+    context: Context,
+    engine: Engine,
 ) -> int:
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
@@ -381,16 +383,20 @@ def update_lease(
 
 # noinspection PyUnusedLocal
 def do_nothing(
-        args,
-        context: Context,
-        engine: Engine,
+    args: typing.Any,
+    context: Context,
+    engine: Engine,
 ) -> int:
     logger.error("Unknown command %s", args.original_command)
     return os.EX_OK
 
 
-def add_lease_command(sub_parsers, action, action_help):
-    sub_parser = sub_parsers.add_parser(action, help=action_help)
+def add_lease_command(
+    sub_parsers: _SubParsersAction, action: str, action_help: str
+) -> ArgumentParser:
+    sub_parser = typing.cast(
+        ArgumentParser, sub_parsers.add_parser(action, help=action_help)
+    )
     sub_parser.add_argument("mac", type=netaddr.EUI, help="MAC address")
     sub_parser.add_argument("ip", type=netaddr.IPAddress, help="IP address")
     sub_parser.add_argument("hostname", nargs="?", help="Hostname")
@@ -399,7 +405,11 @@ def add_lease_command(sub_parsers, action, action_help):
 
 def create_parser(standalone: bool = True) -> ArgumentParser:
     class Parser(ArgumentParser):
-        def parse_known_args(self, args=None, namespace=None):
+        def parse_known_args(
+            self,
+            args: typing.Optional[typing.Sequence[str]] = None,
+            namespace: typing.Optional[typing.Any] = None,
+        ) -> typing.Tuple[argparse.Namespace, typing.List[str]]:
             if namespace is None:
                 namespace = argparse.Namespace()
 
@@ -409,7 +419,7 @@ def create_parser(standalone: bool = True) -> ArgumentParser:
             # argparse uses the type parameter of actions to convert values
             # before parsing it, but in the case of sub-parsers it parses all
             # positional arguments.
-            def type_func(x):
+            def type_func(x: str) -> str:
                 commands.type = None
                 namespace.original_command = x
                 return x if x in commands.choices else "no-op"
@@ -417,9 +427,10 @@ def create_parser(standalone: bool = True) -> ArgumentParser:
             commands.type = type_func
             return super().parse_known_args(args, namespace)
 
-        def exit(self, *a, **kw):
+        def exit(self, *a: typing.Any, **kw: typing.Any) -> None:
             if standalone:
-                return super().exit(*a, **kw)
+                super().exit(*a, **kw)
+                return
             logger.warning("Unexpected call to argparsers exit(args=%r, kwargs=%r)", a, kw)
 
     parser = Parser(
@@ -453,7 +464,7 @@ class Context:
     dhcp_lease_table: Table
 
 
-def main():
+def main() -> int:
     import sys
     logger.warning(
         "Running in standalone mode."
@@ -493,9 +504,9 @@ def main():
 
 
 def dispatch_commands(
-        args,
-        context: Context,
-        engine: Engine,
+    args: typing.Any,
+    context: Context,
+    engine: Engine,
 ) -> int:
     """"""
     funcs: Dict[str, Callable[[Any, Context, Engine], int]] = {

@@ -26,12 +26,12 @@ logger = logging.getLogger('hades.bin.vrrp_notify')
 
 
 # noinspection PyUnusedLocal
-def notify_auth(state, priority) -> int:
+def notify_auth(state: str, priority: int) -> int:
     return 0
 
 
 # noinspection PyUnusedLocal
-def notify_root(state, priority) -> int:
+def notify_root(state: str, priority: int) -> int:
     config = get_config(runtime_checks=True)
     app = create_app(config)
     queue_name = config.HADES_CELERY_NODE_QUEUE
@@ -56,7 +56,7 @@ def notify_root(state, priority) -> int:
 
 
 # noinspection PyUnusedLocal
-def notify_unauth(state, priority) -> int:
+def notify_unauth(state: str, priority: int) -> int:
     return 0
 
 

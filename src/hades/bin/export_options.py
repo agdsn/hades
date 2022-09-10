@@ -15,7 +15,7 @@ from hades.config import ConfigError, load_config, print_config_error
 from hades.config.export import export
 
 
-def create_parser():
+def create_parser() -> ArgumentParser:
     parser = ArgumentParser(description='Export options as shell variables',
                             epilog='Python sequence and mapping types will '
                                    'only be exported, if the destination '
@@ -30,7 +30,7 @@ def create_parser():
     return parser
 
 
-def main():
+def main() -> int:
     parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)

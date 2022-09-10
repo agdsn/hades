@@ -64,7 +64,7 @@ def create_parser() -> ArgumentParser:
     return parser
 
 
-def main():
+def main() -> int:
     parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
@@ -81,6 +81,7 @@ def main():
     except GeneratorError as e:
         logger.critical(str(e))
         return os.EX_DATAERR
+    return os.EX_OK
 
 
 if __name__ == '__main__':
