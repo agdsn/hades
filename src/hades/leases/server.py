@@ -498,10 +498,10 @@ class Server(socketserver.UnixStreamServer):
 
 decode = functools.partial(
     bytes.decode,
-    encoding="utf-8",
+    encoding=sys.getfilesystemencoding(),
     errors="surrogateescape",
 )
-"""Decode bytes like done in `os._createenviron` (hard-coding utf-8)"""
+"""Decode bytes like done in `os._createenviron`"""
 
 
 def _try_close(fd):
