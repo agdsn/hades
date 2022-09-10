@@ -338,7 +338,15 @@ class Server(socketserver.UnixStreamServer):
                     "SCM_RIGHTS control message data must be an multiple of "
                     f"sizeof(int) = {fds.itemsize}"
                 )
-            for fd, requested_fd_mode in zip_left(fds, requested_fd_modes):
+
+            # It's not possible to correctly map every POSIX file descriptor
+            # flag combination to a C stdlib fopen mode, e.g. there is no mode
+            # for O_WRONLY without O_CREAT or with neither O_APPEND nor O_TRUNC,
+            # therefore we verify if the underlying file descriptor flags are
+            # compatible with the requested mode.
+            for num, (fd, requested_fd_mode) in enumerate(
+                zip_left(fds, requested_fd_modes)
+            ):
                 accmode = fcntl.fcntl(fd, fcntl.F_GETFL) & os.O_ACCMODE
                 if accmode == os.O_RDONLY:
                     mode = "r"
@@ -355,14 +363,15 @@ class Server(socketserver.UnixStreamServer):
                     mode = requested_fd_mode or "w"
                 else:
                     os.close(fd)
-                    logger.warning("Unknown fd ACCMODE %x for fd %d", accmode, fd)
+                    logger.warning("Unknown fd ACCMODE %x for fd at index %d", accmode, num)
                     continue
                 # noinspection PyTypeChecker
                 try:
                     stream: TextIO = os.fdopen(fd, mode, closefd=True)
                 except io.UnsupportedOperation as e:
                     raise RuntimeError(
-                        f"Unable to open fd {fd} ({(len(streams))} already parsed, {mode=})"
+                        f"Unable to create IO object for fd at index {num} "
+                        f"with {mode=})"
                     ) from e
                 streams.append(stream)
             stack.pop_all()
