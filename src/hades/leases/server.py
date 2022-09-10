@@ -339,12 +339,12 @@ class Server(socketserver.UnixStreamServer):
                     f"sizeof(int) = {fds.itemsize}"
                 )
             for fd, requested_fd_mode in zip_left(fds, requested_fd_modes):
-                flags = fcntl.fcntl(fd, fcntl.F_GETFL)
-                if flags & os.O_ACCMODE == os.O_RDONLY:
+                accmode = fcntl.fcntl(fd, fcntl.F_GETFL) & os.O_ACCMODE
+                if accmode == os.O_RDONLY:
                     mode = "r"
-                elif flags & os.O_ACCMODE == os.O_WRONLY:
+                elif accmode == os.O_WRONLY:
                     mode = "w"
-                elif flags & os.O_ACCMODE == os.O_RDWR:
+                elif accmode == os.O_RDWR:
                     # the stdout/stderr buffers can possibly be in RW mode,
                     # however the buffer used by `sys.stdout` is usually opened in
                     # write-only mode by python.
@@ -355,7 +355,7 @@ class Server(socketserver.UnixStreamServer):
                     mode = requested_fd_mode or "w"
                 else:
                     os.close(fd)
-                    logger.warning("Unknown fd ACCMODE %x for fd %d", flags & os.O_ACCMODE, fd)
+                    logger.warning("Unknown fd ACCMODE %x for fd %d", accmode, fd)
                     continue
                 # noinspection PyTypeChecker
                 try:
