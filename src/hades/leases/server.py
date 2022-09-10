@@ -1,5 +1,6 @@
 import array
 import contextlib
+import enum
 import fcntl
 import functools
 import io
@@ -124,6 +125,39 @@ class BufferTooSmallError(BaseParseError):
 
 class ProtocolError(Exception):
     pass
+
+
+class Mode(enum.Enum):
+    """
+    Enum to distinguish I/O modes associate with corresponding Python mode
+    strings and compatible POSIX file descriptor status flags.
+
+    Conversion between POSIX file descriptor status flags and Python mode
+    strings is difficult and sometimes impossible, e.g. there is no mode for
+    `O_WRONLY` without `O_CREAT` or with neither `O_APPEND` nor `O_TRUNC`.
+    Some flags (e.g. `O_CREAT`, `O_EXCL`, `O_TRUNC`) and mode strings (`"w"` and
+    `"x"`) are actually only meaningful when opening a file initially. `"w"` is
+    a particularly interesting case, as it always truncates the file if it
+    exists. There is no way to open a file using mode strings only for writing
+    (i.e. no appending or reading).
+
+    Received file descriptors may be opened with different flags and access
+    modes. TTY fds usually have access mode `O_RDWR` mode, the stdio io objects
+    (e.g `sys.stdout`) are however always opened in read-only or write-only mode
+    by Python. In fact, trying to open such a file descriptor with mode string
+    `r+` (i.e. read-write mode) and using buffering causes :func:`os.fdopen` to
+    refuse operation because the buffer is not seekable. See `issue 20074
+    <https://bugs.python.org/issue20074#msg207012>` and the related discussion
+    for some details on the CPython core developers' philosophy on this.
+    """
+    READ = "r", (os.O_RDONLY, os.O_RDWR), None
+    WRITE = "w", (os.O_WRONLY, os.O_RDWR), False
+    UPDATE = "r+", (os.O_RDWR,), False
+
+    def __init__(self, stdio_mode: str, access_mode: Tuple[int, ...]) -> None:
+        super().__init__()
+        self.stdio_mode = stdio_mode
+        self.access_mode = access_mode
 
 
 class Server(socketserver.UnixStreamServer):
@@ -258,7 +292,9 @@ class Server(socketserver.UnixStreamServer):
 
                 streams.extend(
                     stack.enter_context(stream)
-                    for stream in self.parse_ancillary_data(ancdata, ["r", "w", "w"])
+                    for stream in self.parse_ancillary_data(
+                        ancdata, (Mode.READ, Mode.WRITE, Mode.WRITE)
+                    )
                 )
 
                 if msg_flags & socket.MSG_CTRUNC:
@@ -301,14 +337,14 @@ class Server(socketserver.UnixStreamServer):
     @staticmethod
     def parse_ancillary_data(
         ancdata: Container[Tuple[int, int, bytes]],
-        requested_fd_modes: Sequence[str],
+        requested_modes: Sequence[Mode],
     ) -> List[TextIO]:
         """
         Open streams for file descriptors received via :func:`socket.recvmsg`
         ancillary data.
 
         :param ancdata:
-        :param requested_fd_modes: a sequence of modes in which the fds should be opened
+        :param requested_modes: a sequence of modes in which the fds should be opened
         :return:
         """
         fds = array.array("i")
@@ -338,47 +374,28 @@ class Server(socketserver.UnixStreamServer):
                     f"sizeof(int) = {fds.itemsize}"
                 )
 
-            # It's not possible to correctly map every POSIX file descriptor
-            # flag combination to a C stdlib fopen mode, e.g. there is no mode
-            # for O_WRONLY without O_CREAT or with neither O_APPEND nor O_TRUNC,
-            # therefore we verify if the underlying file descriptor flags are
-            # compatible with the requested mode.
-            for num, (fd, requested_fd_mode) in enumerate(
-                zip_left(fds, requested_fd_modes)
+            requested_mode: Mode
+            for num, (fd, requested_mode) in enumerate(
+                zip_left(fds, requested_modes)
             ):
                 accmode = fcntl.fcntl(fd, fcntl.F_GETFL) & os.O_ACCMODE
-                if accmode == os.O_RDONLY:
-                    mode = "r"
-                elif accmode == os.O_WRONLY:
-                    mode = "w"
-                elif accmode == os.O_RDWR:
-                    # the stdout/stderr buffers can possibly be in RW mode,
-                    # however the buffer used by `sys.stdout` is usually opened in
-                    # write-only mode by python.
-                    # in fact, opening this in `r+` (i.e. read-write mode) and using buffering
-                    # causes open() to refuse operation because the buffer is not seekable.
-                    # See https://bugs.python.org/issue20074#msg207012 and the related discussion
-                    # for some details on the core developers' philosophy on this.
-                    mode = requested_fd_mode or "w"
-                else:
-                    raise ProtocolError(
-                        f"Unknown O_ACCMODE {accmode} of fd at index {num}"
-                    )
 
-                if mode != requested_fd_mode:
+                if accmode not in requested_mode.access_mode:
                     raise ProtocolError(
-                        f"File descriptor O_ACCMODE {accmode:02x} of fd at "
-                        f"index {num} is not compatible with requested mode "
-                        f"{requested_fd_mode!r}."
+                        f"File descriptor at index {num} O_ACCMODE bits "
+                        f"{accmode:02x} are not compatible with requested mode "
+                        f"{requested_mode.name}."
                     )
 
                 # noinspection PyTypeChecker
                 try:
-                    stream: TextIO = os.fdopen(fd, mode, closefd=True)
+                    stream: TextIO = os.fdopen(
+                        fd, requested_mode.stdio_mode, closefd=True
+                    )
                 except io.UnsupportedOperation as e:
                     raise RuntimeError(
                         f"Unable to create IO object for fd at index {num} "
-                        f"with {mode=})"
+                        f"with mode {requested_mode.stdio_mode!r})"
                     ) from e
                 streams.append(stream)
             stack.pop_all()
