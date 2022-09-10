@@ -741,15 +741,16 @@ CREATE TABLE unauth_dhcp_lease (
     "SuppliedHostname" text,
     "ExpiresAt" timestamp with time zone NOT NULL,
     "CreatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "UpdatedAt" timestamp with time zone DEFAULT now() NOT NULL,
     "RelayIPAddress" inet,
-    "Tags" text[] NOT NULL,
+    "Tags" text[] DEFAULT '{}' NOT NULL,
     "ClientID" bytea,
     "CircuitID" bytea,
     "SubscriberID" bytea,
     "RemoteID" bytea,
     "VendorClass" text,
-    "RequestedOptions" integer[] NOT NULL,
-    "UserClasses" text[] NOT NULL,
+    "RequestedOptions" integer[] DEFAULT '{}' NOT NULL,
+    "UserClasses" text[] DEFAULT '{}' NOT NULL,
     CONSTRAINT "unauth_dhcp_lease_Tags" CHECK ((COALESCE(array_ndims("Tags"), 1) = 1)),
     CONSTRAINT "unauth_dhcp_lease_RequestedOptions" CHECK ((COALESCE(array_ndims("RequestedOptions"), 1) = 1)),
     CONSTRAINT "unauth_dhcp_lease_UserClasses" CHECK ((COALESCE(array_ndims("UserClasses"), 1) = 1))
@@ -999,7 +1000,7 @@ GRANT SELECT ON TABLE radusergroup TO "{{ constants.RADIUS_USER }}";
 --
 
 GRANT SELECT ON TABLE unauth_dhcp_lease TO "{{ constants.AGENT_USER }}";
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE unauth_dhcp_lease TO "{{ constants.AUTH_DHCP_USER }}";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE unauth_dhcp_lease TO "{{ constants.UNAUTH_DNS_USER }}";
 
 
 --

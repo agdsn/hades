@@ -9,11 +9,11 @@ import pwd
 from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, TypeVar, Sequence, TextIO, \
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, TypeVar, TextIO, \
     Mapping
 
 import netaddr
-from sqlalchemy import text
+from sqlalchemy import text, Table
 from sqlalchemy.engine.base import Connection, Engine
 from sqlalchemy.engine.result import RowProxy
 
@@ -22,7 +22,7 @@ from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
 from hades.common.db import (
     auth_dhcp_lease,
     create_engine,
-    get_all_auth_dhcp_leases,
+    get_all_dhcp_leases,
 )
 from hades.common.privileges import drop_privileges
 from hades.config import load_config
@@ -78,9 +78,8 @@ def print_leases(
         engine: Engine,
 ) -> int:
     """Print all leases in dnsmasq leasefile format"""
-    connection = engine.connect()
-    with connection.begin():
-        leases = get_all_auth_dhcp_leases(connection)
+    with engine.connect() as connection, connection.begin():
+        leases = get_all_dhcp_leases(context.dhcp_lease_table, connection)
     context.stdout.writelines(generate_leasefile_lines(leases))
     return os.EX_OK
 
@@ -253,10 +252,11 @@ def obtain_lease_info(
 
 def query_lease_for_update(
     connection: Connection,
+    dhcp_lease_table: Table,
     ip: netaddr.IPAddress,
 ) -> Optional[RowProxy]:
-    query = auth_dhcp_lease.select(
-        auth_dhcp_lease.c.IPAddress == ip
+    query = dhcp_lease_table.select(
+        dhcp_lease_table.c.IPAddress == ip
     ).with_for_update()
     with closing(connection.execute(query)) as result:
         row = result.fetchone()
@@ -271,6 +271,7 @@ def query_lease_for_update(
 
 def perform_lease_update(
     connection: Connection,
+    dhcp_lease_table: Table,
     ip: netaddr.IPAddress,
     mac: netaddr.EUI,
     old: RowProxy,
@@ -279,8 +280,8 @@ def perform_lease_update(
     changes = {k: v for k, v in new.items() if old[k] != v}
     if not changes:
         return
-    query = auth_dhcp_lease.update(values=changes).where(
-        auth_dhcp_lease.c.IPAddress == ip
+    query = dhcp_lease_table.update(values=changes).where(
+        dhcp_lease_table.c.IPAddress == ip
     )
     result = connection.execute(query)
     if result.rowcount != 1:
@@ -299,7 +300,6 @@ def add_lease(
         context: Context,
         engine: Engine,
 ) -> int:
-    connection = engine.connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
         context,
@@ -313,14 +313,15 @@ def add_lease(
         ip,
         mac,
     )
-    with connection.begin():
+    with engine.connect() as connection, connection.begin():
+        lease_table = context.dhcp_lease_table
         # TODO: Use INSERT ON CONFLICT UPDATE on newer SQLAlchemy (>= 1.1)
-        old_values = query_lease_for_update(connection, ip)
+        old_values = query_lease_for_update(connection, lease_table, ip)
         if old_values is None:
-            connection.execute(auth_dhcp_lease.insert(values=values))
+            connection.execute(lease_table.insert(values=values))
         else:
             logger.warning("Lease for IP %s and MAC %s already exists", ip, mac)
-            perform_lease_update(connection, ip, mac, old_values, values)
+            perform_lease_update(connection, lease_table, ip, mac, old_values, values)
     return os.EX_OK
 
 
@@ -329,7 +330,6 @@ def delete_lease(
         context: Context,
         engine: Engine,
 ) -> int:
-    connection = engine.connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
         context,
@@ -337,8 +337,9 @@ def delete_lease(
     )
     ip, mac = values["IPAddress"], values["MAC"]
     logger.debug("Deleting lease for IP %s and MAC %s", ip, mac)
-    query = auth_dhcp_lease.delete().where(auth_dhcp_lease.c.IPAddress == ip)
-    with connection.begin():
+    lease_table = context.dhcp_lease_table
+    query = lease_table.delete().where(lease_table.c.IPAddress == ip)
+    with engine.connect() as connection, connection.begin():
         result = connection.execute(query)
     if result.rowcount != 1:
         logger.warning(
@@ -355,7 +356,6 @@ def update_lease(
         context: Context,
         engine: Engine,
 ) -> int:
-    connection = engine.connect()
     values = obtain_lease_info(
         LeaseArguments.from_anonymous_args(args),
         context,
@@ -364,13 +364,14 @@ def update_lease(
     values.setdefault('UpdatedAt', text('DEFAULT'))
     ip, mac = values["IPAddress"], values["MAC"]
     logger.debug("Updating lease for IP %s and MAC %s", ip, mac)
-    with connection.begin():
+    with engine.connect() as connection, connection.begin():
         # TODO: Use INSERT ON CONFLICT UPDATE on newer SQLAlchemy (>= 1.1)
-        old_values = query_lease_for_update(connection, ip)
+        lease_table = context.dhcp_lease_table
+        old_values = query_lease_for_update(connection, lease_table, ip)
         if old_values is None:
-            connection.execute(auth_dhcp_lease.insert(values=values))
+            connection.execute(lease_table.insert(values=values))
         else:
-            perform_lease_update(connection, ip, mac, old_values, values)
+            perform_lease_update(connection, lease_table, ip, mac, old_values, values)
     return os.EX_OK
 
 
@@ -444,11 +445,16 @@ class Context:
     stderr: TextIO
     environ: Mapping[str, str]
     environb: Mapping[bytes, bytes]
+    #: Can be either :ref:`hades.db.unauth_dhcp_leases` or :ref:`hades.db.auth_dhcp_leases`
+    dhcp_lease_table: Table
 
 
 def main():
     import sys
-    logger.warning("Running in standalone mode. This is meant for development purposes only.")
+    logger.warning(
+        "Running in standalone mode."
+        " This is meant for development purposes, and only works with `auth-dhcp` leases."
+    )
     # When dnsmasq starts, it calls init before dropping privileges
     if os.geteuid() == 0:
         try:
@@ -475,6 +481,8 @@ def main():
             stderr=sys.stderr,
             environ=os.environ,
             environb=os.environb,
+            # this is hardcoded because we don't really care about standalone mode anyway.
+            dhcp_lease_table=auth_dhcp_lease,
         ),
         engine,
     )

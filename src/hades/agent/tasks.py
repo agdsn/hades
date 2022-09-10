@@ -17,10 +17,13 @@ from sqlalchemy.engine import Engine
 from hades.common.db import (
     Attributes, DatetimeRange, Groups, create_engine,
     get_all_auth_dhcp_leases as do_get_all_auth_dhcp_leases,
+    get_all_unauth_dhcp_leases as do_get_all_unauth_dhcp_leases,
     get_auth_attempts_at_port as do_get_auth_attempts_at_port,
     get_auth_attempts_of_mac as do_get_auth_attempts_of_mac,
     get_auth_dhcp_lease_of_ip as do_get_auth_dhcp_lease_of_ip,
+    get_unauth_dhcp_lease_of_ip as do_get_unauth_dhcp_lease_of_ip,
     get_auth_dhcp_leases_of_mac as do_get_auth_dhcp_leases_of_mac,
+    get_unauth_dhcp_leases_of_mac as do_get_unauth_dhcp_leases_of_mac,
     get_sessions_of_mac as do_get_sessions_of_mac,
 )
 from hades.config import get_config
@@ -292,7 +295,7 @@ def get_auth_attempts_at_port(
     nas_port_id: str,
     when: Optional[TimestampRange] = None,
     limit: Optional[int] = 100,
-) -> Optional[List[Tuple[str, str, Groups, Attributes, float]]]:
+) -> List[Tuple[str, str, Groups, Attributes, float]]:
     """Get the authentication attempts at a given port ordered by
     ``Auth-Date``
 
@@ -323,7 +326,15 @@ def get_auth_attempts_at_port(
 def get_auth_dhcp_leases(
     subnet: Optional[str] = None,
     limit: Optional[int] = 100,
-) -> Optional[List[Tuple[float, str, str, Optional[str]]]]:
+) -> List[Tuple[float, str, str, Optional[str]]]:
+    """Return all auth leases.
+
+    :param subnet: Limit leases to subnet
+    :param limit: Maximum number of leases
+    :return: A list of (Expires-At, MAC, IP-Address, Hostname,
+        Client-ID)-tuples
+    :raises ArgumentError: if illegal arguments are provided
+    """
     if subnet is not None:
         subnet = check_ip_network("subnet", subnet)
     if limit is not None:
@@ -336,9 +347,46 @@ def get_auth_dhcp_leases(
 
 
 @rpc_task()
+def get_unauth_dhcp_leases(
+    subnet: Optional[str] = None,
+    limit: Optional[int] = 100,
+) -> List[Tuple[float, str, str, Optional[str]]]:
+    """Return all unauth leases.
+
+    :param subnet: Limit leases to subnet
+    :param limit: Maximum number of leases
+    :return: A list of (Expires-At, MAC, IP-Address, Hostname,
+        Client-ID)-tuples
+    :raises ArgumentError: if illegal arguments are provided
+    """
+    if subnet is not None:
+        subnet = check_ip_network("subnet", subnet)
+    if limit is not None:
+        limit = check_positive_int("limit", limit)
+    with engine.connect() as connection:
+        leases = do_get_all_unauth_dhcp_leases(connection, subnet, limit)
+    return [
+        (
+            expires_at.timestamp(),
+            str(mac),
+            str(ip),
+            hostname,
+        )
+        for expires_at, mac, ip, hostname in leases
+    ]
+
+
+@rpc_task()
 def get_auth_dhcp_leases_of_ip(
     ip: str,
 ) -> Optional[Tuple[float, str, Optional[str], Optional[str]]]:
+    """Get basic auth lease information for a given IP.
+
+    :param ip: IP address
+    :return: An iterator of (Expiry-Time, MAC, Hostname, Client-ID)-tuples or
+        None
+    :raises ArgumentError: if illegal arguments are provided
+    """
     ip = check_ip_address("ip", ip)
     with contextlib.closing(engine.connect()) as connection:
         result = do_get_auth_dhcp_lease_of_ip(connection, ip)
@@ -350,15 +398,72 @@ def get_auth_dhcp_leases_of_ip(
 
 
 @rpc_task()
+def get_unauth_dhcp_leases_of_ip(
+    ip: str,
+) -> Optional[Tuple[float, str, Optional[str], Optional[str]]]:
+    """Get basic unauth lease information for a given IP.
+
+    :param ip: IP address
+    :return: An iterator of (Expiry-Time, MAC, Hostname, Client-ID)-tuples or
+        None
+    :raises ArgumentError: if illegal arguments are provided
+    """
+    ip = check_ip_address("ip", ip)
+    with engine.connect() as connection:
+        result = do_get_unauth_dhcp_lease_of_ip(connection, ip)
+    if result is None:
+        return None
+    expires_at, mac, hostname, client_id = result
+    return expires_at.timestamp(), str(mac), hostname, client_id
+
+
+@rpc_task()
 def get_auth_dhcp_leases_of_mac(
     mac: str,
-) -> Optional[List[Tuple[float, str, Optional[str]]]]:
+) -> List[Tuple[float, str, Optional[str]]]:
+    """Get basic information about all auth leases of a given MAC.
+
+    :param mac: MAC address
+    :return: A list of (Expiry-Time, IP-Address, Hostname,
+        Client-ID)-tuples ordered by Expiry-Time descending
+    :raises ArgumentError: if illegal arguments are provided
+    """
     mac = check_mac("mac", mac)
     with contextlib.closing(engine.connect()) as connection:
-        return list(starmap(
-            lambda expires_at, ip, hostname:
-                (expires_at.timestamp(), str(ip), hostname),
-            do_get_auth_dhcp_leases_of_mac(connection, mac)))
+        return list(
+            starmap(
+                lambda expires_at, ip, hostname: (
+                    expires_at.timestamp(),
+                    str(ip),
+                    hostname,
+                ),
+                do_get_auth_dhcp_leases_of_mac(connection, mac),
+            )
+        )
+
+
+@rpc_task()
+def get_unauth_dhcp_leases_of_mac(
+    mac: str,
+) -> List[Tuple[float, str, Optional[str]]]:
+    """Get basic information about all unauth leases of a given MAC.
+
+    :param mac: MAC address
+    :return: A list of (Expiry-Time, IP-Address, Hostname,
+        Client-ID)-tuples ordered by Expiry-Time descending
+    :raises ArgumentError: if illegal arguments are provided
+    """
+    mac = check_mac("mac", mac)
+    with engine.connect() as connection:
+        leases = do_get_unauth_dhcp_leases_of_mac(connection, mac)
+    return [
+        (
+            expires_at.timestamp(),
+            str(ip),
+            hostname,
+        )
+        for expires_at, ip, hostname in leases
+    ]
 
 
 def dict_from_attributes(
@@ -418,6 +523,8 @@ units = (
     'hades-agent.service',
     'hades-auth-alternative-dns.service',
     'hades-auth-dhcp.service',
+    "hades-auth-dhcp-leases.service",
+    "hades-auth-dhcp-leases.socket",
     'hades-auth-netns.service',
     'hades-auth-pristine-dns.service',
     'hades-auth-vrrp.service',
@@ -429,6 +536,8 @@ units = (
     'hades-refresh.timer',
     'hades-root-netns.service',
     'hades-root-vrrp.service',
+    "hades-unauth-dhcp-leases.service",
+    "hades-unauth-dhcp-leases.socket",
     'hades-unauth-dns.service',
     'hades-unauth-http.service',
     'hades-unauth-netns.service',

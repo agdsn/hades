@@ -56,18 +56,21 @@ def socket_path() -> bytes:
     return os.fsencode(tempfile.mktemp(prefix="hades-", suffix=".sock"))
 
 
-def read_int_sysctl(variable: str) -> int:
-    with (pathlib.PosixPath("/proc/sys") / variable).open("rb", 0) as f:
-        return int(f.read())
+def read_int_sysctl(variable: str) -> Optional[int]:
+    try:
+        with (pathlib.PosixPath("/proc/sys") / variable).open("rb", 0) as f:
+            return int(f.read())
+    except FileNotFoundError:
+        return None
 
 
 @pytest.fixture(scope="session")
-def optmem_max() -> int:
+def optmem_max() -> Optional[int]:
     return read_int_sysctl("net/core/optmem_max")
 
 
 @pytest.fixture(scope="session")
-def wmem_default() -> int:
+def wmem_default() -> Optional[int]:
     return read_int_sysctl("net/core/wmem_default")
 
 
@@ -95,6 +98,8 @@ def server(socket_path) -> socket.socket:
 def test_short_write_possible(wmem_default):
     """On Linux only the sender can influence the size of a Unix stream socket
     buffer."""
+    if not wmem_default:
+        pytest.skip("`wmem_default` not available")
     got = os.sysconf("SC_ARG_MAX")
     expected = wmem_default + mmap.PAGESIZE
     assert got > expected, "Cannot test short writes"
@@ -219,7 +224,7 @@ async def run_with_trio(
     messages = None
     sent = None
     with trio.move_on_after(TIMEOUT):
-        process = await trio.open_process(
+        process = await trio.lowlevel.open_process(
             argv,
             executable=executable,
             env=environ,
@@ -266,7 +271,7 @@ class BaseRun(abc.ABC):
     def environ(self, server: socket.socket) -> Dict[bytes, bytes]:
         path = os.fsencode(server.getsockname())
         return collections.OrderedDict((
-            (b"HADES_AUTH_DHCP_SCRIPT_SOCKET", path),
+            (b"HADES_DHCP_SCRIPT_SOCKET", path),
         ))
 
     @pytest.fixture(scope="class")
@@ -300,7 +305,10 @@ class BaseRun(abc.ABC):
             uid: int,
             gid: int,
     ) -> Result:
-
+        if not wmem_default or not optmem_max:
+            pytest.skip(
+                "could not read relevant kernel parameters (wmem_default/optmem_max)"
+            )
         return trio.run(
             run_with_trio,
             executable,
@@ -381,18 +389,22 @@ class NoStdoutOutputRun(BaseRun, abc.ABC):
 class PrematureExitRun(NoStdoutOutputRun, abc.ABC):
     @property
     def expected_stderr(self) -> bytes:
-        return inspect.cleandoc(
-            f"""
+        return (
+            inspect.cleandoc(
+                """
             hades-dhcp-script ARGS...
             
             Sends its command-line arguments, environment variables starting
             with DNSMASQ_ and the stdin/stdout file descriptors to the UNIX
-            socket set via the HADES_AUTH_DHCP_SCRIPT_SOCKET environment
-            variable (defaults to {constants.AUTH_DHCP_SCRIPT_SOCKET}).
+            socket set via the HADES_DHCP_SCRIPT_SOCKET environment
+            variable (see `systemctl list-units hades-\\*.socket` for running lease-server sockets).
 
+            Use the `init` command to print out the current state of leases.
             See the -6, --dhcp-script options of dnsmasq for details.
             """
-        ).encode("ascii")
+            ).encode("ascii")
+            + b"\n"
+        )
 
     def test_messages(self, messages: Optional[List[RECVMSG]]):
         assert messages is None
@@ -582,6 +594,8 @@ class TestSuccess(ConnectedRun, SuccessfulRun, NoStdoutOutputRun):
         executable: pathlib.PosixPath,
         wmem_default: int,
     ) -> List[bytes]:
+        if not wmem_default:
+            pytest.skip("could not read wmem_default")
         random_args = random.randbytes(2 * wmem_default).split(b"\x00")
         return [
             bytes(executable),
@@ -596,7 +610,7 @@ class TestSuccess(ConnectedRun, SuccessfulRun, NoStdoutOutputRun):
             (b"DNSMASQ_PREFIX_ENV", b"2"),
             (b"DNSMASQ_PREFIX_WITH_WHITESPACE", b" \twith\t whitespace\t "),
             (b"DNSMASQ_CHARACTERS", bytes(range(0x01, 0x100))),
-            (b"HADES_AUTH_DHCP_SCRIPT_SOCKET", path),
+            (b"HADES_DHCP_SCRIPT_SOCKET", path),
         ))
 
 

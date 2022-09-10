@@ -1,0 +1,2 @@
+[Socket]
+ListenStream=@AUTH_DHCP_SCRIPT_SOCKET@

@@ -1,5 +1,6 @@
 #!/usr/bin/dh-exec
 conf/*.service lib/systemd/system/
+conf/*.socket lib/systemd/system/
 conf/*.timer lib/systemd/system/
 conf/config.py => etc/hades/config/__init__.py
 conf/hades.busconfig => etc/dbus-1/system.d/de.agdsn.hades.conf

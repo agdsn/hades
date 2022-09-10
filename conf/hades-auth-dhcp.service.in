@@ -4,6 +4,11 @@ Documentation=https://agdsn.github.io/hades/
 PartOf=hades.service
 ReloadPropagatedFrom=hades.service
 Before=hades.service
+# The socket is strictly required for startup because dnsmasq needs to call
+# `hades-dhcp-script init` initially
+After=hades-auth-dhcp-leases.socket
+Requires=hades-auth-dhcp-leases.socket
+BindsTo=hades-auth-dhcp-leases.socket
 After=hades-auth-netns.service
 BindsTo=hades-auth-netns.service
 JoinsNamespaceOf=hades-auth-netns.service
@@ -13,6 +18,7 @@ Type=dbus
 BusName=@AUTH_DHCP_DBUS_NAME@
 SyslogIdentifier=hades-auth-dhcp
 EnvironmentFile=@systemdenvfile@
+Environment=HADES_DHCP_SCRIPT_SOCKET=@AUTH_DHCP_SCRIPT_SOCKET@
 ExecStartPre=@bindir@/hades-generate-config --group=@AUTH_DHCP_GROUP@ auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
 ExecStartPre=@DNSMASQ@ --test -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf $AUTH_DNSMASQ_OPTS
 ExecStart=@DNSMASQ@ -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf $AUTH_DNSMASQ_OPTS
