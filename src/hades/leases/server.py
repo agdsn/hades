@@ -1,6 +1,5 @@
 import array
 import contextlib
-import ctypes
 import fcntl
 import io
 import logging
@@ -21,7 +20,7 @@ from hades.bin.dhcp_script import Context, create_parser, dispatch_commands
 from hades.common.signals import install_handler
 
 logger = logging.getLogger(__name__)
-SIZEOF_INT = ctypes.sizeof(ctypes.c_int)
+SIZEOF_INT = struct.calcsize("@i")
 T = TypeVar('T')
 Parser = Generator[int, Tuple[mmap.mmap, int], T]
 
