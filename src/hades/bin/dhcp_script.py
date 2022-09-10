@@ -147,20 +147,17 @@ def obtain_tuple(
     func: Callable[[Any], T] = lambda x: x,  # type: ignore
 ) -> Optional[Tuple[T]]:
     """Obtain a tuple of values from the environment"""
-    env_value = get_env_safe(environ, name)
-    if env_value is not None:
-        try:
-            value = typing.cast(
-                Tuple[T], tuple(func(v) for v in env_value.split(sep) if v)
-            )
-        except ValueError as e:
-            raise ValueError(
-                "Environment variable {} contains illegal value {}".format(
-                    name, env_value
-                )
-            ) from e
-        return value
-    return env_value
+    value = get_env_safe(environ, name)
+    if value is None:
+        return None
+
+    try:
+        tup = tuple(func(v) for v in value.split(sep) if v)
+    except ValueError as e:
+        raise ValueError(
+            f"Environment variable {name} contains illegal value {value}"
+        ) from e
+    return typing.cast(Tuple[T], tup)
 
 
 @dataclass
