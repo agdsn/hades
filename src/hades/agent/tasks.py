@@ -349,7 +349,7 @@ def get_auth_dhcp_leases(
 def get_unauth_dhcp_leases(
     subnet: Optional[str] = None,
     limit: Optional[int] = 100,
-) -> List[Tuple[float, str, str, Optional[str]]]:
+) -> List[Tuple[float, str, str, Optional[str], Optional[str]]]:
     """Return all unauth leases.
 
     :param subnet: Limit leases to subnet
@@ -370,8 +370,9 @@ def get_unauth_dhcp_leases(
             str(mac),
             str(ip),
             hostname,
+            client_id,
         )
-        for expires_at, mac, ip, hostname in leases
+        for expires_at, mac, ip, hostname, client_id in leases
     ]
 
 
@@ -444,7 +445,7 @@ def get_auth_dhcp_leases_of_mac(
 @rpc_task()
 def get_unauth_dhcp_leases_of_mac(
     mac: str,
-) -> List[Tuple[float, str, Optional[str]]]:
+) -> List[Tuple[float, str, Optional[str], Optional[str]]]:
     """Get basic information about all unauth leases of a given MAC.
 
     :param mac: MAC address
@@ -460,8 +461,9 @@ def get_unauth_dhcp_leases_of_mac(
             expires_at.timestamp(),
             str(ip),
             hostname,
+            client_id
         )
-        for expires_at, ip, hostname in leases
+        for expires_at, ip, hostname, client_id in leases
     ]
 
 
