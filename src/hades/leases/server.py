@@ -246,7 +246,7 @@ class Server(socketserver.UnixStreamServer):
         # Leave one byte extra for trailing zero byte
         # TODO: With Python 3.8 a memfd can be opened and mapped twice:
         # writable and readonly
-        fd = os.memfd_create(b"buffer", os.MFD_CLOEXEC)
+        fd = os.memfd_create("buffer", os.MFD_CLOEXEC)
         os.ftruncate(fd, self.max_packet_size + 1)
         self.buffer = mmap.mmap(
             fd,
