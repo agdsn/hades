@@ -148,9 +148,9 @@ def setup_cli_logging(program, args):
     messages: list[typing.Callable[[], None]] = []
     reset_cli_logging()
     if args.verbosity is None:
-        verbosity = os.environ.get('HADES_VERBOSITY', DEFAULT_VERBOSITY)
+        verbosity_ = os.environ.get('HADES_VERBOSITY', DEFAULT_VERBOSITY)
         try:
-            verbosity = int(verbosity)
+            verbosity = int(verbosity_)
         except ValueError as e:
             verbosity = DEFAULT_VERBOSITY
             messages.append(
@@ -161,7 +161,7 @@ def setup_cli_logging(program, args):
                 )
             )
     else:
-        verbosity = args.verbosity
+        verbosity = typing.cast(int, args.verbosity)
     if verbosity < 0:
         messages.append(
             functools.partial(

@@ -909,7 +909,7 @@ def get_dhcp_lease_of_ip(
             dhcp_lease_table.c.ClientID,
         ]
     ).where(IPAddress=ip)
-    return connection.execute(query).first()
+    return connection.execute(query).first()  # type: ignore
 
 
 def get_dhcp_leases_of_mac(

@@ -1,6 +1,10 @@
+from __future__ import annotations
 # noinspection PyPackageRequirements
 import contextlib
+import sys
+import typing
 
+# noinspection PyUnresolvedReferences
 from gi.repository import Gio, GLib
 
 from hades.common.util import qualified_name
@@ -8,10 +12,10 @@ from hades.common.util import qualified_name
 
 class TypedGLibError(Exception):
     """Base GLib exception"""
-    domains = {}
-    codes = {}
-    domain = None
-    code = None
+    domains: typing.Dict[int, typing.Type[TypedGLibError]] = {}
+    codes: typing.Dict[Gio.DBusError, typing.Type[TypedGLibError]] = {}
+    domain: int = None
+    code: Gio.DBusError = None
 
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
