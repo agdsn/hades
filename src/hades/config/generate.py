@@ -19,7 +19,12 @@ from typing import Optional, Union, Iterable, Iterator, TextIO, Tuple
 import jinja2
 import netaddr
 from jinja2.exceptions import FilterArgumentError
-from jinja2.filters import environmentfilter
+try:
+    from jinja2.filters import pass_environment
+except ImportError:
+    # Jinja2 <3
+    # noinspection PyUnresolvedReferences
+    from jinja2.filters import environmentfilter as pass_environment
 
 from hades import constants
 
@@ -71,7 +76,7 @@ def do_max(a):
 
 
 @template_filter('sorted')
-@environmentfilter
+@pass_environment
 def do_sorted(env, iterable, *, attribute=None, item=None, reverse=False):
     if attribute is None and item is None:
         key = None
