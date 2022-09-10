@@ -17,6 +17,7 @@ readonly known_user_port_id=K1
 readonly unknown_user_port_id=U1
 
 setup() {
+	log_test_start
 	psql foreign <<-EOF
 		INSERT INTO radcheck ("Priority", "NASIPAddress", "NASPortId", "UserName", "Attribute", "Op", "Value")
 		VALUES (1, inet '${nas_ip}', '${nas_port_id}', '$(lowercase $(mac_sextuple ${known_user_mac} :))', 'Calling-Station-Id', '==', '$(lowercase $(mac_sextuple "${nas_mac}" -))'),
@@ -44,6 +45,7 @@ teardown() {
 		TRUNCATE radgroupreply;
 		EOF
 	refresh
+	log_test_stop
 }
 
 do_request() {

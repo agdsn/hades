@@ -25,4 +25,10 @@ hades\.deputy\.server module
     :undoc-members:
     :show-inheritance:
 
+hades\.deputy\.dhcp module
+--------------------------
 
+.. automodule:: hades.deputy.dhcp
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -24,7 +24,7 @@ from hades.leases.server import Server
 logger = logging.getLogger(__name__)
 
 
-def main():
+def create_parser() -> ArgumentParser:
     parser = ArgumentParser(
         description="Listens for commands as output by `hades-dhcp-script`.",
         epilog=f"""\
@@ -42,6 +42,11 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--auth", action="store_true")
     group.add_argument("--unauth", action="store_false")
+    return parser
+
+
+def main():
+    parser = create_parser()
     args = parser.parse_args()
     SCRIPT_SOCKET = args.socket
     setup_cli_logging(parser.prog, args)

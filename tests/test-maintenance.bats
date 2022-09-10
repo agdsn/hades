@@ -22,6 +22,7 @@ fakedns() {
 }
 
 setup() {
+	log_test_start
 	data 0
 	psql foreign <<<'TRUNCATE alternative_dns;'
 }
@@ -32,6 +33,7 @@ teardown() {
 		TRUNCATE alternative_dns;
 	EOF
 	refresh
+	log_test_stop
 }
 
 @test "check that fdw contains data" {

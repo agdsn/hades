@@ -1,8 +1,25 @@
-"""Database utilities"""
+"""Database utilities.
+
+This module contains
+
+- the sqlalchemy :class:`Table <sqlalchemy:sqlalchemy.schema.Table>` schema definitions
+- structures related to the former, like :class:`TypeDecorators <sqlalchemy:sqlalchemy.types.TypeDecorator>`
+- functions interacting with the database (both for reading and manipulating)
+"""
 import logging
 import operator
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone, tzinfo
-from typing import Iterable, Iterator, List, Optional, Tuple
+from typing import (
+    Collection,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Generic,
+)
 
 import netaddr
 import psycopg2.extensions
@@ -70,6 +87,16 @@ class MACAddress(TypeDecorator):
         return netaddr.EUI(value, dialect=netaddr.mac_pgsql)
 
 
+def eui_as_unix(mac: netaddr.EUI) -> netaddr.EUI:
+    """Represent a mac address as itself with the :ref:`netaddr.mac_unix_expanded` dialect set.
+
+    This causes the string representation to be the colon-separated ``00:de:ad:be:ef:00``
+    which is used in most other places in hades.
+    This normalization is useful to keep the representations of MAC addresses in the journal consistent.
+    """
+    return netaddr.EUI(int(mac), dialect=netaddr.mac_unix_expanded)
+
+
 class IPAddress(TypeDecorator):
     """Custom SQLAlchemy type for IP addresses.
 
@@ -99,6 +126,8 @@ class TupleArray(ARRAY):
                          zero_indexes=True)
 
 
+#: :meta hide-value:
+#: :type: materialized view
 alternative_dns = Table(
     "alternative_dns",
     metadata,
@@ -107,6 +136,10 @@ alternative_dns = Table(
 )
 temp_alternative_dns = as_copy(alternative_dns, 'temp_alternative_dns')
 
+#: The table containing the DHCP host reservations.
+#:
+#: :meta hide-value:
+#: :type: materialized view
 auth_dhcp_host = Table(
     "auth_dhcp_host",
     metadata,
@@ -118,6 +151,10 @@ auth_dhcp_host = Table(
 )
 temp_auth_dhcp_host = as_copy(auth_dhcp_host, 'temp_auth_dhcp_host')
 
+#: The table representing the auth leases.  Synced from dnsmasq state via the ``--dhcp-script`` hook.
+#:
+#: :meta hide-value:
+#: :type: table
 auth_dhcp_lease = Table(
     "auth_dhcp_lease",
     metadata,
@@ -171,8 +208,16 @@ auth_dhcp_lease = Table(
     CheckConstraint(func.coalesce(func.array_ndims("UserClasses"), 1) == 1),
 )
 
+#: The table representing the unauth leases.  Synced from dnsmasq state via the ``--dhcp-script`` hook.
+#:
+#: :meta hide-value:
+#: :type: table
 unauth_dhcp_lease = as_copy(auth_dhcp_lease, "unauth_dhcp_lease", False)
 
+#: The table network access switches
+#:
+#: :meta hide-value:
+#: :type: materialized view
 nas = Table(
     "nas",
     metadata,
@@ -191,6 +236,10 @@ nas = Table(
 )
 temp_nas = as_copy(nas, 'temp_nas')
 
+#: radius accounting information
+#:
+#: :meta hide-value:
+#: :type: table
 radacct = Table(
     "radacct",
     metadata,
@@ -221,6 +270,8 @@ radacct = Table(
     Column('FramedIPAddress', IPAddress),
 )
 
+#: :meta hide-value:
+#: :type: materialized view
 radcheck = Table(
     "radcheck",
     metadata,
@@ -235,6 +286,8 @@ radcheck = Table(
 )
 temp_radcheck = as_copy(radcheck, 'temp_radcheck')
 
+#: :meta hide-value:
+#: :type: materialized view
 radgroupcheck = Table(
     "radgroupcheck",
     metadata,
@@ -247,6 +300,8 @@ radgroupcheck = Table(
 )
 temp_radgroupcheck = as_copy(radgroupcheck, 'temp_radgroupcheck')
 
+#: :meta hide-value:
+#: :type: materialized view
 radgroupreply = Table(
     "radgroupreply",
     metadata,
@@ -259,6 +314,10 @@ radgroupreply = Table(
 )
 temp_radgroupreply = as_copy(radgroupreply, 'temp_radgroupreply')
 
+#: Radius Authorization logs
+#:
+#: :meta hide-value:
+#: :type: table
 radpostauth = Table(
     "radpostauth",
     metadata,
@@ -277,6 +336,8 @@ radpostauth = Table(
     ),
 )
 
+#: :meta hide-value:
+#: :type: materialized view
 radreply = Table(
     "radreply",
     metadata,
@@ -291,6 +352,8 @@ radreply = Table(
 )
 temp_radreply = as_copy(radreply, 'temp_radreply')
 
+#: :meta hide-value:
+#: :type: materialized view
 radusergroup = Table(
     "radusergroup",
     metadata,
@@ -426,12 +489,41 @@ def create_temp_copy(connection: Connection, source: Table, destination: Table):
     )
 
 
+T = TypeVar("T")
+
+
+@dataclass
+class ObjectsDiff(Generic[T]):
+    __slots__ = ("added", "deleted", "modified")
+    added: List[T]
+    deleted: List[T]
+    modified: List[T]
+
+    def __str__(self):
+        return f"{len(self.added)} added, {len(self.deleted)} deleted, {len(self.modified)} modified"
+
+    def __format__(self, spec):
+        if spec == "l":
+            return "\n".join(
+                [
+                    *(f"A {x}" for x in self.added),
+                    *(f"D {x}" for x in self.deleted),
+                    *(f"M {x}" for x in self.modified),
+                ]
+            )
+        return str(self)
+
+    def __bool__(self):
+        return any((self.added, self.deleted, self.modified))
+
+
 def diff_tables(
     connection: Connection,
     master: Table,
     copy: Table,
     result_columns: Iterable[Column],
-) -> Tuple[List[Tuple], List[Tuple], List[Tuple]]:
+    unique_columns: Optional[Collection[Column]] = None,
+) -> ObjectsDiff[Tuple]:
     """
     Compute the differences in the contents of two tables with identical
     columns.
@@ -446,12 +538,14 @@ def diff_tables(
     :param master: Master table
     :param copy: Copy of master table
     :param result_columns: columns to return
+    :param unique_columns: The columns on which to base the diff. If not specified,
+        will try to make a meaningful decision based on existing table constraints.
     :return: True, if the contents differ, otherwise False
     """
     logger.debug('Calculating diff between "%s" and "%s"',
                  master.name, copy.name)
     result_columns = tuple(result_columns)
-    unique_columns = min(
+    unique_columns = unique_columns or min(
         (constraint.columns
          for constraint in master.constraints
          if isinstance(constraint, (UniqueConstraint, PrimaryKeyConstraint)) and
@@ -490,7 +584,7 @@ def diff_tables(
     ).fetchall() if other_column_names else []
     logger.debug('Diff found %d added, %d deleted, and %d modified records',
                  len(added), len(deleted), len(modified))
-    return added, deleted, modified
+    return ObjectsDiff(added, deleted, modified)
 
 
 def refresh_materialized_view(connection: Connection, view: Table):
@@ -511,7 +605,8 @@ def refresh_and_diff_materialized_view(
     view: Table,
     copy: Table,
     result_columns: Iterable[Column],
-) -> Tuple[List[Tuple], List[Tuple], List[Tuple]]:
+    unique_columns: Optional[Collection[Column]] = None,
+) -> ObjectsDiff[Tuple]:
     """Lock the given `view` with an advisory lock, create a temporary table
     of the view, refresh the view and compute the difference.
 
@@ -519,6 +614,8 @@ def refresh_and_diff_materialized_view(
     :param view: The view to refresh and diff
     :param copy: A temporary table to create and diff
     :param result_columns: The columns to return
+    :param unique_columns: The columns on which to base the diff. If not specified,
+        will try to make a meaningful decision based on existing table constraints.
     :return: A 3-tuple containing three lists of tuples of the `result_columns`
         of added, deleted and modified records due to the refresh.
 
@@ -527,7 +624,7 @@ def refresh_and_diff_materialized_view(
         lock_table(connection, view)
         create_temp_copy(connection, view, copy)
         refresh_materialized_view(connection, view)
-        return diff_tables(connection, view, copy, result_columns)
+        return diff_tables(connection, view, copy, result_columns, unique_columns)
 
 
 def delete_old_sessions(connection: Connection, interval: timedelta):
@@ -659,7 +756,7 @@ def get_sessions_of_mac(
         .order_by(radacct.c.AcctStartTime.desc())
     )
     if when is not None:
-        query.where(radacct.c.AcctStartTime.op('<@') <= func.tstzrange(*when))
+        query.where(radacct.c.AcctStartTime.op('<@')(func.tstzrange(*when)))
     if limit is not None:
         query = query.limit(limit)
     return iter(connection.execute(query))
@@ -691,7 +788,7 @@ def get_auth_attempts_of_mac(
         .order_by(radpostauth.c.AuthDate.desc())
     )
     if when is not None:
-        query.where(radpostauth.c.AuthDate.op('<@') <= func.tstzrange(*when))
+        query.where(radpostauth.c.AuthDate.op('<@')(func.tstzrange(*when)))
     if limit is not None:
         query = query.limit(limit)
     return iter(connection.execute(query))
@@ -727,7 +824,7 @@ def get_auth_attempts_at_port(
         .order_by(radpostauth.c.AuthDate.desc())
     )
     if when is not None:
-        query.where(radpostauth.c.AuthDate.op('<@') <= func.tstzrange(*when))
+        query.where(radpostauth.c.AuthDate.op('<@')(func.tstzrange(*when)))
     if limit is not None:
         query = query.limit(limit)
     return iter(connection.execute(query))
@@ -752,6 +849,7 @@ def get_all_dhcp_leases(
     connection: Connection,
     subnet: Optional[netaddr.IPNetwork] = None,
     limit: Optional[int] = None,
+    interval: Optional[timedelta] = None,
 ) -> Iterator[
     Tuple[
         datetime,
@@ -768,6 +866,7 @@ def get_all_dhcp_leases(
     :param connection: A SQLAlchemy connection
     :param subnet: Limit leases to subnet
     :param limit: Maximum number of leases
+    :param interval: If set, only return leases older than ``now - interval``.
     :return: An iterator that yields (Expires-At, MAC, IP-Address, Hostname,
         Client-ID)-tuples
     """
@@ -781,7 +880,9 @@ def get_all_dhcp_leases(
         ]
     ).order_by(dhcp_lease_table.c.IPAddress.asc())
     if subnet is not None:
-        query = query.where(dhcp_lease_table.c.IPAddress.op('<<=') <= subnet)
+        query = query.where(dhcp_lease_table.c.IPAddress.op('<<=')(subnet))
+    if interval is not None:
+        query = query.where(dhcp_lease_table.c.ExpiresAt < utcnow() - interval)
     if limit is not None:
         query = query.limit(limit)
     return iter(connection.execute(query))
@@ -840,6 +941,7 @@ def get_all_auth_dhcp_leases(
     connection: Connection,
     subnet: Optional[netaddr.IPNetwork] = None,
     limit: Optional[int] = None,
+    interval: Optional[timedelta] = None,
 ) -> Iterator[
     Tuple[
         datetime,
@@ -855,11 +957,12 @@ def get_all_auth_dhcp_leases(
     :param connection: A SQLAlchemy connection
     :param subnet: Limit leases to subnet
     :param limit: Maximum number of leases
+    :param interval: If set, only return leases older than ``now - interval``.
     :return: An iterator that yields (Expires-At, MAC, IP-Address, Hostname,
         Client-ID)-tuples
     """
     logger.debug("Getting all auth DHCP leases")
-    return get_all_dhcp_leases(auth_dhcp_lease, connection, subnet, limit)
+    return get_all_dhcp_leases(auth_dhcp_lease, connection, subnet, limit, interval)
 
 
 def get_auth_dhcp_lease_of_ip(
@@ -898,6 +1001,7 @@ def get_all_unauth_dhcp_leases(
     connection: Connection,
     subnet: Optional[netaddr.IPNetwork] = None,
     limit: Optional[int] = None,
+    interval: Optional[timedelta] = None,
 ) -> Iterator[
     Tuple[
         datetime,
@@ -913,11 +1017,12 @@ def get_all_unauth_dhcp_leases(
     :param connection: A SQLAlchemy connection
     :param subnet: Limit leases to subnet
     :param limit: Maximum number of leases
+    :param interval: If set, only return leases older than ``now - interval``.
     :return: An iterator that yields (Expires-At, MAC, IP-Address, Hostname,
         Client-ID)-tuples
     """
     logger.debug("Getting all unauth DHCP leases")
-    return get_all_dhcp_leases(unauth_dhcp_lease, connection, subnet, limit)
+    return get_all_dhcp_leases(unauth_dhcp_lease, connection, subnet, limit, interval)
 
 
 def get_unauth_dhcp_lease_of_ip(
@@ -949,3 +1054,45 @@ def get_unauth_dhcp_leases_of_mac(
     """
     logger.debug("Getting unauth DHCP leases for MAC %s", mac)
     return get_dhcp_leases_of_mac(unauth_dhcp_lease, connection, mac)
+
+
+@dataclass(frozen=True)
+class LeaseInfo:
+    __slots__ = ("ip", "mac")
+    ip: netaddr.IPAddress
+    mac: netaddr.EUI
+
+    def __str__(self):
+        return f"{self.ip} / {self.mac}"
+
+
+def get_all_invalid_auth_dhcp_leases(
+    connection: Connection,
+) -> Iterator[LeaseInfo]:
+    """
+    Get all auth DHCP leases which do not belong to a host reservation
+    as given in ``auth_dhcp_lease``.
+
+    :param connection: A SQLAlchemy connection
+    :return: an iterator of (IPAddress, MAC) tuples.
+    """
+    logger.debug("Getting invalid auth DHCP leases")
+    query = (
+        select(
+            [
+                auth_dhcp_lease.c.IPAddress,
+                auth_dhcp_lease.c.MAC,
+            ]
+        )
+        .select_from(
+            auth_dhcp_lease.outerjoin(
+                auth_dhcp_host,
+                and_(
+                    auth_dhcp_lease.c.MAC == auth_dhcp_host.c.MAC,
+                    auth_dhcp_lease.c.IPAddress == auth_dhcp_host.c.IPAddress,
+                ),
+            )
+        )
+        .where(auth_dhcp_host.c.MAC.is_(None))
+    )
+    return (LeaseInfo(ip, mac) for ip, mac in connection.execute(query))

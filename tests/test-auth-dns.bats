@@ -20,6 +20,7 @@ ns() {
 }
 
 setup() {
+	log_test_start
 	mkdir /etc/netns/test-auth
 	setup_namespace test-auth
 	setup_namespace test-relay
@@ -58,6 +59,7 @@ teardown() {
 	ip link delete br-relay
 	teardown_namespace test-auth
 	teardown_namespace test-relay
+	log_test_stop
 }
 
 @test "check that DNS queries get answered" {

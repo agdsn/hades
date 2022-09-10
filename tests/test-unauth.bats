@@ -11,6 +11,7 @@ ns() {
 }
 
 setup() {
+	log_test_start
 	setup_namespace test-unauth
 	link_namespace test-unauth br-unauth eth0
 	ns ip addr add dev eth0 "$client_ip_address"
@@ -26,6 +27,7 @@ setup() {
 teardown() {
 	unlink_namespace test-unauth eth0
 	teardown_namespace test-unauth
+	log_test_stop
 }
 
 @test "check that client can aquire DHCP lease" {
@@ -38,6 +40,8 @@ teardown() {
 	ns cat /etc/resolv.conf >&2
 	nameserver=$(ns sed -rne 's/^nameserver (.*)$/\1/p' /etc/resolv.conf)
 	[[ "$nameserver" = "$nameserver_ip_address" ]]
+	# TODO test this lands in `unauth_dhcp_lease`
+	# TODO test that releasing removes the lease
 }
 
 @test "check that DNS queries get redirected" {

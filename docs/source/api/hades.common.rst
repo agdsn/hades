@@ -24,6 +24,7 @@ hades\.common\.db module
     :members:
     :undoc-members:
     :show-inheritance:
+    :member-order: bysource
 
 hades\.common\.glib module
 --------------------------

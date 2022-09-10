@@ -49,6 +49,14 @@ hades\.bin\.generate\_config module
     :undoc-members:
     :show-inheritance:
 
+hades\.bin\.lease_server module
+-------------------------------
+
+.. automodule:: hades.bin.lease_server
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 hades\.bin\.portal module
 -------------------------
 
