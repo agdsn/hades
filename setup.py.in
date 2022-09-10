@@ -71,6 +71,7 @@ class build_exe(Command):
         cflags = os.environ.get('CFLAGS', '').split()
         extra_preargs.extend(cflags)
         comp.define_macro('_XOPEN_SOURCE', '700')
+        comp.define_macro("_GNU_SOURCE", None)
         objs = comp.compile(
             ["src/hades/bin/hades-dhcp-script.c"],
             output_dir=self.build_temp, extra_preargs=extra_preargs,
@@ -195,6 +196,7 @@ setup(name='@PACKAGE_NAME@',
               ["src/hades/bin/hades-dhcp-script.c"],
               define_macros=[
                   ('_XOPEN_SOURCE', '700'),
+                  ("_GNU_SOURCE", None),
               ],
           ),
       ],

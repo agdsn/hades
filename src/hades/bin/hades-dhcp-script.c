@@ -22,7 +22,36 @@ extern char **environ;
 #define SOCKET_OPTION "HADES_AUTH_DHCP_SCRIPT_SOCKET"
 #define SOCKET_OPTION_EQ SOCKET_OPTION "="
 
-#define xerr(s) do { perror((s)); return EX_OSERR; } while(0)
+#define CHECK(expr) \
+    ({ \
+        errno = 0; \
+        __auto_type __result = (expr); \
+        int __errno = errno; \
+        long long __code = __result; \
+        if (__result < 0) { \
+            fprintf( \
+                stderr, \
+                "%s at %s:%d returned %lld: %s [errno=%d]\n", \
+                #expr, \
+                __FILE__, \
+                __LINE__, \
+                __code, \
+                strerror(__errno), \
+                __errno \
+            ); \
+        } \
+        __result; \
+    })
+
+
+#define XFAIL(expr) \
+    ({ \
+        __auto_type __result = CHECK(expr); \
+        if (__result < 0) { \
+            exit(EX_OSERR); \
+        } \
+        __result; \
+    })
 
 static void print_usage(void) {
     fputs(
@@ -104,18 +133,13 @@ int main(int argc, char *argv[]) {
         return EX_USAGE;
     }
     memcpy(addr.sun_path, path, path_len + 1);
-    int fd = socket(addr.sun_family, SOCK_STREAM | SOCK_CLOEXEC, 0);
+    int fd = XFAIL(socket(addr.sun_family, SOCK_STREAM | SOCK_CLOEXEC, 0));
 
-    if (fd < 0) {
-        xerr("socket() failed");
-    }
-
-    if (connect(fd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+    if (CHECK(connect(fd, (struct sockaddr *) &addr, sizeof(addr)))) {
         fprintf(
             stderr,
-            "connect() to %s failed: %s.\nHave you forgotten to start the lease server?\n",
-            addr.sun_path,
-            strerror(errno)
+            "Tried socket path: %s.\nHave you forgotten to start the lease server?\n",
+            addr.sun_path
         );
         return EX_OSERR;
     }
@@ -174,10 +198,7 @@ int main(int argc, char *argv[]) {
     };
 
     do {
-        ssize_t rc = sendmsg(fd, &msg, 0);
-        if (rc < 0) {
-            xerr("sendmsg() failed");
-        }
+        ssize_t rc = XFAIL(sendmsg(fd, &msg, 0));
 
         // Handle partial sendmsg
         for (size_t sent = rc; iov_idx < iov_cnt; iov_idx++) {
@@ -200,19 +221,15 @@ int main(int argc, char *argv[]) {
     } while (iov_idx < iov_cnt);
 
     // Indicate that we finished sending data on the socket level
-    if (shutdown(fd, SHUT_WR) < 0) {
-        xerr("shutdown() failed");
-    }
+    XFAIL(shutdown(fd, SHUT_WR));
 
     // Wait for the remote side to close the connection
     size_t received = 0;
     do {
-        ssize_t l = recv(fd, buffer, sizeof(buffer), 0);
+        ssize_t l = XFAIL(recv(fd, buffer, sizeof(buffer), 0));
 
         if (l == 0) {
             break;
-        } else if (l < 0) {
-            xerr("recv() failed");
         } else {
             received += l;
         }
@@ -227,9 +244,7 @@ int main(int argc, char *argv[]) {
         return EX_DATAERR;
     }
 
-    if (close(fd) < 0) {
-       xerr("close() failed");
-    }
+    XFAIL(close(fd));
 
     return buffer[0];
 }
