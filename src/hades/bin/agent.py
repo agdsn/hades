@@ -12,6 +12,7 @@ import typing
 from argparse import Action, _ArgumentGroup
 
 import celery.apps.worker
+import celery.concurrency.solo
 
 from hades import constants
 from hades.agent import create_app
@@ -74,6 +75,7 @@ def main() -> int:
     reset_cli_logging()
     worker: celery.apps.worker.Worker = app.Worker(
         app=app,
+        pool_cls=celery.concurrency.solo.TaskPool,
         hostname=config.HADES_CELERY_WORKER_HOSTNAME,
         statedb=config.HADES_CELERY_STATE_DB,
         pidfile=args.pid_file,
