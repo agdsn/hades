@@ -255,6 +255,8 @@ def get_sessions_of_mac(
     mac = check_mac("mac", mac)
     if when is not None:
         safe_when = check_timestamp_range("when", when)
+    else:
+        safe_when = None
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
@@ -284,6 +286,8 @@ def get_auth_attempts_of_mac(
     mac = check_mac("mac", mac)
     if when is not None:
         safe_when = check_timestamp_range("when", when)
+    else:
+        safe_when = None
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
