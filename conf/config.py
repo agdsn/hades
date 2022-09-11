@@ -63,11 +63,11 @@ HADES_POSTGRESQL_USER_MAPPINGS = {
 }
 HADES_UNAUTH_WHITELIST_DNS = ('agdsn.de',)
 HADES_AUTH_DNS_ALTERNATIVE_ZONES = {
-    'news.com': {
+    'example.com': {
         'type': 'transparent',
         'records': [
             {
-                'name': 'fake.news.com',
+                'name': 'www.example.com',
                 'ttl': 60*60,
                 'class': 'IN',
                 'type': 'A',

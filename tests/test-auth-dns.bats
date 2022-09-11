@@ -73,7 +73,7 @@ teardown() {
 
 @test "check that alternative DNS is working" {
 	ns cat /etc/resolv.conf >&2
-	for i in www.google.de fake.news.com; do
+	for i in ipv4only.arpa www.example.com; do
 		run ns dig +timeout=1 +short "$i"
 		echo "$output" >&2
 		[[ -n "$output" && "$output" != 127.0.0.1 ]]
@@ -81,9 +81,9 @@ teardown() {
 
 	fakedns
 
-	run ns dig +timeout=1 +short www.google.de
+	run ns dig +timeout=1 +short ipv4only.arpa
 	[[ -n "$output" && "$output" != 127.0.0.1 ]]
 
-	run ns dig +timeout=1 +short fake.news.com
+	run ns dig +timeout=1 +short www.example.com
 	[[ "$output" = 127.0.0.1 ]]
 }
