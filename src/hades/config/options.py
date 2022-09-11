@@ -1035,11 +1035,13 @@ class CELERY_QUEUES(CeleryOption):
             config.HADES_CELERY_RPC_EXCHANGE,
             config.HADES_CELERY_RPC_EXCHANGE_TYPE,
             delivery_mode=kombu.Exchange.TRANSIENT_DELIVERY_MODE,
+            durable=True,
         )
         notify_exchange = kombu.Exchange(
             config.HADES_CELERY_NOTIFY_EXCHANGE,
             config.HADES_CELERY_NOTIFY_EXCHANGE_TYPE,
             delivery_mode=kombu.Exchange.TRANSIENT_DELIVERY_MODE,
+            durable=True,
         )
         node_key = config.HADES_CELERY_NODE_ROUTING_KEY
         site_key = config.HADES_CELERY_SITE_ROUTING_KEY
