@@ -71,7 +71,7 @@ To build the documentation, change into the ``docs`` directory and run:
 
 .. code-block:: console
 
-    sphinx-build source build/html
+    make html
 
 The documentation will built and stored in the ``docs/build/html`` directory.
 This directory is actually a git submodule with a clone of the same repository,
