@@ -978,7 +978,7 @@ class HADES_CELERY_ROUTING_KEY_NODES_SITE(HadesOption):
 
 class HADES_CELERY_ROUTING_KEY_NODES_SELF(HadesOption):
     default = compute.deferred_format(
-        "nodes.{}{}", HADES_SITE_NAME, HADES_SITE_NODE_ID
+        "nodes.{}.{}", HADES_SITE_NAME, HADES_SITE_NODE_ID
     )
     type = str
 
