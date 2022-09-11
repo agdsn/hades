@@ -8,7 +8,7 @@ import inspect
 import logging
 import sys
 import typing
-from argparse import Action, _ArgumentGroup
+from argparse import Action
 
 import celery.apps.worker
 import celery.concurrency.solo
@@ -33,7 +33,7 @@ class Formatter(argparse.HelpFormatter):
         self,
         usage: str,
         actions: typing.Iterable[Action],
-        groups: typing.Iterable[_ArgumentGroup],
+        groups: typing.Iterable,
         prefix: typing.Optional[str] = None,
     ) -> None:
         actions = list(actions)
