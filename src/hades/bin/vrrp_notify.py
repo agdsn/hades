@@ -8,7 +8,6 @@ import os
 import sys
 import textwrap
 import typing as t
-from contextlib import closing
 
 import kombu
 
@@ -61,7 +60,8 @@ def update_bindings(config: Config, name: str, state: str) -> None:
             instance_key,
         },
     }
-    with closing(app.connection(connect_timeout=1)) as connection:
+    with app.connection(connect_timeout=1) as connection:
+        connection.ensure_connection(max_retries=0, timeout=1)
         queue = app.amqp.queues[queue_name]
         bound_queue = queue.bind(connection.default_channel)
         bound_queue.declare()
