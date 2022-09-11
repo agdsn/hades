@@ -42,6 +42,7 @@ check_cluster_version() {
 	local CLUSTER_VERSION PG_VERSION
 	read -r CLUSTER_VERSION < "$PGDATA/PG_VERSION" || :
 	local -i PG_VERSION_NUM PG_VERSION_MAJOR PG_VERSION_MINOR
+	generate_config
 	PG_VERSION_NUM="$(@POSTGRES@ -C server_version_num --config-file="@pkgrunstatedir@/database/conf/postgresql.conf")"
 	PG_VERSION_MAJOR=$(( PG_VERSION_NUM / 10000 ))
 	PG_VERSION_MINOR=$(( PG_VERSION_NUM / 100 % 100 ))
@@ -102,7 +103,6 @@ do_start() {
 		error "Error: PostgreSQL cluster already running"
 		return 3
 	fi
-	generate_config
 	if cluster_exists; then
 		check_cluster_version
 	else
