@@ -1034,12 +1034,14 @@ class CELERY_QUEUES(CeleryOption):
         rpc_exchange = kombu.Exchange(
             config.HADES_CELERY_RPC_EXCHANGE,
             config.HADES_CELERY_RPC_EXCHANGE_TYPE,
+            auto_delete=False,
             delivery_mode=kombu.Exchange.TRANSIENT_DELIVERY_MODE,
             durable=True,
         )
         notify_exchange = kombu.Exchange(
             config.HADES_CELERY_NOTIFY_EXCHANGE,
             config.HADES_CELERY_NOTIFY_EXCHANGE_TYPE,
+            auto_delete=False,
             delivery_mode=kombu.Exchange.TRANSIENT_DELIVERY_MODE,
             durable=True,
         )
