@@ -37,20 +37,28 @@ def notify_root(state: str, priority: int) -> int:
     queue_name = config.HADES_CELERY_NODE_QUEUE
     exchange_name = config.HADES_CELERY_RPC_EXCHANGE
     exchange_type = config.HADES_CELERY_RPC_EXCHANGE_TYPE
-    routing_key = config.HADES_CELERY_SITE_ROUTING_KEY
-    exchange = kombu.Exchange(exchange_name, exchange_type)
+    routing_key = config.HADES_CELERY_ROUTING_KEY_MASTERS_SITE
+    exchange = kombu.Exchange(exchange_name, exchange_type, no_declare=True)
     with closing(app.connection(connect_timeout=1)) as connection:
         queue = app.amqp.queues[queue_name]
         bound_queue = queue.bind(connection.default_channel)
         if state == 'MASTER':
-            logger.info("Binding site node queue %s to RPC exchange %s "
-                        "with site routing key %s",
-                        queue_name, exchange_name, routing_key)
+            logger.info(
+                "Binding node queue %s to RPC exchange %s with site masters "
+                "routing key %s",
+                queue_name,
+                exchange_name,
+                routing_key,
+            )
             bound_queue.bind_to(exchange=exchange, routing_key=routing_key)
         else:
-            logger.info("Unbinding site node queue %s from RPC exchange %s "
-                        "with site routing key %s",
-                        queue_name, exchange_name, routing_key)
+            logger.info(
+                "Unbinding node queue %s from RPC exchange %s with site "
+                "masters routing key %s",
+                queue_name,
+                exchange_name,
+                routing_key,
+            )
             bound_queue.unbind_from(exchange=exchange, routing_key=routing_key)
     return 0
 

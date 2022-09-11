@@ -966,14 +966,25 @@ class HADES_CELERY_NODE_QUEUE_MAX_LENGTH(HadesOption):
     type = int
 
 
-class HADES_CELERY_SITE_ROUTING_KEY(HadesOption):
-    default = compute.equal_to(HADES_SITE_NAME)
+class HADES_CELERY_ROUTING_KEY_NODES_ALL(HadesOption):
+    default = "nodes"
     type = str
 
 
-class HADES_CELERY_NODE_ROUTING_KEY(HadesOption):
-    default = compute.deferred_format('{}.{}', HADES_SITE_NAME,
-                                      HADES_SITE_NODE_ID)
+class HADES_CELERY_ROUTING_KEY_NODES_SITE(HadesOption):
+    default = compute.deferred_format("nodes.{}", HADES_SITE_NAME)
+    type = str
+
+
+class HADES_CELERY_ROUTING_KEY_NODES_SELF(HadesOption):
+    default = compute.deferred_format(
+        "nodes.{}{}", HADES_SITE_NAME, HADES_SITE_NODE_ID
+    )
+    type = str
+
+
+class HADES_CELERY_ROUTING_KEY_MASTERS_SITE(HadesOption):
+    default = compute.deferred_format("masters.{}", HADES_SITE_NAME)
     type = str
 
 
@@ -1054,16 +1065,17 @@ class CELERY_QUEUES(CeleryOption):
             delivery_mode=kombu.Exchange.TRANSIENT_DELIVERY_MODE,
             durable=True,
         )
-        node_key = config.HADES_CELERY_NODE_ROUTING_KEY
-        site_key = config.HADES_CELERY_SITE_ROUTING_KEY
+        all_key = config.HADES_CELERY_ROUTING_KEY_NODES_ALL
+        site_key = config.HADES_CELERY_ROUTING_KEY_NODES_SITE
+        self_key = config.HADES_CELERY_ROUTING_KEY_NODES_SELF
         return (
             kombu.Queue(
                 config.HADES_CELERY_NODE_QUEUE,
                 (
-                    kombu.binding(rpc_exchange, routing_key=node_key),
-                    kombu.binding(notify_exchange, routing_key=node_key),
+                    kombu.binding(rpc_exchange, routing_key=self_key),
+                    kombu.binding(notify_exchange, routing_key=self_key),
                     kombu.binding(notify_exchange, routing_key=site_key),
-                    kombu.binding(notify_exchange, routing_key=""),
+                    kombu.binding(notify_exchange, routing_key=all_key),
                 ),
                 auto_delete=True,
                 durable=False,
@@ -1091,7 +1103,7 @@ class CELERY_DEFAULT_QUEUE(CeleryOption):
 
 
 class CELERY_DEFAULT_ROUTING_KEY(CeleryOption):
-    default = compute.equal_to(HADES_CELERY_SITE_ROUTING_KEY)
+    default = compute.equal_to(HADES_CELERY_ROUTING_KEY_MASTERS_SITE)
     type = str
 
 
