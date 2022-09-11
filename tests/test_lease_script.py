@@ -128,15 +128,14 @@ def executable(request) -> pathlib.PosixPath:
         distribution.parse_command_line()
         command = distribution.get_command_obj(command)
         command.ensure_finalized()
-        return (
+        path = (
             pathlib.PosixPath(root_dir).absolute()
             / command.build_platlib
             / "hades-dhcp-script"
         )
-
-
-def test_executable_exists(executable: pathlib.PosixPath):
-    assert executable.exists()
+        if not path.exists():
+            pytest.fail(f"Executable {path} does not exists")
+        return path
 
 
 class ChildStopped(Exception):
