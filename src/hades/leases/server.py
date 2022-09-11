@@ -313,9 +313,8 @@ class Server(socketserver.UnixStreamServer):
             stdin, stdout, stderr = streams
             # Clear the stack
             stack.pop_all()
-            return (stdin, stdout, stderr), argv, environ
-        # ExitStack does not swallow exceptions, so final `return` always reached
-        assert False
+
+        return (stdin, stdout, stderr), argv, environ
 
     def fill_buffer(self, stack, streams, offset, available, needed, sock):
         buffer = self.buffer
@@ -449,9 +448,8 @@ class Server(socketserver.UnixStreamServer):
                     ) from e
                 streams.append(stream)
             stack.pop_all()
-            return streams
-        # ExitStack does not swallow exceptions, so final `return` always reached
-        assert False
+
+        return streams
 
     @staticmethod
     def parse_integer(
@@ -524,16 +522,13 @@ class Server(socketserver.UnixStreamServer):
         # separate thread, otherwise there will be deadlock
         threading.Thread(name='shutdown', target=self.shutdown).start()
 
-    def serve_forever(self, poll_interval: float = 0.5) -> typing.NoReturn:
+    def serve_forever(self, poll_interval: float = 0.5):
         logger.info("Starting server loop")
         with install_handler(
             (signal.SIGHUP, signal.SIGINT, signal.SIGTERM),
             self._handle_shutdown_signal
         ):
             super().serve_forever(poll_interval)
-        raise RuntimeError(
-            "This should be unreachable. `install_handler` must have swallowed an exception!"
-        )
 
     def _process(
             self,

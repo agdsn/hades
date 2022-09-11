@@ -561,7 +561,7 @@ class HadesDeputyService(object):
         )
 
 
-def run_event_loop() -> typing.NoReturn:
+def run_event_loop():
     """Run the DBus :class:`HadesDeputyService` on the GLib event loop."""
     with contextlib.ExitStack() as stack:
         bus: Bus = stack.enter_context(SystemBus())
@@ -582,4 +582,3 @@ def run_event_loop() -> typing.NoReturn:
             )
         )
         loop.run()
-    assert False
