@@ -945,6 +945,18 @@ class HADES_CELERY_NODE_QUEUE(HadesOption):
     type = str
 
 
+class HADES_CELERY_NODE_QUEUE_TTL(HadesOption):
+    """TTL of the node's queue in seconds"""
+    default = 5.0
+    type = float
+
+
+class HADES_CELERY_NODE_QUEUE_MAX_LENGTH(HadesOption):
+    """Maximum length (in messages) of the node's queue"""
+    default = 1000
+    type = int
+
+
 class HADES_CELERY_SITE_ROUTING_KEY(HadesOption):
     default = compute.equal_to(HADES_SITE_NAME)
     type = str
@@ -1030,12 +1042,19 @@ class CELERY_QUEUES(CeleryOption):
         node_key = config.HADES_CELERY_NODE_ROUTING_KEY
         site_key = config.HADES_CELERY_SITE_ROUTING_KEY
         return (
-            kombu.Queue(config.HADES_CELERY_NODE_QUEUE, (
-                kombu.binding(rpc_exchange, routing_key=node_key),
-                kombu.binding(notify_exchange, routing_key=node_key),
-                kombu.binding(notify_exchange, routing_key=site_key),
-                kombu.binding(notify_exchange, routing_key=''),
-            ), auto_delete=True, durable=False),
+            kombu.Queue(
+                config.HADES_CELERY_NODE_QUEUE,
+                (
+                    kombu.binding(rpc_exchange, routing_key=node_key),
+                    kombu.binding(notify_exchange, routing_key=node_key),
+                    kombu.binding(notify_exchange, routing_key=site_key),
+                    kombu.binding(notify_exchange, routing_key=""),
+                ),
+                auto_delete=True,
+                durable=False,
+                max_length=config.HADES_CELERY_NODE_QUEUE_MAX_LENGTH,
+                message_ttl=int(config.HADES_CELERY_NODE_QUEUE_TTL * 1000),
+            ),
         )
 
     type = collections.abc.Sequence
