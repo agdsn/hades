@@ -94,6 +94,7 @@ def create_parser() -> ArgumentParser:
 def main() -> int:
     parser = create_parser()
     args = parser.parse_args()
+    setup_cli_logging(parser.prog, args)
     logger.fatal("Transitioning %s to %s with priority %d", args.name,
                  args.state, args.priority)
     try:
