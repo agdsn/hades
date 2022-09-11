@@ -20,6 +20,8 @@ EnvironmentFile=@systemdenvfile@
 ExecStart=@bindir@/hades-agent --pid-file @pkgrunstatedir@/agent/agent.pid $AGENT_OPTS
 Restart=always
 RestartSec=5
+# EX_USAGE, EX_UNAVAILABLE, EX_CONFIG
+RestartPreventExitStatus=64 69 78
 
 ;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
 ;RuntimeDirectory=hades/agent

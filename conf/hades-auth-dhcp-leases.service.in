@@ -18,6 +18,8 @@ EnvironmentFile=@systemdenvfile@
 ExecStart=@bindir@/hades-lease-server --syslog --auth
 Restart=always
 RestartSec=5
+# EX_USAGE, EX_UNAVAILABLE, EX_CONFIG
+RestartPreventExitStatus=64 69 78
 User=@AUTH_DHCP_USER@
 
 PrivateNetwork=yes
