@@ -8,7 +8,7 @@ from hades.common.util import qualified_name
 option_name_regex = re.compile(r'\A[A-Z][A-Z0-9_]*\Z', re.ASCII)
 
 
-def is_option_name(name):
+def is_option_name(name: str) -> bool:
     """
     Check if a given object is a valid option name.
 
@@ -17,7 +17,6 @@ def is_option_name(name):
 
     :param name: Name
     :return: True, if name is string and a valid option name, False otherwise
-    :rtype: bool
     """
     return isinstance(name, str) and option_name_regex.match(name)
 
