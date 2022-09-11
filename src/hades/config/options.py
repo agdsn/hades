@@ -920,7 +920,7 @@ class HADES_CELERY_WORKER_HOSTNAME(HadesOption):
 
 
 class HADES_CELERY_RPC_EXCHANGE(HadesOption):
-    default = 'hades.agent.rpc'
+    default = "hades.rpc-call"
     type = str
 
 
@@ -930,7 +930,7 @@ class HADES_CELERY_RPC_EXCHANGE_TYPE(HadesOption):
 
 
 class HADES_CELERY_NOTIFY_EXCHANGE(HadesOption):
-    default = 'hades.agent.notify'
+    default = "hades.notify"
     type = str
 
 
@@ -1117,7 +1117,7 @@ class CELERY_RESULT_BACKEND(CeleryOption):
 
 
 class CELERY_RESULT_EXCHANGE(CeleryOption):
-    default = 'hades.result'
+    default = "hades.rpc-result"
     type = str
 
 
