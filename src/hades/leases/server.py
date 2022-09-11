@@ -16,7 +16,10 @@ import sys
 import threading
 import typing
 
-from collections.abc import Iterable
+from collections.abc import (
+    Iterable,
+    Iterator,
+)
 from itertools import chain, repeat
 from typing import Dict, Generator, List, Literal, Optional, Sequence, Tuple, TypeVar, TextIO
 
@@ -174,6 +177,30 @@ class Mode(enum.Enum):
         self.append = append
 
 
+class LoopGuard(Iterator):
+    """Throws a :class:`RuntimeError` after :paramref:`max` iterations.
+    Useful to protect against infinite loops.
+
+    Usage:
+    >>> g = LoopGuard("outer_loop", max=100)
+    >>> while True:
+    ...     next(g)
+    """
+
+    def __init__(self, name: str, *, maximum: Optional[int] = 1000):
+        self.name = name
+        self.maximum = maximum
+        self.counter = iter(range(maximum))
+
+    def __next__(self) -> None:
+        try:
+            next(self.counter)
+        except StopIteration:
+            raise RuntimeError(
+                f"LoopGuard {self.name} aborted execution after {self.maximum} iterations"
+            ) from None
+
+
 class Server(socketserver.UnixStreamServer):
     """
     Process :program:`dnsmasq` :option:`--dhcp-script` invocations.
@@ -284,13 +311,17 @@ class Server(socketserver.UnixStreamServer):
         parser = self.parse_request()
         needed = next(parser)
         with contextlib.ExitStack() as stack:
+            g = LoopGuard("_receive__needed")
             while needed:
+                next(g)
                 available = self.fill_buffer(
                     stack, streams, offset, available, needed, request
                 )
                 try:
                     parsed = 0
+                    g2 = LoopGuard("_receive__available")
                     while parsed + needed <= available:
+                        next(g2)
                         needed = parser.send((buffer, available))
                         parsed = buffer.tell()
                 except StopIteration as e:
@@ -318,7 +349,9 @@ class Server(socketserver.UnixStreamServer):
 
     def fill_buffer(self, stack, streams, offset, available, needed, sock):
         buffer = self.buffer
+        g = LoopGuard("fill_buffer__needed")
         while available < needed:
+            next(g)
             # Prepare buffer for refill
             parsed = buffer.tell()
             offset += parsed
@@ -472,7 +505,9 @@ class Server(socketserver.UnixStreamServer):
     def parse_string(element: str = "string") -> Parser[bytes]:
         """Try to parse a zero-terminated C string"""
         need = 1
+        g = LoopGuard("parse_string")
         while True:
+            next(g)
             try:
                 data, size = yield need
             except BaseParseError as e:
