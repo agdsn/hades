@@ -653,8 +653,8 @@ CREATE TABLE radpostauth (
     "Groups" text[] NOT NULL,
     "Reply" text[][2] NOT NULL,
     "AuthDate" timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT "radpostauth_GroupsDimension" CHECK ((array_ndims("Groups") = 1)),
-    CONSTRAINT "radpostauth_ReplyDimension" CHECK (((array_ndims("Reply") = 2) AND (array_length("Reply", 2) = 2)))
+    CONSTRAINT "radpostauth_GroupsDimension" CHECK ((COALESCE(array_ndims("Groups"), 1) = 1)),
+    CONSTRAINT "radpostauth_ReplyDimension" CHECK ((COALESCE(array_ndims("Reply"), 2) = 2) AND (COALESCE(array_length("Reply", 2), 2) = 2))
 );
 
 
