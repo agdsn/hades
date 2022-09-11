@@ -290,11 +290,11 @@ class Server(socketserver.UnixStreamServer):
                 )
                 try:
                     parsed = 0
-                    while parsed + needed < available:
-                        needed = parser.send((buffer, available - parsed))
+                    while parsed + needed <= available:
+                        needed = parser.send((buffer, available))
                         parsed = buffer.tell()
                 except StopIteration as e:
-                    _, _, (argv, environ) = e.value
+                    argv, environ = e.value
                     if buffer.tell() < available:
                         raise ProtocolError(
                             f"{available - buffer.tell()} byte(s) left over "
