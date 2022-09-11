@@ -1,7 +1,9 @@
+from __future__ import annotations
 import contextlib
 import operator
 import platform
 import types
+import typing as t
 from datetime import datetime, timezone
 from itertools import starmap
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
@@ -41,7 +43,7 @@ TimestampRange = Tuple[Union[None, int, float], Union[None, int, float]]
 
 
 # noinspection PyUnusedLocal
-def setup_engine(sender, *args, **kwargs):
+def setup_engine(sender: t.Any, *args: t.Any, **kwargs: t.Any) -> None:
     global engine
     config = get_config()
     engine = create_engine(config)
@@ -57,9 +59,14 @@ class ArgumentError(Exception):
 
 class Task(celery.Task):
     @classmethod
-    def wrap(cls, f: types.FunctionType, kwargs):
+    def wrap(
+        cls, f: t.Callable, kwargs: t.Dict[str, t.Any]
+    ) -> Task:
         name = kwargs.pop("name")
         bind = kwargs.get("bind", False)
+        # workaround: function definitions are always inferred to be `Callable`
+        # instead of satisfying something stricter like `FunctionType`.
+        assert isinstance(f, types.FunctionType)
         task = type(
             name,
             (cls,),
@@ -74,7 +81,7 @@ class Task(celery.Task):
                 '__wrapped__': f,
             })
         task.__qualname__ = f.__qualname__
-        return task()
+        return t.cast(Task, task())
 
 
 class RPCTask(Task):
@@ -82,7 +89,7 @@ class RPCTask(Task):
     throws = (ArgumentError,)
 
 
-def rpc_task(*args, **kwargs):
+def rpc_task(*args: t.Any, **kwargs: t.Any) -> t.Callable[[t.Callable], Task]:
     """
     A convenience decorator that invokes :func:`celery.Celery.task`, but sets
     the following options, if not explicitly overridden:
@@ -96,7 +103,7 @@ def rpc_task(*args, **kwargs):
     ============= =========================================
     """
 
-    def wrapper(f: types.FunctionType):
+    def wrapper(f: t.Callable) -> Task:
         kwargs.setdefault("name", f"hades.agent.rpc.{f.__name__}")
         return RPCTask.wrap(f, kwargs)
 
@@ -207,26 +214,25 @@ def check_positive_int(argument: str, number: Any) -> int:
     return safe_num
 
 
-@rpc_task()
-def refresh():
+def _refresh() -> None:
     """Perform a refresh of all materialized views"""
     signal_refresh()
 
 
 @rpc_task()
-def cleanup():
+def cleanup() -> None:
     """Perform a database cleanup"""
     signal_cleanup()
 
 
 @rpc_task()
-def release_auth_dhcp_lease(ip: str):
+def release_auth_dhcp_lease(ip: str) -> None:
     ip = check_ip_address("ip", ip)
     signal_auth_dhcp_lease_release(ip)
 
 
 @rpc_task()
-def release_unauth_dhcp_lease(ip: str):
+def release_unauth_dhcp_lease(ip: str) -> None:
     ip = check_ip_address("ip", ip)
     signal_unauth_dhcp_lease_release(ip)
 
@@ -249,6 +255,8 @@ def get_sessions_of_mac(
     mac = check_mac("mac", mac)
     if when is not None:
         safe_when = check_timestamp_range("when", when)
+    else:
+        safe_when = None
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
@@ -278,6 +286,8 @@ def get_auth_attempts_of_mac(
     mac = check_mac("mac", mac)
     if when is not None:
         safe_when = check_timestamp_range("when", when)
+    else:
+        safe_when = None
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:

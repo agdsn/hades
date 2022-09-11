@@ -8,6 +8,8 @@ import os
 import pathlib
 import sys
 import traceback
+import typing as t
+from types import TracebackType
 from typing import Any, Iterable, Optional, Tuple, Union
 
 from hades import constants
@@ -192,12 +194,17 @@ class ConfigLoadError(ConfigError):
 
 
 def print_config_error(e: ConfigError):
-    def format_cause():
-        return (''.join(traceback.format_exception_only(type(cause), cause))
-                .strip())
+    def format_cause(cause: Optional[BaseException]) -> str:
+        return "".join(
+            traceback.format_exception_only(
+                type(cause) if cause is not None else None, cause
+            )
+        ).strip()
 
-    def config_from_module_name():
-        if isinstance(cause, ImportError) and cause.name is not None:
+    def config_from_module_name(
+        cause: ImportError,
+    ) -> t.Optional[t.Union[str, pathlib.PurePath]]:
+        if cause.name is not None:
             top, sep, tail = cause.name.partition('.')
             if top == CONFIG_PACKAGE_NAME:
                 if tail == '':
@@ -206,12 +213,10 @@ def print_config_error(e: ConfigError):
                     return root_config_dir / (tail.replace('.', '/') + '.py')
         return None
 
-    def origin():
+    def origin(
+        tb: t.Optional[TracebackType],
+    ) -> t.Union[traceback.FrameSummary, t.Tuple[str, int, str, str]]:
         """Try to find the originating config in the traceback"""
-        if e.__cause__ is not None:
-            tb = cause.__traceback__
-        else:
-            tb = e.__traceback__
         tb_info = traceback.extract_tb(tb)
         for filename, lineno, funcname, src in reversed(tb_info):
             if filename is not None:
@@ -231,18 +236,20 @@ def print_config_error(e: ConfigError):
         cause = e.__cause__
         if cause is None:
             message = str(e)
-        elif isinstance(cause, ImportError) and config_from_module_name():
-            config = config_from_module_name()
+        elif isinstance(cause, ImportError) and (
+            config := config_from_module_name(cause)
+        ):
             if config == root_config:
                 message = "File could not be imported"
             else:
                 message = "The file {} could not be imported".format(config)
         elif isinstance(cause, SyntaxError):
-            message = format_cause()
+            message = format_cause(cause)
         else:
-            filename, lineno, funcname, src = origin()
-            message = 'File "{}", line {}\n{}'.format(filename, lineno,
-                                                      format_cause())
+            tb = (cause or e).__traceback__
+            filename, lineno, funcname, src = origin(tb)
+            message = f'File "{filename}", line {lineno}\n{format_cause(cause)}'
+
         if logger.getEffectiveLevel() > logging.INFO:
             logger.critical("Error while loading config file %s: %s.\n"
                             "Have you forgotten to run this script as a suitable hades user?",
