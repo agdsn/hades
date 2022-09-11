@@ -50,6 +50,7 @@ class OptionMeta(type):
     default: Callable  # Can't type this properly due to circular import
     has_default: bool
     required: bool
+    abstract: bool
     type: Optional[Type]
     runtime_check: Any
     static_check: Any
@@ -58,6 +59,7 @@ class OptionMeta(type):
         if name in mcs.options:
             raise TypeError("option named {} already defined as {}."
                             .format(name, qualified_name(mcs.options[name])))
+        attributes["abstract"] = abstract
         if not abstract and not is_option_name(name):
             raise TypeError('not a valid option name')
         if not abstract and 'default' in attributes:
