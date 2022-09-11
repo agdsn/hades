@@ -45,7 +45,7 @@ if ! getent group '@SYSTEM_GROUP@' &>/dev/null; then
 fi
 
 for file in $(dpkg-query --listfiles hades | grep '^@pkgsysconfdir@'); do
-	if dpkg-statoverride --list "$file" >/dev/null; then
+	if ! dpkg-statoverride --list "$file" >/dev/null; then
 		chgrp '@SYSTEM_GROUP@' "$file"
 	fi
 done
