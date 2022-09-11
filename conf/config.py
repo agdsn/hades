@@ -76,3 +76,12 @@ HADES_AUTH_DNS_ALTERNATIVE_ZONES = {
         ]
     }
 }
+HADES_CUSTOM_IPTABLES_INPUT_RULES = [
+    # Expose PostgreSQL
+    "-p tcp -m tcp --dport 5432 -j ACCEPT",
+    # Expose RabbitMQ AMQP socket
+    "-p tcp -m tcp --dport 5672 -j ACCEPT",
+    # Expose RabbitMQ HTTP management interface
+    "-p tcp -m tcp --dport 15672 -j ACCEPT",
+]
+HADES_POSTGRESQL_LISTEN = [netaddr.IPNetwork("0.0.0.0/0")]
