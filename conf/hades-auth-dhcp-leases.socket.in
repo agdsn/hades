@@ -1,2 +1,8 @@
+[Unit]
+Description=Hades auth DHCP lease management (accepting commands from `hades-dhcp-script`)
+Documentation=https://agdsn.github.io/hades/
+PartOf=hades.service
+ReloadPropagatedFrom=hades.service
+
 [Socket]
 ListenStream=@AUTH_DHCP_SCRIPT_SOCKET@
