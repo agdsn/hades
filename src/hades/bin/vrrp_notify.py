@@ -21,7 +21,7 @@ logger = logging.getLogger('hades.bin.vrrp_notify')
 
 # noinspection PyUnusedLocal
 def notify_auth(config: Config, state: str, priority: int) -> int:
-    return 0
+    return os.EX_OK
 
 
 # noinspection PyUnusedLocal
@@ -53,12 +53,12 @@ def notify_root(config: Config, state: str, priority: int) -> int:
                 routing_key,
             )
             bound_queue.unbind_from(exchange=exchange, routing_key=routing_key)
-    return 0
+    return os.EX_OK
 
 
 # noinspection PyUnusedLocal
 def notify_unauth(config: Config, state: str, priority: int) -> int:
-    return 0
+    return os.EX_OK
 
 
 HANDLERS: t.Dict[str, t.Callable[[Config, str, int], int]] = {
