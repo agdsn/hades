@@ -1101,6 +1101,16 @@ class CELERY_EVENT_SERIALIZER(CeleryOption):
     type = str
 
 
+class CELERY_RESULT_EXCHANGE_TYPE(CeleryOption):
+    default = "direct"
+    type = str
+
+
+class CELERY_RESULT_PERSISTENT(CeleryOption):
+    default = False
+    type = bool
+
+
 class CELERY_RESULT_SERIALIZER(CeleryOption):
     default = 'json'
     type = str
