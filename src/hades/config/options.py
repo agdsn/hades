@@ -983,8 +983,28 @@ class HADES_CELERY_ROUTING_KEY_NODES_SELF(HadesOption):
     type = str
 
 
+class HADES_CELERY_ROUTING_KEY_MASTERS_ALL(HadesOption):
+    default = compute.deferred_format("masters", HADES_SITE_NAME)
+    type = str
+
+
 class HADES_CELERY_ROUTING_KEY_MASTERS_SITE(HadesOption):
-    default = compute.deferred_format("masters.{}", HADES_SITE_NAME)
+    default = compute.deferred_format("masters.all.{}", HADES_SITE_NAME)
+    type = str
+
+
+class HADES_CELERY_ROUTING_KEY_MASTERS_SITE_AUTH(HadesOption):
+    default = compute.deferred_format("masters.auth.{}", HADES_SITE_NAME)
+    type = str
+
+
+class HADES_CELERY_ROUTING_KEY_MASTERS_SITE_ROOT(HadesOption):
+    default = compute.deferred_format("masters.root.{}", HADES_SITE_NAME)
+    type = str
+
+
+class HADES_CELERY_ROUTING_KEY_MASTERS_SITE_UNAUTH(HadesOption):
+    default = compute.deferred_format("masters.unauth.{}", HADES_SITE_NAME)
     type = str
 
 
@@ -1103,7 +1123,7 @@ class CELERY_DEFAULT_QUEUE(CeleryOption):
 
 
 class CELERY_DEFAULT_ROUTING_KEY(CeleryOption):
-    default = compute.equal_to(HADES_CELERY_ROUTING_KEY_MASTERS_SITE)
+    default = compute.equal_to(HADES_CELERY_ROUTING_KEY_MASTERS_SITE_ROOT)
     type = str
 
 
