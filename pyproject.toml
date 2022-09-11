@@ -25,6 +25,7 @@ no_strict_optional = true
 [[tool.mypy.overrides]]
 module = [
     "hades.bin.*",
+    "hades.agent.*",
 ]
 disallow_untyped_defs = true
 disallow_untyped_globals = true

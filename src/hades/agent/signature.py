@@ -44,6 +44,7 @@ placing newline (\n) between header and payload:
 
 """
 import base64
+import typing as t
 from functools import partial
 from typing import Iterable, Optional, Union
 
@@ -102,30 +103,34 @@ class ED25519Serializer:
                 f"not {qualified_name(type(data))}"
             )
 
-    def serialize(self, data):
+    def serialize(self, data: t.Any) -> bytes:
         content_type, content_encoding, payload = dumps(
             data, serializer=self._inner_serializer
         )
-        payload = self._ensure_bytes(payload, content_encoding)
+        bytes_payload = self._ensure_bytes(payload, content_encoding)
         content_type = self._ensure_bytes(content_type, "us-ascii")
         content_encoding = self._ensure_bytes(content_encoding, "us-ascii")
-        message = b"".join((
-            self._signer,
-            content_type,
-            b"\x00",
-            content_encoding,
-            b"\x00",
-            payload,
-        ))
-        signed_message = self._signing_key.sign(message)
+        message = b"".join(
+            (
+                self._signer,
+                content_type,
+                b"\x00",
+                content_encoding,
+                b"\x00",
+                bytes_payload,
+            )
+        )
+        signed_message = t.cast(bytes, self._signing_key.sign(message))
         if self._armored:
-            return base64.b64encode(
-                signed_message[:-len(payload)]
-            ) + b"\n" + payload
+            return (
+                base64.b64encode(signed_message[: -len(bytes_payload)])
+                + b"\n"
+                + bytes_payload
+            )
         else:
             return signed_message
 
-    def deserialize(self, data: bytes):
+    def deserialize(self, data: bytes) -> t.Any:
         if self._armored:
             header, sep, payload = data.partition(b"\n")
             if not sep:
@@ -168,7 +173,7 @@ def register(
         *,
         inner_serializer: str = "json",
         accept: Optional[Iterable[str]] = ("application/json",),
-):
+) -> None:
     """
     Register serializer with :mod:`kombu`.
 
