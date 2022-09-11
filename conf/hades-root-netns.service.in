@@ -39,7 +39,6 @@ ExecStopPost=-@IPTABLES_RESTORE@ /dev/null
 # Delete the network namespace
 ExecStopPost=-@IP@ netns delete root
 
-;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
-;RuntimeDirectory=hades/root-netns
-;RuntimeDirectoryMode=0750
-;RuntimeDirectoryPreserve=yes
+RuntimeDirectory=hades/root-netns
+RuntimeDirectoryMode=0750
+RuntimeDirectoryPreserve=yes

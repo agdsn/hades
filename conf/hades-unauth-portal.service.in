@@ -27,7 +27,7 @@ KillSignal=SIGINT
 NotifyAccess=all
 
 PrivateNetwork=yes
-;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
-;RuntimeDirectory=hades/unauth-portal
-;RuntimeDirectoryMode=2750
-;RuntimeDirectoryPreserve=yes
+
+RuntimeDirectory=hades/unauth-portal
+RuntimeDirectoryMode=2750
+RuntimeDirectoryPreserve=yes

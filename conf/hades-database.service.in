@@ -20,7 +20,6 @@ ExecReload=@pkglibexecdir@/control-database.sh reload
 ExecStop=@pkglibexecdir@/control-database.sh stop
 Restart=always
 
-;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
-;RuntimeDirectory=hades/database hades/database/conf
-;RuntimeDirectoryMode=2751
-;RuntimeDirectoryPreserve=yes
+RuntimeDirectory=hades/database hades/database/conf
+RuntimeDirectoryMode=2751
+RuntimeDirectoryPreserve=yes

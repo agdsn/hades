@@ -37,7 +37,6 @@ ExecStop=@IFDOWN@ --verbose --interfaces=@pkgrunstatedir@/auth-netns/interfaces 
 ExecStopPost=-@IP@ netns delete auth
 
 PrivateNetwork=yes
-;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
-;RuntimeDirectory=hades/auth-netns
-;RuntimeDirectoryMode=0750
-;RuntimeDirectoryPreserve=yes
+RuntimeDirectory=hades/auth-netns
+RuntimeDirectoryMode=0750
+RuntimeDirectoryPreserve=yes

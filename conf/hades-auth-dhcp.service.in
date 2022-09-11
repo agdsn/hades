@@ -28,7 +28,4 @@ Restart=always
 RestartSec=5
 
 PrivateNetwork=yes
-;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
-;RuntimeDirectory=hades/auth-dhcp
-;RuntimeDirectoryMode=2750
-;RuntimeDirectoryPreserve=yes
+# runtime directory controlled by tmpfile.d config

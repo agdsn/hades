@@ -1,19 +1,11 @@
-# This file can be replace by RuntimeDirectory settings in the unit files
-# starting with systemd 233 (not available in Stretch), because the
-# RuntimeDirectoryPreserve setting was added there.
-d @pkgrunstatedir@/agent            2750    @AGENT_USER@ @AGENT_GROUP@
-d @pkgrunstatedir@/auth-dhcp        2750    @AUTH_DHCP_USER@ @AUTH_DHCP_GROUP@
+# This file handles directories not configurable via RuntimeDirectory settings in unit files,
+# e.g. because the process drops user/group
+# privileges.
+# dnsmasq drops privileges, unit run as root
+d @pkgrunstatedir@/auth-dhcp        2749    @AUTH_DHCP_USER@ @AUTH_DHCP_GROUP@
+# auth-dns/ shared by hades-auth-{pristine,alternative}-dns
 d @pkgrunstatedir@/auth-dns         2750    @AUTH_DNS_USER@ @AUTH_DNS_GROUP@
-d @pkgrunstatedir@/auth-netns       0750    root root
-d @pkgrunstatedir@/auth-vrrp        0750    root root
-d @pkgrunstatedir@/database         2751    @DATABASE_USER@ @DATABASE_GROUP@
-d @pkgrunstatedir@/database/conf    2750    @DATABASE_USER@ @DATABASE_GROUP@
-d @pkgrunstatedir@/deputy           0750    root root
-d @pkgrunstatedir@/radius           2750    @RADIUS_USER@ @RADIUS_GROUP@
-d @pkgrunstatedir@/root-netns       0750    root root
-d @pkgrunstatedir@/root-vrrp        0750    root root
+# dnsmasq drops privileges, unit run as root
 d @pkgrunstatedir@/unauth-dns       2750    @UNAUTH_DNS_USER@ @UNAUTH_DNS_GROUP@
+# nginx drops privileges, unit run as root
 d @pkgrunstatedir@/unauth-http      2750    @PORTAL_USER@ @PORTAL_GROUP@
-d @pkgrunstatedir@/unauth-netns     0750    root root
-d @pkgrunstatedir@/unauth-portal    2750    @PORTAL_USER@ @PORTAL_GROUP@
-d @pkgrunstatedir@/unauth-vrrp      0750    root root

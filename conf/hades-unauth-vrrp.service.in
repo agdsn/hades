@@ -23,7 +23,7 @@ Restart=always
 RestartSec=5
 
 PrivateNetwork=yes
-;RuntimeDirectoryPreserve is not yet supported on Stretch's systemd
-;RuntimeDirectory=hades/unauth-vrrp
-;RuntimeDirectoryMode=0750
-;RuntimeDirectoryPreserve=yes
+
+RuntimeDirectory=hades/unauth-vrrp
+RuntimeDirectoryMode=0750
+RuntimeDirectoryPreserve=yes
