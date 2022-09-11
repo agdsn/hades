@@ -193,8 +193,48 @@ class ConfigLoadError(ConfigError):
         self.filename = filename
         super().__init__(*args)
 
-    def report_error(self, fallback_logger: Logger):
-        print_config_error(self)  # TODO inline relevant branch
+    def report_error(self, fallback_logger: Logger) -> None:
+        logger = self.logger or fallback_logger
+
+        root_config = pathlib.PurePath(self.filename)
+        message = self._build_message(root_config)
+        if logger.getEffectiveLevel() > logging.INFO:
+            logger.critical(
+                "Error while loading config file %s: %s.\n"
+                "Have you forgotten to run this script as a suitable hades user?",
+                root_config,
+                message,
+            )
+            logger.critical("Hint: Increase verbosity for a full traceback.")
+            return
+        logger.info(
+            "Error while loading config file %s: %s",
+            root_config,
+            message,
+            exc_info=self,
+        )
+
+    def _build_message(self, root_config: pathlib.PurePath) -> str:
+        root_config_dir = root_config.parent
+        # TODO more elegant would be to let the user pass the cause to the constructor,
+        # but this works as well (as long as it is called after the `raise … from cause`)
+        cause = self.__cause__
+        if cause is None:
+            return str(self)
+
+        if isinstance(cause, ImportError) and (
+            config := _config_from_module_name(cause, root_config_dir)
+        ):
+            if config == root_config:
+                return "File could not be imported"
+            return f"The file {config} could not be imported"
+
+        if isinstance(cause, SyntaxError):
+            return _format_cause(cause)
+
+        tb = (cause or self).__traceback__
+        filename, lineno, funcname, src = _origin(tb, root_config_dir)
+        return f'File "{filename}", line {lineno}\n{_format_cause(cause)}'
 
 
 def _format_cause(cause: Optional[BaseException]) -> str:
@@ -239,40 +279,7 @@ def _origin(
 def print_config_error(e: ConfigError):
     import warnings
     warnings.warn(f"Use {type(e).__name__}.report_error() instead", DeprecationWarning)
-
-    if isinstance(e, ConfigOptionError):
-        # TODO move to `ConfigOptionError.report()`
-        # TODO remove after removing usages
-        logger.critical("Configuration error with option %s: %s", e.option, e)
-    elif isinstance(e, ConfigLoadError):
-        # TODO move to `ConfigLoadError.report()`
-        root_config = pathlib.PurePath(e.filename)
-        root_config_dir = root_config.parent
-        cause = e.__cause__
-        if cause is None:
-            message = str(e)
-        elif isinstance(cause, ImportError) and (
-            config := _config_from_module_name(cause, root_config_dir)
-        ):
-            if config == root_config:
-                message = "File could not be imported"
-            else:
-                message = "The file {} could not be imported".format(config)
-        elif isinstance(cause, SyntaxError):
-            message = _format_cause(cause)
-        else:
-            tb = (cause or e).__traceback__
-            filename, lineno, funcname, src = _origin(tb, root_config_dir)
-            message = f'File "{filename}", line {lineno}\n{_format_cause(cause)}'
-
-        if logger.getEffectiveLevel() > logging.INFO:
-            logger.critical("Error while loading config file %s: %s.\n"
-                            "Have you forgotten to run this script as a suitable hades user?",
-                            root_config, message)
-            logger.critical("Hint: Increase verbosity for a full traceback.")
-        else:
-            logger.info("Error while loading config file %s: %s",
-                        root_config, message, exc_info=e)
+    e.report_error(logger)
 
 
 class _safe_install:
