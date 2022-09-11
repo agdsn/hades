@@ -910,6 +910,11 @@ class SQLALCHEMY_DATABASE_URI(FlaskOption):
 ##################
 
 
+class HADES_CELERY_PREFIX(HadesOption):
+    default = "hades."
+    type = str
+
+
 class HADES_CELERY_WORKER_HOSTNAME(HadesOption):
     """
     Hostname of the hades-agent Celery worker.
@@ -920,7 +925,7 @@ class HADES_CELERY_WORKER_HOSTNAME(HadesOption):
 
 
 class HADES_CELERY_RPC_EXCHANGE(HadesOption):
-    default = 'hades.agent.rpc'
+    default = compute.deferred_format("{}rpc-call", HADES_CELERY_PREFIX)
     type = str
 
 
@@ -930,7 +935,7 @@ class HADES_CELERY_RPC_EXCHANGE_TYPE(HadesOption):
 
 
 class HADES_CELERY_NOTIFY_EXCHANGE(HadesOption):
-    default = 'hades.agent.notify'
+    default = compute.deferred_format("{}notify", HADES_CELERY_PREFIX)
     type = str
 
 
@@ -940,19 +945,66 @@ class HADES_CELERY_NOTIFY_EXCHANGE_TYPE(HadesOption):
 
 
 class HADES_CELERY_NODE_QUEUE(HadesOption):
-    default = compute.deferred_format('hades.{}.{}', HADES_SITE_NAME,
-                                      HADES_SITE_NODE_ID)
+    default = compute.deferred_format(
+        "{}{}.{}",
+        HADES_CELERY_PREFIX,
+        HADES_SITE_NAME,
+        HADES_SITE_NODE_ID,
+    )
     type = str
 
 
-class HADES_CELERY_SITE_ROUTING_KEY(HadesOption):
-    default = compute.equal_to(HADES_SITE_NAME)
+class HADES_CELERY_NODE_QUEUE_TTL(HadesOption):
+    """TTL of the node's queue in seconds"""
+    default = 5.0
+    type = float
+
+
+class HADES_CELERY_NODE_QUEUE_MAX_LENGTH(HadesOption):
+    """Maximum length (in messages) of the node's queue"""
+    default = 1000
+    type = int
+
+
+class HADES_CELERY_ROUTING_KEY_NODES_ALL(HadesOption):
+    default = "nodes"
     type = str
 
 
-class HADES_CELERY_NODE_ROUTING_KEY(HadesOption):
-    default = compute.deferred_format('{}.{}', HADES_SITE_NAME,
-                                      HADES_SITE_NODE_ID)
+class HADES_CELERY_ROUTING_KEY_NODES_SITE(HadesOption):
+    default = compute.deferred_format("nodes.{}", HADES_SITE_NAME)
+    type = str
+
+
+class HADES_CELERY_ROUTING_KEY_NODES_SELF(HadesOption):
+    default = compute.deferred_format(
+        "nodes.{}{}", HADES_SITE_NAME, HADES_SITE_NODE_ID
+    )
+    type = str
+
+
+class HADES_CELERY_ROUTING_KEY_MASTERS_ALL(HadesOption):
+    default = compute.deferred_format("masters", HADES_SITE_NAME)
+    type = str
+
+
+class HADES_CELERY_ROUTING_KEY_MASTERS_SITE(HadesOption):
+    default = compute.deferred_format("masters.all.{}", HADES_SITE_NAME)
+    type = str
+
+
+class HADES_CELERY_ROUTING_KEY_MASTERS_SITE_AUTH(HadesOption):
+    default = compute.deferred_format("masters.auth.{}", HADES_SITE_NAME)
+    type = str
+
+
+class HADES_CELERY_ROUTING_KEY_MASTERS_SITE_ROOT(HadesOption):
+    default = compute.deferred_format("masters.root.{}", HADES_SITE_NAME)
+    type = str
+
+
+class HADES_CELERY_ROUTING_KEY_MASTERS_SITE_UNAUTH(HadesOption):
+    default = compute.deferred_format("masters.unauth.{}", HADES_SITE_NAME)
     type = str
 
 
@@ -1021,21 +1073,35 @@ class CELERY_QUEUES(CeleryOption):
         """
         rpc_exchange = kombu.Exchange(
             config.HADES_CELERY_RPC_EXCHANGE,
-            config.HADES_CELERY_RPC_EXCHANGE_TYPE
+            config.HADES_CELERY_RPC_EXCHANGE_TYPE,
+            auto_delete=False,
+            delivery_mode=kombu.Exchange.TRANSIENT_DELIVERY_MODE,
+            durable=True,
         )
         notify_exchange = kombu.Exchange(
             config.HADES_CELERY_NOTIFY_EXCHANGE,
-            config.HADES_CELERY_NOTIFY_EXCHANGE_TYPE
+            config.HADES_CELERY_NOTIFY_EXCHANGE_TYPE,
+            auto_delete=False,
+            delivery_mode=kombu.Exchange.TRANSIENT_DELIVERY_MODE,
+            durable=True,
         )
-        node_key = config.HADES_CELERY_NODE_ROUTING_KEY
-        site_key = config.HADES_CELERY_SITE_ROUTING_KEY
+        all_key = config.HADES_CELERY_ROUTING_KEY_NODES_ALL
+        site_key = config.HADES_CELERY_ROUTING_KEY_NODES_SITE
+        self_key = config.HADES_CELERY_ROUTING_KEY_NODES_SELF
         return (
-            kombu.Queue(config.HADES_CELERY_NODE_QUEUE, (
-                kombu.binding(rpc_exchange, routing_key=node_key),
-                kombu.binding(notify_exchange, routing_key=node_key),
-                kombu.binding(notify_exchange, routing_key=site_key),
-                kombu.binding(notify_exchange, routing_key=''),
-            ), auto_delete=True, durable=False),
+            kombu.Queue(
+                config.HADES_CELERY_NODE_QUEUE,
+                (
+                    kombu.binding(rpc_exchange, routing_key=self_key),
+                    kombu.binding(notify_exchange, routing_key=self_key),
+                    kombu.binding(notify_exchange, routing_key=site_key),
+                    kombu.binding(notify_exchange, routing_key=all_key),
+                ),
+                auto_delete=True,
+                durable=False,
+                max_length=config.HADES_CELERY_NODE_QUEUE_MAX_LENGTH,
+                message_ttl=int(config.HADES_CELERY_NODE_QUEUE_TTL * 1000),
+            ),
         )
 
     type = collections.abc.Sequence
@@ -1057,7 +1123,7 @@ class CELERY_DEFAULT_QUEUE(CeleryOption):
 
 
 class CELERY_DEFAULT_ROUTING_KEY(CeleryOption):
-    default = compute.equal_to(HADES_CELERY_SITE_ROUTING_KEY)
+    default = compute.equal_to(HADES_CELERY_ROUTING_KEY_MASTERS_SITE_ROOT)
     type = str
 
 
@@ -1076,6 +1142,16 @@ class CELERY_EVENT_SERIALIZER(CeleryOption):
     type = str
 
 
+class CELERY_RESULT_EXCHANGE_TYPE(CeleryOption):
+    default = "direct"
+    type = str
+
+
+class CELERY_RESULT_PERSISTENT(CeleryOption):
+    default = False
+    type = bool
+
+
 class CELERY_RESULT_SERIALIZER(CeleryOption):
     default = 'json'
     type = str
@@ -1092,7 +1168,7 @@ class CELERY_RESULT_BACKEND(CeleryOption):
 
 
 class CELERY_RESULT_EXCHANGE(CeleryOption):
-    default = 'hades.result'
+    default = compute.deferred_format("{}rpc-result", HADES_CELERY_PREFIX)
     type = str
 
 

@@ -79,6 +79,8 @@ class Config(collections.abc.Mapping):
         return value
 
     def __getitem__(self, key):
+        if isinstance(key, OptionMeta):
+            key = key.__name__
         value = self._config[key]
         self._verify(key, value)
         return value
@@ -99,6 +101,8 @@ class Config(collections.abc.Mapping):
         return len(self._config)
 
     def __contains__(self, x):
+        if isinstance(x, OptionMeta):
+            key = x.__name__
         return x in self._config
 
     def __iter__(self):

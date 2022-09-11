@@ -7,57 +7,91 @@ import logging
 import os
 import sys
 import textwrap
-import typing
+import typing as t
 from contextlib import closing
 
 import kombu
 
 from hades.agent import create_app
-from hades.common.cli import ArgumentParser, common_parser
+from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
 from hades.config import (
-    CeleryOption,
-    ConfigError,
-    get_config,
-    load_config,
-    print_config_error,
+    Config, ConfigError, Option, load_config, print_config_error
+)
+from hades.config.options import (
+    HADES_CELERY_NODE_QUEUE,
+    HADES_CELERY_NOTIFY_EXCHANGE,
+    HADES_CELERY_NOTIFY_EXCHANGE_TYPE,
+    HADES_CELERY_ROUTING_KEY_MASTERS_ALL,
+    HADES_CELERY_ROUTING_KEY_MASTERS_SITE,
+    HADES_CELERY_ROUTING_KEY_MASTERS_SITE_AUTH,
+    HADES_CELERY_ROUTING_KEY_MASTERS_SITE_ROOT,
+    HADES_CELERY_ROUTING_KEY_MASTERS_SITE_UNAUTH,
+    HADES_CELERY_RPC_EXCHANGE,
+    HADES_CELERY_RPC_EXCHANGE_TYPE,
 )
 
 logger = logging.getLogger('hades.bin.vrrp_notify')
+INSTANCES: t.Dict[str, t.Type[Option]] = {
+    "hades-auth": HADES_CELERY_ROUTING_KEY_MASTERS_SITE_AUTH,
+    "hades-root": HADES_CELERY_ROUTING_KEY_MASTERS_SITE_ROOT,
+    "hades-unauth": HADES_CELERY_ROUTING_KEY_MASTERS_SITE_UNAUTH,
+}
 
 
-# noinspection PyUnusedLocal
-def notify_auth(state: str, priority: int) -> int:
-    return 0
-
-
-# noinspection PyUnusedLocal
-def notify_root(state: str, priority: int) -> int:
-    config = get_config(runtime_checks=True)
+def update_bindings(config: Config, name: str, state: str) -> None:
     app = create_app(config)
-    queue_name = config.HADES_CELERY_NODE_QUEUE
-    exchange_name = config.HADES_CELERY_RPC_EXCHANGE
-    exchange_type = config.HADES_CELERY_RPC_EXCHANGE_TYPE
-    routing_key = config.HADES_CELERY_SITE_ROUTING_KEY
-    exchange = kombu.Exchange(exchange_name, exchange_type)
+    queue_name = config[HADES_CELERY_NODE_QUEUE]
+    rpc_exchange = kombu.Exchange(
+        config[HADES_CELERY_RPC_EXCHANGE],
+        config[HADES_CELERY_RPC_EXCHANGE_TYPE],
+    )
+    notify_exchange = kombu.Exchange(
+        config[HADES_CELERY_NOTIFY_EXCHANGE],
+        config[HADES_CELERY_NOTIFY_EXCHANGE_TYPE],
+    )
+    instance_key = config[INSTANCES[name]]
+    bindings = {
+        rpc_exchange: {instance_key},
+        notify_exchange: {
+            config[HADES_CELERY_ROUTING_KEY_MASTERS_ALL],
+            config[HADES_CELERY_ROUTING_KEY_MASTERS_SITE],
+            instance_key,
+        },
+    }
     with closing(app.connection(connect_timeout=1)) as connection:
         queue = app.amqp.queues[queue_name]
         bound_queue = queue.bind(connection.default_channel)
+        bound_queue.declare()
         if state == 'MASTER':
-            logger.info("Binding site node queue %s to RPC exchange %s "
-                        "with site routing key %s",
-                        queue_name, exchange_name, routing_key)
-            bound_queue.bind_to(exchange=exchange, routing_key=routing_key)
+            for exchange, keys in bindings.items():
+                bound_exchange = exchange.bind(connection.default_channel)
+                bound_exchange.declare()
+                for key in keys:
+                    logger.info(
+                        "Binding node queue %s to exchange %s "
+                        "with routing key %s",
+                        queue_name,
+                        exchange.name,
+                        key,
+                    )
+                    bound_queue.bind_to(
+                        exchange=bound_exchange, routing_key=key
+                    )
         else:
-            logger.info("Unbinding site node queue %s from RPC exchange %s "
-                        "with site routing key %s",
-                        queue_name, exchange_name, routing_key)
-            bound_queue.unbind_from(exchange=exchange, routing_key=routing_key)
-    return 0
-
-
-# noinspection PyUnusedLocal
-def notify_unauth(state: str, priority: int) -> int:
-    return 0
+            for exchange, keys in bindings.items():
+                bound_exchange = exchange.bind(connection.default_channel)
+                bound_exchange.declare()
+                for key in keys:
+                    logger.info(
+                        "Unbinding node queue %s from exchange %s "
+                        "with routing key %s",
+                        queue_name,
+                        exchange.name,
+                        key,
+                    )
+                    bound_queue.unbind_from(
+                        exchange=rpc_exchange, routing_key=key
+                    )
 
 
 def create_parser() -> ArgumentParser:
@@ -75,7 +109,7 @@ def create_parser() -> ArgumentParser:
     parser.add_argument(
         "name",
         help="The name of the group or instance",
-        choices=["hades-auth", "hades-root", "hades-unauth"],
+        choices=INSTANCES.keys(),
     )
     parser.add_argument('state', choices=['MASTER', 'BACKUP', 'FAULT'],
                         help="The state it's transitioning to")
@@ -86,21 +120,16 @@ def create_parser() -> ArgumentParser:
 def main() -> int:
     parser = create_parser()
     args = parser.parse_args()
+    setup_cli_logging(parser.prog, args)
     logger.fatal("Transitioning %s to %s with priority %d", args.name,
                  args.state, args.priority)
     try:
-        config = load_config(args.config, runtime_checks=True,
-                             option_cls=CeleryOption)
+        config = load_config(args.config, runtime_checks=True)
     except ConfigError as e:
         print_config_error(e)
         return os.EX_CONFIG
-    if args.name == 'hades-auth':
-        return notify_auth(args.state, args.priority)
-    elif args.name == 'hades-root':
-        return notify_root(args.state, args.priority)
-    elif args.name == 'hades-unauth':
-        return notify_unauth(args.state, args.priority)
-    raise NotImplementedError(f"Unknown name {args.name}")
+    update_bindings(config, args.name, args.state)
+    return os.EX_OK
 
 
 if __name__ == '__main__':
