@@ -6,7 +6,6 @@ Loads the Hades configuration and transfers control to Celery.
 import argparse
 import inspect
 import logging
-import os
 import sys
 import typing
 from argparse import Action, _ArgumentGroup
@@ -22,7 +21,11 @@ from hades.common.cli import (
     reset_cli_logging,
     setup_cli_logging,
 )
-from hades.config import ConfigError, load_config, print_config_error
+from hades.common.exc import handles_setup_errors
+from hades.config import load_config
+
+
+logger = logging.getLogger(__name__)
 
 
 class Formatter(argparse.HelpFormatter):
@@ -61,15 +64,12 @@ def create_parser() -> ArgumentParser:
     return parser
 
 
+@handles_setup_errors(logger=logger)
 def main() -> int:
     parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
-    try:
-        config = load_config(args.config)
-    except ConfigError as e:
-        print_config_error(e)
-        return os.EX_CONFIG
+    config = load_config(args.config)
     app = create_app(config)
     log_level = logging.root.level
     reset_cli_logging()

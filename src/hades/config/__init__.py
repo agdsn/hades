@@ -18,7 +18,6 @@ from .loader import (
     get_config,
     is_config_loaded,
     load_config,
-    print_config_error,
 )
 
 __all__ = (
@@ -37,5 +36,4 @@ __all__ = (
     "get_config",
     "is_config_loaded",
     "load_config",
-    "print_config_error",
 )

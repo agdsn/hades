@@ -9,6 +9,7 @@ import pathlib
 import sys
 import traceback
 import typing as t
+from logging import Logger
 from types import TracebackType
 from typing import Any, Iterable, Optional, Tuple, Union
 
@@ -192,72 +193,87 @@ class ConfigLoadError(ConfigError):
         self.filename = filename
         super().__init__(*args)
 
+    def report_error(self, fallback_logger: Logger) -> None:
+        logger = self.logger or fallback_logger
 
-def print_config_error(e: ConfigError):
-    def format_cause(cause: Optional[BaseException]) -> str:
-        return "".join(
-            traceback.format_exception_only(
-                type(cause) if cause is not None else None, cause
+        root_config = pathlib.PurePath(self.filename)
+        message = self._build_message(root_config)
+        if logger.getEffectiveLevel() > logging.INFO:
+            logger.critical(
+                "Error while loading config file %s: %s.\n"
+                "Have you forgotten to run this script as a suitable hades user?",
+                root_config,
+                message,
             )
-        ).strip()
+            logger.critical("Hint: Increase verbosity for a full traceback.")
+            return
+        logger.info(
+            "Error while loading config file %s: %s",
+            root_config,
+            message,
+            exc_info=self,
+        )
 
-    def config_from_module_name(
-        cause: ImportError,
-    ) -> t.Optional[t.Union[str, pathlib.PurePath]]:
-        if cause.name is not None:
-            top, sep, tail = cause.name.partition('.')
-            if top == CONFIG_PACKAGE_NAME:
-                if tail == '':
-                    return '__init__.py'
-                else:
-                    return root_config_dir / (tail.replace('.', '/') + '.py')
-        return None
-
-    def origin(
-        tb: t.Optional[TracebackType],
-    ) -> t.Union[traceback.FrameSummary, t.Tuple[str, int, str, str]]:
-        """Try to find the originating config in the traceback"""
-        tb_info = traceback.extract_tb(tb)
-        for filename, lineno, funcname, src in reversed(tb_info):
-            if filename is not None:
-                try:
-                    pathlib.PurePath(filename).relative_to(root_config_dir)
-                except ValueError:
-                    pass
-                else:
-                    return filename, lineno, funcname, src
-        return tb_info[-1]
-
-    if isinstance(e, ConfigOptionError):
-        logger.critical("Configuration error with option %s: %s", e.option, e)
-    elif isinstance(e, ConfigLoadError):
-        root_config = pathlib.PurePath(e.filename)
+    def _build_message(self, root_config: pathlib.PurePath) -> str:
         root_config_dir = root_config.parent
-        cause = e.__cause__
+        # TODO more elegant would be to let the user pass the cause to the constructor,
+        # but this works as well (as long as it is called after the `raise … from cause`)
+        cause = self.__cause__
         if cause is None:
-            message = str(e)
-        elif isinstance(cause, ImportError) and (
-            config := config_from_module_name(cause)
+            return str(self)
+
+        if isinstance(cause, ImportError) and (
+            config := _config_from_module_name(cause, root_config_dir)
         ):
             if config == root_config:
-                message = "File could not be imported"
-            else:
-                message = "The file {} could not be imported".format(config)
-        elif isinstance(cause, SyntaxError):
-            message = format_cause(cause)
-        else:
-            tb = (cause or e).__traceback__
-            filename, lineno, funcname, src = origin(tb)
-            message = f'File "{filename}", line {lineno}\n{format_cause(cause)}'
+                return "File could not be imported"
+            return f"The file {config} could not be imported"
 
-        if logger.getEffectiveLevel() > logging.INFO:
-            logger.critical("Error while loading config file %s: %s.\n"
-                            "Have you forgotten to run this script as a suitable hades user?",
-                            root_config, message)
-            logger.critical("Hint: Increase verbosity for a full traceback.")
-        else:
-            logger.info("Error while loading config file %s: %s",
-                        root_config, message, exc_info=e)
+        if isinstance(cause, SyntaxError):
+            return _format_cause(cause)
+
+        tb = (cause or self).__traceback__
+        filename, lineno, funcname, src = _origin(tb, root_config_dir)
+        return f'File "{filename}", line {lineno}\n{_format_cause(cause)}'
+
+
+def _format_cause(cause: Optional[BaseException]) -> str:
+    return "".join(
+        traceback.format_exception_only(
+            type(cause) if cause is not None else None, cause
+        )
+    ).strip()
+
+
+def _config_from_module_name(
+    cause: ImportError,
+    root_config_dir: pathlib.PurePath,
+) -> t.Optional[t.Union[str, pathlib.PurePath]]:
+    if cause.name is not None:
+        top, sep, tail = cause.name.partition('.')
+        if top == CONFIG_PACKAGE_NAME:
+            if tail == '':
+                return '__init__.py'
+            else:
+                return root_config_dir / (tail.replace('.', '/') + '.py')
+    return None
+
+
+def _origin(
+        tb: t.Optional[TracebackType],
+        root_config_dir: pathlib.PurePath,
+) -> t.Union[traceback.FrameSummary, t.Tuple[str, int, str, str]]:
+    """Try to find the originating config in the traceback"""
+    tb_info = traceback.extract_tb(tb)
+    for filename, lineno, funcname, src in reversed(tb_info):
+        if filename is not None:
+            try:
+                pathlib.PurePath(filename).relative_to(root_config_dir)
+            except ValueError:
+                pass
+            else:
+                return filename, lineno, funcname, src
+    return tb_info[-1]
 
 
 class _safe_install:
