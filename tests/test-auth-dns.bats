@@ -78,12 +78,15 @@ teardown() {
 		echo "$output" >&2
 		[[ -n "$output" && "$output" != 127.0.0.1 ]]
 	done
+	echo "$output" >&2
 
 	fakedns
 
 	run ns dig +timeout=1 +short ipv4only.arpa
+	echo "$output" >&2
 	[[ -n "$output" && "$output" != 127.0.0.1 ]]
 
 	run ns dig +timeout=1 +short www.example.com
+	echo "$output" >&2
 	[[ "$output" = 127.0.0.1 ]]
 }
