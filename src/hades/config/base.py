@@ -1,8 +1,7 @@
 from __future__ import annotations
 import functools
 import re
-import typing
-from typing import Any, Dict
+from typing import Any, Dict, Type
 
 from hades.common.util import qualified_name
 
@@ -132,7 +131,7 @@ def coerce(value):
 
 class OptionDescriptor:
     @classmethod
-    def decorate(cls: typing.Type[OptionDescriptor], f):
+    def decorate(cls: Type[OptionDescriptor], f):
         """
         Convert regular functions into an :class:`OptionDescriptor`.
 
