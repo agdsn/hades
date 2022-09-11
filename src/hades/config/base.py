@@ -1,7 +1,7 @@
 from __future__ import annotations
 import functools
 import re
-from typing import Any, Dict, Type
+from typing import Any, Dict, Optional, Type
 
 from hades.common.util import qualified_name
 
@@ -37,6 +37,7 @@ class OptionMeta(type):
     dictionary.
     """
     options: Dict[str, Any] = {}
+    option_cls: Optional[Type[Option]] = None
 
     # class variables of classes using this as a meta class
     default: Any
@@ -55,6 +56,14 @@ class OptionMeta(type):
         if not abstract and 'default' in attributes:
             attributes['has_default'] = True
         cls = super(OptionMeta, mcs).__new__(mcs, name, bases, attributes)
+        if mcs.option_cls is None:
+            # noinspection PyTypeChecker
+            mcs.option_cls = cls
+        elif not issubclass(cls, mcs.option_cls):
+            raise TypeError(
+                f"{qualified_name(cls)} is not a subclass of "
+                f"{qualified_name(mcs.option_cls)}"
+            )
         if cls.has_default and cls.required:
             raise TypeError("required options can't have defaults")
         if not abstract:
