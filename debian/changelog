@@ -1,3 +1,35 @@
+hades (0.5.0) bullseye; urgency=low
+
+  * Upgrade to Debian bullseye (GH-94, GH-99, GH-103, GH-113)
+  * Dropped support for Python < 3.8
+  * Forceful DHCP lease release (GH-67)
+  * Maintain DHCP leases in database using dnsmasq lease script
+  * AMQP changes
+    * Separate routing keys for each VRRP instance
+    * Durable exchanges
+    * Prefix option for AMQP objects
+    * New default name
+  * Improved documentation (GH-73, GH-97)
+  * Improved type annotations
+  * Build improvements
+    * Debian packaging (GH-96)
+    * Configure script (GH-100)
+  * systemd improvements (GH-102, GH-108)
+    * Rename radius-vrrp to root-vrrp for consistency (all other VRRP
+      instances are named like their namespace)
+    * Order files consistently
+    * Use Type=notify for unbound
+    * Set RefuseManualStart for netns units, because they would automatically
+      if not required anyway
+    * Convert the hades target into service, so that it can be reloaded
+      Fix reference to non-existent hades-auth-dns.service unit
+    * Stop automatic restarts if non-transient setup errors occurr, that
+      require operator intervention.
+  * Allow authentication with unknown MAC addresses (GH-90)
+  * Allow same MAC address in different IP subnets (GH-92)
+
+ -- Sebastian Schrader <sebastian.schrader@agdsn.de>  Sun, 11 Sep 2022 19:04:09 +0000
+
 hades (0.4.0) stretch; urgency=low
 
   * Start 0.4.0 branch
