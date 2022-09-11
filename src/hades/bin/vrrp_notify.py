@@ -14,8 +14,11 @@ import kombu
 
 from hades.agent import create_app
 from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
+from hades.common.exc import handles_setup_errors
 from hades.config import (
-    Config, ConfigError, Option, load_config, print_config_error
+    Config,
+    load_config,
+    Option,
 )
 from hades.config.options import (
     HADES_CELERY_NODE_QUEUE,
@@ -117,17 +120,15 @@ def create_parser() -> ArgumentParser:
     return parser
 
 
+
+@handles_setup_errors(logger)
 def main() -> int:
     parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
     logger.fatal("Transitioning %s to %s with priority %d", args.name,
                  args.state, args.priority)
-    try:
-        config = load_config(args.config, runtime_checks=True)
-    except ConfigError as e:
-        print_config_error(e)
-        return os.EX_CONFIG
+    config = load_config(args.config, runtime_checks=True)
     update_bindings(config, args.name, args.state)
     return os.EX_OK
 

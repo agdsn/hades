@@ -7,12 +7,17 @@ systemd don't support arrays for example, whereas advanced shells like ``bash``
 or ``zsh`` do.
 """
 import argparse
+import logging
 import os
 import sys
 
 from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
-from hades.config import ConfigError, load_config, print_config_error
+from hades.common.exc import handles_setup_errors
+from hades.config import load_config
 from hades.config.export import export
+
+
+logger = logging.getLogger(__name__)
 
 
 def create_parser() -> ArgumentParser:
@@ -30,15 +35,12 @@ def create_parser() -> ArgumentParser:
     return parser
 
 
+@handles_setup_errors(logger)
 def main() -> int:
     parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
-    try:
-        config = load_config(args.config)
-    except ConfigError as e:
-        print_config_error(e)
-        return os.EX_CONFIG
+    config = load_config(args.config)
     export(config, args.format, args.file)
     return os.EX_OK
 

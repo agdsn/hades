@@ -20,8 +20,9 @@ from sqlalchemy.pool import NullPool
 from hades import constants
 from hades.common import db
 from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
+from hades.common.exc import handles_setup_errors
 from hades.common.privileges import dropped_privileges
-from hades.config import ConfigError, load_config, print_config_error
+from hades.config import load_config
 
 logger = logging.getLogger('hades.bin.check_database')
 
@@ -65,15 +66,12 @@ def create_parser() -> ArgumentParser:
     return parser
 
 
+@handles_setup_errors(logger)
 def main() -> int:
     parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
-    try:
-        config = load_config(args.config)
-    except ConfigError as e:
-        print_config_error(e)
-        return os.EX_CONFIG
+    config = load_config(args.config)
     try:
         engine = db.create_engine(config, poolclass=NullPool)
         agent_pwd: pwd.struct_passwd = pwd.getpwnam(constants.AGENT_USER)
