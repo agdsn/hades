@@ -23,6 +23,7 @@ from typing import (
 
 import netaddr
 import psycopg2.extensions
+import sqlalchemy.exc
 from sqlalchemy import (
     BigInteger, CheckConstraint, Column, DateTime, Integer, LargeBinary,
     MetaData, PrimaryKeyConstraint, String, Table, Text, TypeDecorator,
@@ -35,6 +36,7 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import expression
 
 from hades.config import Config, get_config
+from hades.common.exc import HadesUsageError
 
 logger = logging.getLogger(__name__)
 metadata = MetaData()
@@ -412,11 +414,21 @@ class UTCTZInfoCursorFactory(psycopg2.extensions.cursor):
 
 
 def create_engine(config: Config, **kwargs):
+    """Set up an engine.
+
+    :raises HadesUsageError: if engine fails with :class:`sqlalchemy.exc.ArgumentError`.
+    """
     kwargs.setdefault('connect_args', {}).update(
         options="-c TimeZone=UTC", cursor_factory=UTCTZInfoCursorFactory
     )
     clean_up_pyroute2_registrations()
-    return sqa_create_engine(config.SQLALCHEMY_DATABASE_URI, **kwargs)
+    try:
+        return sqa_create_engine(config.SQLALCHEMY_DATABASE_URI, **kwargs)
+    except sqlalchemy.exc.ArgumentError as e:
+        raise HadesUsageError(
+            "Error when trying to create engine, likely due to misconfiguration.",
+            logger=logger,
+        ) from e
 
 
 def clean_up_pyroute2_registrations():
