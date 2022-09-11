@@ -3,7 +3,7 @@ import functools
 import logging
 import os
 import re
-from typing import Any, Dict, Optional, Type, Union
+from typing import Any, Callable, Dict, Optional, Type, Union
 from logging import Logger
 
 from hades.common.util import qualified_name
@@ -45,10 +45,10 @@ class OptionMeta(type):
     option_cls: Optional[Type[Option]] = None
 
     # class variables of classes using this as a meta class
-    default: Any
+    default: Callable  # Can't type this properly due to circular import
     has_default: bool
     required: bool
-    type: Any
+    type: Optional[Type]
     runtime_check: Any
     static_check: Any
 
@@ -111,8 +111,8 @@ class OptionMeta(type):
 class Option(object, metaclass=OptionMeta, abstract=True):
     has_default = False
     required = False
-    default: Any = None
-    type: Any = None
+    default: Callable  # Can't type this properly due to circular import
+    type: Optional[Type] = None
     runtime_check: Any = None
     static_check: Any = None
 
