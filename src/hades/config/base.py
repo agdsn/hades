@@ -1,7 +1,7 @@
 from __future__ import annotations
 import functools
 import re
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Optional, Type, Union
 
 from hades.common.util import qualified_name
 
@@ -22,7 +22,7 @@ def is_option_name(name):
     return isinstance(name, str) and option_name_regex.match(name)
 
 
-def option_reference(option):
+def option_reference(option: Union[Type[Option], str]):
     option = coerce(option)
     return ":hades:option:`{}`".format(option)
 
@@ -131,11 +131,15 @@ class OptionCheckError(ConfigOptionError):
     """Indicates that an option check failed"""
 
 
-def coerce(value):
+def coerce(value: Union[Type[Option], str]) -> str:
     if isinstance(value, type) and issubclass(value, Option):
         return value.__name__
-    else:
+    elif isinstance(value, str):
         return value
+    else:
+        raise TypeError(
+            f"value must be a string or an Option class, not {value!r}"
+        )
 
 
 class OptionDescriptor:
