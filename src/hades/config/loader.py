@@ -9,6 +9,7 @@ import pathlib
 import sys
 import traceback
 import typing as t
+from logging import Logger
 from types import TracebackType
 from typing import Any, Iterable, Optional, Tuple, Union
 
@@ -192,8 +193,14 @@ class ConfigLoadError(ConfigError):
         self.filename = filename
         super().__init__(*args)
 
+    def report_error(self, fallback_logger: Logger):
+        print_config_error(self)  # TODO inline relevant branch
+
 
 def print_config_error(e: ConfigError):
+    import warnings
+
+    warnings.warn(f"Use {type(e).__name__}.report_error() instead", DeprecationWarning)
     def format_cause(cause: Optional[BaseException]) -> str:
         return "".join(
             traceback.format_exception_only(
@@ -229,8 +236,11 @@ def print_config_error(e: ConfigError):
         return tb_info[-1]
 
     if isinstance(e, ConfigOptionError):
+        # TODO move to `ConfigOptionError.report()`
+        # TODO remove after removing usages
         logger.critical("Configuration error with option %s: %s", e.option, e)
     elif isinstance(e, ConfigLoadError):
+        # TODO move to `ConfigLoadError.report()`
         root_config = pathlib.PurePath(e.filename)
         root_config_dir = root_config.parent
         cause = e.__cause__

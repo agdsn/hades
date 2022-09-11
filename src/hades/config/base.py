@@ -1,10 +1,16 @@
 from __future__ import annotations
 import functools
+import logging
+import os
 import re
 from typing import Any, Dict, Optional, Type, Union
+from logging import Logger
 
 from hades.common.util import qualified_name
+from hades.common.exc import HadesSetupError
 
+
+logger = logging.getLogger(__name__)
 option_name_regex = re.compile(r'\A[A-Z][A-Z0-9_]*\Z', re.ASCII)
 
 
@@ -111,15 +117,28 @@ class Option(object, metaclass=OptionMeta, abstract=True):
     static_check: Any = None
 
 
-class ConfigError(Exception):
+class ConfigError(HadesSetupError):
     """Base class for all config related errors."""
+
+    preferred_exit_code = os.EX_CONFIG
+
+    def __init__(self, *a, **kw):
+        self.logger = kw.get("logger", logger)
+        super().__init__(*a, **kw)
 
 
 class ConfigOptionError(ConfigError):
     """Base class for errors related to processing a specific option"""
-    def __init__(self, *args, option: str):
-        super(ConfigOptionError, self).__init__(*args)
+
+    def __init__(self, *args, option: str, **kwargs):
+        super().__init__(*args, **kwargs)
         self.option = option
+
+    def report_error(self, fallback_logger: Logger) -> None:
+        logger = self.logger or fallback_logger
+        logger.critical(
+            "Configuration error with option %s: %s", self.option, self
+        )
 
 
 class MissingOptionError(ConfigOptionError):
