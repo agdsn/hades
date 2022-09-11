@@ -910,6 +910,11 @@ class SQLALCHEMY_DATABASE_URI(FlaskOption):
 ##################
 
 
+class HADES_CELERY_PREFIX(HadesOption):
+    default = "hades."
+    type = str
+
+
 class HADES_CELERY_WORKER_HOSTNAME(HadesOption):
     """
     Hostname of the hades-agent Celery worker.
@@ -920,7 +925,7 @@ class HADES_CELERY_WORKER_HOSTNAME(HadesOption):
 
 
 class HADES_CELERY_RPC_EXCHANGE(HadesOption):
-    default = "hades.rpc-call"
+    default = compute.deferred_format("{}rpc-call", HADES_CELERY_PREFIX)
     type = str
 
 
@@ -930,7 +935,7 @@ class HADES_CELERY_RPC_EXCHANGE_TYPE(HadesOption):
 
 
 class HADES_CELERY_NOTIFY_EXCHANGE(HadesOption):
-    default = "hades.notify"
+    default = compute.deferred_format("{}notify", HADES_CELERY_PREFIX)
     type = str
 
 
@@ -940,8 +945,12 @@ class HADES_CELERY_NOTIFY_EXCHANGE_TYPE(HadesOption):
 
 
 class HADES_CELERY_NODE_QUEUE(HadesOption):
-    default = compute.deferred_format('hades.{}.{}', HADES_SITE_NAME,
-                                      HADES_SITE_NODE_ID)
+    default = compute.deferred_format(
+        "{}{}.{}",
+        HADES_CELERY_PREFIX,
+        HADES_SITE_NAME,
+        HADES_SITE_NODE_ID,
+    )
     type = str
 
 
@@ -1127,7 +1136,7 @@ class CELERY_RESULT_BACKEND(CeleryOption):
 
 
 class CELERY_RESULT_EXCHANGE(CeleryOption):
-    default = "hades.rpc-result"
+    default = compute.deferred_format("{}rpc-result", HADES_CELERY_PREFIX)
     type = str
 
 
