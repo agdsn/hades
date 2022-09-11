@@ -308,7 +308,7 @@ def generate_radius_clients_file(
 
 
 # noinspection PyPep8Naming
-class HadesDeputyService(object):
+class HadesDeputyService:
     """Deputy DBus service
 
     This class implements a DBus service that exposes some privileged operations

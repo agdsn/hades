@@ -341,7 +341,7 @@ class GeneratorError(Exception):
     pass
 
 
-class ConfigGenerator(object):
+class ConfigGenerator:
     DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S%z"
     """Format string for producing RFC3339-compatible datetime strings"""
     TEMPLATE_SUFFIX = ".j2"

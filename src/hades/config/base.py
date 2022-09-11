@@ -115,7 +115,7 @@ class OptionMeta(type):
             self.runtime_check(config, value)
 
 
-class Option(object, metaclass=OptionMeta, abstract=True):
+class Option(metaclass=OptionMeta, abstract=True):
     has_default = False
     required = False
     default: Callable  # Can't type this properly due to circular import
