@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional, Type, Union
 from logging import Logger
 
 from hades.common.util import qualified_name
-from hades.common.exc import HadesSetupError
+from hades.common.exc import SetupError
 
 
 logger = logging.getLogger(__name__)
@@ -117,10 +117,10 @@ class Option(object, metaclass=OptionMeta, abstract=True):
     static_check: Any = None
 
 
-class ConfigError(HadesSetupError):
+class ConfigError(SetupError):
     """Base class for all config related errors."""
 
-    preferred_exit_code = os.EX_CONFIG
+    exit_code = os.EX_CONFIG
 
     def __init__(self, *a, **kw):
         self.logger = kw.get("logger", logger)
