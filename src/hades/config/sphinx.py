@@ -89,9 +89,14 @@ class OptionDocumenter(sphinx.ext.autodoc.ClassDocumenter):
     objtype = 'option'
 
     @classmethod
-    def can_document_member(cls, member: Any, membername: str, isattr: bool,
-                            parent: Any) -> bool:
-        return isinstance(member, type) and issubclass(member, Option)
+    def can_document_member(
+        cls, member: Any, membername: str, isattr: bool, parent: Any
+    ) -> bool:
+        return (
+            isinstance(member, type)
+            and issubclass(member, Option)
+            and not member.abstract
+        )
 
     def add_field(self, name: str, body: str, sourcename: str):
         """
