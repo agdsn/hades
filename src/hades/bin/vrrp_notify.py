@@ -7,7 +7,7 @@ import logging
 import os
 import sys
 import textwrap
-import typing
+import typing as t
 from contextlib import closing
 
 import kombu
@@ -61,6 +61,13 @@ def notify_unauth(config: Config, state: str, priority: int) -> int:
     return 0
 
 
+HANDLERS: t.Dict[str, t.Callable[[Config, str, int], int]] = {
+    "hades-auth": notify_auth,
+    "hades-root": notify_root,
+    "hades-unauth": notify_unauth,
+}
+
+
 def create_parser() -> ArgumentParser:
     description = textwrap.dedent(
         """
@@ -76,7 +83,7 @@ def create_parser() -> ArgumentParser:
     parser.add_argument(
         "name",
         help="The name of the group or instance",
-        choices=["hades-auth", "hades-root", "hades-unauth"],
+        choices=HANDLERS.keys(),
     )
     parser.add_argument('state', choices=['MASTER', 'BACKUP', 'FAULT'],
                         help="The state it's transitioning to")
@@ -94,13 +101,7 @@ def main() -> int:
     except ConfigError as e:
         print_config_error(e)
         return os.EX_CONFIG
-    if args.name == 'hades-auth':
-        return notify_auth(config, args.state, args.priority)
-    elif args.name == 'hades-root':
-        return notify_root(config, args.state, args.priority)
-    elif args.name == 'hades-unauth':
-        return notify_unauth(config, args.state, args.priority)
-    raise NotImplementedError(f"Unknown name {args.name}")
+    return HANDLERS[args.name](config, args.state, args.priority)
 
 
 if __name__ == '__main__':
