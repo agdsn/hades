@@ -197,43 +197,48 @@ class ConfigLoadError(ConfigError):
         print_config_error(self)  # TODO inline relevant branch
 
 
+def _format_cause(cause: Optional[BaseException]) -> str:
+    return "".join(
+        traceback.format_exception_only(
+            type(cause) if cause is not None else None, cause
+        )
+    ).strip()
+
+
+def _config_from_module_name(
+    cause: ImportError,
+    root_config_dir: pathlib.PurePath,
+) -> t.Optional[t.Union[str, pathlib.PurePath]]:
+    if cause.name is not None:
+        top, sep, tail = cause.name.partition('.')
+        if top == CONFIG_PACKAGE_NAME:
+            if tail == '':
+                return '__init__.py'
+            else:
+                return root_config_dir / (tail.replace('.', '/') + '.py')
+    return None
+
+
+def _origin(
+        tb: t.Optional[TracebackType],
+        root_config_dir: pathlib.PurePath,
+) -> t.Union[traceback.FrameSummary, t.Tuple[str, int, str, str]]:
+    """Try to find the originating config in the traceback"""
+    tb_info = traceback.extract_tb(tb)
+    for filename, lineno, funcname, src in reversed(tb_info):
+        if filename is not None:
+            try:
+                pathlib.PurePath(filename).relative_to(root_config_dir)
+            except ValueError:
+                pass
+            else:
+                return filename, lineno, funcname, src
+    return tb_info[-1]
+
+
 def print_config_error(e: ConfigError):
     import warnings
-
     warnings.warn(f"Use {type(e).__name__}.report_error() instead", DeprecationWarning)
-    def format_cause(cause: Optional[BaseException]) -> str:
-        return "".join(
-            traceback.format_exception_only(
-                type(cause) if cause is not None else None, cause
-            )
-        ).strip()
-
-    def config_from_module_name(
-        cause: ImportError,
-    ) -> t.Optional[t.Union[str, pathlib.PurePath]]:
-        if cause.name is not None:
-            top, sep, tail = cause.name.partition('.')
-            if top == CONFIG_PACKAGE_NAME:
-                if tail == '':
-                    return '__init__.py'
-                else:
-                    return root_config_dir / (tail.replace('.', '/') + '.py')
-        return None
-
-    def origin(
-        tb: t.Optional[TracebackType],
-    ) -> t.Union[traceback.FrameSummary, t.Tuple[str, int, str, str]]:
-        """Try to find the originating config in the traceback"""
-        tb_info = traceback.extract_tb(tb)
-        for filename, lineno, funcname, src in reversed(tb_info):
-            if filename is not None:
-                try:
-                    pathlib.PurePath(filename).relative_to(root_config_dir)
-                except ValueError:
-                    pass
-                else:
-                    return filename, lineno, funcname, src
-        return tb_info[-1]
 
     if isinstance(e, ConfigOptionError):
         # TODO move to `ConfigOptionError.report()`
@@ -247,18 +252,18 @@ def print_config_error(e: ConfigError):
         if cause is None:
             message = str(e)
         elif isinstance(cause, ImportError) and (
-            config := config_from_module_name(cause)
+            config := _config_from_module_name(cause, root_config_dir)
         ):
             if config == root_config:
                 message = "File could not be imported"
             else:
                 message = "The file {} could not be imported".format(config)
         elif isinstance(cause, SyntaxError):
-            message = format_cause(cause)
+            message = _format_cause(cause)
         else:
             tb = (cause or e).__traceback__
-            filename, lineno, funcname, src = origin(tb)
-            message = f'File "{filename}", line {lineno}\n{format_cause(cause)}'
+            filename, lineno, funcname, src = _origin(tb, root_config_dir)
+            message = f'File "{filename}", line {lineno}\n{_format_cause(cause)}'
 
         if logger.getEffectiveLevel() > logging.INFO:
             logger.critical("Error while loading config file %s: %s.\n"
