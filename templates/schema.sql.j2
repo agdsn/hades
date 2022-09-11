@@ -650,8 +650,8 @@ CREATE TABLE radpostauth (
     "NASIPAddress" inet NOT NULL,
     "NASPortId" text,
     "PacketType" text NOT NULL,
-    "Groups" text[],
-    "Reply" text[][2],
+    "Groups" text[] NOT NULL,
+    "Reply" text[][2] NOT NULL,
     "AuthDate" timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT "radpostauth_GroupsDimension" CHECK ((array_ndims("Groups") = 1)),
     CONSTRAINT "radpostauth_ReplyDimension" CHECK (((array_ndims("Reply") = 2) AND (array_length("Reply", 2) = 2)))
