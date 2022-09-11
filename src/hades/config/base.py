@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 import functools
 import logging
 import os
 import re
+import types
 from typing import Any, Callable, Dict, Optional, Type, Union
 from logging import Logger
 
@@ -60,6 +62,11 @@ class OptionMeta(type):
             raise TypeError('not a valid option name')
         if not abstract and 'default' in attributes:
             attributes['has_default'] = True
+        if "type" in attributes:
+            type_ = attributes["type"]
+            # isinstance checks against parameterized types fails
+            if isinstance(type_, types.GenericAlias):
+                type_ = attributes["type"] = type_.__origin__
         cls = super(OptionMeta, mcs).__new__(mcs, name, bases, attributes)
         if mcs.option_cls is None:
             # noinspection PyTypeChecker
