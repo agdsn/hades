@@ -276,12 +276,6 @@ def _origin(
     return tb_info[-1]
 
 
-def print_config_error(e: ConfigError):
-    import warnings
-    warnings.warn(f"Use {type(e).__name__}.report_error() instead", DeprecationWarning)
-    e.report_error(logger)
-
-
 class _safe_install:
     def __init__(self, module):
         self.module = module
