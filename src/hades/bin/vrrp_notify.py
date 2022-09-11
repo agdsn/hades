@@ -14,25 +14,18 @@ import kombu
 
 from hades.agent import create_app
 from hades.common.cli import ArgumentParser, common_parser
-from hades.config import (
-    CeleryOption,
-    ConfigError,
-    get_config,
-    load_config,
-    print_config_error,
-)
+from hades.config import Config, ConfigError, load_config, print_config_error
 
 logger = logging.getLogger('hades.bin.vrrp_notify')
 
 
 # noinspection PyUnusedLocal
-def notify_auth(state: str, priority: int) -> int:
+def notify_auth(config: Config, state: str, priority: int) -> int:
     return 0
 
 
 # noinspection PyUnusedLocal
-def notify_root(state: str, priority: int) -> int:
-    config = get_config(runtime_checks=True)
+def notify_root(config: Config, state: str, priority: int) -> int:
     app = create_app(config)
     queue_name = config.HADES_CELERY_NODE_QUEUE
     exchange_name = config.HADES_CELERY_RPC_EXCHANGE
@@ -64,7 +57,7 @@ def notify_root(state: str, priority: int) -> int:
 
 
 # noinspection PyUnusedLocal
-def notify_unauth(state: str, priority: int) -> int:
+def notify_unauth(config: Config, state: str, priority: int) -> int:
     return 0
 
 
@@ -97,17 +90,16 @@ def main() -> int:
     logger.fatal("Transitioning %s to %s with priority %d", args.name,
                  args.state, args.priority)
     try:
-        config = load_config(args.config, runtime_checks=True,
-                             option_cls=CeleryOption)
+        config = load_config(args.config, runtime_checks=True)
     except ConfigError as e:
         print_config_error(e)
         return os.EX_CONFIG
     if args.name == 'hades-auth':
-        return notify_auth(args.state, args.priority)
+        return notify_auth(config, args.state, args.priority)
     elif args.name == 'hades-root':
-        return notify_root(args.state, args.priority)
+        return notify_root(config, args.state, args.priority)
     elif args.name == 'hades-unauth':
-        return notify_unauth(args.state, args.priority)
+        return notify_unauth(config, args.state, args.priority)
     raise NotImplementedError(f"Unknown name {args.name}")
 
 
