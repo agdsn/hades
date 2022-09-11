@@ -31,10 +31,13 @@ def notify_root(config: Config, state: str, priority: int) -> int:
     exchange_name = config.HADES_CELERY_RPC_EXCHANGE
     exchange_type = config.HADES_CELERY_RPC_EXCHANGE_TYPE
     routing_key = config.HADES_CELERY_ROUTING_KEY_MASTERS_SITE
-    exchange = kombu.Exchange(exchange_name, exchange_type, no_declare=True)
+    exchange = kombu.Exchange(exchange_name, exchange_type)
     with closing(app.connection(connect_timeout=1)) as connection:
         queue = app.amqp.queues[queue_name]
         bound_queue = queue.bind(connection.default_channel)
+        bound_queue.declare()
+        bound_exchange = exchange.bind(connection.default_channel)
+        bound_exchange.declare()
         if state == 'MASTER':
             logger.info(
                 "Binding node queue %s to RPC exchange %s with site masters "
