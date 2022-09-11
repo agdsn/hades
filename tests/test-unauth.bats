@@ -6,6 +6,7 @@ readonly client_mac_address=de:ad:be:ef:00:00
 readonly client_ip_address=10.66.10.10/19
 readonly nameserver_ip_address=10.66.0.1
 readonly dnsmasq_pidfile=/run/hades/unauth-dns/dnsmasq.pid
+readonly dhcpcd_conf="${BATS_TEST_DIRNAME}/dhcpcd.conf"
 
 ns() {
 	ns_exec test-unauth "$@"
@@ -34,7 +35,7 @@ teardown() {
 @test "check that client can acquire unauth DHCP lease" {
 	ns ip addr flush dev eth0
 	ns truncate -s0 /etc/resolv.conf
-	run ns dhcpcd --noipv4ll --ipv4only eth0
+	run ns dhcpcd --config "${dhcpcd_conf}" eth0
 	echo "$output" >&2
 	[[ $status = 0 ]]
 	lease_line=$(egrep 'leased [^ ]+ for [0-9]+ seconds' <<<"$output")
@@ -51,14 +52,14 @@ teardown() {
 	[[ "$output" == "$ip" ]]
 
 	# RELEASE
-	run ns dhcpcd --noipv4ll --ipv4only --release eth0
+	run ns dhcpcd --config "${dhcpcd_conf}" --release eth0
 	run psql --no-align --tuples-only hades <<-EOF
 		select count(*) from unauth_dhcp_lease where "MAC"='$client_mac_address'
 	EOF
 	hexdump -C <<<"$output"
 	[[ "$output" == "0" ]]
 
-	run ns dhcpcd --noipv4ll --ipv4only --exit eth0
+	run ns dhcpcd --config "${dhcpcd_conf}" --exit eth0
 }
 
 @test "check that DNS queries get redirected" {

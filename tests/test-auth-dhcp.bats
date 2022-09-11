@@ -8,6 +8,7 @@ readonly client_hostname=test
 readonly gateway_ip_address=141.30.226.1/23
 readonly relay_ip_address=10.66.67.1/24
 readonly auth_ip=10.66.67.10/24
+readonly dhcpcd_conf="${BATS_TEST_DIRNAME}/dhcpcd.conf"
 readonly dhcpcd_script="${BATS_TEST_DIRNAME}/dhcpcd-script.bash"
 readonly dhcrelay_pid_file=/run/test-dhcrelay.pid
 
@@ -59,14 +60,10 @@ teardown() {
 
 @test "check that client can acquire DHCP lease" {
 	run ns dhcpcd \
-		--config /dev/null \
+		--config "$dhcpcd_conf" \
 		--script "$dhcpcd_script" \
 		--env script_output_dir="$script_output_dir" \
 		--env variable=env \
-		--option domain_name_servers,domain_name,domain_search,host_name \
-		--timeout 10 \
-		--noipv4ll \
-		--ipv4only \
 		--oneshot eth0 \
 		;
 	echo "$output" >&2
