@@ -26,7 +26,7 @@ def is_option_name(name: str) -> bool:
     :param name: Name
     :return: True, if name is string and a valid option name, False otherwise
     """
-    return isinstance(name, str) and option_name_regex.match(name)
+    return bool(isinstance(name, str) and option_name_regex.match(name))
 
 
 def option_reference(option: Union[Type[Option], str]):
@@ -72,7 +72,7 @@ class OptionMeta(type):
         cls = super(OptionMeta, mcs).__new__(mcs, name, bases, attributes)
         if mcs.option_cls is None:
             # noinspection PyTypeChecker
-            mcs.option_cls = cls
+            mcs.option_cls = cls  # type: ignore
         elif not issubclass(cls, mcs.option_cls):
             raise TypeError(
                 f"{qualified_name(cls)} is not a subclass of "
@@ -120,7 +120,7 @@ class OptionMeta(type):
 class Option(metaclass=OptionMeta, abstract=True):
     has_default = False
     required = False
-    default: Callable  # Can't type this properly due to circular import
+    default: Any
     type: Optional[Type] = None
     runtime_check: Any = None
     static_check: Any = None
