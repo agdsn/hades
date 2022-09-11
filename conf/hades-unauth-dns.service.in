@@ -15,12 +15,14 @@ JoinsNamespaceOf=hades-unauth-netns.service
 [Service]
 Type=dbus
 BusName=@UNAUTH_DNS_DBUS_NAME@
+User=@UNAUTH_DNS_USER@
+Group=@UNAUTH_DNS_GROUP@
 SyslogIdentifier=hades-unauth-dns
 EnvironmentFile=@systemdenvfile@
 Environment=HADES_DHCP_SCRIPT_SOCKET=@UNAUTH_DHCP_SCRIPT_SOCKET@
 ExecStartPre=@bindir@/hades-generate-config --group=@UNAUTH_DNS_GROUP@ unauth-dnsmasq.conf.j2 @pkgrunstatedir@/unauth-dns/dnsmasq.conf
 ExecStartPre=@DNSMASQ@ --test -k --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf $UNAUTH_DNSMASQ_OPTS
-ExecStart=@DNSMASQ@ -k --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf $UNAUTH_DNSMASQ_OPTS
+ExecStart=+@DNSMASQ@ -k --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf $UNAUTH_DNSMASQ_OPTS
 ExecReload=@bindir@/hades-generate-config --group=@UNAUTH_DNS_GROUP@ unauth-dnsmasq.conf.j2 @pkgrunstatedir@/unauth-dns/dnsmasq.conf
 ExecReload=@DNSMASQ@ --test -k --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf $UNAUTH_DNSMASQ_OPTS
 ExecReload=@KILL@ -HUP $MAINPID
@@ -29,6 +31,10 @@ RestartSec=5
 
 PrivateNetwork=yes
 # runtime directory controlled by tmpfile.d config
+
+RuntimeDirectory=hades/unauth-dns
+RuntimeDirectoryMode=2750
+RuntimeDirectoryPreserve=yes
 
 [Install]
 Alias=hades-unauth-dhcp.service

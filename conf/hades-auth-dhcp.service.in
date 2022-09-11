@@ -15,12 +15,14 @@ JoinsNamespaceOf=hades-auth-netns.service
 [Service]
 Type=dbus
 BusName=@AUTH_DHCP_DBUS_NAME@
+User=@AUTH_DHCP_USER@
+Group=@AUTH_DHCP_GROUP@
 SyslogIdentifier=hades-auth-dhcp
 EnvironmentFile=@systemdenvfile@
 Environment=HADES_DHCP_SCRIPT_SOCKET=@AUTH_DHCP_SCRIPT_SOCKET@
 ExecStartPre=@bindir@/hades-generate-config --group=@AUTH_DHCP_GROUP@ auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
 ExecStartPre=@DNSMASQ@ --test -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf $AUTH_DNSMASQ_OPTS
-ExecStart=@DNSMASQ@ -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf $AUTH_DNSMASQ_OPTS
+ExecStart=+@DNSMASQ@ -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf $AUTH_DNSMASQ_OPTS
 ExecReload=@bindir@/hades-generate-config --group=@AUTH_DHCP_GROUP@ auth-dnsmasq.conf.j2 @pkgrunstatedir@/auth-dhcp/dnsmasq.conf
 ExecReload=@DNSMASQ@ --test -k --enable-dbus=@AUTH_DHCP_DBUS_NAME@ --conf-file=@pkgrunstatedir@/auth-dhcp/dnsmasq.conf $AUTH_DNSMASQ_OPTS
 ExecReload=@KILL@ -HUP $MAINPID
@@ -28,4 +30,7 @@ Restart=always
 RestartSec=5
 
 PrivateNetwork=yes
-# runtime directory controlled by tmpfile.d config
+
+RuntimeDirectory=hades/auth-dhcp
+RuntimeDirectoryMode=2750
+RuntimeDirectoryPreserve=yes

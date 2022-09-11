@@ -11,11 +11,13 @@ Wants=hades-unauth-portal.service
 
 [Service]
 Type=forking
+User=@PORTAL_USER@
+Group=@PORTAL_GROUP@
 PIDFile=@PORTAL_NGINX_PID_FILE@
 SyslogIdentifier=hades-unauth-http
 EnvironmentFile=@systemdenvfile@
 ExecStartPre=@bindir@/hades-generate-config --group=@PORTAL_GROUP@ nginx @pkgrunstatedir@/unauth-http
-ExecStart=@NGINX@ -c @pkgrunstatedir@/unauth-http/nginx.conf $NGINX_OPTS
+ExecStart=+@NGINX@ -c @pkgrunstatedir@/unauth-http/nginx.conf $NGINX_OPTS
 ExecReload=@bindir@/hades-generate-config --group=@PORTAL_GROUP@ nginx @pkgrunstatedir@/unauth-http
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
@@ -25,4 +27,7 @@ KillMode=mixed
 SyslogLevel=err
 
 PrivateNetwork=yes
-# runtime directory controlled by tmpfile.d config
+
+RuntimeDirectory=hades/unauth-http
+RuntimeDirectoryMode=2750
+RuntimeDirectoryPreserve=yes
