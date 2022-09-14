@@ -66,17 +66,21 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     pypy3-dev \
     python3-all \
     python3-all-dev \
+    python3-asyncpg \
     python3-babel \
     python3-cairo \
     python3-celery \
+    python3-fastapi \
     python3-flask \
     python3-flask-babel \
     python3-gi \
     python3-guzzle-sphinx-theme \
+    python3-hypercorn \
     python3-jinja2 \
     python3-kombu \
     python3-nacl \
     python3-netaddr \
+    python3-outcome \
     python3-pip \
     python3-psycopg2 \
     python3-pydbus \
@@ -88,7 +92,9 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     python3-sphinx-argparse \
     python3-sphinx-autodoc-typehints \
     python3-sqlalchemy \
+    python3-sqlalchemy-ext \
     python3-systemd \
+    python3-trio \
     python3-venv \
     rabbitmq-server \
     radon \
