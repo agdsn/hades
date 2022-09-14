@@ -165,14 +165,14 @@ class ED25519Serializer:
 
 
 def register(
-        signing_key: nacl.signing.SigningKey,
-        verify_keys: Iterable[nacl.signing.VerifyKey],
-        name: str,
-        content_type: str,
-        armored: bool,
-        *,
-        inner_serializer: str = "json",
-        accept: Optional[Iterable[str]] = ("application/json",),
+    signing_key: nacl.signing.SigningKey,
+    verify_keys: Iterable[nacl.signing.VerifyKey],
+    name: str,
+    content_type: str,
+    armored: bool,
+    *,
+    inner_serializer: str = "json",
+    accept: Optional[Iterable[str]] = ("application/json",),
 ) -> None:
     """
     Register serializer with :mod:`kombu`.

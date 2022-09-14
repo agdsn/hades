@@ -260,8 +260,8 @@ def _config_from_module_name(
 
 
 def _origin(
-        tb: t.Optional[TracebackType],
-        root_config_dir: pathlib.PurePath,
+    tb: t.Optional[TracebackType],
+    root_config_dir: pathlib.PurePath,
 ) -> t.Union[traceback.FrameSummary, t.Tuple[str, int, str, str]]:
     """Try to find the originating config in the traceback"""
     tb_info = traceback.extract_tb(tb)

@@ -28,9 +28,9 @@ logger = logging.getLogger('hades.bin.check_database')
 
 
 def check_database(
-        engine: Engine,
-        user: pwd.struct_passwd,
-        tables: Iterable[Table],
+    engine: Engine,
+    user: pwd.struct_passwd,
+    tables: Iterable[Table],
 ) -> None:
     """Check a set of tables as a user.
 

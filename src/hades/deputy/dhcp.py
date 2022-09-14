@@ -46,10 +46,10 @@ class DHCPOption(ctypes.BigEndianStructure):
 
 
 def make_release_packet(
-        server_ip: netaddr.IPAddress,
-        client_ip: netaddr.IPAddress,
-        client_mac: netaddr.EUI,
-        client_id: Optional[bytes] = None,
+    server_ip: netaddr.IPAddress,
+    client_ip: netaddr.IPAddress,
+    client_mac: netaddr.EUI,
+    client_id: Optional[bytes] = None,
 ) -> bytearray:
     """
     Create a valid DHCPRELEASE packet for a given client IP address, client
@@ -133,9 +133,9 @@ def netns(ns: str) -> typing.Iterator[None]:
 
 
 def send_dhcp_packet(
-        server_ip: netaddr.IPAddress, packet: bytearray,
-        from_interface: Optional[str] = None,
-        from_ip: Optional[netaddr.IPAddress] = None,
+    server_ip: netaddr.IPAddress, packet: bytearray,
+    from_interface: Optional[str] = None,
+    from_ip: Optional[netaddr.IPAddress] = None,
 ):
     """
     Send a given DHCP packet as a DHCP client (port 68) to a DHCP server (port
@@ -164,13 +164,13 @@ def send_dhcp_packet(
 
 
 def release_dhcp_lease(
-        server_ip: netaddr.IPAddress,
-        client_ip: netaddr.IPAddress,
-        client_mac: netaddr.EUI,
-        client_id: Optional[bytes] = None,
-        from_interface: Optional[str] = None,
-        from_ip: Optional[netaddr.IPAddress] = None,
-        ns: Optional[str] = 'auth',
+    server_ip: netaddr.IPAddress,
+    client_ip: netaddr.IPAddress,
+    client_mac: netaddr.EUI,
+    client_id: Optional[bytes] = None,
+    from_interface: Optional[str] = None,
+    from_ip: Optional[netaddr.IPAddress] = None,
+    ns: Optional[str] = "auth",
 ):
     """
     Send a DHCPRELEASE packet to the given server_ip for lease of given

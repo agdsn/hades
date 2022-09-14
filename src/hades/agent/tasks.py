@@ -576,7 +576,7 @@ def get_systemd_status() -> Dict[str, Any]:
 
 
 def get_distribution_metadata(
-        distribution: pkg_resources.Distribution
+    distribution: pkg_resources.Distribution
 ) -> Dict[str, Any]:
     """
     Get metadata of a given distribution and all its dependencies.

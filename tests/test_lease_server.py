@@ -226,9 +226,7 @@ def test_parse_int_buffer_too_small(driver: Driver[int]):
     ids=("test", "empty string", "all bytes")
 )
 def test_parse_valid_string(
-        driver: Driver[bytes],
-        buffer: mmap.mmap,
-        value: bytes,
+    driver: Driver[bytes], buffer: mmap.mmap, value: bytes
 ):
     size = fill_buffer(buffer, value + b"\x00")
 
@@ -281,10 +279,10 @@ def serialize_request(
     ],
 )
 def test_parse_valid_request(
-        driver: Driver[Tuple[List[bytes], Dict[bytes, bytes]]],
-        buffer: mmap.mmap,
-        argv: List[bytes],
-        environ: Dict[bytes, bytes],
+    driver: Driver[Tuple[List[bytes], Dict[bytes, bytes]]],
+    buffer: mmap.mmap,
+    argv: List[bytes],
+    environ: Dict[bytes, bytes],
 ):
     size = fill_buffer(buffer, serialize_request(argv, environ))
     got_argv, got_environ = driver(buffer, size, Server.parse_request())

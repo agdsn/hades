@@ -245,7 +245,7 @@ def update_alternative_dns_ipset(ips: Iterable[netaddr.IPAddress]) -> None:
 
 
 def generate_radius_clients(
-        clients: Iterable[Tuple[str, str, str, int, str, str, str, str]]
+    clients: Iterable[Tuple[str, str, str, int, str, str, str, str]]
 ) -> Iterable[str]:
     """Generate the FreeRADIUS configuration for a given list of NAS clients in
     the ``clients.conf`` format.
@@ -288,7 +288,7 @@ def generate_radius_clients(
 
 
 def generate_radius_clients_file(
-        clients: Iterable[Tuple[str, str, str, int, str, str, str, str]]
+    clients: Iterable[Tuple[str, str, str, int, str, str, str, str]]
 ) -> None:
     """Generate a FreeRADIUS ``clients.conf`` file.
 
