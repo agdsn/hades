@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 def main() -> int:
     parser = ArgumentParser(parents=[common_parser])
+    parser.add_argument("-a", "--argv0")
     parser.add_argument('user')
     parser.add_argument('command')
     parser.add_argument("arguments", nargs=argparse.REMAINDER)
@@ -24,14 +25,16 @@ def main() -> int:
     except KeyError:
         logger.critical("No such user or group")
         return os.EX_NOUSER
-    filename = args.command
     try:
         drop_privileges(passwd, group)
     except PermissionError:
         logging.exception("Can't drop privileges")
         return os.EX_NOPERM
+    filename = args.command
+    argv = [filename if args.argv0 is None else args.argv0]
+    argv.extend(args.arguments)
     try:
-        os.execvp(filename, [filename] + args.arguments)
+        os.execvp(filename, argv)
     except (FileNotFoundError, PermissionError):
         logger.critical("Could not execute %s", filename)
         return os.EX_NOINPUT
