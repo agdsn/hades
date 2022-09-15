@@ -1,3 +1,4 @@
+import argparse
 import grp
 import logging
 import os
@@ -14,7 +15,7 @@ def main() -> int:
     parser = ArgumentParser(parents=[common_parser])
     parser.add_argument('user')
     parser.add_argument('command')
-    parser.add_argument('arguments', nargs='*')
+    parser.add_argument("arguments", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
     try:
