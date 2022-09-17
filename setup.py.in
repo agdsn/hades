@@ -1,3 +1,4 @@
+# noinspection DuplicatedCode
 from distutils import log
 from distutils.ccompiler import CCompiler, compiler_class, new_compiler
 from distutils.command.build import build
