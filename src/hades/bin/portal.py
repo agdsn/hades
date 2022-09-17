@@ -52,6 +52,7 @@ def main() -> int:
         host=args.host,
         port=args.port,
         debug=args.debug,
+        load_dotenv=False,
         threaded=args.threads,
     )
     return os.EX_OK
