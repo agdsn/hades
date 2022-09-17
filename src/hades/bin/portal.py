@@ -5,6 +5,7 @@ as a command-line application.
 Also export the app object for use by WSGI application servers, if imported as
 an ordinary Python module.
 """
+import os
 import typing
 
 from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
@@ -52,7 +53,7 @@ def main() -> int:
         debug=args.debug,
         threaded=args.threads,
     )
-    return 0
+    return os.EX_OK
 
 
 if __name__ == '__main__':
