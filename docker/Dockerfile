@@ -80,9 +80,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     python3-pip \
     python3-psycopg2 \
     python3-pydbus \
-    python3-pyrad \
     python3-pyroute2 \
-    python3-pysnmp4 \
     python3-pytest \
     python3-pytest-mock \
     python3-setuptools \
