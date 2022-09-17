@@ -8,7 +8,7 @@ from flask_babel import Babel, _, lazy_gettext
 
 from hades import constants
 from hades.common.db import create_engine, get_groups, get_latest_auth_attempt
-from hades.config import Config, FlaskOption, get_config, load_config
+from hades.config import Config, FlaskOption, load_config
 from .session import NullSessionInterface
 
 path = importlib.resources.files(__package__)
@@ -63,13 +63,6 @@ def handle_database_error(error):
     content = render_template("error.html",
                               message=_("The database is unavailable"))
     return content, 500
-
-
-@app.before_first_request
-def init_engine():
-    global engine
-    config = get_config(runtime_checks=True)
-    engine = create_engine(config)
 
 
 @app.route("/")
@@ -129,4 +122,6 @@ def configure_app(config: typing.Optional[Config] = None) -> Flask:
         config = load_config(runtime_checks=True)
     app.config.from_object(config.of_type(FlaskOption))
     app.jinja_env.globals.update(config=config, constants=constants)
+    global engine
+    engine = create_engine(config)
     return app
