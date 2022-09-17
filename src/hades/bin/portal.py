@@ -26,6 +26,18 @@ def create_parser() -> ArgumentParser:
         description="Run development server of captive-portal",
         parents=[common_parser],
     )
+    parser.add_argument(
+        "--host", "-h", default="127.0.0.1", help="The address to bind to."
+    )
+    parser.add_argument(
+        "--port", "-p", default=5000, help="The port to bind to."
+    )
+    parser.add_argument(
+        "-d", "--debug", action="store_true", help="Enable debug mode."
+    )
+    parser.add_argument(
+        "-t", "--threads", default=4, help="Number of threads."
+    )
     return parser
 
 
@@ -34,7 +46,12 @@ def main() -> int:
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
     configure_app(load_config(args.config))
-    app.run(debug=True)
+    app.run(
+        host=args.host,
+        port=args.port,
+        debug=args.debug,
+        threaded=args.threads,
+    )
     return 0
 
 
