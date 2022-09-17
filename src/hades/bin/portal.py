@@ -9,6 +9,7 @@ import os
 import sys
 import typing
 
+from hades import constants
 from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
 from hades.config import Config, FlaskOption, load_config
 # noinspection PyUnresolvedReferences
@@ -21,6 +22,7 @@ def configure_app(config: typing.Optional[Config] = None) -> None:
     if config is None:
         config = load_config(runtime_checks=True)
     app.config.from_object(config.of_type(FlaskOption))
+    app.jinja_env.globals.update(config=config, constants=constants)
 
 
 def create_parser() -> ArgumentParser:
