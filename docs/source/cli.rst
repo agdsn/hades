@@ -58,7 +58,10 @@ hades-lease-server
 
 hades-portal
 ============
-Does not take arguments.
+.. argparse::
+   :module: hades.bin.portal
+   :func: create_parser
+   :prog: hades-portal
 
 hades-vrrp-notify
 =================
