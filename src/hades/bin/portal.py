@@ -5,13 +5,16 @@ as a command-line application.
 Also export the app object for use by WSGI application servers, if imported as
 an ordinary Python module.
 """
+import logging
 import os
 import sys
 
 from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
+from hades.common.exc import handles_setup_errors
 from hades.config import load_config
 from hades.portal.views import configure_app
 
+logger = logging.getLogger("hades.bin.portal")
 
 
 def create_parser() -> ArgumentParser:
@@ -34,6 +37,7 @@ def create_parser() -> ArgumentParser:
     return parser
 
 
+@handles_setup_errors(logger)
 def main() -> int:
     parser = create_parser()
     args = parser.parse_args()
