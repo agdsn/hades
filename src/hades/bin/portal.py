@@ -6,6 +6,7 @@ Also export the app object for use by WSGI application servers, if imported as
 an ordinary Python module.
 """
 import os
+import sys
 import typing
 
 from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
@@ -57,7 +58,7 @@ def main() -> int:
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
 else:
     try:
         import uwsgi
