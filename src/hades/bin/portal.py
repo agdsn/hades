@@ -7,22 +7,11 @@ an ordinary Python module.
 """
 import os
 import sys
-import typing
 
-from hades import constants
 from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
-from hades.config import Config, FlaskOption, load_config
-# noinspection PyUnresolvedReferences
-from hades.portal import app, views
+from hades.config import load_config
+from hades.portal.views import configure_app
 
-application = app
-
-
-def configure_app(config: typing.Optional[Config] = None) -> None:
-    if config is None:
-        config = load_config(runtime_checks=True)
-    app.config.from_object(config.of_type(FlaskOption))
-    app.jinja_env.globals.update(config=config, constants=constants)
 
 
 def create_parser() -> ArgumentParser:
@@ -49,7 +38,7 @@ def main() -> int:
     parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
-    configure_app(load_config(args.config))
+    app = configure_app(load_config(args.config))
     app.run(
         host=args.host,
         port=args.port,
@@ -68,4 +57,4 @@ else:
     except ImportError:
         pass
     else:
-        configure_app()
+        application = configure_app()

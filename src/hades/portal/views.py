@@ -1,13 +1,25 @@
+import importlib.resources
+import typing
+
 import arpreq
-
 import sqlalchemy.exc
-from flask import render_template, request
-from flask_babel import _, lazy_gettext
+from flask import Flask, render_template, request
+from flask_babel import Babel, _, lazy_gettext
 
+from hades import constants
 from hades.common.db import create_engine, get_groups, get_latest_auth_attempt
-from hades.config import get_config
-from hades.portal import app, babel
+from hades.config import Config, FlaskOption, get_config, load_config
+from .session import NullSessionInterface
 
+path = importlib.resources.files(__package__)
+app = Flask(
+    __name__,
+    static_url_path="/assets",
+    template_folder=str(path / "templates"),
+    static_folder=str(path / "assets"),
+)
+app.session_interface = NullSessionInterface()
+babel = Babel(app)
 logger = app.logger
 
 
@@ -110,3 +122,11 @@ def index():
 
         return render_template("status.html", reasons=reasons,
                                mac=mac, show_mac=False)
+
+
+def configure_app(config: typing.Optional[Config] = None) -> Flask:
+    if config is None:
+        config = load_config(runtime_checks=True)
+    app.config.from_object(config.of_type(FlaskOption))
+    app.jinja_env.globals.update(config=config, constants=constants)
+    return app
