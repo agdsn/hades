@@ -256,7 +256,7 @@ setup(name='@PACKAGE_NAME@',
           'Intended Audience :: System Administrators',
           'Intended Audience :: Telecommunications Industry',
           'Operating System :: POSIX :: Linux',
-          'Programming Language :: C'
+          'Programming Language :: C',
           'Programming Language :: Python :: 3 :: Only',
           'Programming Language :: Python :: 3.9',
           'Programming Language :: Python :: 3.10',
