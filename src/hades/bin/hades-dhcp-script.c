@@ -1,4 +1,6 @@
 /* SPDX-License-Identifier: MIT */
+#define _XOPEN_SOURCE 700
+#define _GNU_SOURCE
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
