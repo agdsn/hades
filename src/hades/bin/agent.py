@@ -3,12 +3,10 @@
 
 Loads the Hades configuration and transfers control to Celery.
 """
-import argparse
 import inspect
 import logging
 import sys
 import typing
-from argparse import Action
 
 import celery.apps.worker
 import celery.concurrency.solo
@@ -28,20 +26,6 @@ from hades.config import load_config
 logger = logging.getLogger(__name__)
 
 
-class Formatter(argparse.HelpFormatter):
-    def add_usage(
-        self,
-        usage: str,
-        actions: typing.Iterable[Action],
-        groups: typing.Iterable,
-        prefix: typing.Optional[str] = None,
-    ) -> None:
-        actions = list(actions)
-        actions.append(argparse.Action([], dest='worker_options',
-                                       metavar='worker options', nargs='?'))
-        super().add_usage(usage, actions, groups, prefix)
-
-
 def create_parser() -> ArgumentParser:
     description = inspect.cleandoc(
         """
@@ -53,7 +37,6 @@ def create_parser() -> ArgumentParser:
     )
     parser = ArgumentParser(
         description=description,
-        formatter_class=Formatter,
         parents=[common_parser],
     )
     parser.add_argument(
