@@ -29,9 +29,14 @@ def create_parser() -> ArgumentParser:
     parser.add_argument('--format', choices=('systemd', 'posix', 'bash', 'ksh',
                                              'zsh'),
                         default='systemd', help='Export format.')
-    parser.add_argument('file', type=argparse.FileType('wb'), metavar='FILE',
-                        default='-', nargs='?',
-                        help='Output destination (default: stdout)')
+    parser.add_argument(
+        "file",
+        type=argparse.FileType("wb"),
+        metavar="FILE",
+        default="-",
+        nargs=argparse.OPTIONAL,
+        help="Output destination (default: stdout)"
+    )
     return parser
 
 

@@ -101,7 +101,7 @@ common_parser.add_argument(
 )
 common_parser.add_argument(
     "--syslog",
-    nargs="?",
+    nargs=argparse.OPTIONAL,
     const="/dev/log",
     metavar="SOCKET",
     help=(

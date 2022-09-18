@@ -59,9 +59,15 @@ def create_parser() -> ArgumentParser:
                         help="The group of created files and directories.")
     parser.add_argument(dest='source', type=relative_path, metavar='SOURCE',
                         help="Template file name or template directory name")
-    parser.add_argument(dest='destination', metavar='DESTINATION', nargs='?',
-                        help="Destination file or directory (default is stdout "
-                             "for files; required for directories)")
+    parser.add_argument(
+        dest="destination",
+        metavar="DESTINATION",
+        nargs=argparse.OPTIONAL,
+        help=(
+            "Destination file or directory (default is stdout for files; "
+            "required for directories)"
+        ),
+    )
     return parser
 
 

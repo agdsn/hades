@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """hades-lease-server entrypoint"""
+import argparse
 import logging
 import os
 import socket
@@ -36,9 +37,12 @@ def create_parser() -> ArgumentParser:
         """,
         parents=[common_parser],
     )
-    parser.add_argument('--socket', nargs='?',
-                        default=constants.AUTH_DHCP_SCRIPT_SOCKET,
-                        help=f"Socket to listen on. Default: {constants.AUTH_DHCP_SCRIPT_SOCKET}")
+    parser.add_argument(
+        "--socket",
+        nargs=argparse.OPTIONAL,
+        default=constants.AUTH_DHCP_SCRIPT_SOCKET,
+        help=f"Socket to listen on. Default: {constants.AUTH_DHCP_SCRIPT_SOCKET}",
+    )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--auth", action="store_true")
     group.add_argument("--unauth", action="store_false")

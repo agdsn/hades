@@ -399,7 +399,7 @@ def add_lease_command(
     )
     sub_parser.add_argument("mac", type=netaddr.EUI, help="MAC address")
     sub_parser.add_argument("ip", type=netaddr.IPAddress, help="IP address")
-    sub_parser.add_argument("hostname", nargs="?", help="Hostname")
+    sub_parser.add_argument("hostname", nargs=argparse.OPTIONAL, help="Hostname")
     return sub_parser
 
 
