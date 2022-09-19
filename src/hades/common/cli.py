@@ -126,8 +126,8 @@ def setup_cli_logging(program, args):
     The possible log level settings are:
 
     - :data:`logging.ERROR` is the minimum log level.
-    - :data:`logging.CRITICAL` will always also be logged to STDERR even if
-      logging to syslog.
+    - :data:`logging.CRITICAL` will also be logged to stderr, if stderr is a
+      terminal, even if logging to syslog is enabled.
     - :data:`logging.WARNING` is the default logging level, but can be
       suppressed with ``-q``/``--quiet`` or ``HADES_VERBOSITY=0``.
     - Each ``-v``/``--verbose`` increases the verbosity by one level.
@@ -176,16 +176,19 @@ def setup_cli_logging(program, args):
                "%(message)s")
     else:
         fmt = "%(message)s"
-    stderr_handler = logging.StreamHandler(stream=sys.stderr)
-    stderr_handler.name = "stderr"
-    if args.syslog is not None:
-        # Also log critical messages to stderr
-        stderr_handler.setLevel(logging.CRITICAL)
+
+    handlers = []
+    if sys.stderr.isatty() or not args.syslog:
+        stderr_handler = logging.StreamHandler(stream=sys.stderr)
+        stderr_handler.name = "stderr"
+        # Only log critical messages to stderr, if syslog is enabled
+        if args.syslog is not None:
+            stderr_handler.setLevel(logging.CRITICAL)
+        handlers.append(stderr_handler)
+    if args.syslog:
         syslog_handler = logging.handlers.SysLogHandler(address=args.syslog)
         syslog_handler.name = "syslog"
-        handlers = [syslog_handler, stderr_handler]
-    else:
-        handlers = [stderr_handler]
+        handlers.append(syslog_handler)
     logging.basicConfig(level=level, style='%', format=fmt, handlers=handlers)
     # Log collected messages
     for message in messages:
