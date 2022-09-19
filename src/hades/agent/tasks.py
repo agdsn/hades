@@ -72,7 +72,7 @@ class Task(celery.Task):
             (cls,),
             {
                 'name': name,
-                'run': f,
+                'run': staticmethod(f),
                 '_decorated': True,
                 '__doc__': f.__doc__,
                 '__module__': f.__module__,
