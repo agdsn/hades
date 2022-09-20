@@ -199,8 +199,8 @@ def reset_cli_logging():
     """Reset root logger configuration"""
     root = logging.root
     for h in root.handlers:
+        h.acquire()
         try:
-            h.acquire()
             h.flush()
             h.close()
         except (OSError, ValueError):
