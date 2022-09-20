@@ -920,7 +920,7 @@ def get_dhcp_lease_of_ip(
             dhcp_lease_table.c.Hostname,
             dhcp_lease_table.c.ClientID,
         ]
-    ).where(IPAddress=ip)
+    ).where(dhcp_lease_table.c.IPAddress == ip)
     return connection.execute(query).first()  # type: ignore
 
 
@@ -945,7 +945,7 @@ def get_dhcp_leases_of_mac(
             dhcp_lease_table.c.Hostname,
             dhcp_lease_table.c.ClientID,
         ]
-    ).where(MAC=mac).order_by(dhcp_lease_table.c.ExpiresAt.desc())
+    ).where(dhcp_lease_table.c.MAC == mac).order_by(dhcp_lease_table.c.ExpiresAt.desc())
     return iter(connection.execute(query))
 
 
