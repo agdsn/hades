@@ -1,3 +1,13 @@
+hades (0.5.1) bullseye; urgency=high
+
+  * Various important bugfixes in the RPC api (hades-agent):
+    * Fix bug breaking any RPC method call (GH-119)
+    * Fix bug breaking the `get_auth_attempts_at_port` RPC method
+    * Fix two bugs breaking the `get_auth_dhcp_leases_of_ip` RPC method
+    * Fix bug breaking the `get_dhcp_leases_of_mac` RPC method
+
+ --  <lukas.juhrich@agdsn.de>  Tue, 20 Sep 2022 12:28:00 +0000
+
 hades (0.5.0) bullseye; urgency=low
 
   * Upgrade to Debian bullseye (GH-94, GH-99, GH-103, GH-113)
