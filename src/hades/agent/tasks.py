@@ -319,8 +319,7 @@ def get_auth_attempts_at_port(
     """
     nas_ip_address = check_ip_address("nas_ip_address", nas_ip_address)
     nas_port_id = check_str("nas_port_id", nas_port_id)
-    if when is not None:
-        safe_when = check_timestamp_range("until", when)
+    safe_when = check_timestamp_range("until", when) if when is not None else None
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
