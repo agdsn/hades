@@ -5,7 +5,6 @@ import platform
 import types
 import typing as t
 from datetime import datetime, timezone
-from itertools import starmap
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import celery
@@ -260,10 +259,12 @@ def get_sessions_of_mac(
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
-        return list(starmap(
-            lambda nas_ip, nas_port, start, stop:
-                (str(nas_ip), nas_port, start.timestamp(), stop.timestamp()),
-            do_get_sessions_of_mac(connection, mac, safe_when, limit)))
+        return [
+            (str(nas_ip), nas_port, start.timestamp(), stop.timestamp())
+            for nas_ip, nas_port, start, stop in do_get_sessions_of_mac(
+                connection, mac, safe_when, limit
+            )
+        ]
 
 
 @rpc_task()
@@ -291,11 +292,12 @@ def get_auth_attempts_of_mac(
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
-        return list(starmap(
-            lambda nas_ip, nas_port, packet_type, groups, reply, auth_date:
-                (str(nas_ip), nas_port, packet_type, groups, reply,
-                 auth_date.timestamp()),
-            do_get_auth_attempts_of_mac(connection, mac, safe_when, limit)))
+        return [
+            (str(nas_ip), nas_port, packet_type, groups, reply, auth_date.timestamp())
+            for nas_ip, nas_port, packet_type, groups, reply, auth_date in do_get_auth_attempts_of_mac(
+                connection, mac, safe_when, limit
+            )
+        ]
 
 
 @rpc_task()
@@ -323,18 +325,19 @@ def get_auth_attempts_at_port(
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
-        return list(starmap(
-            lambda user_name, packet_type, groups, reply, auth_date:
-                (user_name, packet_type, groups, reply, auth_date.timestamp()),
-            do_get_auth_attempts_at_port(connection, nas_ip_address,
-                                         nas_port_id, safe_when, limit)))
+        return [
+            (user_name, packet_type, groups, reply, auth_date.timestamp())
+            for user_name, packet_type, groups, reply, auth_date in do_get_auth_attempts_at_port(
+                connection, nas_ip_address, nas_port_id, safe_when, limit
+            )
+        ]
 
 
 @rpc_task()
 def get_auth_dhcp_leases(
     subnet: Optional[str] = None,
     limit: Optional[int] = 100,
-) -> List[Tuple[float, str, str, Optional[str]]]:
+) -> List[Tuple[float, str, str, Optional[str], Optional[bytes]]]:
     """Return all auth leases.
 
     :param subnet: Limit leases to subnet
@@ -348,10 +351,12 @@ def get_auth_dhcp_leases(
     if limit is not None:
         limit = check_positive_int("limit", limit)
     with contextlib.closing(engine.connect()) as connection:
-        return list(starmap(
-            lambda expires_at, mac, ip, hostname:
-                (expires_at.timestamp(), str(mac), str(ip), hostname),
-            do_get_all_auth_dhcp_leases(connection, subnet, limit)))
+        return [
+            (expires_at.timestamp(), str(mac), str(ip), hostname, client_id)
+            for expires_at, mac, ip, hostname, client_id in do_get_all_auth_dhcp_leases(
+                connection, subnet, limit
+            )
+        ]
 
 
 @rpc_task()
@@ -439,17 +444,17 @@ def get_auth_dhcp_leases_of_mac(
     """
     mac = check_mac("mac", mac)
     with contextlib.closing(engine.connect()) as connection:
-        return list(
-            starmap(
-                lambda expires_at, ip, hostname, client_id: (
-                    expires_at.timestamp(),
-                    str(ip),
-                    hostname,
-                    client_id,
-                ),
-                do_get_auth_dhcp_leases_of_mac(connection, mac),
+        return [
+            (
+                expires_at.timestamp(),
+                str(ip),
+                hostname,
+                client_id,
             )
-        )
+            for expires_at, ip, hostname, client_id in do_get_auth_dhcp_leases_of_mac(
+                connection, mac
+            )
+        ]
 
 
 @rpc_task()
