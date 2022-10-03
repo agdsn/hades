@@ -9,7 +9,7 @@ Vcs-Git: https://github.com/agdsn/hades.git
 Build-Depends:
  bash (>= 4),
  bridge-utils,
- debhelper (>= 10),
+ debhelper-compat (= 12),
  dh-exec,
  dh-python,
  dh-virtualenv (>= 0.8),
