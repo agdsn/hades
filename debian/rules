@@ -20,9 +20,11 @@ export DH_VIRTUALENV_INSTALL_ROOT=/usr/lib
 
 configure_args += venvdir=$(DH_VIRTUALENV_INSTALL_ROOT)/$(PACKAGE)
 
+.PHONY: clean binary binary-arch binary-indep build build-arch build-indep install install-indep install-arch
 clean binary binary-arch binary-indep build build-arch build-indep install install-indep install-arch:
 	dh $@ --buildsystem=dh_virtualenv
 
+.PHONY: execute_after_dh_auto_install
 execute_after_dh_auto_install:
 	# Move console scripts to /usr/bin
 	mkdir -p debian/$(PACKAGE)/usr/bin
@@ -30,19 +32,24 @@ execute_after_dh_auto_install:
 
 else
 
+.PHONY: clean binary binary-arch binary-indep build build-arch build-indep install install-indep install-arch
 clean binary binary-arch binary-indep build build-arch build-indep install install-indep install-arch:
 	dh $@ --with python3 --buildsystem=pybuild
 
 endif
 
+.PHONY: execute_after_dh_fixperms
 execute_after_dh_fixperms:
 	chmod -R u=rwX,g=rX,o= debian/$(PACKAGE)/etc/hades/config
 
+.PHONY: execute_after_dh_auto_clean
 execute_after_dh_auto_clean:
 	./configure.mk clean
 
+.PHONY: execute_before_dh_auto_configure
 execute_before_dh_auto_configure:
 	./configure.mk $(configure_args)
 
+.PHONY: override_dh_builddeb
 override_dh_builddeb:
 	dh_builddeb -- -Znone
