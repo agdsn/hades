@@ -23,8 +23,7 @@ configure_args += venvdir=$(DH_VIRTUALENV_INSTALL_ROOT)/$(PACKAGE)
 clean binary binary-arch binary-indep build build-arch build-indep:
 	dh $@ --buildsystem=dh_virtualenv
 
-override_dh_auto_install:
-	dh_auto_install
+execute_after_dh_auto_install:
 	# Move console scripts to /usr/bin
 	mkdir -p debian/$(PACKAGE)/usr/bin
 	mv debian/$(PACKAGE)/usr/lib/$(PACKAGE)/bin/hades-* debian/$(PACKAGE)/usr/bin
@@ -36,17 +35,14 @@ clean binary binary-arch binary-indep build build-arch build-indep:
 
 endif
 
-override_dh_fixperms:
-	dh_fixperms
+execute_after_dh_fixperms:
 	chmod -R u=rwX,g=rX,o= debian/$(PACKAGE)/etc/hades/config
 
-override_dh_auto_clean:
-	dh_auto_clean
+execute_after_dh_auto_clean:
 	./configure.mk clean
 
-override_dh_auto_configure:
+execute_before_dh_auto_configure:
 	./configure.mk $(configure_args)
-	dh_auto_configure
 
 override_dh_builddeb:
 	dh_builddeb -- -Znone
