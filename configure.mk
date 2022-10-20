@@ -6,9 +6,13 @@ NULL :=
 # Shell #
 # ----- #
 
-SHELL := $(shell if output="$$(command -v bash)"; then echo "$${output}"; fi)
+SHELL := $(shell command -v bash)
 ifeq ($(strip $(SHELL)),)
 $(error Could not find bash)
+endif
+# Check for .SHELLSTATUS support (GNU make 4.2+)
+ifneq ($(.SHELLSTATUS),0)
+$(error Your make does not support .SHELLSTATUS)
 endif
 .SHELLFLAGS := -euo pipefail -c
 
@@ -27,14 +31,21 @@ SUBSTITUTIONS += $(strip $1)
 )
 endef
 
+# xshell(CODE, ERROR)
+# -------------------
+# Run $(shell CODE) and fail with $(error ERROR) if exit status is non-zero.
+define xshell
+$(shell $(strip $1))$(if $(filter-out 0,$(.SHELLSTATUS)),$(error Executing $(strip $1) failed with exit status $(.SHELLSTATUS)))
+endef
+
 # add_shell_substitution(VARIABLE, CODE)
 # --------------------------------------
 # Set VARIABLE to the output of executing CODE in a shell and add VARIABLE to
 # the list of substitution variables.
 define add_shell_substitution
-$(call add_substitution,$1,$(shell if output="$$($(strip $2))"; then echo "$$output"; fi))
-$(if $($(strip $1)),,
-	$(error Failed to execute $(strip $2) (No output or non-zero exit status))
+$(if $(findstring undefined,$(origin $(strip $1))),
+    $(call add_substitution, $1, $(call xshell,$(strip $2))),
+    $(eval SUBSTITUTIONS += $(strip $1))
 )
 endef
 
@@ -42,20 +53,7 @@ endef
 # ---------------------------
 # Find the full path of a program. A specific PATH may be specified optionally.
 define find_program
-$(shell
-    $(if $(strip $2),PATH="$(strip $2)";,)
-    IFS=':';
-    for path in $$PATH; do
-        IFS=;
-        for exec in $(strip $1); do
-            if [[ -x "$${path}/$${exec}" ]]; then
-                printf "%s/%s" "$$path" "$$exec";
-            exit 0;
-            fi;
-        done;
-    done;
-    exit 127
-)
+$(firstword $(foreach name,$1,$(wildcard $(addsuffix /$(name),$(subst :, ,$(if $(and $(filter-out undefined,$(origin 2)),$2),$(strip $2),$(PATH)))))))
 endef
 
 # require_program(VARIABLE, NAMES, [PATH])
@@ -65,10 +63,20 @@ endef
 # optionally.
 # The variable is added to list of substitution variables.
 define require_program
-$(call add_substitution,$1,$(call find_program,$2,$3))
-$(if $($(strip $1)),
-    $(info Found $(strip $2) at $($(strip $1))),
-    $(error Could not find $(strip $2) in PATH=$(if $(strip $3)),$(PATH),$(strip $3))
+$(if
+    $(findstring undefined,$(origin $(strip $1))),
+    $(call add_substitution,$1,
+        $(if $(and $(filter-out undefined,$(origin 3)),$3),
+            $(call find_program,$2,$3),
+            $(call find_program,$2)
+        )
+    )
+    $(if $($(strip $1)),
+        $(info Found $(strip $2) at $($(strip $1))),
+        $(error Could not find $(strip $2) in PATH=$(if $(and $(filter-out undefined,$(origin 3)),$3),$(strip $3),$(PATH)))
+    ),
+    $(info Using user-defined $(strip $2) at $($(strip $1)))
+    $(eval SUBSTITUTIONS += $(strip $1))
 )
 endef
 
@@ -203,16 +211,28 @@ $(call require_program,UNBOUND_CHECKCONF,unbound-checkconf)
 $(call require_program,UNBOUND_CONTROL,unbound-control)
 $(call require_program,UWSGI,uwsgi)
 
-get_pg_version := perl -MPgCommon -e 'print get_newest_version();'
-
-$(call add_shell_substitution, PG_VERSION, $(get_pg_version))
-
+ifndef PG_ROOT
+PG_VERSION := $(call xshell, command -v perl &>/dev/null && perl -e 'if (my $$version = eval { require PgCommon; PgCommon::get_newest_version(); }) { print $$version; }')
+ifneq ($(PG_VERSION),)
 get_pg_path := perl -MPgCommon -e 'print get_program_path($$ARGV[0], "$(PG_VERSION)");'
-
 $(call add_shell_substitution, CREATEDB,   $(get_pg_path) createdb)
 $(call add_shell_substitution, CREATEUSER, $(get_pg_path) createuser)
 $(call add_shell_substitution, PG_CTL,     $(get_pg_path) pg_ctl)
 $(call add_shell_substitution, POSTGRES,   $(get_pg_path) postgres)
+pg_path = $(NULL)
+else # ifneq ($(PG_VERSION),)
+pg_path = $(subst :, ,$(PATH))
+endif # ifneq ($(PG_VERSION),)
+else # ifndef PG_ROOT
+pg_path = $(PG_ROOT)/bin
+endif # ifndef PG_ROOT
+
+ifneq ($(pg_path),)
+$(call require_program, CREATEDB,   createdb,  $(pg_path))
+$(call require_program, CREATEUSER, createuser $(pg_path))
+$(call require_program, PG_CTL,     pg_ctl,    $(pg_path))
+$(call require_program, POSTGRES,   postgres,  $(pg_path))
+endif # ifneq ($(pg_path),)
 
 # ----------------- #
 # Users and groups  #
