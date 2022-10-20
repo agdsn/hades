@@ -211,16 +211,28 @@ $(call require_program,UNBOUND_CHECKCONF,unbound-checkconf)
 $(call require_program,UNBOUND_CONTROL,unbound-control)
 $(call require_program,UWSGI,uwsgi)
 
-get_pg_version := perl -MPgCommon -e 'print get_newest_version();'
-
-$(call add_shell_substitution, PG_VERSION, $(get_pg_version))
-
+ifndef PG_ROOT
+PG_VERSION := $(shell perl -e 'if (my $$version = eval { require PgCommon; PgCommon::get_newest_version(); }) { print $$version; }')
+ifneq ($(PG_VERSION),)
 get_pg_path := perl -MPgCommon -e 'print get_program_path($$ARGV[0], "$(PG_VERSION)");'
-
 $(call add_shell_substitution, CREATEDB,   $(get_pg_path) createdb)
 $(call add_shell_substitution, CREATEUSER, $(get_pg_path) createuser)
 $(call add_shell_substitution, PG_CTL,     $(get_pg_path) pg_ctl)
 $(call add_shell_substitution, POSTGRES,   $(get_pg_path) postgres)
+pg_path = $(NULL)
+else # ifneq ($(PG_VERSION),)
+pg_path = $(subst :, ,$(PATH))
+endif # ifneq ($(PG_VERSION),)
+else # ifndef PG_ROOT
+pg_path = $(PG_ROOT)/bin
+endif # ifndef PG_ROOT
+
+ifneq ($(pg_path),)
+$(call require_program, CREATEDB,   createdb,  $(pg_path))
+$(call require_program, CREATEUSER, createuser $(pg_path))
+$(call require_program, PG_CTL,     pg_ctl,    $(pg_path))
+$(call require_program, POSTGRES,   postgres,  $(pg_path))
+endif # ifneq ($(pg_path),)
 
 # ----------------- #
 # Users and groups  #
