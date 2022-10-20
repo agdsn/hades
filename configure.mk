@@ -31,17 +31,20 @@ SUBSTITUTIONS += $(strip $1)
 )
 endef
 
+# xshell(CODE, ERROR)
+# -------------------
+# Run $(shell CODE) and fail with $(error ERROR) if exit status is non-zero.
+define xshell
+$(shell $(strip $1))$(if $(filter-out 0,$(.SHELLSTATUS)),$(error Executing $(strip $1) failed with exit status $(.SHELLSTATUS)))
+endef
+
 # add_shell_substitution(VARIABLE, CODE)
 # --------------------------------------
 # Set VARIABLE to the output of executing CODE in a shell and add VARIABLE to
 # the list of substitution variables.
 define add_shell_substitution
 $(if $(findstring undefined,$(origin $(strip $1))),
-    $(call add_substitution,
-        $1,
-        $(shell $(strip $2))
-        $(if $(filter-out 0,$(.SHELLSTATUS)),$(error Failed to execute $(strip $2)))
-    ),
+    $(call add_substitution, $1, $(call xshell,$(strip $2))),
     $(eval SUBSTITUTIONS += $(strip $1))
 )
 endef
@@ -209,7 +212,7 @@ $(call require_program,UNBOUND_CONTROL,unbound-control)
 $(call require_program,UWSGI,uwsgi)
 
 ifndef PG_ROOT
-PG_VERSION := $(shell perl -e 'if (my $$version = eval { require PgCommon; PgCommon::get_newest_version(); }) { print $$version; }')
+PG_VERSION := $(call xshell, command -v perl &>/dev/null && perl -e 'if (my $$version = eval { require PgCommon; PgCommon::get_newest_version(); }) { print $$version; }')
 ifneq ($(PG_VERSION),)
 get_pg_path := perl -MPgCommon -e 'print get_program_path($$ARGV[0], "$(PG_VERSION)");'
 $(call add_shell_substitution, CREATEDB,   $(get_pg_path) createdb)
