@@ -10,6 +10,10 @@ SHELL := $(shell if output="$$(command -v bash)"; then echo "$${output}"; fi)
 ifeq ($(strip $(SHELL)),)
 $(error Could not find bash)
 endif
+# Check for .SHELLSTATUS support (GNU make 4.2+)
+ifneq ($(.SHELLSTATUS),0)
+$(error Your make does not support .SHELLSTATUS)
+endif
 .SHELLFLAGS := -euo pipefail -c
 
 # --------- #
@@ -32,9 +36,10 @@ endef
 # Set VARIABLE to the output of executing CODE in a shell and add VARIABLE to
 # the list of substitution variables.
 define add_shell_substitution
-$(call add_substitution,$1,$(shell if output="$$($(strip $2))"; then echo "$$output"; fi))
-$(if $($(strip $1)),,
-	$(error Failed to execute $(strip $2) (No output or non-zero exit status))
+$(call add_substitution,
+    $1,
+    $(shell $(strip $2))
+    $(if $(filter-out 0,$(.SHELLSTATUS)),$(error Failed to execute $(strip $2)))
 )
 endef
 
