@@ -36,10 +36,13 @@ endef
 # Set VARIABLE to the output of executing CODE in a shell and add VARIABLE to
 # the list of substitution variables.
 define add_shell_substitution
-$(call add_substitution,
-    $1,
-    $(shell $(strip $2))
-    $(if $(filter-out 0,$(.SHELLSTATUS)),$(error Failed to execute $(strip $2)))
+$(if $(findstring undefined,$(origin $(strip $1))),
+    $(call add_substitution,
+        $1,
+        $(shell $(strip $2))
+        $(if $(filter-out 0,$(.SHELLSTATUS)),$(error Failed to execute $(strip $2)))
+    ),
+    $(eval SUBSTITUTIONS += $(strip $1))
 )
 endef
 
@@ -68,15 +71,20 @@ endef
 # optionally.
 # The variable is added to list of substitution variables.
 define require_program
-$(call add_substitution,$1,
-    $(if $(and $(filter-out undefined,$(origin 3)),$3),
-        $(call find_program,$2,$3),
-        $(call find_program,$2)
+$(if
+    $(findstring undefined,$(origin $(strip $1))),
+    $(call add_substitution,$1,
+        $(if $(and $(filter-out undefined,$(origin 3)),$3),
+            $(call find_program,$2,$3),
+            $(call find_program,$2)
+        )
     )
-)
-$(if $($(strip $1)),
-    $(info Found $(strip $2) at $($(strip $1))),
-    $(error Could not find $(strip $2) in PATH=$(if $(and $(filter-out undefined,$(origin 3)),$3),$(strip $3),$(PATH)))
+    $(if $($(strip $1)),
+        $(info Found $(strip $2) at $($(strip $1))),
+        $(error Could not find $(strip $2) in PATH=$(if $(and $(filter-out undefined,$(origin 3)),$3),$(strip $3),$(PATH)))
+    ),
+    $(info Using user-defined $(strip $2) at $($(strip $1)))
+    $(eval SUBSTITUTIONS += $(strip $1))
 )
 endef
 
