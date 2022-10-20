@@ -19,6 +19,8 @@ jobs:
         run: >
           sudo apt update
           && sudo apt install
+          bash
+          build-essential
           libsystemd-dev
           libgirepository1.0-dev
       - uses: actions/setup-python@v4
@@ -38,7 +40,19 @@ jobs:
           -r requirements.doc.txt
           -r requirements.lint.txt
           -r requirements.test.txt
-
+      - name: run configure script
+        run: >
+          ./configure.mk
+          IFDOWN=
+          IFUP=
+          IPSET=
+          KEEPALIVED=
+          RADIUSD=
+          UNBOUND=
+          UNBOUND_ANCHOR=
+          UNBOUND_CHECKCONF=
+          UNBOUND_CONTROL=
+          UWSGI=
       # TODO add script rendering mypy warnings as annotations
       - name: Execute mypy
         run: mypy
