@@ -48,10 +48,8 @@ endef
 # Find the full path of a program. A specific PATH may be specified optionally.
 define find_program
 $(shell
-    $(if $(strip $2),PATH="$(strip $2)";,)
-    IFS=':';
-    for path in $$PATH; do
-        IFS=;
+    $(if $(and $(filter-out undefined,$(origin 2)),$2),paths=($(strip $2));,IFS=':';paths=($$PATH);IFS=;)
+    for path in "$${paths[@]}"; do
         for exec in $(strip $1); do
             if [[ -x "$${path}/$${exec}" ]]; then
                 printf "%s/%s" "$$path" "$$exec";
@@ -70,10 +68,15 @@ endef
 # optionally.
 # The variable is added to list of substitution variables.
 define require_program
-$(call add_substitution,$1,$(call find_program,$2,$3))
+$(call add_substitution,$1,
+    $(if $(and $(filter-out undefined,$(origin 3)),$3),
+        $(call find_program,$2,$3),
+        $(call find_program,$2)
+    )
+)
 $(if $($(strip $1)),
     $(info Found $(strip $2) at $($(strip $1))),
-    $(error Could not find $(strip $2) in PATH=$(if $(strip $3)),$(PATH),$(strip $3))
+    $(error Could not find $(strip $2) in PATH=$(if $(and $(filter-out undefined,$(origin 3)),$3),$(strip $3),$(PATH)))
 )
 endef
 
