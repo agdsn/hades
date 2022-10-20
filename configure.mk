@@ -6,7 +6,7 @@ NULL :=
 # Shell #
 # ----- #
 
-SHELL := $(shell if output="$$(command -v bash)"; then echo "$${output}"; fi)
+SHELL := $(shell command -v bash)
 ifeq ($(strip $(SHELL)),)
 $(error Could not find bash)
 endif
@@ -50,18 +50,7 @@ endef
 # ---------------------------
 # Find the full path of a program. A specific PATH may be specified optionally.
 define find_program
-$(shell
-    $(if $(and $(filter-out undefined,$(origin 2)),$2),paths=($(strip $2));,IFS=':';paths=($$PATH);IFS=;)
-    for path in "$${paths[@]}"; do
-        for exec in $(strip $1); do
-            if [[ -x "$${path}/$${exec}" ]]; then
-                printf "%s/%s" "$$path" "$$exec";
-            exit 0;
-            fi;
-        done;
-    done;
-    exit 127
-)
+$(firstword $(foreach name,$1,$(wildcard $(addsuffix /$(name),$(subst :, ,$(if $(and $(filter-out undefined,$(origin 2)),$2),$(strip $2),$(PATH)))))))
 endef
 
 # require_program(VARIABLE, NAMES, [PATH])
