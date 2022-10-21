@@ -6,7 +6,11 @@ NULL :=
 # Shell #
 # ----- #
 
-SHELL := $(shell command -v bash)
+# Prevent GNU make optimization that tries to detect, if commands may be
+# executed directly instead of indirectly via a shell on GNU make earlier than
+# 4.2.90 by adding shell construct : &&
+# https://github.com/mirror/make/commit/1af314465e5dfe3e8baa839a32a72e83c04f26ef
+SHELL := $(shell : && command -v bash)
 ifeq ($(strip $(SHELL)),)
 $(error Could not find bash)
 endif
