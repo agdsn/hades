@@ -11,12 +11,17 @@ from hades.common.privileges import drop_privileges
 logger = logging.getLogger(__name__)
 
 
-def main() -> int:
+def create_parser() -> ArgumentParser:
     parser = ArgumentParser(parents=[common_parser])
     parser.add_argument("-a", "--argv0")
     parser.add_argument('user')
     parser.add_argument('command')
     parser.add_argument("arguments", nargs=argparse.REMAINDER)
+    return parser
+
+
+def main() -> int:
+    parser = create_parser()
     args = parser.parse_args()
     setup_cli_logging(parser.prog, args)
     try:
