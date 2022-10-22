@@ -1,9 +1,15 @@
+# These requirements should be `install_requires`,
+#  pinned to the versions packaged in the respective debian release.
 arpreq~=0.3.4
 Babel~=2.8.0
 celery~=5.0.0
 Flask~=1.1.2
 Flask-Babel~=0.12.2
 Jinja2~=2.11.3
+# transitive pin, because Jinja2~=2.11.3 does not work with MarkupSafe>=2.1.0
+# Pinning a little more strict (1.x instead of 2.0.x) to be consistent with
+# the rule of pinning to the versions packaged in debian.
+MarkupSafe~=1.1.1,<2.1.0
 kombu~=5.0.2
 netaddr~=0.7.19
 psycopg2-binary~=2.8.6
