@@ -4,6 +4,15 @@ requires = ["setuptools", "wheel"]
 #  when used with `--no-use-pep517`:
 #  pip install --no-use-pep517 -e .
 
+[tool.pytest.ini_options]
+addopts = [
+    "--strict-markers",
+]
+markers = [
+    "needs_build: marks tests which need programs compiled with C",
+]
+
+
 [tool.mypy]
 python_version = "3.9"
 follow_imports = "silent"

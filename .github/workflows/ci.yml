@@ -1,0 +1,92 @@
+name: Hades CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  python-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out hades and submodules
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: install dev dependencies
+        # libgirepository1.0-dev required for PyGObject setup
+        run: >
+          sudo apt update
+          && sudo apt install
+          bash
+          build-essential
+          libsystemd-dev
+          libgirepository1.0-dev
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      - name: print pip cache information
+        run: pip cache info && pip cache list
+      - name: ensure presence of `wheel`
+        run: pip install wheel
+      - name: install pip dependencies
+        run: >
+          pip install
+          vendor/arpreq
+          -e .
+          -r requirements.txt
+          -r requirements.doc.txt
+          -r requirements.lint.txt
+          -r requirements.test.txt
+      - name: run configure script
+        run: >
+          ./configure.mk
+          IFDOWN=
+          IFUP=
+          IPSET=
+          KEEPALIVED=
+          RADIUSD=
+          UNBOUND=
+          UNBOUND_ANCHOR=
+          UNBOUND_CHECKCONF=
+          UNBOUND_CONTROL=
+          UWSGI=
+      # TODO add script rendering mypy warnings as annotations
+      - name: Execute mypy
+        run: mypy
+
+      - name: execute unittests
+        run: pytest -v tests -m "not needs_build"
+
+      - name: Build sphinx docs
+        run: make SPHINXOPTS="-EN -w sphinx.log" -C docs html
+      # TODO add script rendering annotations
+      # - name: Render sphinx warnings as annotations
+      #   run: python ./scripts/render_sphinx_log.py docs/sphinx.log
+      - name: Publish sphinx docs as pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: docs/build/html
+
+  # see https://github.com/actions/deploy-pages#usage
+  deploy-docs:
+    if: (github.event_name == 'push') && github.ref == 'refs/heads/main'
+    # Add a dependency to the build job
+    needs: python-lint
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write  # to deploy to Pages
+      id-token: write  # to verify the deployment originates from an appropriate source
+    # Deploy to the github-pages environment. see
+    # https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment
+    # for general information abotu environments.
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy sphinx docs to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
