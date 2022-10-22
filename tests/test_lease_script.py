@@ -33,6 +33,9 @@ from hades import constants
 from hades.leases.server import Mode, Server
 
 
+pytestmark = pytest.mark.needs_build
+
+
 # Available since CPython 3.10
 F_GETPIPE_SZ = getattr(fcntl, "F_GETPIPE_SZ", 1032)
 AncillaryData = List[Tuple[int, int, bytes]]

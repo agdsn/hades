@@ -58,7 +58,7 @@ jobs:
         run: mypy
 
       - name: execute unittests
-        run: pytest -v tests
+        run: pytest -v tests -m "not needs_build"
 
       - name: Build sphinx docs
         run: make SPHINXOPTS="-EN -w sphinx.log" -C docs html
