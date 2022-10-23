@@ -42,7 +42,9 @@ class VersionAction(argparse.Action):
         self.version = version
 
     def __call__(self, parser: argparse.ArgumentParser, namespace: argparse.Namespace, values, option_string=None):
-        print(self.version)
+        formatter = argparse.RawDescriptionHelpFormatter(parser.prog)
+        formatter.add_text(self.version)
+        print(formatter.format_help())
         parser.exit()
 
 
