@@ -13,7 +13,12 @@ from hades import constants
 
 class ArgumentParser(argparse.ArgumentParser):
     """ArgumentParser subclass that exists with :data:`os.EX_USAGE` exit code if
-    parsing fails."""
+    parsing fails and uses a custom version action for different formatting."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.register("action", "version", VersionAction)
+
     def error(self, message: str) -> typing.NoReturn:
         self.print_usage(sys.stderr)
         args = {'prog': self.prog, 'message': message}
@@ -24,7 +29,7 @@ class VersionAction(argparse.Action):
     # noinspection PyShadowingBuiltins
     def __init__(self,
                  option_strings,
-                 version_info=None,
+                 version=None,
                  dest=argparse.SUPPRESS,
                  default=argparse.SUPPRESS,
                  help="show program's version number, configure options, copyright notice and exit"):
@@ -34,11 +39,10 @@ class VersionAction(argparse.Action):
             default=default,
             nargs=0,
             help=help)
-        self.version_info = version_info
+        self.version = version
 
     def __call__(self, parser: argparse.ArgumentParser, namespace: argparse.Namespace, values, option_string=None):
-        version_info = self.version_info
-        print(version_info)
+        print(self.version)
         parser.exit()
 
 
@@ -76,8 +80,8 @@ common_parser.add_argument(
 common_parser.add_argument(
     "-V",
     "--version",
-    action=VersionAction,
-    version_info=inspect.cleandoc(
+    action="version",
+    version=inspect.cleandoc(
         """
         {PACKAGE_NAME} version {PACKAGE_VERSION}
         Configure Options: {CONFIGURE_ARGS}
