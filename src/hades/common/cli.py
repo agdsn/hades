@@ -26,6 +26,16 @@ class ArgumentParser(argparse.ArgumentParser):
 
 
 class VersionAction(argparse.Action):
+    warranty_notice = """
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+    """
+
     # noinspection PyShadowingBuiltins
     def __init__(self,
                  option_strings,
@@ -33,17 +43,25 @@ class VersionAction(argparse.Action):
                  dest=argparse.SUPPRESS,
                  default=argparse.SUPPRESS,
                  help="show program's version number, configure options, copyright notice and exit"):
+        if version is not None:
+            raise ValueError("version may not be overriden")
         super(VersionAction, self).__init__(
             option_strings=option_strings,
             dest=dest,
             default=default,
             nargs=0,
             help=help)
-        self.version = version
 
     def __call__(self, parser: argparse.ArgumentParser, namespace: argparse.Namespace, values, option_string=None):
         formatter = argparse.RawDescriptionHelpFormatter(parser.prog)
-        formatter.add_text(self.version)
+        formatter.add_text(
+            f"{constants.PACKAGE_NAME} version {constants.PACKAGE_VERSION}"
+            f"\nConfigure Options: {constants.CONFIGURE_ARGS}"
+        )
+        formatter.add_text(
+            f"Copyright (c) 2015-2022 {constants.PACKAGE_AUTHOR}"
+        )
+        formatter.add_text(inspect.cleandoc(self.warranty_notice))
         print(formatter.format_help())
         parser.exit()
 
@@ -83,27 +101,6 @@ common_parser.add_argument(
     "-V",
     "--version",
     action="version",
-    version=inspect.cleandoc(
-        """
-        {PACKAGE_NAME} version {PACKAGE_VERSION}
-        Configure Options: {CONFIGURE_ARGS}
-
-        Copyright (c) 2015-2022 {PACKAGE_AUTHOR}
-
-        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-        THE SOFTWARE.
-        """
-    ).format(
-        PACKAGE_NAME=constants.PACKAGE_NAME,
-        PACKAGE_VERSION=constants.PACKAGE_VERSION,
-        CONFIGURE_ARGS=constants.CONFIGURE_ARGS,
-        PACKAGE_AUTHOR=constants.PACKAGE_AUTHOR,
-    )
 )
 common_parser.add_argument(
     "--syslog",
