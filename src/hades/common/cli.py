@@ -10,6 +10,12 @@ from gettext import gettext as _
 
 from hades import constants
 
+from .logging import (
+    plain_formatter,
+    stderr_debug_formatter,
+    syslog_debug_formatter,
+)
+
 
 class ArgumentParser(argparse.ArgumentParser):
     """ArgumentParser subclass that exists with :data:`os.EX_USAGE` exit code if
@@ -174,16 +180,14 @@ def setup_cli_logging(program, args):
         )
     effective_verbosity = max(0, min(len(VERBOSITY_LEVELS) - 1, verbosity))
     level = VERBOSITY_LEVELS[effective_verbosity]
-    if level <= logging.DEBUG:
-        fmt = ("[%(asctime)s] %(levelname)s in %(filename)s:%(lineno)d: "
-               "%(message)s")
-    else:
-        fmt = "%(message)s"
 
     handlers = []
     if sys.stderr.isatty() or not args.syslog:
         stderr_handler = logging.StreamHandler(stream=sys.stderr)
         stderr_handler.name = "stderr"
+        stderr_handler.setFormatter(
+            plain_formatter if level > logging.DEBUG else stderr_debug_formatter
+        )
         # Only log critical messages to stderr, if syslog is enabled
         if args.syslog is not None:
             stderr_handler.setLevel(logging.CRITICAL)
@@ -191,8 +195,14 @@ def setup_cli_logging(program, args):
     if args.syslog:
         syslog_handler = logging.handlers.SysLogHandler(address=args.syslog)
         syslog_handler.name = "syslog"
+        syslog_handler.setFormatter(
+            plain_formatter if level > logging.DEBUG else syslog_debug_formatter
+        )
         handlers.append(syslog_handler)
-    logging.basicConfig(level=level, style='%', format=fmt, handlers=handlers)
+    root = logging.root
+    root.setLevel(level)
+    for h in handlers:
+        root.addHandler(h)
     # Log collected messages
     for message in messages:
         message()
