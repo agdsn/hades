@@ -184,7 +184,15 @@ common_parser = ArgumentParser(add_help=False)
 common_parser.add_argument(
     "-c", "--config", default=None, help="Path to config file"
 )
-common_parser.add_argument(
+logging_group = common_parser.add_argument_group(
+    title="logging options",
+    description=f"""
+    Logging level (verbosity) and logging target options. The default level is
+    {logging.getLevelName(VERBOSITY_LEVELS[DEFAULT_VERBOSITY])} and the default
+    target is stderr.
+    """,
+)
+logging_group.add_argument(
     "-v",
     "--verbose",
     dest="verbosity",
@@ -195,7 +203,7 @@ common_parser.add_argument(
         f"{len(VERBOSITY_LEVELS) - DEFAULT_VERBOSITY - 1}) times"
     ),
 )
-common_parser.add_argument(
+logging_group.add_argument(
     "-q",
     "--quiet",
     dest="verbosity",
@@ -211,7 +219,7 @@ common_parser.add_argument(
     "--version",
     action="version",
 )
-common_parser.add_argument(
+syslog_action = logging_group.add_argument(
     "--syslog",
     nargs=argparse.OPTIONAL,
     default=None,
@@ -226,7 +234,7 @@ common_parser.add_argument(
         "on stderr too, if stderr is a tty."
     ),
 )
-common_parser.add_argument(
+journal_action = logging_group.add_argument(
     "--journal",
     action="store_true",
     help=(
