@@ -17,8 +17,9 @@ from hades.portal.views import configure_app
 logger = logging.getLogger("hades.bin.portal")
 
 
-def create_parser() -> ArgumentParser:
+def create_parser(prog: str = "hades-portal") -> ArgumentParser:
     parser = ArgumentParser(
+        prog=prog,
         description="Run development server of captive-portal",
         parents=[common_parser],
     )

@@ -61,8 +61,11 @@ def check_table(conn: Connection, table: Table) -> None:
     conn.execute(select([exists(select([null()]).select_from(table))])).scalar()
 
 
-def create_parser() -> ArgumentParser:
-    parser = ArgumentParser(parents=[common_parser])
+def create_parser(prog: str = "hades-check-database") -> ArgumentParser:
+    parser = ArgumentParser(
+        prog=prog,
+        parents=[common_parser],
+    )
     return parser
 
 

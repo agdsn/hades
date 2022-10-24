@@ -26,7 +26,7 @@ from hades.config import load_config
 logger = logging.getLogger(__name__)
 
 
-def create_parser() -> ArgumentParser:
+def create_parser(prog: str = "hades-agent") -> ArgumentParser:
     description = inspect.cleandoc(
         """
         Run the celery command configured for Hades.
@@ -36,6 +36,7 @@ def create_parser() -> ArgumentParser:
         """
     )
     parser = ArgumentParser(
+        prog=prog,
         description=description,
         parents=[common_parser],
     )

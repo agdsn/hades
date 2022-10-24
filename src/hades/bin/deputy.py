@@ -15,8 +15,9 @@ from hades.deputy.server import run_event_loop
 logger = logging.getLogger(__name__)
 
 
-def create_parser() -> ArgumentParser:
+def create_parser(prog: str = "hades-deputy") -> ArgumentParser:
     parser = ArgumentParser(
+        prog=prog,
         description='Provides a DBus API to perform privileged operations',
         parents=[common_parser])
     return parser

@@ -403,7 +403,10 @@ def add_lease_command(
     return sub_parser
 
 
-def create_parser(standalone: bool = True) -> ArgumentParser:
+def create_parser(
+    prog: str = "hades-dhcp-script",
+    standalone: bool = True,
+) -> ArgumentParser:
     class Parser(ArgumentParser):
         def parse_known_args(
             self,
@@ -434,6 +437,7 @@ def create_parser(standalone: bool = True) -> ArgumentParser:
             logger.warning("Unexpected call to argparsers exit(args=%r, kwargs=%r)", a, kw)
 
     parser = Parser(
+        prog=prog,
         description="dnsmasq leasefile dhcp-script to store leases in the "
         "Hades database",
         parents=[common_parser] if standalone else [],

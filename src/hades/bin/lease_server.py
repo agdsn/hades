@@ -25,8 +25,9 @@ from hades.leases.server import Server
 logger = logging.getLogger(__name__)
 
 
-def create_parser() -> ArgumentParser:
+def create_parser(prog: str = "hades-lease-server") -> ArgumentParser:
     parser = ArgumentParser(
+        prog=prog,
         description="Listens for commands as output by `hades-dhcp-script`.",
         epilog=f"""\
             This server listens on a socket for commands communicating lease events.

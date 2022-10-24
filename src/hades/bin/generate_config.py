@@ -45,8 +45,11 @@ def relative_path(value: str) -> pathlib.PurePath:
     return p
 
 
-def create_parser() -> ArgumentParser:
-    parser = ArgumentParser(parents=[common_parser])
+def create_parser(prog: str = "hades-generate-config") -> ArgumentParser:
+    parser = ArgumentParser(
+        prog=prog,
+        parents=[common_parser],
+    )
     parser.add_argument('-m', '--mode', type=mode, default=0o0750,
                         help="The mode of created files and directories. Only "
                              "read, write, setgid, and sticky bits are "

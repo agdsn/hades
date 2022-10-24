@@ -20,12 +20,16 @@ from hades.config.export import export
 logger = logging.getLogger(__name__)
 
 
-def create_parser() -> ArgumentParser:
-    parser = ArgumentParser(description='Export options as shell variables',
-                            epilog='Python sequence and mapping types will '
-                                   'only be exported, if the destination '
-                                   'format support it',
-                            parents=[common_parser])
+def create_parser(prog: str = "hades-export-options") -> ArgumentParser:
+    parser = ArgumentParser(
+        prog=prog,
+        description="Export options as shell variables",
+        epilog=(
+            "Python sequence and mapping types will only be exported, if the "
+            "destination format supports it"
+        ),
+        parents=[common_parser],
+    )
     parser.add_argument('--format', choices=('systemd', 'posix', 'bash', 'ksh',
                                              'zsh'),
                         default='systemd', help='Export format.')

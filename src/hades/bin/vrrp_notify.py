@@ -97,7 +97,7 @@ def update_bindings(config: Config, name: str, state: str) -> None:
                     )
 
 
-def create_parser() -> ArgumentParser:
+def create_parser(prog: str = "hades-vrrp-notify") -> ArgumentParser:
     description = textwrap.dedent(
         """
         Hades keepalived VRRP notify script.
@@ -105,8 +105,11 @@ def create_parser() -> ArgumentParser:
         This script is called by keepalived, if a VRRP instance's state changes.
         """
     )
-    parser = ArgumentParser(description=description,
-                            parents=[common_parser])
+    parser = ArgumentParser(
+        prog=prog,
+        description=description,
+        parents=[common_parser],
+    )
     parser.add_argument('type', choices=['GROUP', 'INSTANCE'],
                         help="Type indication")
     parser.add_argument(
