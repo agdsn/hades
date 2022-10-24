@@ -16,6 +16,8 @@ from .logging import (
     syslog_debug_formatter,
 )
 
+T = typing.TypeVar("T")
+
 
 class ArgumentParser(argparse.ArgumentParser):
     """ArgumentParser subclass that exists with :data:`os.EX_USAGE` exit code if
@@ -43,12 +45,14 @@ class VersionAction(argparse.Action):
     """
 
     # noinspection PyShadowingBuiltins
-    def __init__(self,
-                 option_strings,
-                 version=None,
-                 dest=argparse.SUPPRESS,
-                 default=argparse.SUPPRESS,
-                 help="show program's version number, configure options, copyright notice and exit"):
+    def __init__(
+        self,
+        option_strings: typing.Sequence[str],
+        version: None = None,
+        dest: str = argparse.SUPPRESS,
+        default: typing.Union[T, str, None] = argparse.SUPPRESS,
+        help: str = "show program's version number, configure options, copyright notice and exit",
+    ) -> None:
         if version is not None:
             raise ValueError("version may not be overriden")
         super(VersionAction, self).__init__(
@@ -58,7 +62,13 @@ class VersionAction(argparse.Action):
             nargs=0,
             help=help)
 
-    def __call__(self, parser: argparse.ArgumentParser, namespace: argparse.Namespace, values, option_string=None):
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        values: typing.Union[str, typing.Sequence[typing.Any], None],
+        option_string: typing.Optional[str] = None,
+    ) -> None:
         formatter = argparse.RawDescriptionHelpFormatter(parser.prog)
         formatter.add_text(
             f"{constants.PACKAGE_NAME} version {constants.PACKAGE_VERSION}"
