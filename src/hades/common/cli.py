@@ -10,6 +10,8 @@ import typing
 import urllib.parse
 from gettext import gettext as _
 
+import systemd.journal
+
 from hades import constants
 
 from .logging import (
@@ -224,6 +226,14 @@ common_parser.add_argument(
         "on stderr too, if stderr is a tty."
     ),
 )
+common_parser.add_argument(
+    "--journal",
+    action="store_true",
+    help=(
+        "Log to systemd journal. CRITICAL messages will still be logged on "
+        "stderr too, if stderr is a tty."
+    ),
+)
 
 
 def setup_cli_logging(program, args):
@@ -235,13 +245,14 @@ def setup_cli_logging(program, args):
     :std:envvar:`HADES_VERBOSITY` environment variable or finally the default
     value :data:`DEFAULT_VERBOSITY`.
 
-    Messages are logged to stderr by default, but can also be logged to syslog.
+    Messages are logged to stderr by default, but can also be logged via the
+    syslog or systemd journal protocol.
 
     The possible log level settings are:
 
     - :data:`logging.ERROR` is the minimum log level.
     - :data:`logging.CRITICAL` will also be logged to stderr, if stderr is a
-      terminal, even if logging to syslog is enabled.
+      terminal, even if other targets are enabled.
     - :data:`logging.WARNING` is the default logging level, but can be
       suppressed with ``-q``/``--quiet`` or ``HADES_VERBOSITY=0``.
     - Each ``-v``/``--verbose`` increases the verbosity by one level.
@@ -285,18 +296,32 @@ def setup_cli_logging(program, args):
         )
     effective_verbosity = max(0, min(len(VERBOSITY_LEVELS) - 1, verbosity))
     level = VERBOSITY_LEVELS[effective_verbosity]
+    handlers = list[logging.Handler]()
 
-    handlers = []
-    if sys.stderr.isatty() or not args.syslog:
+    if args.journal:
+        journal_handler = systemd.journal.JournalHandler(
+            SYSLOG_IDENTIFIER=program,
+        )
+        journal_handler.name = "journal"
+        # The journal handler already includes all interesting metadata in
+        # specific journal fields, e.g. CODE_FILE, CODE_LINE, CODE_FUNC,
+        # EXCEPTION_TEXT, EXCEPTION_INFO and more. There is no need to clobber
+        # the message field with other data, even in debug mode.
+        # See systemd.journal-fields(7) for a list of available fields.
+        journal_handler.setFormatter(plain_formatter)
+        handlers.append(journal_handler)
+
+    if sys.stderr.isatty() or not (args.journal or args.syslog):
         stderr_handler = logging.StreamHandler(stream=sys.stderr)
         stderr_handler.name = "stderr"
         stderr_handler.setFormatter(
             plain_formatter if level > logging.DEBUG else stderr_debug_formatter
         )
-        # Only log critical messages to stderr, if syslog is enabled
-        if args.syslog is not None:
+        # Log only critical messages to stderr, if others targets are enabled
+        if args.syslog is not None or args.journal:
             stderr_handler.setLevel(logging.CRITICAL)
         handlers.append(stderr_handler)
+
     if args.syslog:
         syslog_handler = logging.handlers.SysLogHandler(**args.syslog)
         syslog_handler.name = "syslog"
@@ -305,6 +330,7 @@ def setup_cli_logging(program, args):
             plain_formatter if level > logging.DEBUG else syslog_debug_formatter
         )
         handlers.append(syslog_handler)
+
     root = logging.root
     root.setLevel(level)
     for h in handlers:
