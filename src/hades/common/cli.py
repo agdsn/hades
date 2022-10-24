@@ -244,7 +244,7 @@ journal_action = logging_group.add_argument(
 )
 
 
-def setup_cli_logging(program, args):
+def setup_cli_logging(program: str, args: argparse.Namespace) -> None:
     """
     Setup logging for CLI applications, that do not configure logging
     themselves.
@@ -348,7 +348,7 @@ def setup_cli_logging(program, args):
         message()
 
 
-def reset_cli_logging():
+def reset_cli_logging() -> None:
     """Reset root logger configuration"""
     root = logging.root
     for h in root.handlers:
