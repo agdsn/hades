@@ -4,8 +4,10 @@ import functools
 import inspect
 import logging.handlers
 import os
+import socket
 import sys
 import typing
+import urllib.parse
 from gettext import gettext as _
 
 from hades import constants
@@ -82,6 +84,95 @@ class VersionAction(argparse.Action):
         parser.exit()
 
 
+def syslog_url(v: str) -> dict[str, typing.Any]:
+    """Convert syslog CLI argument URL into
+    :class:`logging.handlers.SyslogHandler` `kwargs`."""
+    # If argparse catches ValueError or TypeError, it swallows the actual
+    # exception message and prints only 'invalid %(type)s value: %(value)r',
+    # whereas ArgumentTypeError prints the actual exception message. A bare
+    # ValueError or TypeError reaching the argparse is therefore considered a
+    # bug.
+    try:
+        return _syslog_url(v)
+    except (ValueError, TypeError) as e:
+        raise AssertionError(f"Unhandled {type(e)} error") from e
+
+
+def _syslog_url(v: str) -> dict[str, typing.Any]:
+    try:
+        url = urllib.parse.urlsplit(v)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(
+            f"Failed to parse URL {v!r}: {e}"
+        ) from e
+    result: dict[str, typing.Any] = {}
+    if url.query:
+        try:
+            parameters = urllib.parse.parse_qsl(
+                url.query,
+                keep_blank_values=True,
+                errors="strict",
+                strict_parsing=True,
+            )
+        except ValueError as e:
+            raise argparse.ArgumentTypeError(
+                f"Failed to parse query: {url.query!r}: {e}"
+            ) from e
+        extra_parameters = []
+        for name, value in parameters:
+            if name == 'facility':
+                if value not in logging.handlers.SysLogHandler.facility_names:
+                    raise argparse.ArgumentTypeError(
+                        f"Illegal facility: {value!r}"
+                    )
+                result["facility"] = value
+            else:
+                extra_parameters.append(f"{name!r}={value!r}")
+        if extra_parameters:
+            raise argparse.ArgumentTypeError(
+                f"Extra query parameters: {' '.join(extra_parameters)}"
+            )
+    scheme = url.scheme
+    illegal_components: tuple[str, ...]
+    if scheme in ("tcp", "udp"):
+        illegal_components = ("username", "password", "path", "fragment")
+        try:
+            port = url.port
+        except ValueError as e:
+            raise argparse.ArgumentTypeError(
+                f"Illegal port: {url.netloc}"
+            ) from e
+        hostname = "localhost" if url.hostname is None else url.hostname
+        if scheme == "tcp":
+            port = logging.handlers.SYSLOG_TCP_PORT if port is None else port
+            socktype = socket.SOCK_STREAM
+        else:
+            port = logging.handlers.SYSLOG_UDP_PORT if port is None else port
+            socktype = socket.SOCK_DGRAM
+        result["socktype"] = socktype
+        result["address"] = (hostname, port)
+    elif scheme == "unix":
+        illegal_components = ("netloc", "fragment")
+        try:
+            result["address"] = urllib.parse.unquote(url.path, errors="strict")
+        except UnicodeDecodeError as e:
+            raise argparse.ArgumentTypeError(
+                f"Could not decode path {url.path!r}: {e}"
+            ) from e
+    else:
+        raise argparse.ArgumentTypeError(f"Unsupported scheme: {scheme!r}")
+
+    if any(getattr(url, c) for c in illegal_components):
+        illegal_values = " ".join(
+            f"{c}={v!r}" for c in illegal_components if (v := getattr(url, c))
+        )
+        raise argparse.ArgumentTypeError(
+            f"Scheme {scheme!r} may not have {illegal_values}"
+        )
+
+    return result
+
+
 VERBOSITY_LEVELS = (
     logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG, logging.NOTSET
 )
@@ -121,12 +212,16 @@ common_parser.add_argument(
 common_parser.add_argument(
     "--syslog",
     nargs=argparse.OPTIONAL,
-    const="/dev/log",
-    metavar="SOCKET",
+    default=None,
+    type=syslog_url,
+    const=syslog_url("unix:///dev/log"),
+    metavar="URL",
     help=(
-        "Log to syslog instead of stderr. CRITICAL messages will still be "
-        "logged on stderr too. A path to the log socket may be provided, "
-        "defaults to /dev/log otherwise."
+        "Log to syslog via TCP, UDP or UNIX socket. Defaults to "
+        "unix:///dev/log if no URL is specified. Supported URL schemes are "
+        "tcp, udp, and unix. The syslog facility may specified via the "
+        "facility query parameter. CRITICAL messages will still be logged "
+        "on stderr too, if stderr is a tty."
     ),
 )
 
@@ -203,7 +298,7 @@ def setup_cli_logging(program, args):
             stderr_handler.setLevel(logging.CRITICAL)
         handlers.append(stderr_handler)
     if args.syslog:
-        syslog_handler = logging.handlers.SysLogHandler(address=args.syslog)
+        syslog_handler = logging.handlers.SysLogHandler(**args.syslog)
         syslog_handler.name = "syslog"
         syslog_handler.setFormatter(
             plain_formatter if level > logging.DEBUG else syslog_debug_formatter
