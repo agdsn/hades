@@ -300,6 +300,7 @@ def setup_cli_logging(program, args):
     if args.syslog:
         syslog_handler = logging.handlers.SysLogHandler(**args.syslog)
         syslog_handler.name = "syslog"
+        syslog_handler.ident = program
         syslog_handler.setFormatter(
             plain_formatter if level > logging.DEBUG else syslog_debug_formatter
         )
