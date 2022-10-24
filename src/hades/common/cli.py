@@ -190,7 +190,7 @@ common_parser.add_argument(
     action="count",
     help=(
         f"Be more verbose (use up to "
-        f"{len(VERBOSITY_LEVELS) - DEFAULT_VERBOSITY}) times"
+        f"{len(VERBOSITY_LEVELS) - DEFAULT_VERBOSITY - 1}) times"
     ),
 )
 common_parser.add_argument(
