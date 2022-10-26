@@ -219,6 +219,20 @@ common_parser.add_argument(
     "--version",
     action="version",
 )
+stderr_action = logging_group.add_argument(
+    "--stderr",
+    dest="stderr",
+    action="store_true",
+    default=None,
+    help="Log to stderr.",
+)
+logging_group.add_argument(
+    "--no-stderr",
+    dest="stderr",
+    action="store_false",
+    default=None,
+    help="Never log to stderr (not even CRITICAL messages if stderr is a tty).",
+)
 syslog_action = logging_group.add_argument(
     "--syslog",
     nargs=argparse.OPTIONAL,
@@ -319,14 +333,14 @@ def setup_cli_logging(program: str, args: argparse.Namespace) -> None:
         journal_handler.setFormatter(plain_formatter)
         handlers.append(journal_handler)
 
-    if sys.stderr.isatty() or not (args.journal or args.syslog):
+    if args.stderr or (args.stderr is None and sys.stderr.isatty()):
         stderr_handler = logging.StreamHandler(stream=sys.stderr)
         stderr_handler.name = "stderr"
         stderr_handler.setFormatter(
             plain_formatter if level > logging.DEBUG else stderr_debug_formatter
         )
-        # Log only critical messages to stderr, if others targets are enabled
-        if args.syslog is not None or args.journal:
+        # If not explicitly enabled, log only critical messages to stderr
+        if args.stderr is None:
             stderr_handler.setLevel(logging.CRITICAL)
         handlers.append(stderr_handler)
 
