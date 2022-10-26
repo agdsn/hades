@@ -10,6 +10,7 @@ import typing
 import urllib.parse
 from gettext import gettext as _
 
+import systemd.daemon
 import systemd.journal
 
 from hades import constants
@@ -189,7 +190,11 @@ logging_group = common_parser.add_argument_group(
     description=f"""
     Logging level (verbosity) and logging target options. The default level is
     {logging.getLevelName(VERBOSITY_LEVELS[DEFAULT_VERBOSITY])} and the default
-    target is stderr.
+    target is automatically chosen based on the runtime environment in the
+    following order: 1. stderr if tty, 2. systemd journal if available,
+    3. syslog (unix:/dev/log, udp://localhost:514, tcp://localhost:514) if
+    available, 4. stderr. If explicitly specified, multiple logging targets can
+    be used at once.
     """,
 )
 logging_group.add_argument(
@@ -251,11 +256,49 @@ syslog_action = logging_group.add_argument(
 journal_action = logging_group.add_argument(
     "--journal",
     action="store_true",
+    default=None,
     help=(
         "Log to systemd journal. CRITICAL messages will still be logged on "
         "stderr too, if stderr is a tty."
     ),
 )
+
+
+def can_connect(
+    family: socket.AddressFamily,
+    type_: socket.SocketKind,
+    addr: typing.Union[tuple[typing.Any, ...], str, bytes],
+) -> bool:
+    """Check, if connecting a socket to a given address is possible"""
+    with socket.socket(family, type_) as s:
+        try:
+            s.connect(addr)
+        except OSError:
+            return False
+        else:
+            return True
+
+
+def try_local_syslog() -> typing.Optional[dict[str, typing.Any]]:
+    """Try connecting to possible local syslog sockets and return suitable
+    kwargs for `class:logging.handlers.SyslogHandler` for the first successful
+    connection."""
+    for family, type_, addr in (
+        (socket.AF_UNIX, socket.SOCK_DGRAM, "/dev/log"),
+        (socket.AF_INET6, socket.SOCK_DGRAM, ("::1", 514, 0, 0)),
+        (socket.AF_INET6, socket.SOCK_STREAM, ("::1", 514, 0, 0)),
+        (socket.AF_INET, socket.SOCK_DGRAM, ("127.0.0.1", 514)),
+        (socket.AF_INET, socket.SOCK_STREAM, ("127.0.0.1", 514)),
+    ):
+        if can_connect(family, type_, addr):
+            return {
+                # SyslogHandler requires a 2-tuple address and uses getaddrinfo
+                # internally to convert this into an appropriate AF_INET6
+                # address tuple
+                "address": addr[:2] if family == socket.AF_INET6 else addr,
+                "socktype": type_,
+            }
+    return None
 
 
 def setup_cli_logging(program: str, args: argparse.Namespace) -> None:
@@ -319,6 +362,18 @@ def setup_cli_logging(program: str, args: argparse.Namespace) -> None:
     effective_verbosity = max(0, min(len(VERBOSITY_LEVELS) - 1, verbosity))
     level = VERBOSITY_LEVELS[effective_verbosity]
     handlers = list[logging.Handler]()
+
+    if (args.stderr, args.syslog, args.journal) == (None, None, None):
+        if sys.stderr.isatty():
+            args.stderr = stderr_action.const
+        elif systemd.daemon.booted() and can_connect(
+            socket.AF_UNIX, socket.SOCK_DGRAM, "/run/systemd/journal/socket"
+        ):
+            args.journal = journal_action.const
+        elif (args_syslog := try_local_syslog()) is not None:
+            args.syslog = args_syslog
+        else:
+            args.stderr = stderr_action.const
 
     if args.journal:
         journal_handler = systemd.journal.JournalHandler(
