@@ -17,6 +17,7 @@ from hades import constants
 
 from .logging import (
     plain_formatter,
+    reset_logger,
     stderr_debug_formatter,
     syslog_debug_formatter,
 )
@@ -419,14 +420,4 @@ def setup_cli_logging(program: str, args: argparse.Namespace) -> None:
 
 def reset_cli_logging() -> None:
     """Reset root logger configuration"""
-    root = logging.root
-    for h in root.handlers:
-        h.acquire()
-        try:
-            h.flush()
-            h.close()
-        finally:
-            h.release()
-        root.removeHandler(h)
-    for f in root.filters:
-        root.removeFilter(f)
+    reset_logger(logging.root)

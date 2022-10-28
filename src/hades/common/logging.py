@@ -43,3 +43,24 @@ stderr_debug_formatter = RFC3389UTCFormatter(
 
 syslog_debug_formatter = RFC3389UTCFormatter("%(filename)s:%(lineno)d:%(message)s")
 """Formatter for extensive debug output to syslog"""
+
+
+def reset_logger(logger: logging.Logger) -> None:
+    """
+    Reset a logger
+
+    * Remove all handlers
+    * Remove all filters
+
+    :param logger: Logger to reset
+    """
+    for h in logger.handlers:
+        h.acquire()
+        try:
+            h.flush()
+            h.close()
+        finally:
+            h.release()
+        logger.removeHandler(h)
+    for f in logger.filters:
+        logger.removeFilter(f)
