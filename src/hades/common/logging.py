@@ -51,6 +51,8 @@ def reset_logger(logger: logging.Logger) -> None:
 
     * Remove all handlers
     * Remove all filters
+    * Set disabled to `False`
+    * Set propagate to `True`
 
     :param logger: Logger to reset
     """
@@ -64,3 +66,5 @@ def reset_logger(logger: logging.Logger) -> None:
         logger.removeHandler(h)
     for f in logger.filters:
         logger.removeFilter(f)
+    logger.disabled = False
+    logger.propagate = True
