@@ -425,8 +425,6 @@ def reset_cli_logging() -> None:
         try:
             h.flush()
             h.close()
-        except (OSError, ValueError):
-            pass
         finally:
             h.release()
         root.removeHandler(h)
