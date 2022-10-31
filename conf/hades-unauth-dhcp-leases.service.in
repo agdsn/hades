@@ -15,7 +15,7 @@ JoinsNamespaceOf=hades-unauth-netns.service
 Type=notify
 SyslogIdentifier=hades-unauth-dhcp-leases
 EnvironmentFile=@systemdenvfile@
-ExecStart=@bindir@/hades-lease-server --unauth
+ExecStart=@bindir@/hades-lease-server --unauth $UNAUTH_DHCP_LEASES_SERVER_OPTS
 Restart=always
 RestartSec=5
 # EX_USAGE, EX_UNAVAILABLE, EX_CONFIG
