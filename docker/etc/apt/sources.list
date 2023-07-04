@@ -1,17 +1,17 @@
-deb http://ftp.agdsn.de/debian bullseye main
-deb-src http://ftp.agdsn.de/debian bullseye main
-deb http://deb.debian.org/debian-debug/ bullseye-debug main
+deb http://ftp.agdsn.de/debian bookworm main
+deb-src http://ftp.agdsn.de/debian bookworm main
+deb http://deb.debian.org/debian-debug/ bookworm-debug main
 
-deb http://ftp.agdsn.de/debian bullseye-updates main
-deb-src http://ftp.agdsn.de/debian bullseye-updates main
+deb http://ftp.agdsn.de/debian bookworm-updates main
+deb-src http://ftp.agdsn.de/debian bookworm-updates main
 
-deb http://ftp.agdsn.de/debian bullseye-proposed-updates main
-deb-src http://ftp.agdsn.de/debian bullseye-proposed-updates main
-deb http://deb.debian.org/debian-debug/ bullseye-proposed-updates-debug main
+deb http://ftp.agdsn.de/debian bookworm-proposed-updates main
+deb-src http://ftp.agdsn.de/debian bookworm-proposed-updates main
+deb http://deb.debian.org/debian-debug/ bookworm-proposed-updates-debug main
 
-deb http://ftp.agdsn.de/debian bullseye-backports main
-deb-src http://ftp.agdsn.de/debian bullseye-backports main
-deb http://deb.debian.org/debian-debug/ bullseye-backports-debug main
+deb http://ftp.agdsn.de/debian bookworm-backports main
+deb-src http://ftp.agdsn.de/debian bookworm-backports main
+deb http://deb.debian.org/debian-debug/ bookworm-backports-debug main
 
-deb http://ftp.agdsn.de/debian-security bullseye-security main
-deb-src http://ftp.agdsn.de/debian-security bullseye-security main
+deb http://ftp.agdsn.de/debian-security bookworm-security main
+deb-src http://ftp.agdsn.de/debian-security bookworm-security main

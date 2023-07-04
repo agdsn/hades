@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM debian:bullseye
+FROM debian:bookworm
 MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
 ENV LANG=C.UTF-8 container=docker
 COPY etc/ /etc/
