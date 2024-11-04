@@ -59,5 +59,6 @@ dhcp-leasefile={{ constants.UNAUTH_DHCP_LEASE_FILE }}
 
 dhcp-script={{ constants.bindir }}/hades-dhcp-script
 
-# Set DHCP-Option 160 (RFC 7710)
-dhcp-option=160,"{{ HADES_PORTAL_URL }}"
+# Set DHCP-Option 114 (RFC 8910)
+# https://datatracker.ietf.org/doc/html/rfc8910
+dhcp-option=114,"{{ HADES_PORTAL_URL }}"
