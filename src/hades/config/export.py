@@ -34,7 +34,7 @@ def export(config, output_format, file):
     for name, value in config.items():
         if isinstance(value, shell_types):
             print("{}={}".format(name, escape(value)), file=file)
-        elif isinstance(value, collections.Mapping) and mappings:
+        elif isinstance(value, collections.abc.Mapping) and mappings:
             if output_format == 'bash':
                 print("declare -g -A {}".format(name), file=file)
             if output_format in ('ksh', 'zsh'):
@@ -44,7 +44,7 @@ def export(config, output_format, file):
                              if isinstance(k, shell_types) and
                              isinstance(v, shell_types))
             print("{}=({})".format(name, value), file=file)
-        elif isinstance(value, collections.Sequence) and sequences:
+        elif isinstance(value, collections.abc.Sequence) and sequences:
             value = ' '.join(escape(v) for v in value
                              if isinstance(v, shell_types))
             print("{}=({})".format(name, value), file=file)
