@@ -35,7 +35,7 @@ def create_parser(prog: str = "hades-export-options") -> ArgumentParser:
                         default='systemd', help='Export format.')
     parser.add_argument(
         "file",
-        type=argparse.FileType("wb"),
+        type=argparse.FileType("w"),
         metavar="FILE",
         default="-",
         nargs=argparse.OPTIONAL,
