@@ -378,8 +378,7 @@ class ConfigGenerator:
             ),
             auto_reload=False, autoescape=False, keep_trailing_newline=True,
             undefined=jinja2.StrictUndefined,
-            extensions=['jinja2.ext.do', 'jinja2.ext.loopcontrols',
-                        'jinja2.ext.with_'],
+            extensions=['jinja2.ext.do', 'jinja2.ext.loopcontrols'],
             trim_blocks=True, lstrip_blocks=True,
         )
         self.env.globals.update({
