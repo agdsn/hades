@@ -17,7 +17,7 @@ SyslogIdentifier=hades-auth-vrrp
 EnvironmentFile=@systemdenvfile@
 ExecStartPre=@bindir@/hades-generate-config keepalived/auth.conf.j2 @pkgrunstatedir@/auth-vrrp/keepalived.conf
 ExecStartPre=@KEEPALIVED@ --vrrp --use-file=@pkgrunstatedir@/auth-vrrp/keepalived.conf --config-test
-ExecStart=@KEEPALIVED@ --log-console --vrrp --use-file=@pkgrunstatedir@/auth-vrrp/keepalived.conf --pid=@pkgrunstatedir@/auth-vrrp/keepalived.pid --vrrp_pid=@pkgrunstatedir@/auth-vrrp/keepalived-vrrp.pid $AUTH_KEEPALIVED_OPTS
+ExecStart=@KEEPALIVED@ --vrrp --use-file=@pkgrunstatedir@/auth-vrrp/keepalived.conf --pid=@pkgrunstatedir@/auth-vrrp/keepalived.pid --vrrp_pid=@pkgrunstatedir@/auth-vrrp/keepalived-vrrp.pid $AUTH_KEEPALIVED_OPTS
 ExecReload=@bindir@/hades-generate-config keepalived/auth.conf.j2 @pkgrunstatedir@/auth-vrrp/keepalived.conf
 ExecReload=@KEEPALIVED@ --vrrp --use-file=@pkgrunstatedir@/auth-vrrp/keepalived.conf --config-test
 ExecReload=@KILL@ -HUP $MAINPID
