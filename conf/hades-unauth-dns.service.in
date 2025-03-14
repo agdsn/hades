@@ -21,10 +21,10 @@ SyslogIdentifier=hades-unauth-dns
 EnvironmentFile=@systemdenvfile@
 Environment=HADES_DHCP_SCRIPT_SOCKET=@UNAUTH_DHCP_SCRIPT_SOCKET@
 ExecStartPre=@bindir@/hades-generate-config --group=@UNAUTH_DNS_GROUP@ unauth-dnsmasq.conf.j2 @pkgrunstatedir@/unauth-dns/dnsmasq.conf
-ExecStartPre=@DNSMASQ@ --test -k --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf $UNAUTH_DNSMASQ_OPTS
-ExecStart=+@DNSMASQ@ -k --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf $UNAUTH_DNSMASQ_OPTS
+ExecStartPre=@DNSMASQ@ --test --keep-in-foreground --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf $UNAUTH_DNSMASQ_OPTS
+ExecStart=+@DNSMASQ@ --keep-in-foreground --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf $UNAUTH_DNSMASQ_OPTS
 ExecReload=@bindir@/hades-generate-config --group=@UNAUTH_DNS_GROUP@ unauth-dnsmasq.conf.j2 @pkgrunstatedir@/unauth-dns/dnsmasq.conf
-ExecReload=@DNSMASQ@ --test -k --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf $UNAUTH_DNSMASQ_OPTS
+ExecReload=@DNSMASQ@ --test --keep-in-foreground --enable-dbus=@UNAUTH_DNS_DBUS_NAME@ --conf-file=@pkgrunstatedir@/unauth-dns/dnsmasq.conf $UNAUTH_DNSMASQ_OPTS
 ExecReload=@KILL@ -HUP $MAINPID
 Restart=always
 RestartSec=5
