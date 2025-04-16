@@ -108,6 +108,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     tcpdump \
     tmux \
     unbound \
+    unbound-anchor \
     unzip \
     uwsgi \
     uwsgi-plugin-python3 \
