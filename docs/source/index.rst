@@ -83,8 +83,8 @@ The easiest way to build Hades is using `Docker <https://www.docker.com/>`_:
 
  .. code-block:: console
 
-   $ docker-compose build --build-arg=UID=$(id -u) --build-arg=GID=$(id -g)
-   $ docker-compose run --user builder --rm build.sh
+   $ docker compose build --build-arg=UID=$(id -u) --build-arg=GID=$(id -g)
+   $ docker compose run --user builder --rm build.sh
 
 The first command will build an image for development purposes.
 The UID and GID build arguments ensure that the user, that is created within the
@@ -115,8 +115,8 @@ start a container in detached state and launch a shell in it afterwards:
 
  .. code-block:: console
 
-   $ docker-compose up -d
-   $ docker-compose exec --user builder bash
+   $ docker compose up -d
+   $ docker compose exec --user builder bash
 
 This way, systemd will start in the docker container, so that you can install
 and test Hades inside the container:

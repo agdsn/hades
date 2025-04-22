@@ -35,7 +35,7 @@ dpkg-buildpackage --no-sign -b \
 Troubleshooting
 ===============
 <details><summary>Issues with the db schema / access</summary>
-Try recreating the costgresql-cluster in the container:
+Try recreating the postgresql-cluster in the container:
 
 ```shell
 sudo systemctl stop hades-database
