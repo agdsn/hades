@@ -185,7 +185,6 @@ auth_dhcp_lease = Table(
         nullable=False,
         server_default=literal((), type_=TupleArray(Text, dimensions=1)),
     ),
-    Column("Domain", Text),
     Column("ClientID", LargeBinary),
     Column("CircuitID", LargeBinary),
     Column("SubscriberID", LargeBinary),
