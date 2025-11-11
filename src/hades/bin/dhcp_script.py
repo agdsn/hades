@@ -16,9 +16,9 @@ from typing import Any, Callable, Dict, Iterable, Optional, Tuple, TypeVar, Text
 
 import netaddr
 import sqlalchemy
-from sqlalchemy import text, Table
+from sqlalchemy import text, Table, select
 from sqlalchemy.engine.base import Connection, Engine
-from sqlalchemy.engine.result import RowProxy
+from sqlalchemy.engine import Row
 
 from hades import constants
 from hades.common.cli import ArgumentParser, common_parser, setup_cli_logging
@@ -260,10 +260,12 @@ def query_lease_for_update(
     connection: Connection,
     dhcp_lease_table: Table,
     ip: netaddr.IPAddress,
-) -> Optional[RowProxy]:
-    query = dhcp_lease_table.select(
-        dhcp_lease_table.c.IPAddress == ip
-    ).with_for_update()
+) -> Optional[Row]:
+    query = (
+        select(dhcp_lease_table)
+        .where(dhcp_lease_table.c.IPAddress == ip)
+        .with_for_update()
+    )
     with closing(connection.execute(query)) as result:
         row = result.fetchone()
         if result.fetchone() is not None:
@@ -280,10 +282,10 @@ def perform_lease_update(
     dhcp_lease_table: Table,
     ip: netaddr.IPAddress,
     mac: netaddr.EUI,
-    old: RowProxy,
+    old: Row,
     new: Dict[str, Any],
 ) -> typing.Optional[sqlalchemy.engine.Result]:
-    changes = {k: v for k, v in new.items() if old[k] != v}
+    changes = {k: v for k, v in new.items() if old._mapping.get(k) != v}
     if not changes:
         return None
     query = dhcp_lease_table.update(values=changes).where(
