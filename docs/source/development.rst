@@ -16,11 +16,11 @@ Building & Running
 ------------------
 
 Run the following command in the project root directory to build an image with
-``docker-compose``:
+``docker compose``:
 
 .. code-block:: console
 
-   docker-compose build --build-arg=UID=$(id -u) --build-arg=GID=$(id -g) hades
+   docker compose build --build-arg=UID=$(id -u) --build-arg=GID=$(id -g) hades
 
 The ``UID`` and ``GID`` build args ensure, that the IDs of the user on your
 machine match with the user and group created inside the container.
@@ -29,7 +29,7 @@ After you've successfully created the image, you can run the container:
 
 .. code-block:: console
 
-   docker-compose -up -d
+   docker compose up -d
 
 This will start the container in background.
 Inside the container ``systemd`` is started.
@@ -40,7 +40,7 @@ To enter the container run the following command:
 
 .. code-block:: console
 
-   docker-compose exec -u builder hades bash
+   docker compose exec -u builder hades bash
 
 Use in Production
 -----------------

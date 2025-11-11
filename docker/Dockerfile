@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM debian:bookworm
+FROM debian:trixie
 MAINTAINER Sebastian Schrader <sebastian.schrader@agdsn.de>
 ENV LANG=C.UTF-8 container=docker
 COPY etc/ /etc/
@@ -54,7 +54,8 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     nginx \
     packaging-dev \
     piuparts \
-    policykit-1 \
+    pkexec \
+    polkitd \
     postgresql \
     postgresql-contrib \
     pycodestyle \
@@ -108,6 +109,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     tcpdump \
     tmux \
     unbound \
+    unbound-anchor \
     unzip \
     uwsgi \
     uwsgi-plugin-python3 \

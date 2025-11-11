@@ -91,6 +91,7 @@ Depends:
  python3-trio,
  ssl-cert,
  unbound,
+ unbound-anchor,
  uwsgi,
  uwsgi-plugin-python3,
  ${python3:Depends},
